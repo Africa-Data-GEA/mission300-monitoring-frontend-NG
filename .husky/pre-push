@@ -1,0 +1,23 @@
+#!/bin/sh
+#
+# Pre-push gate.
+#
+# Nothing reaches the remote unless it typechecks, lints clean, and every test
+# passes. This runs the same three commands CI would, so a green push is a
+# green build.
+#
+# If you genuinely need to bypass this (a hotfix on a broken main, say), use
+# `git push --no-verify` — and say so in the pull request.
+
+set -e
+
+echo "→ pre-push: typecheck"
+pnpm typecheck
+
+echo "→ pre-push: lint"
+pnpm lint
+
+echo "→ pre-push: tests"
+pnpm test
+
+echo "✓ pre-push checks passed"

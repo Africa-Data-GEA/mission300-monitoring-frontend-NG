@@ -1,0 +1,146 @@
+/*
+ * ============================================================================
+ * THEME — Mission 300 Monitoring Dashboard
+ * ============================================================================
+ *
+ * THIS IS THE ONLY FILE YOU NEED TO EDIT TO RE-THEME THE APPLICATION.
+ *
+ * Every colour, font, radius and type step used anywhere in the product is
+ * declared here. Components reference these tokens through Tailwind utilities
+ * (bg-surface, text-text-muted, rounded-card…) and never hardcode a raw value,
+ * so changing a value here changes it everywhere.
+ *
+ * To re-theme:
+ *   1. Change the values below. Do not rename the tokens.
+ *   2. Light and dark values live in :root and .dark respectively.
+ *   3. Run `pnpm test` — token names are asserted by the component tests.
+ *
+ * Values derived from the approved wireframe
+ * (docs/source/EMRC - M300 Dashboard Configuration Wireframe v0-1 2026-06-10.pdf).
+ */
+
+@theme {
+  /* --- Brand -------------------------------------------------------------
+   * The deep green used for active navigation and primary actions. */
+  --color-brand-50: #ecfdf3;
+  --color-brand-100: #d1fadf;
+  --color-brand-200: #a6f4c5;
+  --color-brand-300: #6ce9a6;
+  --color-brand-400: #32d583;
+  --color-brand-500: #12b76a;
+  --color-brand-600: #039855;
+  --color-brand-700: #027a48;
+  --color-brand-800: #05603a;
+  --color-brand-900: #10432a;
+
+  /* --- Delivery status ---------------------------------------------------
+   * Maps 1:1 to the status vocabulary in the page specifications. Do not add
+   * a status here without adding it to DeliveryStatus in src/types/domain.ts. */
+  --color-status-on-track: #039855;
+  --color-status-on-track-bg: #ecfdf3;
+  --color-status-at-risk: #b42318;
+  --color-status-at-risk-bg: #fee4e2;
+  --color-status-lagging: #b54708;
+  --color-status-lagging-bg: #fef0c7;
+  --color-status-delayed: #b42318;
+  --color-status-delayed-bg: #fee4e2;
+  --color-status-no-data: #475467;
+  --color-status-no-data-bg: #f2f4f7;
+
+  /* --- Data confidence ---------------------------------------------------
+   * The dashboard must always disclose how trustworthy a number is. */
+  --color-confidence-confirmed: #039855;
+  --color-confidence-validation: #b54708;
+  --color-confidence-gap: #475467;
+
+  /* --- Trend -------------------------------------------------------------
+   * Green means "improving". For a lower-is-better metric such as ATC&C
+   * losses that is a DOWNWARD arrow. See src/lib/trend.ts. */
+  --color-trend-up: #039855;
+  --color-trend-down: #b42318;
+
+  --color-link: #1570ef;
+
+  /* --- Typography --------------------------------------------------------
+   * Deliberately tighter than the Tailwind default: this is a dense
+   * operational tool viewed at 100% zoom for long stretches, not a marketing
+   * page. Roughly one step down from stock Tailwind at every level.
+   *
+   * The root font size is intentionally NOT overridden — doing so breaks the
+   * browser font-size preference for users who rely on it. The scale is
+   * tightened here instead, so rem units still honour user settings. */
+  --font-sans: 'Inter Tight Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, 'Cascadia Code', 'Source Code Pro', monospace;
+
+  --text-2xs: 0.625rem; /* 10px — badge counters */
+  --text-2xs--line-height: 0.875rem;
+  --text-xs: 0.6875rem; /* 11px — captions, table meta */
+  --text-xs--line-height: 1rem;
+  --text-sm: 0.75rem; /* 12px — secondary body */
+  --text-sm--line-height: 1.125rem;
+  --text-base: 0.8125rem; /* 13px — default body */
+  --text-base--line-height: 1.25rem;
+  --text-lg: 0.9375rem; /* 15px — card and section titles */
+  --text-lg--line-height: 1.375rem;
+  --text-xl: 1.0625rem; /* 17px */
+  --text-xl--line-height: 1.5rem;
+  --text-2xl: 1.25rem; /* 20px */
+  --text-2xl--line-height: 1.625rem;
+  --text-3xl: 1.5rem; /* 24px — page title */
+  --text-3xl--line-height: 1.875rem;
+  --text-4xl: 1.75rem; /* 28px — headline KPI values */
+  --text-4xl--line-height: 2rem;
+
+  /* --- Shape ------------------------------------------------------------- */
+  --radius-card: 0.75rem;
+  --radius-control: 0.5rem;
+  --radius-pill: 9999px;
+}
+
+/*
+ * Surfaces live outside @theme so light and dark can swap by class without
+ * duplicating every component's class list.
+ */
+:root {
+  --surface: #ffffff; /* cards, panels */
+  --surface-page: #f2f3f5; /* the page beneath the cards */
+  --surface-sunken: #f5f6f8; /* section wells, breadcrumb chips */
+  --surface-inverse: #0d0f11; /* top bar */
+  --border-default: #eaecf0;
+  --border-strong: #d0d5dd;
+  --text-default: #101828;
+  --text-muted: #667085;
+  --text-subtle: #98a2b3;
+  --text-inverse: #ffffff;
+  --scrollbar-thumb: #d0d5dd;
+  --scrollbar-thumb-hover: #98a2b3;
+}
+
+.dark {
+  --surface: #16181d;
+  --surface-page: #0d0f11;
+  --surface-sunken: #1c1f26;
+  --surface-inverse: #16181d;
+  --border-default: #2a2e37;
+  --border-strong: #3a3f4a;
+  --text-default: #f9fafb;
+  --text-muted: #98a2b3;
+  --text-subtle: #667085;
+  --text-inverse: #f9fafb;
+  --scrollbar-thumb: #3a3f4a;
+  --scrollbar-thumb-hover: #4a5060;
+}
+
+/* Expose the theme-swapped values as Tailwind utilities. */
+@theme inline {
+  --color-surface: var(--surface);
+  --color-surface-page: var(--surface-page);
+  --color-surface-sunken: var(--surface-sunken);
+  --color-surface-inverse: var(--surface-inverse);
+  --color-border-default: var(--border-default);
+  --color-border-strong: var(--border-strong);
+  --color-text-default: var(--text-default);
+  --color-text-muted: var(--text-muted);
+  --color-text-subtle: var(--text-subtle);
+  --color-text-inverse: var(--text-inverse);
+}
