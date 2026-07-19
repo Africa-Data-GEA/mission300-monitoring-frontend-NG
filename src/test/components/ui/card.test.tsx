@@ -23,44 +23,31 @@ describe('Card', () => {
 
   describe('variants', () => {
     /*
-     * Cards are borderless by design. Separation comes from surface contrast
-     * (a white card on the grey page) plus a soft shadow, which is what the
-     * wireframe shows — a border on top of that reads as heavy.
+     * Cards carry no border and no shadow. Separation comes entirely from
+     * surface contrast — a white card on the grey page. Adding either back
+     * makes the dense layout read as heavy.
      */
-    it('renders a raised card with no border', () => {
+    it('renders a default card with no border and no shadow', () => {
       const { container } = render(<Card />)
 
-      expect(container.firstChild).toHaveClass('bg-surface', 'shadow-card')
+      expect(container.firstChild).toHaveClass('bg-surface')
       expect(container.firstChild).not.toHaveClass('border')
-    })
-
-    it('defaults to the raised variant', () => {
-      const { container } = render(<Card />)
-
-      expect(container.firstChild).toHaveClass('shadow-card')
+      expect(container.firstChild).not.toHaveClass('shadow-card')
     })
 
     /*
      * The well is the grey container that groups white cards, as in the
-     * Pillar performance and Needs attention sections. It must not carry the
-     * shadow, or nested cards look like they float on another card.
+     * Access delivery, National performance and Delivery status sections.
      */
-    it('renders a well with the sunken surface and no shadow', () => {
+    it('renders a well on the sunken surface', () => {
       const { container } = render(<Card variant="well" />)
 
       expect(container.firstChild).toHaveClass('bg-surface-sunken')
-      expect(container.firstChild).not.toHaveClass('shadow-card')
-    })
-
-    it('renders a plain card with no shadow', () => {
-      const { container } = render(<Card variant="plain" />)
-
-      expect(container.firstChild).toHaveClass('bg-surface')
-      expect(container.firstChild).not.toHaveClass('shadow-card')
+      expect(container.firstChild).not.toHaveClass('bg-surface')
     })
 
     it('always applies the card radius', () => {
-      for (const variant of ['raised', 'well', 'plain'] as const) {
+      for (const variant of ['default', 'well'] as const) {
         const { container, unmount } = render(<Card variant={variant} />)
         expect(container.firstChild).toHaveClass('rounded-card')
         unmount()

@@ -74,6 +74,42 @@ describe('DashboardPage', () => {
 
   describe('dynamic pillar behaviour', () => {
     /*
+     * Changing a filter creates a new query key, which by default drops the
+     * hook back to `pending` and blanks the page behind a skeleton on every
+     * interaction. `keepPreviousData` keeps the figures on screen so they
+     * update in place. The skeleton is reserved for the genuine first load.
+     */
+    it('never falls back to the skeleton when a filter changes', async () => {
+      const user = userEvent.setup()
+      renderWithProviders(<DashboardPage />)
+
+      await screen.findByRole('heading', { name: 'Executive Overview', level: 1 })
+
+      await user.click(screen.getByRole('combobox', { name: /Compact pillar/ }))
+      await user.click(
+        await screen.findByRole('option', { name: 'Clean cooking' }),
+      )
+
+      // The previous figures stay mounted throughout the refetch.
+      expect(
+        screen.queryByLabelText('Loading Executive Overview'),
+      ).not.toBeInTheDocument()
+      expect(
+        screen.getByRole('heading', { name: 'Executive Overview', level: 1 }),
+      ).toBeInTheDocument()
+
+      await waitFor(() => {
+        expect(
+          screen.getByRole('combobox', { name: /Compact pillar/ }),
+        ).toHaveTextContent('Clean cooking')
+      })
+
+      expect(
+        screen.queryByLabelText('Loading Executive Overview'),
+      ).not.toBeInTheDocument()
+    })
+
+    /*
      * Selecting a pillar must recalculate the page, not merely hide rows —
      * the specification requires the delivery card to recalculate and the
      * middle cards to change metric, which is why filtering is server-driven.
