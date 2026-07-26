@@ -50,7 +50,7 @@ export function DeliveryStatusSection({ panel }: { panel: DeliveryStatusPanel })
         </div>
       </div>
 
-      <div className="mt-4 grid gap-4 lg:grid-cols-[1.1fr_1fr]">
+      <div className="mt-3 grid gap-3 xl:grid-cols-[1.1fr_1fr]">
         {/* Pillar delivery status */}
         <Card className="p-4">
           <div className="flex flex-wrap items-baseline justify-between gap-2">

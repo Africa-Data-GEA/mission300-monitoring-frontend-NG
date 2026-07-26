@@ -58,12 +58,14 @@ describe('NAVIGATION', () => {
      * Exactly one page exists today; this test must be updated as pages ship,
      * which is deliberate — it forces the flag and the page to land together.
      */
-    it('marks Executive Overview as the only built page', () => {
+    it('marks each implemented page as ready', () => {
       const ready = allItems.filter((item) => item.ready)
 
-      expect(ready).toHaveLength(1)
-      expect(ready[0]?.label).toBe('Executive Overview')
-      expect(ready[0]?.to).toBe('/')
+      expect(ready.map((item) => [item.label, item.to])).toEqual([
+        ['Executive Overview', '/'],
+        ['Stakeholders & institutions', '/stakeholders'],
+        ['User access & administration', '/administration'],
+      ])
     })
   })
 

@@ -1,4 +1,4 @@
-import { screen, waitFor } from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { http, HttpResponse } from 'msw'
 import { describe, expect, it } from 'vitest'
@@ -33,9 +33,6 @@ describe('DashboardPage', () => {
 
     await screen.findByRole('heading', { name: 'Executive Overview', level: 1 })
 
-    expect(
-      screen.getByRole('region', { name: 'Dashboard filters' }),
-    ).toBeInTheDocument()
     expect(
       screen.getByRole('region', { name: 'Headline metrics' }),
     ).toBeInTheDocument()
@@ -74,71 +71,35 @@ describe('DashboardPage', () => {
 
   describe('dynamic pillar behaviour', () => {
     /*
-     * Changing a filter creates a new query key, which by default drops the
-     * hook back to `pending` and blanks the page behind a skeleton on every
-     * interaction. `keepPreviousData` keeps the figures on screen so they
-     * update in place. The skeleton is reserved for the genuine first load.
+     * The filter bar now lives in the shell, so the page reads its selection
+     * from the URL. Rendering at a filtered route is exactly what happens when
+     * a user picks a pillar or opens a shared link.
      */
-    it('never falls back to the skeleton when a filter changes', async () => {
-      const user = userEvent.setup()
-      renderWithProviders(<DashboardPage />)
+    it('queries with the global filter selection from the URL', async () => {
+      renderWithProviders(<DashboardPage />, {
+        route: '/?pillar=private-sector-participation',
+      })
 
       await screen.findByRole('heading', { name: 'Executive Overview', level: 1 })
 
-      await user.click(screen.getByRole('combobox', { name: /Compact pillar/ }))
-      await user.click(
-        await screen.findByRole('option', { name: 'Clean cooking' }),
-      )
-
-      // The previous figures stay mounted throughout the refetch.
-      expect(
-        screen.queryByLabelText('Loading Executive Overview'),
-      ).not.toBeInTheDocument()
-      expect(
-        screen.getByRole('heading', { name: 'Executive Overview', level: 1 }),
-      ).toBeInTheDocument()
-
-      await waitFor(() => {
-        expect(
-          screen.getByRole('combobox', { name: /Compact pillar/ }),
-        ).toHaveTextContent('Clean cooking')
+      const list = await screen.findByRole('list', {
+        name: 'National performance metrics',
       })
-
+      expect(within(list).getAllByRole('listitem')).toHaveLength(1)
       expect(
-        screen.queryByLabelText('Loading Executive Overview'),
-      ).not.toBeInTheDocument()
+        screen.getByRole('img', { name: /Private capital mobilized/ }),
+      ).toBeInTheDocument()
     })
 
-    /*
-     * Selecting a pillar must recalculate the page, not merely hide rows —
-     * the specification requires the delivery card to recalculate and the
-     * middle cards to change metric, which is why filtering is server-driven.
-     */
-    it('refetches and narrows the page when a pillar is selected', async () => {
-      const user = userEvent.setup()
+    it('shows every metric when no pillar is selected', async () => {
       renderWithProviders(<DashboardPage />)
 
       await screen.findByRole('heading', { name: 'Executive Overview', level: 1 })
 
-      // All Pillars shows all six Section C metrics.
-      expect(screen.getAllByRole('img')).toHaveLength(6)
-
-      await user.click(screen.getByRole('combobox', { name: /Compact pillar/ }))
-      await user.click(
-        await screen.findByRole('option', { name: 'Private sector' }),
-      )
-
-      // Only the private-sector metric survives the narrowing.
-      await waitFor(() => {
-        expect(
-          screen.getByRole('img', { name: /Private capital mobilized/ }),
-        ).toBeInTheDocument()
+      const list = await screen.findByRole('list', {
+        name: 'National performance metrics',
       })
-      await waitFor(() => {
-        expect(
-          screen.queryByRole('img', { name: /National metering rate/ }),
-        ).not.toBeInTheDocument()
-      })
+      expect(within(list).getAllByRole('listitem')).toHaveLength(6)
     })
   })
 

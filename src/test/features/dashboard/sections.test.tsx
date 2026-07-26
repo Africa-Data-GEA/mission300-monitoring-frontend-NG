@@ -3,8 +3,8 @@ import userEvent from '@testing-library/user-event'
 import { describe, expect, it } from 'vitest'
 import { AccessDeliverySection } from '@/features/dashboard/components/access-delivery-section'
 import { DeliveryStatusSection } from '@/features/dashboard/components/delivery-status-section'
-import { HeadlineCards } from '@/features/dashboard/components/headline-cards'
-import { NationalPerformanceSection } from '@/features/dashboard/components/national-performance-section'
+import { HeadlineCards } from '@/features/dashboard/components/headline-cards/headline-cards'
+import { NationalPerformanceSection } from '@/features/dashboard/components/national-performance/national-performance-section'
 import { executiveOverview } from '@/mocks/data/executive-overview'
 import { renderWithRouter } from '@/test/render'
 import type { Bottleneck } from '@/features/dashboard/types'
@@ -31,12 +31,12 @@ describe('Section A — headline cards', () => {
     render(<HeadlineCards cards={headlineCards} />)
 
     expect(
-      screen.getByText('Priority milestones delivered on time'),
+      screen.getByText('Priority milestones on time'),
     ).toBeInTheDocument()
     expect(screen.getByText('15%')).toBeInTheDocument()
     expect(
       screen.getByRole('progressbar', {
-        name: 'Priority milestones delivered on time',
+        name: 'Priority milestones on time',
       }),
     ).toHaveAttribute('aria-valuenow', '15')
   })
@@ -77,9 +77,8 @@ describe('Section A — headline cards', () => {
   it('treats a rising escalation count as a worsening', () => {
     render(<HeadlineCards cards={headlineCards} />)
 
-    expect(screen.getByText('+1 vs Q2 2025').parentElement).toHaveClass(
-      'text-trend-down',
-    )
+    // getByText resolves to the trend pill itself, which carries the colour.
+    expect(screen.getByText('+1 vs Q2 2025')).toHaveClass('text-trend-down')
   })
 
   it('presents a cleared escalation count calmly rather than as an alert', () => {
@@ -132,7 +131,7 @@ describe('Section B — access delivery by channel', () => {
 
     expect(screen.getByText('New grid connections')).toBeInTheDocument()
     expect(
-      screen.getByText('Active mini-grid household connections'),
+      screen.getByText('Mini-grid household connections'),
     ).toBeInTheDocument()
     expect(screen.getByText('Solar Home Systems deployed')).toBeInTheDocument()
   })
@@ -142,7 +141,7 @@ describe('Section B — access delivery by channel', () => {
 
     expect(
       screen.getByRole('progressbar', {
-        name: 'Active mini-grid household connections',
+        name: 'Mini-grid household connections',
       }),
     ).toHaveAttribute('aria-valuenow', '17.1')
   })
@@ -174,7 +173,9 @@ describe('Section C — national performance', () => {
   it('renders all six specified metrics', () => {
     render(<NationalPerformanceSection metrics={nationalPerformance} />)
 
-    expect(screen.getAllByRole('listitem')).toHaveLength(6)
+    // Scoped to the metric list: the tick-mark legend is also a <ul>.
+    const list = screen.getByRole('list', { name: 'National performance metrics' })
+    expect(within(list).getAllByRole('listitem')).toHaveLength(6)
   })
 
   it('renders a bullet chart per metric', () => {

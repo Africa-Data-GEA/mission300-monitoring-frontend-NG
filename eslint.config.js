@@ -29,6 +29,10 @@ export default defineConfig([
     files: [
       'src/test/**/*.{ts,tsx}',
       'src/config/**/*.{ts,tsx}',
+      // Context modules export a provider component alongside its hook, which
+      // is the standard React pattern and cannot be split without making the
+      // context itself public.
+      'src/app/**/*.{ts,tsx}',
       'vite.config.ts',
     ],
     rules: {

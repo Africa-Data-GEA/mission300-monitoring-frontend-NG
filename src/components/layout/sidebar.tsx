@@ -6,48 +6,57 @@ import { cn } from '@/lib/utils'
 /**
  * Primary navigation.
  *
- * Per the wireframe, every item is an outlined pill: the active item is filled
- * with the deep brand green and reversed to white, while inactive items are
- * white with a light border. Items whose pages are not yet built render as
- * disabled buttons rather than links, so the full information architecture is
- * reviewable without producing dead routes.
+ * Active items are filled with the deep brand green and reversed to white.
+ * Inactive items sit on a very light tint rather than carrying a border — at
+ * this density a border per row draws more attention to the chrome than to the
+ * content. Items whose pages are not yet built render as disabled buttons
+ * rather than links, so the full information architecture is reviewable
+ * without producing dead routes.
  */
 const ITEM_BASE =
-  'flex w-full items-center gap-2.5 rounded-control border px-3 py-2 text-sm font-medium transition-colors'
+  'flex w-full items-center gap-2 rounded-control px-2.5 py-1.5 text-sm font-medium transition-colors'
 
-export function Sidebar({ className }: { className?: string }) {
+export function Sidebar({
+  className,
+  onNavigate,
+}: {
+  className?: string
+  /** Called when a link is followed — used to dismiss the mobile drawer. */
+  onNavigate?: () => void
+}) {
   return (
     <nav
       aria-label="Primary"
       className={cn(
-        'flex w-64 shrink-0 flex-col gap-5 bg-surface px-3 py-5',
+        'flex w-56 shrink-0 flex-col gap-4 bg-surface px-2.5 py-4',
         className,
       )}
     >
-      <div className="px-1">
-        <p className="text-base font-semibold text-text-default">Mission 300</p>
-        <p className="text-sm text-text-muted">Monitoring Dashboard</p>
+      <div className="px-1.5">
+        <p className="text-sm font-semibold text-text-default">Mission 300</p>
+        <p className="text-xs text-text-muted">Monitoring Dashboard</p>
       </div>
 
       {NAVIGATION.map((group) => (
         <div key={group.label}>
-          <p className="px-1 pb-2 text-xs font-medium text-text-subtle">
+          <p className="px-1.5 pb-1.5 text-2xs font-medium tracking-wide text-text-subtle uppercase">
             {group.label}
           </p>
 
-          <ul className="space-y-1.5">
+          <ul className="space-y-0.5">
             {group.items.map((item) => (
               <li key={item.label}>
                 {item.ready ? (
                   <NavLink
                     to={item.to}
                     end={item.to === '/'}
+                    onClick={onNavigate}
                     className={({ isActive }) =>
                       cn(
                         ITEM_BASE,
                         isActive
-                          ? 'border-brand-800 bg-brand-800 text-text-inverse'
-                          : 'border-border-default bg-surface text-text-default hover:bg-surface-sunken',
+                          ? 'bg-brand-800 text-text-inverse'
+                          : 'bg-surface-sunken/10 text-text-default hover:bg-border-default',
                       )
                     }
                   >
@@ -56,7 +65,7 @@ export function Sidebar({ className }: { className?: string }) {
                         <item.icon
                           aria-hidden="true"
                           className={cn(
-                            'size-4 shrink-0',
+                            'size-3.5 shrink-0',
                             isActive ? 'text-text-inverse' : 'text-text-muted',
                           )}
                         />
@@ -64,7 +73,7 @@ export function Sidebar({ className }: { className?: string }) {
                         {item.children && (
                           <ChevronDown
                             aria-hidden="true"
-                            className="ml-auto size-4 shrink-0 opacity-70"
+                            className="ml-auto size-3.5 shrink-0 opacity-70"
                           />
                         )}
                       </>
@@ -79,18 +88,18 @@ export function Sidebar({ className }: { className?: string }) {
                     aria-describedby="nav-not-available"
                     className={cn(
                       ITEM_BASE,
-                      'cursor-not-allowed border-border-default bg-surface text-left text-text-subtle',
+                      'cursor-not-allowed bg-surface-sunken text-left text-text-subtle',
                     )}
                   >
                     <item.icon
                       aria-hidden="true"
-                      className="size-4 shrink-0 text-text-subtle"
+                      className="size-3.5 shrink-0 text-text-subtle"
                     />
                     <span className="truncate">{item.label}</span>
                     {item.children && (
                       <ChevronDown
                         aria-hidden="true"
-                        className="ml-auto size-4 shrink-0 opacity-70"
+                        className="ml-auto size-3.5 shrink-0 opacity-70"
                       />
                     )}
                   </button>

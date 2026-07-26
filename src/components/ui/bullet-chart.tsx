@@ -1,10 +1,20 @@
 import { cn } from '@/lib/utils'
 import type { ImprovementDirection } from '@/types/domain'
 
-/** Position of a value on the chart's own scale, as a percentage. */
+/**
+ * Position of a value on the chart's own scale, as a percentage.
+ *
+ * Rounded to two decimals because the raw division produces artefacts such as
+ * 55.00000000000001, which would otherwise be written into the DOM as an
+ * inline width.
+ */
 function toPercent(value: number, min: number, max: number): number {
   if (max === min) return 0
-  return Math.min(100, Math.max(0, ((value - min) / (max - min)) * 100))
+
+  const ratio = ((value - min) / (max - min)) * 100
+  const clamped = Math.min(100, Math.max(0, ratio))
+
+  return Math.round(clamped * 100) / 100
 }
 
 /**

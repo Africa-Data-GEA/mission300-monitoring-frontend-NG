@@ -48,7 +48,7 @@
   }
 
   *::-webkit-scrollbar {
-    width: 8px;
+    width: 5px;
     height: 8px;
   }
 
@@ -68,4 +68,53 @@
   *::-webkit-scrollbar-corner {
     background: transparent;
   }
+}
+
+@keyframes auth-step-in {
+  from {
+    opacity: 0;
+    transform: translateX(0.75rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .auth-step-enter {
+    animation: auth-step-in 220ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+}
+
+.water-blur-overlay {
+  background:
+    radial-gradient(circle at 20% 25%, rgb(255 255 255 / 22%), transparent 34%),
+    radial-gradient(circle at 78% 70%, rgb(2 122 72 / 10%), transparent 38%),
+    rgb(15 23 42 / 34%);
+  backdrop-filter: blur(14px) saturate(125%);
+}
+
+.side-dialog-panel {
+  box-shadow: -18px 0 60px rgb(15 23 42 / 12%);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .water-blur-overlay {
+    animation: water-overlay-in 240ms ease-out;
+  }
+
+  .side-dialog-panel {
+    animation: side-dialog-in 280ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+}
+
+@keyframes water-overlay-in {
+  from { opacity: 0; backdrop-filter: blur(0); }
+  to { opacity: 1; backdrop-filter: blur(14px) saturate(125%); }
+}
+
+@keyframes side-dialog-in {
+  from { opacity: 0; transform: translateX(2rem) scale(0.99); }
+  to { opacity: 1; transform: translateX(0) scale(1); }
 }

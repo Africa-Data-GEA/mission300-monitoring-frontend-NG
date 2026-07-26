@@ -1,6 +1,7 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
+import { executiveOverviewSchema } from '@/api/schemas/executive-overview'
 import { api } from '@/lib/api-client'
-import type { ExecutiveOverview, ExecutiveOverviewQuery } from './types'
+import type { ExecutiveOverviewQuery } from './types'
 
 /** Query keys are centralised so cache invalidation has a single source. */
 export const dashboardKeys = {
@@ -30,7 +31,12 @@ export function useExecutiveOverview(query: ExecutiveOverviewQuery = {}) {
   return useQuery({
     queryKey: dashboardKeys.executiveOverview(query),
     queryFn: () =>
-      api.get<ExecutiveOverview>(`/executive-overview${toSearchParams(query)}`),
+      api.get(
+        `/executive-overview${toSearchParams(query)}`,
+        // Validating here means a contract mismatch fails at the boundary with
+        // a named field rather than as `undefined` inside a component.
+        executiveOverviewSchema,
+      ),
     /*
      * Changing a filter changes the query key, which would otherwise drop the
      * hook back to `pending` and blank the page behind a skeleton on every

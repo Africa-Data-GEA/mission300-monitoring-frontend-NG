@@ -14,75 +14,13 @@ export const executiveOverview: ExecutiveOverview = {
   lastUpdated: '2025-10-14T09:12:00Z',
   appliedPillar: 'all',
 
-  filters: {
-    reportingPeriods: [
-      { value: 'q3-2025', label: 'Q3 2025' },
-      { value: 'q2-2025', label: 'Q2 2025' },
-      { value: 'q1-2025', label: 'Q1 2025' },
-      { value: 'fy-2025', label: 'FY 2025' },
-      { value: 'custom', label: 'Custom range…' },
-    ],
-    pillars: [
-      { value: 'all', label: 'All pillars' },
-      { value: 'generation-network', label: 'Generation & network' },
-      { value: 'last-mile-access', label: 'Last-mile access' },
-      { value: 'financially-viable-utilities', label: 'Viable utilities' },
-      { value: 'private-sector-participation', label: 'Private sector' },
-      { value: 'regional-integration', label: 'Regional integration' },
-      { value: 'clean-cooking', label: 'Clean cooking' },
-    ],
-    institutions: [
-      { value: 'all', label: 'All institutions' },
-      { value: 'fmop', label: 'Federal Ministry of Power' },
-      { value: 'fmof', label: 'Federal Ministry of Finance' },
-      { value: 'nerc', label: 'NERC' },
-      { value: 'rea', label: 'Rural Electrification Agency' },
-      { value: 'tcn', label: 'Transmission Company of Nigeria' },
-      { value: 'niso', label: 'Nigerian Independent System Operator' },
-      { value: 'nbet', label: 'Nigerian Bulk Electricity Trading Plc' },
-    ],
-    priorities: [
-      { value: 'priority', label: 'Priority actions' },
-      { value: 'all', label: 'Complete portfolio' },
-    ],
-    geographicScopes: [
-      { value: 'national', label: 'National' },
-      { value: 'state', label: 'By state' },
-      { value: 'disco', label: 'By Distribution Company' },
-    ],
-    distributionCompanies: [
-      { value: 'all', label: 'All Distribution Companies' },
-      { value: 'abuja', label: 'Abuja DisCo' },
-      { value: 'benin', label: 'Benin DisCo' },
-      { value: 'eko', label: 'Eko DisCo' },
-      { value: 'enugu', label: 'Enugu DisCo' },
-      { value: 'ibadan', label: 'Ibadan DisCo' },
-      { value: 'ikeja', label: 'Ikeja DisCo' },
-      { value: 'jos', label: 'Jos DisCo' },
-      { value: 'kaduna', label: 'Kaduna DisCo' },
-      { value: 'kano', label: 'Kano DisCo' },
-      { value: 'ph', label: 'Port Harcourt DisCo' },
-      { value: 'yola', label: 'Yola DisCo' },
-    ],
-    technologies: [
-      { value: 'all', label: 'All technologies' },
-      { value: 'grid', label: 'Grid extension' },
-      { value: 'mini-grid', label: 'Mini-grids' },
-      { value: 'shs', label: 'Solar Home Systems' },
-      { value: 'hydro', label: 'Hydro' },
-      { value: 'solar', label: 'Solar' },
-      { value: 'gas', label: 'Gas' },
-      { value: 'clean-cooking', label: 'Clean cooking' },
-    ],
-  },
 
   /* ---------------- Section A — Headline cards (exactly four) -------- */
   headlineCards: {
     milestoneDelivery: {
-      title: 'Priority milestones delivered on time',
+      title: 'Priority milestones on time',
       icon: 'milestones',
       percentComplete: 15,
-      caption: 'completed on schedule',
       breakdown: [
         { status: 'completed', label: 'completed', count: 8 },
         { status: 'on-track', label: 'on track', count: 31 },
@@ -109,7 +47,7 @@ export const executiveOverview: ExecutiveOverview = {
     },
 
     accessRate: {
-      title: 'National electricity access rate',
+      title: 'Electricity access rate',
       icon: 'access',
       value: '70%',
       rawValue: 70,
@@ -165,7 +103,7 @@ export const executiveOverview: ExecutiveOverview = {
     },
 
     escalations: {
-      title: 'Critical escalations requiring leadership attention',
+      title: 'Critical escalations',
       icon: 'escalations',
       unresolvedCritical: 4,
       overdueDecisions: 3,
@@ -220,7 +158,7 @@ export const executiveOverview: ExecutiveOverview = {
     },
     {
       id: 'mini-grid-connections',
-      title: 'Active mini-grid household connections',
+      title: 'Mini-grid household connections',
       value: '128,450',
       rawValue: 128_450,
       target: 750_000,

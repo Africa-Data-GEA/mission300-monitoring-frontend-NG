@@ -10,10 +10,11 @@ import type { MetricIconName, MetricProvenance, SourceTag } from '@/types/domain
  * Shared chrome for the four Section A headline cards: icon, provenance badge,
  * information popover and title.
  *
- * The four cards have deliberately different bodies — a progress bar, a KPI
- * with a source year, a KPI with a sparkline, an alert count — so only the
- * frame is shared. Extracting the body too would mean a props object that
- * describes four unrelated shapes.
+ * ALIGNMENT: the four cards sit side by side, so their internals must line up
+ * even though the titles differ in length. The title is therefore clamped to
+ * two lines and reserves that height whether or not it wraps, which keeps the
+ * value rows on a common baseline. The card itself stretches to the tallest in
+ * the row, and each body pushes its footer down with `mt-auto`.
  */
 export function MetricCardFrame({
   title,
@@ -37,8 +38,8 @@ export function MetricCardFrame({
   className?: string
 }) {
   return (
-    <Card className={cn('flex flex-col p-4', className)}>
-      <div className="flex items-start justify-between gap-3">
+    <Card className={cn('flex h-full flex-col p-4', className)}>
+      <div className="flex items-start justify-between gap-2">
         <span
           className={cn(
             'inline-flex size-8 shrink-0 items-center justify-center rounded-full',
@@ -54,13 +55,23 @@ export function MetricCardFrame({
           />
         </span>
 
-        <div className="flex shrink-0 items-center gap-1.5">
+        <div className="flex min-w-0 shrink-0 items-center gap-1">
           <SourceBadge source={source} />
           <InfoPopover provenance={provenance} label={title} details={details} />
         </div>
       </div>
 
-      <p className="mt-4 text-sm text-text-muted">{title}</p>
+      {/*
+        Two-line box reserved whether or not the title wraps, so the value rows
+        across the four cards share a baseline. The full text stays available
+        via the title attribute when it is clamped.
+      */}
+      <p
+        title={title}
+        className="mt-3 line-clamp-2 min-h-9 text-sm text-text-muted"
+      >
+        {title}
+      </p>
 
       {children}
     </Card>

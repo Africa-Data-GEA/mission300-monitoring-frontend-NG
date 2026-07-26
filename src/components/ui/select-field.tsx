@@ -7,7 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from './select'
-import type { FilterOption } from '@/features/dashboard/types'
+import type { FilterOption } from '@/types/filters'
 
 /**
  * Labelled select used across filter bars.

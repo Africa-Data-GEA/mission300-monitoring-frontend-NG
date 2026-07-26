@@ -86,25 +86,25 @@ describe('Sidebar', () => {
     })
 
     /*
-     * Per the wireframe, inactive items are outlined white pills rather than
-     * transparent rows — the outline is what makes the list read as a set of
-     * controls instead of plain text.
+     * Inactive items sit on a light tint rather than carrying a border: at
+     * this density a border per row draws more attention to the chrome than
+     * to the content.
      */
-    it('renders inactive items as outlined white pills', () => {
+    it('renders inactive items on a light tint with no border', () => {
       renderWithRouter(<Sidebar />, { route: '/bottlenecks' })
 
       const inactive = screen.getByRole('link', { name: /Executive Overview/ })
-      expect(inactive).toHaveClass('border-border-default', 'bg-surface')
+      expect(inactive).toHaveClass('bg-surface-sunken')
+      expect(inactive).not.toHaveClass('border')
       expect(inactive).not.toHaveClass('bg-brand-800')
     })
 
-    it('outlines unbuilt items the same way', () => {
+    it('tints unbuilt items the same way', () => {
       renderWithRouter(<Sidebar />)
 
-      expect(screen.getByRole('button', { name: /KPI explorer/ })).toHaveClass(
-        'border-border-default',
-        'bg-surface',
-      )
+      const unbuilt = screen.getByRole('button', { name: /KPI explorer/ })
+      expect(unbuilt).toHaveClass('bg-surface-sunken')
+      expect(unbuilt).not.toHaveClass('border')
     })
 
     /*

@@ -69,7 +69,9 @@ describe('api client', () => {
         }),
       )
 
-      await api.get('/widgets', { headers: { Authorization: 'Bearer token' } })
+      await api.get('/widgets', undefined, {
+        headers: { Authorization: 'Bearer token' },
+      })
 
       expect(headers.auth).toBe('Bearer token')
       expect(headers.contentType).toBe('application/json')

@@ -1,19 +1,18 @@
 import { describe, expect, it } from 'vitest'
+import { executiveOverviewSchema } from '@/api/schemas/executive-overview'
+import { dashboardFilterOptionsSchema } from '@/api/schemas/filters'
 import { executiveOverview } from '@/mocks/data/executive-overview'
+import { filterOptions } from '@/mocks/data/filters'
 import { PILLARS } from '@/types/domain'
+import type { FilterOption } from '@/types/filters'
 
 /**
  * The mock payload doubles as the worked example handed to the gApp backend
  * team, so it must stay internally consistent and match the page
  * specification. These tests guard the qualities real data must also have.
  */
-const {
-  headlineCards,
-  accessDelivery,
-  nationalPerformance,
-  deliveryStatus,
-  filters,
-} = executiveOverview
+const { headlineCards, accessDelivery, nationalPerformance, deliveryStatus } =
+  executiveOverview
 
 const allCards = [
   headlineCards.milestoneDelivery,
@@ -23,6 +22,39 @@ const allCards = [
 ]
 
 describe('executive overview mock payload', () => {
+  /*
+   * The mock is what the app serves in development and what every other test
+   * renders against, so it must satisfy the same schema the real backend will
+   * be held to. Without this, a schema change would surface as a runtime
+   * ContractError in the browser rather than a failing test.
+   */
+  describe('schema conformance', () => {
+    it('satisfies the Executive Overview contract', () => {
+      const result = executiveOverviewSchema.safeParse(executiveOverview)
+
+      // Surface the offending fields rather than a bare boolean.
+      const issues = result.success
+        ? []
+        : result.error.issues.map(
+            (issue) => `${issue.path.join('.') || '(root)'}: ${issue.message}`,
+          )
+
+      expect(issues).toEqual([])
+    })
+
+    it('satisfies the filter options contract', () => {
+      const result = dashboardFilterOptionsSchema.safeParse(filterOptions)
+
+      const issues = result.success
+        ? []
+        : result.error.issues.map(
+            (issue) => `${issue.path.join('.') || '(root)'}: ${issue.message}`,
+          )
+
+      expect(issues).toEqual([])
+    })
+  })
+
   describe('provenance', () => {
     /*
      * The specification requires definition, methodology, source and
@@ -104,7 +136,7 @@ describe('executive overview mock payload', () => {
     })
 
     it('provides all seven specified filter groups', () => {
-      expect(Object.keys(filters).sort()).toEqual(
+      expect(Object.keys(filterOptions).sort()).toEqual(
         [
           'distributionCompanies',
           'geographicScopes',
@@ -153,8 +185,13 @@ describe('executive overview mock payload', () => {
     })
 
     it('gives every filter option a unique value and a label', () => {
-      for (const [group, options] of Object.entries(filters)) {
-        const values = options.map((option: { value: string }) => option.value)
+      // Object.entries widens the value type, so restate it for the loop.
+      const groups = Object.entries(filterOptions) as ReadonlyArray<
+        [string, readonly FilterOption[]]
+      >
+
+      for (const [group, options] of groups) {
+        const values = options.map((option) => option.value)
         expect(new Set(values).size, group).toBe(values.length)
         for (const option of options) {
           expect(option.label, `${group}.${option.value}`).toBeTruthy()
@@ -231,7 +268,7 @@ describe('executive overview mock payload', () => {
     })
 
     it('offers a custom reporting period so the date picker is reachable', () => {
-      expect(filters.reportingPeriods).toContainEqual(
+      expect(filterOptions.reportingPeriods).toContainEqual(
         expect.objectContaining({ value: 'custom' }),
       )
     })

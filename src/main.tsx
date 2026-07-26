@@ -15,7 +15,14 @@ async function enableMocking() {
   if (import.meta.env.VITE_ENABLE_MOCKS === 'false') return
 
   const { worker } = await import('@/mocks/browser')
-  return worker.start({ onUnhandledRequest: 'bypass' })
+
+  /*
+   * `warn` rather than `bypass`: an unmatched /api call silently falls through
+   * to the dev server, which answers with the SPA shell and produces a
+   * confusing JSON parse error downstream. Warning names the offending URL in
+   * the console instead.
+   */
+  return worker.start({ onUnhandledRequest: 'warn' })
 }
 
 enableMocking().then(() => {
