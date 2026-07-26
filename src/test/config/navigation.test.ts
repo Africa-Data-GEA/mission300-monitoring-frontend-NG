@@ -55,14 +55,20 @@ describe('NAVIGATION', () => {
   describe('readiness flags', () => {
     /*
      * `ready` drives whether an item renders as a link or a disabled button.
-     * Exactly one page exists today; this test must be updated as pages ship,
-     * which is deliberate — it forces the flag and the page to land together.
+     * This test must be updated as pages ship, which is deliberate — it forces
+     * the flag and the page to land together.
      */
     it('marks each implemented page as ready', () => {
       const ready = allItems.filter((item) => item.ready)
 
       expect(ready.map((item) => [item.label, item.to])).toEqual([
         ['Executive Overview', '/'],
+        ['KPI explorer', '/kpis'],
+        ['Programs', '/programs'],
+        ['State and DisCo performance', '/state-disco'],
+        ['Implementation register', '/implementation-register'],
+        ['Bottlenecks & exceptions', '/bottlenecks'],
+        ['Data submissions & validation', '/data-submissions'],
         ['Stakeholders & institutions', '/stakeholders'],
         ['User access & administration', '/administration'],
       ])

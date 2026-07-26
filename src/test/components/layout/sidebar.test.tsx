@@ -53,10 +53,11 @@ describe('Sidebar', () => {
     it('renders unbuilt items as disabled buttons, not links', () => {
       renderWithRouter(<Sidebar />)
 
-      const unbuilt = screen.getByRole('button', { name: /KPI explorer/ })
+      // "Reports & exports" has no page yet.
+      const unbuilt = screen.getByRole('button', { name: /Reports & exports/ })
       expect(unbuilt).toBeDisabled()
       expect(
-        screen.queryByRole('link', { name: /KPI explorer/ }),
+        screen.queryByRole('link', { name: /Reports & exports/ }),
       ).not.toBeInTheDocument()
     })
 
@@ -88,22 +89,27 @@ describe('Sidebar', () => {
     /*
      * Inactive items sit on a light tint rather than carrying a border: at
      * this density a border per row draws more attention to the chrome than
-     * to the content.
+     * to the content. Ready-but-inactive links use a lighter (10% opacity)
+     * tint than disabled/unbuilt items, so the two read as distinct states.
      */
     it('renders inactive items on a light tint with no border', () => {
       renderWithRouter(<Sidebar />, { route: '/bottlenecks' })
 
       const inactive = screen.getByRole('link', { name: /Executive Overview/ })
-      expect(inactive).toHaveClass('bg-surface-sunken')
+      expect(inactive).toHaveClass('bg-surface-sunken/10')
       expect(inactive).not.toHaveClass('border')
       expect(inactive).not.toHaveClass('bg-brand-800')
     })
 
-    it('tints unbuilt items the same way', () => {
+    it('tints unbuilt items more strongly than inactive-but-ready items', () => {
       renderWithRouter(<Sidebar />)
 
-      const unbuilt = screen.getByRole('button', { name: /KPI explorer/ })
+      // "Reports & exports" has no page yet, so it renders as a disabled
+      // button with the full-opacity tint — distinct from the /10 tint on
+      // ready items.
+      const unbuilt = screen.getByRole('button', { name: /Reports & exports/ })
       expect(unbuilt).toHaveClass('bg-surface-sunken')
+      expect(unbuilt).not.toHaveClass('bg-surface-sunken/10')
       expect(unbuilt).not.toHaveClass('border')
     })
 

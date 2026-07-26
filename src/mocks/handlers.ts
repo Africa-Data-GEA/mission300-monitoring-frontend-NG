@@ -26,7 +26,10 @@ import type {
   ScopeAssignment,
 } from '@/api/schemas/administration'
 import type { ExecutiveOverview } from '@/features/dashboard/types'
+import { bottlenecksHandlers } from './handlers/bottlenecks'
 import { dataSubmissionHandlers } from './handlers/data-submissions'
+import { implementationRegisterHandlers } from './handlers/implementation-register'
+import { programsHandlers } from './handlers/programs'
 import { stateDiscoHandlers } from './handlers/state-disco'
 
 /**
@@ -184,7 +187,10 @@ function auditCutoff(period: string) {
 const invitedUsers: UserAccount[] = []
 
 export const handlers = [
+  ...bottlenecksHandlers,
   ...dataSubmissionHandlers,
+  ...implementationRegisterHandlers,
+  ...programsHandlers,
   ...stateDiscoHandlers,
   http.get('/api/health', () =>
     HttpResponse.json({ status: 'ok', version: 'mock' }),

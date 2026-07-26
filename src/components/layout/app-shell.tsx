@@ -47,9 +47,17 @@ export function AppShell() {
       {/* Slide-over drawer below lg. */}
       {isNavOpen && (
         <div className="fixed inset-0 z-50 lg:hidden">
+          {/*
+            Click-outside-to-dismiss backdrop. Hidden from the accessibility
+            tree and out of tab order: keyboard and screen-reader users
+            already have two ways to close the drawer (Escape, and the topbar
+            toggle button), so this must not appear as a second, identically
+            labelled "Close navigation" control.
+          */}
           <button
             type="button"
-            aria-label="Close navigation"
+            aria-hidden="true"
+            tabIndex={-1}
             onClick={() => setNavOpen(false)}
             className="absolute inset-0 bg-black/40"
           />

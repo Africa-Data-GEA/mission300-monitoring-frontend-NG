@@ -1,14 +1,15 @@
-import {
-  VALIDATION_LABELS,
-  type ValidationStatus,
-} from '@/api/schemas/kpi-explorer'
+import { VALIDATION_LABELS, type ValidationStatus } from '@/api/schemas/kpi-explorer'
 import { cn } from '@/lib/utils'
 
 /**
- * Validation-status pill, shared by the catalogue table and the profile.
+ * Validation-status pill.
  *
- * A data gap is neutral, not red — the specification treats it as a catalogue
- * fact, and a pending value must never read as confirmed.
+ * Promoted from the KPI Explorer catalogue on its second use in the
+ * Implementation Register — both modules use the same confirmed/provisional/
+ * pending/data-gap vocabulary from kpi-explorer.ts.
+ *
+ * A data gap is neutral, not red — a data gap is a catalogue fact, and a
+ * pending value must never read as confirmed.
  */
 const STYLES: Record<ValidationStatus, string> = {
   confirmed: 'bg-status-on-track-bg text-status-on-track',

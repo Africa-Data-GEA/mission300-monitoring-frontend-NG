@@ -1,0 +1,140 @@
+import { delay, http, HttpResponse } from 'msw'
+import type { BottleneckRecord } from '@/api/schemas/bottlenecks'
+import {
+  bottlenecksEscalations,
+  bottlenecksFilterOptions,
+  bottlenecksOverview,
+  bottlenecksRegister,
+} from '../data/bottlenecks'
+
+function positiveInteger(value: string | null, fallback: number) {
+  const parsed = Number(value)
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : fallback
+}
+
+function paginate<T>(items: T[], requestedPage: number, pageSize: number) {
+  const pageCount = Math.max(1, Math.ceil(items.length / pageSize))
+  const page = Math.min(requestedPage, pageCount)
+  const offset = (page - 1) * pageSize
+
+  return {
+    items: items.slice(offset, offset + pageSize),
+    page,
+    pageSize,
+    total: items.length,
+  }
+}
+
+/** Records created via POST during this session, kept in front of the
+ * seeded register so a newly created bottleneck appears immediately. */
+const createdRecords: BottleneckRecord[] = []
+let nextRecordNumber = bottlenecksRegister.length + 1
+
+export const bottlenecksHandlers = [
+  /** GET /api/bottlenecks/filters — this module's own nine filters. */
+  http.get('/api/bottlenecks/filters', () =>
+    HttpResponse.json(bottlenecksFilterOptions),
+  ),
+
+  /**
+   * GET /api/bottlenecks
+   *
+   * Query (all optional): search, severity, category, institution, pillar,
+   * linkedRecord, lifecycleStage, escalationStatus, validationStatus,
+   * reportingPeriod, page, pageSize (applies to the register only).
+   *
+   * The mock applies search, severity, category and institution to the
+   * register table; the four headline cards, distributions and agency
+   * breakdown describe the full open register, not the filtered slice — the
+   * specification frames them as period benchmarks, not a filter response.
+   */
+  http.get('/api/bottlenecks', async ({ request }) => {
+    await delay(300)
+
+    const params = new URL(request.url).searchParams
+    const search = params.get('search')?.trim().toLowerCase() ?? ''
+    const severity = params.get('severity') ?? 'all'
+    const category = params.get('category') ?? 'all'
+    const institution = params.get('institution') ?? 'all'
+
+    const allRecords = [...createdRecords, ...bottlenecksRegister]
+
+    const filtered = allRecords.filter((row) => {
+      const matchesSearch =
+        !search ||
+        [row.id, row.issue, row.institution].some((field) =>
+          field.toLowerCase().includes(search),
+        )
+      const matchesSeverity = severity === 'all' || row.severity === severity
+      const matchesCategory = category === 'all' || row.category === category
+      const matchesInstitution =
+        institution === 'all' || row.institution === institution
+
+      return matchesSearch && matchesSeverity && matchesCategory && matchesInstitution
+    })
+
+    const page = positiveInteger(params.get('page'), 1)
+    const pageSize = Math.min(50, positiveInteger(params.get('pageSize'), 10))
+    const escalationPage = positiveInteger(params.get('escalationPage'), 1)
+
+    return HttpResponse.json({
+      ...bottlenecksOverview,
+      register: paginate(filtered, page, pageSize),
+      escalations: paginate(bottlenecksEscalations, escalationPage, 10),
+    })
+  }),
+
+  /**
+   * POST /api/bottlenecks
+   *
+   * Creates a new bottleneck / exception record. The server is the source of
+   * truth for the generated identifier, date raised and initial status — the
+   * client only supplies what a person raising the issue would know.
+   */
+  http.post('/api/bottlenecks', async ({ request }) => {
+    await delay(300)
+
+    const body = (await request.json()) as {
+      issue?: string
+      category?: string
+      severity?: string
+      pillar?: string
+      linkedRecord?: string
+      institution?: string
+      lifecycleStage?: string
+      followUp?: string
+    }
+
+    if (!body.issue || body.issue.trim().length < 5) {
+      return HttpResponse.json(
+        { message: 'Describe the issue in at least a few words.' },
+        { status: 422 },
+      )
+    }
+
+    const record: BottleneckRecord = {
+      id: `BTN-2025-${String(nextRecordNumber).padStart(3, '0')}`,
+      issue: body.issue.trim(),
+      category: (body.category ?? 'coordination') as BottleneckRecord['category'],
+      severity: (body.severity ?? 'medium') as BottleneckRecord['severity'],
+      pillar: (body.pillar ?? 'generation-network') as BottleneckRecord['pillar'],
+      linkedRecord: body.linkedRecord?.trim() ?? '',
+      institution: body.institution?.trim() ?? '',
+      dateRaised: new Date().toISOString(),
+      ageDays: 0,
+      followUp: body.followUp?.trim() ?? '',
+      escalationStatus: 'not-escalated',
+      status: 'open',
+      lifecycleStage:
+        (body.lifecycleStage ?? 'identification') as BottleneckRecord['lifecycleStage'],
+    }
+
+    nextRecordNumber += 1
+    createdRecords.unshift(record)
+
+    return HttpResponse.json({
+      record,
+      message: `${record.id} has been added to the bottleneck register.`,
+    })
+  }),
+]

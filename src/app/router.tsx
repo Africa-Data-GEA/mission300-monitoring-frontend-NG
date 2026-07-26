@@ -21,6 +21,12 @@ const AdministrationPage = lazy(() =>
   })),
 )
 
+const BottlenecksPage = lazy(() =>
+  import('@/features/bottlenecks/bottlenecks-page').then((module) => ({
+    default: module.BottlenecksPage,
+  })),
+)
+
 const StakeholdersPage = lazy(() =>
   import('@/features/stakeholders/stakeholders-page').then((module) => ({
     default: module.StakeholdersPage,
@@ -30,6 +36,18 @@ const StakeholdersPage = lazy(() =>
 const KpiExplorerPage = lazy(() =>
   import('@/features/kpi-explorer/kpi-explorer-page').then((module) => ({
     default: module.KpiExplorerPage,
+  })),
+)
+
+const ImplementationRegisterPage = lazy(() =>
+  import('@/features/implementation-register/implementation-register-page').then((module) => ({
+    default: module.ImplementationRegisterPage,
+  })),
+)
+
+const ProgramsPage = lazy(() =>
+  import('@/features/programs/programs-page').then((module) => ({
+    default: module.ProgramsPage,
   })),
 )
 
@@ -95,6 +113,16 @@ export const router = createBrowserRouter([
         handle: { globalFilters: false } satisfies RouteHandle,
       },
       {
+        path: 'programs',
+        element: lazyRoute(<ProgramsPage />),
+        handle: { globalFilters: false } satisfies RouteHandle,
+      },
+      {
+        path: 'implementation-register',
+        element: lazyRoute(<ImplementationRegisterPage />),
+        handle: { globalFilters: false } satisfies RouteHandle,
+      },
+      {
         path: 'stakeholders',
         element: lazyRoute(<StakeholdersPage />),
         handle: { globalFilters: false } satisfies RouteHandle,
@@ -102,6 +130,11 @@ export const router = createBrowserRouter([
       {
         path: 'administration',
         element: lazyRoute(<AdministrationPage />),
+        handle: { globalFilters: false } satisfies RouteHandle,
+      },
+      {
+        path: 'bottlenecks',
+        element: lazyRoute(<BottlenecksPage />),
         handle: { globalFilters: false } satisfies RouteHandle,
       },
       {

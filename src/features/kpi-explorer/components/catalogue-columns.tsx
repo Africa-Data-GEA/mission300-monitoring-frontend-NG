@@ -3,7 +3,7 @@ import { PILLAR_LABELS } from '@/types/domain'
 import { type Column } from '@/components/ui/data-table'
 import { formatDate } from '@/lib/format'
 import { ReadinessBadge } from './readiness-badge'
-import { ValidationBadge } from './validation-badge'
+import { ValidationBadge } from '@/components/ui/validation-badge'
 
 /**
  * Column definitions for the KPI catalogue table.

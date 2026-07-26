@@ -1,5 +1,5 @@
 import type { KpiProfile } from '@/api/schemas/kpi-explorer'
-import { ProfileField } from './profile-field'
+import { ProfileField } from '@/components/ui/profile-field'
 
 /** Official indicator metadata, shown exactly as configured. */
 export function MetadataPanel({ profile }: { profile: KpiProfile }) {

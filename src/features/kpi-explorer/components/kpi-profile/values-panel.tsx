@@ -1,7 +1,7 @@
 import type { KpiProfile } from '@/api/schemas/kpi-explorer'
 import { Sparkline } from '@/components/ui/sparkline'
 import { TrendIndicator } from '@/components/ui/trend-indicator'
-import { ProfileField } from './profile-field'
+import { ProfileField } from '@/components/ui/profile-field'
 
 /** Current value, trend and the baseline/target/variance figures. */
 export function ValuesPanel({ profile }: { profile: KpiProfile }) {

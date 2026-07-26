@@ -21,7 +21,13 @@ function renderShell(route = '/') {
         path: '/',
         element: <AppShell />,
         children: [
-          { index: true, element: <p>Home content</p> },
+          // handle.globalFilters mirrors the real router (src/app/router.tsx):
+          // AppShell only renders the filter bar for routes that opt in.
+          {
+            index: true,
+            element: <p>Home content</p>,
+            handle: { globalFilters: true },
+          },
           { path: 'other', element: <p>Other content</p> },
         ],
       },

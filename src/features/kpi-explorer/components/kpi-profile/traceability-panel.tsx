@@ -1,6 +1,6 @@
 import type { KpiProfile } from '@/api/schemas/kpi-explorer'
-import { ValidationBadge } from '../validation-badge'
-import { ProfileField } from './profile-field'
+import { ValidationBadge } from '@/components/ui/validation-badge'
+import { ProfileField } from '@/components/ui/profile-field'
 
 /** Origin and review status of the selected value. */
 export function TraceabilityPanel({ profile }: { profile: KpiProfile }) {
