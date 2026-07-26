@@ -26,6 +26,8 @@ import type {
   ScopeAssignment,
 } from '@/api/schemas/administration'
 import type { ExecutiveOverview } from '@/features/dashboard/types'
+import { dataSubmissionHandlers } from './handlers/data-submissions'
+import { stateDiscoHandlers } from './handlers/state-disco'
 
 /**
  * MSW request handlers — the executable API contract.
@@ -182,6 +184,8 @@ function auditCutoff(period: string) {
 const invitedUsers: UserAccount[] = []
 
 export const handlers = [
+  ...dataSubmissionHandlers,
+  ...stateDiscoHandlers,
   http.get('/api/health', () =>
     HttpResponse.json({ status: 'ok', version: 'mock' }),
   ),

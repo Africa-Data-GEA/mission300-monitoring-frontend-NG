@@ -63,14 +63,17 @@ async function request<T>(
   options: RequestOptions = {},
 ): Promise<T> {
   const { body, headers, ...rest } = options
+  const isFormData = typeof FormData !== 'undefined' && body instanceof FormData
 
   const response = await fetch(`${BASE_URL}${path}`, {
     ...rest,
     headers: {
-      'Content-Type': 'application/json',
+      ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
       ...headers,
     },
-    ...(body === undefined ? {} : { body: JSON.stringify(body) }),
+    ...(body === undefined
+      ? {}
+      : { body: isFormData ? body : JSON.stringify(body) }),
   })
 
   if (!response.ok) {

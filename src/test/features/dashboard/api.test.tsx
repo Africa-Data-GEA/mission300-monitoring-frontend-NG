@@ -54,6 +54,14 @@ describe('useExecutiveOverview', () => {
   })
 
   describe('query parameters', () => {
+    /*
+     * These tests only assert on the request URL the hook constructs, not on
+     * the response body, so the mock returns `{}` rather than a full payload.
+     * That fails schema validation, so the query settles as an error — which
+     * is fine here; we wait for "settled" rather than "success" because the
+     * URL is already captured by the time the request lands, regardless of
+     * how the mock response validates.
+     */
     it('sends no query string when no filters are given', async () => {
       let url = ''
       server.use(
@@ -66,7 +74,7 @@ describe('useExecutiveOverview', () => {
       const { result } = renderHook(() => useExecutiveOverview(), {
         wrapper: QueryWrapper,
       })
-      await waitFor(() => expect(result.current.isSuccess).toBe(true))
+      await waitFor(() => expect(result.current.isPending).toBe(false))
 
       expect(url).not.toContain('?')
     })
@@ -93,7 +101,7 @@ describe('useExecutiveOverview', () => {
           }),
         { wrapper: QueryWrapper },
       )
-      await waitFor(() => expect(result.current.isSuccess).toBe(true))
+      await waitFor(() => expect(result.current.isPending).toBe(false))
 
       for (const fragment of [
         'period=q2-2025',
@@ -121,7 +129,7 @@ describe('useExecutiveOverview', () => {
         () => useExecutiveOverview({ period: 'q2-2025' }),
         { wrapper: QueryWrapper },
       )
-      await waitFor(() => expect(result.current.isSuccess).toBe(true))
+      await waitFor(() => expect(result.current.isPending).toBe(false))
 
       expect(url).toContain('period=q2-2025')
       expect(url).not.toContain('institution')

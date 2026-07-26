@@ -33,6 +33,9 @@ export default defineConfig([
       // is the standard React pattern and cannot be split without making the
       // context itself public.
       'src/app/**/*.{ts,tsx}',
+      // Route definition files export RouteObject arrays/config, not
+      // components, so the fast-refresh constraint does not apply.
+      'src/features/*/routes.tsx',
       'vite.config.ts',
     ],
     rules: {

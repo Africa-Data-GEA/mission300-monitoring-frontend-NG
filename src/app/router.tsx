@@ -2,6 +2,8 @@ import { lazy, Suspense } from 'react'
 import { createBrowserRouter } from 'react-router'
 import { AppShell } from '@/components/layout/app-shell'
 import { RouteFallback } from '@/components/layout/route-fallback'
+import { dataSubmissionRoutes } from '@/features/data-submissions/routes'
+import { stateDiscoRoutes } from '@/features/state-disco/routes'
 
 /*
  * Pages are lazily loaded so each ships its own chunk and the initial download
@@ -100,6 +102,16 @@ export const router = createBrowserRouter([
       {
         path: 'administration',
         element: lazyRoute(<AdministrationPage />),
+        handle: { globalFilters: false } satisfies RouteHandle,
+      },
+      {
+        path: 'data-submissions',
+        children: dataSubmissionRoutes,
+        handle: { globalFilters: false } satisfies RouteHandle,
+      },
+      {
+        path: 'state-disco',
+        children: stateDiscoRoutes,
         handle: { globalFilters: false } satisfies RouteHandle,
       },
     ],

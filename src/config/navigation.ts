@@ -59,7 +59,7 @@ export const NAVIGATION: readonly NavGroup[] = [
         label: 'State and DisCo performance',
         to: '/state-disco',
         icon: MapPin,
-        ready: false,
+        ready: true,
       },
     ],
   },
@@ -87,7 +87,7 @@ export const NAVIGATION: readonly NavGroup[] = [
         label: 'Data submissions & validation',
         to: '/data-submissions',
         icon: Database,
-        ready: false,
+        ready: true,
       },
       {
         label: 'Reports & exports',

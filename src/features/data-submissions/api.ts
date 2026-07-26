@@ -1,0 +1,126 @@
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import {
+  dataGapListSchema,
+  dataSubmissionFiltersSchema,
+  draftSavedSchema,
+  manualEntryDefinitionSchema,
+  obligationListSchema,
+  overdueListSchema,
+  submissionDetailSchema,
+  submissionListSchema,
+  uploadDefinitionSchema,
+  validationDecisionResponseSchema,
+  validationQueueSchema,
+  type DataSubmissionQuery,
+  type ManualEntryRequest,
+  type ValidationDecisionRequest,
+} from '@/api/schemas/data-submissions'
+import { api } from '@/lib/api-client'
+
+export const submissionKeys = {
+  all: ['data-submissions'] as const,
+  filters: () => ['data-submissions', 'filters'] as const,
+  list: (name: string, query: DataSubmissionQuery) =>
+    ['data-submissions', name, query] as const,
+  entry: (id: string) => ['data-submissions', 'entry', id] as const,
+  upload: (id: string) => ['data-submissions', 'upload', id] as const,
+  review: (id: string) => ['data-submissions', 'review', id] as const,
+}
+
+function queryString(query: DataSubmissionQuery) {
+  const params = new URLSearchParams()
+  Object.entries(query).forEach(([key, value]) => {
+    if (value !== undefined && value !== '' && value !== 'all') {
+      params.set(key, String(value))
+    }
+  })
+  const value = params.toString()
+  return value ? `?${value}` : ''
+}
+
+function useWorkflowList<T>(
+  name: string,
+  path: string,
+  query: DataSubmissionQuery,
+  schema: Parameters<typeof api.get<T>>[1],
+) {
+  return useQuery({
+    queryKey: submissionKeys.list(name, query),
+    queryFn: () => api.get(`${path}${queryString(query)}`, schema),
+    placeholderData: keepPreviousData,
+  })
+}
+
+export function useSubmissionFilters() {
+  return useQuery({
+    queryKey: submissionKeys.filters(),
+    queryFn: () => api.get('/data-submissions/filters', dataSubmissionFiltersSchema),
+    staleTime: Infinity,
+  })
+}
+
+export const useObligations = (query: DataSubmissionQuery) =>
+  useWorkflowList('obligations', '/data-submissions/obligations', query, obligationListSchema)
+
+export const useSubmissions = (query: DataSubmissionQuery) =>
+  useWorkflowList('submissions', '/data-submissions/submissions', query, submissionListSchema)
+
+export const useValidationQueue = (query: DataSubmissionQuery) =>
+  useWorkflowList('validation', '/data-submissions/validation', query, validationQueueSchema)
+
+export const useOverdueSubmissions = (query: DataSubmissionQuery) =>
+  useWorkflowList('overdue', '/data-submissions/overdue', query, overdueListSchema)
+
+export const useDataGaps = (query: DataSubmissionQuery) =>
+  useWorkflowList('gaps', '/data-submissions/gaps', query, dataGapListSchema)
+
+export function useManualEntryDefinition(id: string) {
+  return useQuery({
+    queryKey: submissionKeys.entry(id),
+    queryFn: () => api.get(`/data-submissions/obligations/${id}/entry`, manualEntryDefinitionSchema),
+    enabled: Boolean(id),
+  })
+}
+
+export function useUploadDefinition(id: string) {
+  return useQuery({
+    queryKey: submissionKeys.upload(id),
+    queryFn: () => api.get(`/data-submissions/obligations/${id}/upload`, uploadDefinitionSchema),
+    enabled: Boolean(id),
+  })
+}
+
+export function useSaveManualEntry(id: string) {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (input: ManualEntryRequest) =>
+      api.post(`/data-submissions/obligations/${id}/entry`, input, draftSavedSchema),
+    onSuccess: () => client.invalidateQueries({ queryKey: submissionKeys.all }),
+  })
+}
+
+export function useUploadSubmission(id: string) {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (formData: FormData) =>
+      api.post(`/data-submissions/obligations/${id}/upload`, formData, draftSavedSchema),
+    onSuccess: () => client.invalidateQueries({ queryKey: submissionKeys.all }),
+  })
+}
+
+export function useSubmissionReview(id: string) {
+  return useQuery({
+    queryKey: submissionKeys.review(id),
+    queryFn: () => api.get(`/data-submissions/validation/${id}`, submissionDetailSchema),
+    enabled: Boolean(id),
+  })
+}
+
+export function useValidationDecision(id: string) {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (input: ValidationDecisionRequest) =>
+      api.post(`/data-submissions/validation/${id}/decisions`, input, validationDecisionResponseSchema),
+    onSuccess: () => client.invalidateQueries({ queryKey: submissionKeys.all }),
+  })
+}

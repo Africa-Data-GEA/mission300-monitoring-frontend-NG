@@ -1,45 +1,12 @@
-import { useMemo, useState } from 'react'
-import type {
-  KpiCatalogueRow,
-  KpiExplorerQuery,
-} from '@/api/schemas/kpi-explorer'
 import { Breadcrumb } from '@/components/ui/breadcrumb'
-import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
-import { useKpiExplorer, useKpiExplorerFilters, useKpiProfile } from './api'
+import { ErrorState } from '@/components/ui/error-state'
 import { CatalogueSummary } from './components/catalogue-summary'
 import { CatalogueTable } from './components/catalogue-table'
-import { KpiExplorerSkeleton } from './components/kpi-explorer-skeleton'
 import { Distributions } from './components/distributions/distributions'
-import {
-  KpiExplorerFilters,
-  type KpiFilterValues,
-} from './components/kpi-explorer-filters'
+import { KpiExplorerFilters } from './components/kpi-explorer-filters'
+import { KpiExplorerSkeleton } from './components/kpi-explorer-skeleton'
 import { KpiProfileDialog } from './components/kpi-profile/kpi-profile-dialog'
-
-const DEFAULT_FILTERS: KpiFilterValues = {
-  search: '',
-  pillar: 'all',
-  category: 'all',
-  readiness: 'all',
-  validationStatus: 'all',
-  sourceInstitution: 'all',
-  reportingPeriod: 'q3-2025',
-  geography: 'national',
-}
-
-/** Filters that count as "active" for the More-filters badge. Search and the
- * two always-set periods are excluded so the badge reflects real narrowing. */
-function countActive(filters: KpiFilterValues): number {
-  let count = 0
-  if (filters.pillar !== 'all') count += 1
-  if (filters.category !== 'all') count += 1
-  if (filters.readiness !== 'all') count += 1
-  if (filters.validationStatus !== 'all') count += 1
-  if (filters.sourceInstitution !== 'all') count += 1
-  if (filters.geography !== 'national') count += 1
-  return count
-}
+import { useKpiExplorerPage } from './use-kpi-explorer-page'
 
 /**
  * KPI Explorer — the authoritative indicator catalogue and technical
@@ -48,42 +15,28 @@ function countActive(filters: KpiFilterValues): number {
  *
  * Uses its own eight filters rather than the global dashboard filters, so the
  * route opts out of the global filter bar (see src/app/router.tsx).
+ *
+ * All state and data-fetching lives in use-kpi-explorer-page.ts — this
+ * component only reads that hook and renders.
  */
 export function KpiExplorerPage() {
-  const [filters, setFilters] = useState<KpiFilterValues>(DEFAULT_FILTERS)
-  const [page, setPage] = useState(1)
-  const [selectedId, setSelectedId] = useState<string | null>(null)
+  const page = useKpiExplorerPage()
 
-  const query = useMemo<KpiExplorerQuery>(
-    () => ({ ...filters, page }),
-    [filters, page],
-  )
+  if (page.isPending) return <KpiExplorerSkeleton />
 
-  const options = useKpiExplorerFilters()
-  const { data, isPending, isError, error, refetch } = useKpiExplorer(query)
-  const profile = useKpiProfile(selectedId)
-
-  if (isPending || options.isPending) return <KpiExplorerSkeleton />
-
-  if (isError) {
+  if (page.isError) {
     return (
-      <Card className="p-8 text-center" role="alert">
-        <h1 className="text-lg font-semibold text-text-default">
-          KPI Explorer could not be loaded
-        </h1>
-        <p className="mx-auto mt-2 max-w-prose text-sm text-text-muted">
-          {error.message}
-        </p>
-        <Button onClick={() => void refetch()} className="mt-5">
-          Try again
-        </Button>
-      </Card>
+      <ErrorState
+        title="KPI Explorer could not be loaded"
+        message={page.error.message}
+        onRetry={page.retry}
+      />
     )
   }
 
-  function openProfile(row: KpiCatalogueRow) {
-    setSelectedId(row.id)
-  }
+  if (!page.data) return null
+
+  const { data } = page
 
   return (
     <div className="flex flex-col gap-4">
@@ -99,20 +52,13 @@ export function KpiExplorerPage() {
         </h1>
       </div>
 
-      {options.data && (
+      {page.filterOptions && (
         <KpiExplorerFilters
-          options={options.data}
-          value={filters}
-          activeFilterCount={countActive(filters)}
-          onChange={(next) => {
-            setFilters(next)
-            // A narrowed result set makes the current page number meaningless.
-            setPage(1)
-          }}
-          onReset={() => {
-            setFilters(DEFAULT_FILTERS)
-            setPage(1)
-          }}
+          options={page.filterOptions}
+          value={page.filters}
+          activeFilterCount={page.activeFilterCount}
+          onChange={page.changeFilters}
+          onReset={page.resetFilters}
         />
       )}
 
@@ -123,8 +69,8 @@ export function KpiExplorerPage() {
         page={data.catalogue.page}
         pageSize={data.catalogue.pageSize}
         total={data.catalogue.total}
-        onPageChange={setPage}
-        onOpenProfile={openProfile}
+        onPageChange={page.setPage}
+        onOpenProfile={page.openProfile}
       />
 
       <Distributions
@@ -133,10 +79,10 @@ export function KpiExplorerPage() {
       />
 
       <KpiProfileDialog
-        open={selectedId !== null}
-        profile={profile.data}
-        isPending={profile.isPending}
-        onClose={() => setSelectedId(null)}
+        open={page.isProfileOpen}
+        profile={page.profile}
+        isPending={page.isProfilePending}
+        onClose={page.closeProfile}
       />
     </div>
   )
