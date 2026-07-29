@@ -31,17 +31,27 @@ import { paginated } from './administration'
 export const readinessTierSchema = z.enum(['core', 'supporting', 'future'])
 
 /**
- * Validation status of an indicator's current value.
+ * Validation status of an indicator's current value, per the M300 KPI
+ * Matrix's own five-value vocabulary (docs/EMRC - M300 KPI Matrix v2-0
+ * 2026-06-29.xlsx, "KPI Matrix Field Defination" sheet):
  *
- * `provisional` and `pending` are distinct: the specification says pending
- * values must NOT be treated as confirmed, and provisional is a published-but-
- * caveated value. `data-gap` means no value exists at all.
+ * - `confirmed`: formally verified and signed off by the responsible
+ *   institution — final and traceable to an approved source.
+ * - `public-source`: from a credible public institutional report (e.g. a
+ *   NERC quarterly publication) but not yet formally confirmed.
+ * - `requires-validation`: a credible value exists but needs institutional
+ *   sign-off, a more recent update, or reconciliation with another source.
+ * - `provisional`: the best available planning/baseline estimate, explicitly
+ *   subject to revision once confirmed data is obtained.
+ * - `future`: no data is currently available — collection, methodology
+ *   agreement or institutional confirmation must happen first.
  */
 export const validationStatusSchema = z.enum([
   'confirmed',
+  'public-source',
+  'requires-validation',
   'provisional',
-  'pending',
-  'data-gap',
+  'future',
 ])
 
 /* ------------------------------------------------------------------ *
@@ -79,6 +89,10 @@ export const kpiCatalogueRowSchema = z.object({
   category: z.string().min(1),
   unit: z.string().min(1),
   sourceInstitution: z.string().min(1),
+  /** The submitted dataset (Data Submissions & Validation) this indicator is
+   * measured from, e.g. "Metering performance". Links the two modules so an
+   * approved submission can be traced to the indicator it publishes to. */
+  sourceDataset: z.string().min(1),
   frequency: z.string().min(1),
   readiness: readinessTierSchema,
   validationStatus: validationStatusSchema,
@@ -94,6 +108,9 @@ export const kpiHistoryPointSchema = z.object({
   period: z.string().min(1),
   value: z.number(),
   validationStatus: validationStatusSchema,
+  /** The submission that published this point, where one did. Null for
+   * points seeded before this traceability existed. */
+  submissionId: z.string().nullable(),
 })
 
 /** A delivery record linked to the indicator via its identifier. */
@@ -138,6 +155,7 @@ export const kpiProfileSchema = z.object({
 
   // Traceability panel.
   sourceInstitution: z.string().min(1),
+  sourceDataset: z.string().min(1),
   sourceReference: z.string(),
   reportingPeriod: z.string(),
   validationStatus: validationStatusSchema,
@@ -232,14 +250,15 @@ export type KpiExplorerFilterOptions = z.infer<
 export const READINESS_LABELS: Record<ReadinessTier, string> = {
   core: 'Core / Tier 1',
   supporting: 'Supporting / Tier 2',
-  future: 'Future',
+  future: 'Future / Tier 3',
 }
 
 export const VALIDATION_LABELS: Record<ValidationStatus, string> = {
   confirmed: 'Confirmed',
+  'public-source': 'Public Source',
+  'requires-validation': 'Requires Validation',
   provisional: 'Provisional',
-  pending: 'Pending',
-  'data-gap': 'Data gap',
+  future: 'Future',
 }
 
 export const READINESS_TIERS = readinessTierSchema.options

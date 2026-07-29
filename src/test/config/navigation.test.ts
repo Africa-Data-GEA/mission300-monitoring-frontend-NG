@@ -5,11 +5,18 @@ import { PILLARS, PILLAR_LABELS } from '@/types/domain'
 const allItems = NAVIGATION.flatMap((group) => group.items)
 
 describe('NAVIGATION', () => {
-  it('defines the four groups from the wireframe', () => {
+  /*
+   * The wireframe defined four groups; "Analytics" was added afterward on
+   * stakeholder feedback to give KPI explorer — a reference catalogue, not a
+   * primary page — its own clearly-labelled section near the bottom rather
+   * than sitting inside Monitoring & Analysis.
+   */
+  it('defines the five navigation groups', () => {
     expect(NAVIGATION.map((group) => group.label)).toEqual([
       'Monitoring & Analysis',
       'Delivery tracking',
       'Data operations',
+      'Analytics',
       'Administration',
     ])
   })
@@ -21,9 +28,7 @@ describe('NAVIGATION', () => {
   })
 
   /*
-   * Duplicate paths would make NavLink highlight two entries at once. The
-   * wireframe lists "Implementation register" twice; this guards the decision
-   * to place it under Delivery tracking only.
+   * Duplicate paths would make NavLink highlight two entries at once.
    */
   it('has no duplicate routes', () => {
     const paths = allItems.map((item) => item.to)
@@ -63,14 +68,14 @@ describe('NAVIGATION', () => {
 
       expect(ready.map((item) => [item.label, item.to])).toEqual([
         ['Executive Overview', '/'],
-        ['KPI explorer', '/kpis'],
+        ['Pillar dashboards', '/pillars'],
+        ['State & DisCo', '/state-disco'],
         ['Programs', '/programs'],
-        ['State and DisCo performance', '/state-disco'],
-        ['Implementation register', '/implementation-register'],
-        ['Bottlenecks & exceptions', '/bottlenecks'],
-        ['Data submissions & validation', '/data-submissions'],
-        ['Stakeholders & institutions', '/stakeholders'],
-        ['User access & administration', '/administration'],
+        ['Data submissions', '/data-submissions'],
+        ['Reports & exports', '/reports'],
+        ['KPI explorer', '/kpis'],
+        ['Stakeholders', '/stakeholders'],
+        ['User access', '/administration'],
       ])
     })
   })
@@ -78,7 +83,7 @@ describe('NAVIGATION', () => {
   describe('pillar sub-navigation', () => {
     it('lists every Compact pillar', () => {
       const pillarItem = allItems.find(
-        (item) => item.label === 'Compact pillar dashboards',
+        (item) => item.label === 'Pillar dashboards',
       )
 
       expect(pillarItem?.children).toHaveLength(PILLARS.length)
@@ -86,7 +91,7 @@ describe('NAVIGATION', () => {
 
     it('routes each pillar to its own dashboard', () => {
       const pillarItem = allItems.find(
-        (item) => item.label === 'Compact pillar dashboards',
+        (item) => item.label === 'Pillar dashboards',
       )
 
       for (const pillar of PILLARS) {

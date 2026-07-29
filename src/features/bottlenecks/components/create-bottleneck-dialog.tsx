@@ -10,13 +10,16 @@ export function CreateBottleneckDialog({
   onCreated,
   open,
   institutions,
+  defaultLinkedRecord,
 }: {
   onClose: () => void
   onCreated: () => void
   open: boolean
   institutions: readonly FilterOption[]
+  /** Prefills "Linked record" — e.g. a project id, when raised from that project's page. */
+  defaultLinkedRecord?: string
 }) {
-  const creation = useCreateBottleneck(onCreated)
+  const creation = useCreateBottleneck(onCreated, defaultLinkedRecord)
 
   return (
     <SideDialog

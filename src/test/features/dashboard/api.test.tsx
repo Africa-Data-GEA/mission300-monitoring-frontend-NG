@@ -50,7 +50,7 @@ describe('useExecutiveOverview', () => {
     expect(result.current.data?.headlineCards.accessRate.value).toBe('70%')
     expect(result.current.data?.accessDelivery).toHaveLength(3)
     expect(result.current.data?.nationalPerformance).toHaveLength(6)
-    expect(result.current.data?.deliveryStatus.pillars).toHaveLength(6)
+    expect(result.current.data?.deliveryStatus.ongoingProjects).toHaveLength(6)
   })
 
   describe('query parameters', () => {
@@ -137,12 +137,11 @@ describe('useExecutiveOverview', () => {
   })
 
   /*
-   * The specification requires the page to recalculate for a selected pillar,
-   * not merely to hide rows. The mock implements the narrowing so the required
-   * behaviour is demonstrable and the contract is unambiguous for the backend.
+   * The endpoint narrows project rows and national metrics for a selected
+   * pillar while headline outcomes remain national.
    */
   describe('dynamic pillar behaviour', () => {
-    it('returns every pillar for All Pillars', async () => {
+    it('returns every ongoing project for All Pillars', async () => {
       const { result } = renderHook(
         () => useExecutiveOverview({ pillar: 'all' }),
         { wrapper: QueryWrapper },
@@ -151,7 +150,7 @@ describe('useExecutiveOverview', () => {
       await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
       expect(result.current.data?.appliedPillar).toBe('all')
-      expect(result.current.data?.deliveryStatus.pillars).toHaveLength(6)
+      expect(result.current.data?.deliveryStatus.ongoingProjects).toHaveLength(6)
     })
 
     it('narrows the payload to the selected pillar', async () => {
@@ -165,12 +164,12 @@ describe('useExecutiveOverview', () => {
       expect(result.current.data?.appliedPillar).toBe(
         'financially-viable-utilities',
       )
-      expect(result.current.data?.deliveryStatus.pillars).toHaveLength(1)
+      expect(result.current.data?.deliveryStatus.ongoingProjects).toHaveLength(2)
       // Four of the six Section C metrics belong to this pillar.
       expect(result.current.data?.nationalPerformance).toHaveLength(4)
     })
 
-    it('recalculates the milestone delivery card for the selected pillar', async () => {
+    it('narrows project rows to the selected pillar', async () => {
       const { result } = renderHook(
         () => useExecutiveOverview({ pillar: 'last-mile-access' }),
         { wrapper: QueryWrapper },
@@ -178,10 +177,9 @@ describe('useExecutiveOverview', () => {
 
       await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
-      // 4 completed of 21 records ≈ 19%, not the national 15%.
-      expect(
-        result.current.data?.headlineCards.milestoneDelivery.percentComplete,
-      ).toBe(19)
+      const projects = result.current.data?.deliveryStatus.ongoingProjects ?? []
+      expect(projects).toHaveLength(1)
+      expect(projects.every((project) => project.pillar === 'last-mile-access')).toBe(true)
     })
 
     it('falls back to the full payload for an unknown pillar', async () => {
@@ -192,7 +190,7 @@ describe('useExecutiveOverview', () => {
 
       await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
-      expect(result.current.data?.deliveryStatus.pillars).toHaveLength(6)
+      expect(result.current.data?.deliveryStatus.ongoingProjects).toHaveLength(6)
     })
   })
 

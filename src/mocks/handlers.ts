@@ -1,5 +1,6 @@
 import { http, HttpResponse, delay } from 'msw'
-import { executiveOverview } from './data/executive-overview'
+import { PILLARS } from '@/api/schemas/common'
+import { buildProjectStatusSummary, executiveOverview } from './data/executive-overview'
 import { filterOptions } from './data/filters'
 import {
   administrationAuditLog,
@@ -19,6 +20,35 @@ import {
   kpiExplorerFilterOptions,
   kpiExplorerOverview,
 } from './data/kpi-explorer'
+import { getLiveBackendUrl } from './live-backend'
+
+/**
+ * The KPIs with a real backend behind them. Their rows/profiles are fetched
+ * live and spliced in where the mock would otherwise serve a static one;
+ * every other KPI is untouched. Failures fall back to the static mock row
+ * rather than breaking the page if the backend is down.
+ */
+const LIVE_KPI_IDS = new Set(['M300-P3-004', 'M300-P3-006'])
+
+async function fetchLiveKpiProfile(backendUrl: string, id: string): Promise<unknown | null> {
+  try {
+    const response = await fetch(`${backendUrl}/api/kpi-explorer/kpis/${id}`)
+    if (!response.ok) return null
+    return await response.json()
+  } catch {
+    return null
+  }
+}
+
+async function fetchLiveKpiCatalogue(backendUrl: string): Promise<{ id: string }[]> {
+  try {
+    const response = await fetch(`${backendUrl}/api/kpi-explorer/catalogue`)
+    if (!response.ok) return []
+    return (await response.json()) as { id: string }[]
+  } catch {
+    return []
+  }
+}
 import type { UserAccount } from '@/api/schemas/administration'
 import type {
   AuditEvent,
@@ -28,8 +58,9 @@ import type {
 import type { ExecutiveOverview } from '@/features/dashboard/types'
 import { bottlenecksHandlers } from './handlers/bottlenecks'
 import { dataSubmissionHandlers } from './handlers/data-submissions'
-import { implementationRegisterHandlers } from './handlers/implementation-register'
+import { pillarDashboardHandlers } from './handlers/pillar-dashboard'
 import { programsHandlers } from './handlers/programs'
+import { reportsHandlers } from './handlers/reports'
 import { stateDiscoHandlers } from './handlers/state-disco'
 
 /**
@@ -62,55 +93,26 @@ function applyPillarFilter(
 ): ExecutiveOverview {
   if (!pillar || pillar === 'all') return payload
 
-  const pillarStatus = payload.deliveryStatus.pillars.find(
-    (entry) => entry.pillar === pillar,
-  )
-
   // Unknown pillar: return the payload untouched rather than an empty page.
-  if (!pillarStatus) return payload
-
-  const completed =
-    pillarStatus.counts.find((entry) => entry.status === 'completed')?.count ?? 0
-  const onTrack =
-    pillarStatus.counts.find((entry) => entry.status === 'on-track')?.count ?? 0
-  const percentComplete =
-    pillarStatus.total === 0
-      ? 0
-      : Math.round((completed / pillarStatus.total) * 100)
+  if (!PILLARS.some((entry) => entry === pillar)) return payload
 
   const exceptions = payload.deliveryStatus.exceptions.filter((exception) =>
     exception.institution.length > 0,
+  )
+  const ongoingProjects = payload.deliveryStatus.ongoingProjects.filter(
+    (project) => project.pillar === pillar,
   )
 
   return {
     ...payload,
     appliedPillar: pillar,
-    headlineCards: {
-      ...payload.headlineCards,
-      milestoneDelivery: {
-        ...payload.headlineCards.milestoneDelivery,
-        percentComplete,
-        breakdown: pillarStatus.counts.map((entry) => ({
-          status: entry.status,
-          label: entry.status.replace('-', ' '),
-          count: entry.count,
-        })),
-        baselineLabel: `${pillarStatus.total} priority records in ${pillarStatus.label}`,
-      },
-      escalations: {
-        ...payload.headlineCards.escalations,
-        unresolvedCritical: Math.min(
-          payload.headlineCards.escalations.unresolvedCritical,
-          completed + onTrack,
-        ),
-      },
-    },
     nationalPerformance: payload.nationalPerformance.filter(
       (metric) => metric.pillar === pillar,
     ),
     deliveryStatus: {
       ...payload.deliveryStatus,
-      pillars: [pillarStatus],
+      ongoingProjects,
+      statusSummary: buildProjectStatusSummary(ongoingProjects),
       exceptions,
     },
   }
@@ -189,8 +191,9 @@ const invitedUsers: UserAccount[] = []
 export const handlers = [
   ...bottlenecksHandlers,
   ...dataSubmissionHandlers,
-  ...implementationRegisterHandlers,
+  ...pillarDashboardHandlers,
   ...programsHandlers,
+  ...reportsHandlers,
   ...stateDiscoHandlers,
   http.get('/api/health', () =>
     HttpResponse.json({ status: 'ok', version: 'mock' }),
@@ -212,12 +215,19 @@ export const handlers = [
    * list so the heavy profile payload is only fetched on drill-down.
    */
   http.get('/api/kpi-explorer/kpis/:id', async ({ params }) => {
+    const id = String(params.id)
+    const liveBackend = getLiveBackendUrl()
+    if (liveBackend && LIVE_KPI_IDS.has(id)) {
+      const live = await fetchLiveKpiProfile(liveBackend, id)
+      if (live) return HttpResponse.json(live)
+    }
+
     await delay(200)
-    const profile = getKpiProfile(String(params.id))
+    const profile = getKpiProfile(id)
 
     if (!profile) {
       return HttpResponse.json(
-        { message: `No indicator found with id ${String(params.id)}` },
+        { message: `No indicator found with id ${id}` },
         { status: 404 },
       )
     }
@@ -268,6 +278,16 @@ export const handlers = [
         matchesStatus
       )
     })
+
+    const liveBackend = getLiveBackendUrl()
+    if (liveBackend) {
+      const liveRows = await fetchLiveKpiCatalogue(liveBackend)
+      for (const liveId of LIVE_KPI_IDS) {
+        const live = liveRows.find((row) => row.id === liveId)
+        const index = filtered.findIndex((row) => row.id === liveId)
+        if (live && index !== -1) filtered[index] = live as (typeof filtered)[number]
+      }
+    }
 
     const page = positiveInteger(params.get('page'), 1)
     const pageSize = Math.min(50, positiveInteger(params.get('pageSize'), 25))

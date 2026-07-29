@@ -8,7 +8,7 @@ import type { BulletMetric } from '../../types'
 /** One Section C metric: value, trend and its bullet chart. */
 export function BulletMetricRow({ metric }: { metric: BulletMetric }) {
   return (
-    <Card className="flex h-full flex-col p-4">
+    <Card className="relative flex h-full flex-col p-4 transition-[border-color,box-shadow] hover:z-20 hover:border-brand-200 hover:shadow-sm focus-within:z-20">
       <div className="flex items-start justify-between gap-3">
         <h3 className="text-sm font-medium text-text-default">{metric.title}</h3>
         <div className="flex shrink-0 items-center gap-1.5">
@@ -48,9 +48,6 @@ export function BulletMetricRow({ metric }: { metric: BulletMetric }) {
         label={metric.title}
         valueLabel={metric.value}
       />
-
-      {/* Target only. Caveats and methodology are in the popover. */}
-      <p className="mt-2 text-xs text-text-muted">{metric.targetLabel}</p>
     </Card>
   )
 }

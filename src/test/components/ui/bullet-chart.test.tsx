@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { describe, expect, it } from 'vitest'
 import { BulletChart } from '@/components/ui/bullet-chart'
 
@@ -33,6 +34,36 @@ describe('BulletChart', () => {
     expect(label).toContain('baseline 44')
     expect(label).toContain('expected 68')
     expect(label).toContain('target 100')
+  })
+
+  it('shows chart details on hover', async () => {
+    const user = userEvent.setup()
+    render(<BulletChart {...base} />)
+
+    const chart = screen.getByRole('img')
+    expect(chart).toHaveAttribute('tabindex', '0')
+    expect(screen.queryByRole('tooltip')).not.toBeInTheDocument()
+
+    await user.hover(chart)
+
+    const tooltip = screen.getByRole('tooltip')
+    expect(tooltip).toHaveTextContent('Current55%')
+    expect(tooltip).toHaveTextContent('Baseline44')
+    expect(tooltip).toHaveTextContent('Expected68')
+    expect(tooltip).toHaveTextContent('Target100')
+    expect(tooltip).toHaveTextContent('Behind expected trajectory')
+  })
+
+  it('shows the same chart details on keyboard focus', async () => {
+    const user = userEvent.setup()
+    render(<BulletChart {...base} />)
+
+    await user.tab()
+
+    expect(screen.getByRole('img')).toHaveFocus()
+    expect(screen.getByRole('tooltip')).toHaveTextContent(
+      'Behind expected trajectory',
+    )
   })
 
   describe('positioning', () => {
@@ -113,7 +144,7 @@ describe('BulletChart', () => {
       render(<BulletChart {...base} current={55} expected={68} />)
 
       expect(screen.getByTestId('bullet-current')).toHaveClass(
-        'bg-status-lagging',
+        'bg-chart-blue-light',
       )
       expect(screen.getByRole('img').getAttribute('aria-label')).toContain(
         'behind the approved trajectory',
@@ -123,7 +154,9 @@ describe('BulletChart', () => {
     it('treats a higher-is-better metric at or above expected as on track', () => {
       render(<BulletChart {...base} current={70} expected={68} />)
 
-      expect(screen.getByTestId('bullet-current')).toHaveClass('bg-brand-600')
+      expect(screen.getByTestId('bullet-current')).toHaveClass(
+        'bg-chart-blue-dark',
+      )
     })
 
     /*
@@ -140,7 +173,9 @@ describe('BulletChart', () => {
         />,
       )
 
-      expect(screen.getByTestId('bullet-current')).toHaveClass('bg-brand-600')
+      expect(screen.getByTestId('bullet-current')).toHaveClass(
+        'bg-chart-blue-dark',
+      )
       expect(screen.getByRole('img').getAttribute('aria-label')).toContain(
         'at or ahead of the approved trajectory',
       )
@@ -157,7 +192,7 @@ describe('BulletChart', () => {
       )
 
       expect(screen.getByTestId('bullet-current')).toHaveClass(
-        'bg-status-lagging',
+        'bg-chart-blue-light',
       )
     })
 
@@ -167,7 +202,9 @@ describe('BulletChart', () => {
       const label = screen.getByRole('img').getAttribute('aria-label')
       expect(label).not.toContain('behind')
       expect(label).not.toContain('ahead')
-      expect(screen.getByTestId('bullet-current')).toHaveClass('bg-brand-600')
+      expect(screen.getByTestId('bullet-current')).toHaveClass(
+        'bg-chart-blue-dark',
+      )
     })
   })
 })

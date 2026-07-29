@@ -2,6 +2,7 @@ import { TrendIndicator } from '@/components/ui/trend-indicator'
 import { cn } from '@/lib/utils'
 import { MetricCardFrame } from '../metric-card-frame'
 import type { AccessRateCard as AccessRateCardData } from '../../types'
+import { AccessRateLineChart } from './access-rate-line-chart'
 import { HEADLINE_VALUE } from './headline-value'
 
 /** A2. Latest official national electricity access rate. */
@@ -30,6 +31,8 @@ export function AccessRateCard({ data }: { data: AccessRateCardData }) {
           {data.sourceYear}
         </span>
       </div>
+
+      {data.sparkline.length >= 2 && <AccessRateLineChart points={data.sparkline} />}
 
       {data.trend && (
         <div className="mt-auto pt-3">

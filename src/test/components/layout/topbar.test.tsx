@@ -15,12 +15,6 @@ describe('Topbar', () => {
     expect(screen.getByText('M300')).toBeInTheDocument()
   })
 
-  it('renders the signed-in user', () => {
-    render(<Topbar />)
-
-    expect(screen.getByText('John Doe')).toBeInTheDocument()
-  })
-
   describe('search', () => {
     it('has an accessible name', () => {
       render(<Topbar />)
@@ -57,11 +51,5 @@ describe('Topbar', () => {
 
       expect(screen.getByRole('button', { name: /Notifications/ })).toBeDisabled()
     })
-  })
-
-  it('hides the decorative user initials from assistive technology', () => {
-    render(<Topbar />)
-
-    expect(screen.getByText('JO')).toHaveAttribute('aria-hidden', 'true')
   })
 })

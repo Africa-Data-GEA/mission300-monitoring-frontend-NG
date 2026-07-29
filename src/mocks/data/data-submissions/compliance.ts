@@ -41,7 +41,7 @@ export const dataGaps: DataGap[] = [
     status: statuses.inProgress, availableActions: ['view'],
   },
   {
-    id: 'gap-003', kpiId: 'M300-FVU-001', kpiName: 'Metering rate',
+    id: 'gap-003', kpiId: 'M300-P3-004', kpiName: 'Metering Rate',
     pillar: 'Financially viable utilities', institution: 'NERC',
     reportingPeriod: 'Q3 2026', category: 'Failed validation', readinessTier: 'Core',
     owner: 'Ngozi Okafor', nextAction: 'Resolve the Kano DisCo registered-customer discrepancy.',

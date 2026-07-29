@@ -11,7 +11,17 @@ import {
   uploadDefinitions,
   validationQueue,
 } from '../data/data-submissions'
-import type { WorkflowStatus } from '@/api/schemas/data-submissions'
+import { administrationAuditLog, administrationUsers } from '../data/administration'
+import { getKpiProfile, publishKpiValue } from '../data/kpi-explorer'
+import { getLiveBackendUrl, proxyToLiveBackend } from '../live-backend'
+import type {
+  KpiExtraction,
+  SubmissionDetail,
+  SubmissionListItem,
+  ValidationQueueItem,
+  WorkflowStatus,
+} from '@/api/schemas/data-submissions'
+import type { AuditEvent } from '@/api/schemas/administration'
 
 function pageNumber(value: string | null, fallback: number) {
   const parsed = Number(value)
@@ -60,27 +70,235 @@ const decisionStatuses = {
   rejected: statuses.rejected,
 }
 
+/**
+ * Backend-response fixtures, not calculations performed by the frontend.
+ * They let the UI exercise the upload -> validation -> approval contract
+ * until the real ingestion service returns its own extracted values.
+ */
+const mockBackendExtractionsByObligation: Record<string, KpiExtraction[]> = {
+  'obl-001': [
+    {
+      kpiId: 'M300-P3-004',
+      kpiName: 'Metering Rate',
+      reportingPeriod: 'Q3 2026',
+      value: 57.4,
+    },
+  ],
+}
+
+let nextSubmissionNumber = 23
+
+function createMockBackendSubmission(
+  obligationId: string,
+  file: File,
+  sourceReference: string,
+  notes: string,
+) {
+  const obligation = submissionObligations.find((item) => item.id === obligationId)
+  if (!obligation) return undefined
+
+  const submissionId = `SUB-2026-${String(nextSubmissionNumber).padStart(4, '0')}`
+  nextSubmissionNumber += 1
+  const submittedAt = new Date().toISOString()
+  const submittedBy = 'Ngozi Okafor'
+  const reviewer = 'Grace Etim'
+
+  const record: SubmissionListItem = {
+    id: submissionId,
+    institution: obligation.institution,
+    dataset: obligation.dataset,
+    reportingPeriod: obligation.reportingPeriod,
+    method: 'template-upload',
+    methodLabel: 'Template upload',
+    version: 1,
+    submittedBy,
+    submittedAt,
+    submittedAtLabel: 'Just now',
+    status: statuses.pending,
+    validationSummary: 'Backend validation passed',
+    availableActions: ['view'],
+  }
+
+  const queueItem: ValidationQueueItem = {
+    ...record,
+    reviewer,
+    ageLabel: 'Awaiting review',
+    automatedCheck: statuses.approved,
+    issueCount: 0,
+    availableActions: ['review'],
+  }
+
+  const detail: SubmissionDetail = {
+    ...queueItem,
+    fileName: file.name,
+    sourceReference,
+    notes,
+    issues: [],
+    history: [
+      {
+        id: `hist-${submissionId}-upload`,
+        status: statuses.pending,
+        actor: submittedBy,
+        occurredAt: submittedAt,
+        occurredAtLabel: 'Just now',
+        comment: 'Template uploaded and backend validation completed.',
+      },
+    ],
+    permittedDecisions: ['approved', 'provisional', 'returned', 'rejected'],
+    extractedValues: (mockBackendExtractionsByObligation[obligationId] ?? []).map(
+      (extraction) => ({ ...extraction }),
+    ),
+  }
+
+  submissionRecords.unshift(record)
+  validationQueue.unshift(queueItem)
+  submissionDetails[submissionId] = detail
+  obligation.status = statuses.pending
+  obligation.availableActions = ['view']
+
+  return detail
+}
+
+function synchronizeSubmissionDecision(
+  detail: SubmissionDetail,
+  status: WorkflowStatus,
+  decision: keyof typeof decisionStatuses,
+  comments: string,
+) {
+  const record = submissionRecords.find((item) => item.id === detail.id)
+  if (record) {
+    record.status = status
+    record.validationSummary = `Decision recorded: ${status.label}`
+    record.availableActions = decision === 'returned' ? ['correct', 'view'] : ['view']
+  }
+
+  const queueItem = validationQueue.find((item) => item.id === detail.id)
+  if (queueItem) {
+    queueItem.status = status
+    queueItem.ageLabel = 'Decision recorded just now'
+    queueItem.availableActions = decision === 'returned' ? ['review'] : ['view']
+  }
+
+  const obligation = submissionObligations.find(
+    (item) =>
+      item.institution === detail.institution &&
+      item.dataset === detail.dataset &&
+      item.reportingPeriod === detail.reportingPeriod,
+  )
+  if (obligation) {
+    obligation.status = status
+    obligation.acceptedSubmissionId =
+      decision === 'approved' || decision === 'provisional' ? detail.id : null
+    obligation.availableActions =
+      decision === 'returned' ? ['upload-template', 'download-template'] : ['view']
+  }
+
+  const occurredAt = new Date().toISOString()
+  detail.status = status
+  detail.ageLabel = 'Decision recorded just now'
+  detail.history = [
+    ...detail.history,
+    {
+      id: `hist-${detail.id}-${detail.history.length + 1}`,
+      status,
+      actor: detail.reviewer,
+      occurredAt,
+      occurredAtLabel: 'Just now',
+      comment: comments,
+    },
+  ]
+}
+
+/**
+ * A submission has already had its values extracted at this point — see
+ * `extractedValues` on submissionDetails. `getKpiProfile` is called BEFORE
+ * `publishKpiValue` mutates anything, so the audit event carries the true
+ * prior value rather than a value this same call already overwrote.
+ *
+ * Only approved and provisional decisions publish; returned and rejected
+ * never do, since neither is an accepted value.
+ *
+ * The audit event is attributed to the submission's assigned reviewer — the
+ * person recording the decision — resolved to a real Administration account
+ * so the event shows up for that user like any other audited action, rather
+ * than to an invented "system" identity no account matches.
+ */
+let nextAuditEventNumber = 1043
+
+function publishExtractedValues(
+  submissionId: string,
+  extractedValues: KpiExtraction[],
+  decision: 'approved' | 'provisional',
+  reviewerName: string,
+): KpiExtraction[] {
+  const resultingStatus = decision === 'approved' ? 'confirmed' : 'provisional'
+  const reviewer = administrationUsers.find((user) => user.name === reviewerName)
+  const published: KpiExtraction[] = []
+
+  for (const extraction of extractedValues) {
+    const priorValue = getKpiProfile(extraction.kpiId)?.currentLabel ?? null
+    const applied = publishKpiValue(extraction, submissionId, resultingStatus)
+    if (!applied) continue
+
+    published.push(extraction)
+    nextAuditEventNumber += 1
+    administrationAuditLog.unshift({
+      id: `evt-${nextAuditEventNumber}`,
+      timestamp: new Date().toISOString(),
+      userId: reviewer?.id ?? administrationUsers[0]!.id,
+      userName: reviewer?.name ?? reviewerName,
+      action: 'Published KPI value',
+      module: 'KPI Explorer',
+      recordId: extraction.kpiId,
+      priorValue,
+      newValue: String(extraction.value),
+      result: 'success',
+      reference: submissionId,
+    } satisfies AuditEvent)
+  }
+
+  return published
+}
+
+/**
+ * Data Submissions is proxied to the real m300-demo-backend as one whole
+ * module, not spliced obligation-by-obligation: the mock's demo dataset and
+ * the backend's one real obligation (Metering Rate) are different records
+ * with different ids, so mixing them would produce mismatched pagination
+ * totals and duplicate-looking rows. Opt in with VITE_SUBMISSIONS_BACKEND_URL;
+ * every other module is unaffected.
+ */
 export const dataSubmissionHandlers = [
-  http.get('/api/data-submissions/filters', () =>
-    HttpResponse.json(dataSubmissionFilters),
-  ),
+  http.get('/api/data-submissions/filters', ({ request }) => {
+    const liveBackend = getLiveBackendUrl()
+    if (liveBackend) return proxyToLiveBackend(request, liveBackend)
+    return HttpResponse.json(dataSubmissionFilters)
+  }),
   http.get('/api/data-submissions/obligations', async ({ request }) => {
+    const liveBackend = getLiveBackendUrl()
+    if (liveBackend) return proxyToLiveBackend(request, liveBackend)
     await delay(100)
     const url = new URL(request.url)
     return HttpResponse.json(paginate(filterRows(submissionObligations, url), url))
   }),
   http.get('/api/data-submissions/submissions', async ({ request }) => {
+    const liveBackend = getLiveBackendUrl()
+    if (liveBackend) return proxyToLiveBackend(request, liveBackend)
     await delay(100)
     const url = new URL(request.url)
     return HttpResponse.json(paginate(filterRows(submissionRecords, url), url))
   }),
-  http.get('/api/data-submissions/obligations/:id/entry', ({ params }) => {
+  http.get('/api/data-submissions/obligations/:id/entry', ({ request, params }) => {
+    const liveBackend = getLiveBackendUrl()
+    if (liveBackend) return proxyToLiveBackend(request, liveBackend)
     const definition = manualEntryDefinitions[String(params.id)]
     return definition
       ? HttpResponse.json(definition)
       : notFound('Manual entry is not configured for this reporting obligation.')
   }),
-  http.post('/api/data-submissions/obligations/:id/entry', async ({ params }) => {
+  http.post('/api/data-submissions/obligations/:id/entry', async ({ request, params }) => {
+    const liveBackend = getLiveBackendUrl()
+    if (liveBackend) return proxyToLiveBackend(request, liveBackend)
     await delay(250)
     if (!submissionObligations.some((item) => item.id === params.id)) {
       return notFound('The reporting obligation was not found.')
@@ -91,60 +309,121 @@ export const dataSubmissionHandlers = [
       nextUrl: '/data-submissions/submissions',
     }, { status: 201 })
   }),
-  http.get('/api/data-submissions/obligations/:id/upload', ({ params }) => {
+  http.get('/api/data-submissions/obligations/:id/upload', ({ request, params }) => {
+    const liveBackend = getLiveBackendUrl()
+    if (liveBackend) return proxyToLiveBackend(request, liveBackend)
     const definition = uploadDefinitions[String(params.id)]
     return definition
       ? HttpResponse.json(definition)
       : notFound('Template upload is not configured for this reporting obligation.')
   }),
   http.post('/api/data-submissions/obligations/:id/upload', async ({ request, params }) => {
+    const liveBackend = getLiveBackendUrl()
+    if (liveBackend) return proxyToLiveBackend(request, liveBackend)
     await delay(350)
-    if (!submissionObligations.some((item) => item.id === params.id)) {
+    const obligationId = String(params.id)
+    if (!submissionObligations.some((item) => item.id === obligationId)) {
       return notFound('The reporting obligation was not found.')
     }
     const form = await request.formData()
-    if (!(form.get('file') instanceof File)) {
+    const file = form.get('file')
+    if (!(file instanceof File)) {
       return HttpResponse.json({ message: 'Select a completed template to upload.' }, { status: 400 })
     }
+    const sourceReference = String(form.get('sourceReference') ?? '').trim()
+    if (!sourceReference) {
+      return HttpResponse.json({ message: 'Provide the source reference for this submission.' }, { status: 400 })
+    }
+    const detail = createMockBackendSubmission(
+      obligationId,
+      file,
+      sourceReference,
+      String(form.get('notes') ?? ''),
+    )
+    if (!detail) return notFound('The reporting obligation was not found.')
+
     return HttpResponse.json({
-      submissionId: 'SUB-2026-0023', version: 1, status: statuses.ready,
-      message: 'Upload received and automated checks passed.',
-      nextUrl: '/data-submissions/submissions',
+      submissionId: detail.id, version: detail.version, status: detail.status,
+      message: 'Upload received. Backend validation passed and the submission is ready for review.',
+      nextUrl: `/data-submissions/validation/${detail.id}`,
     }, { status: 201 })
   }),
   http.get('/api/data-submissions/validation', async ({ request }) => {
+    const liveBackend = getLiveBackendUrl()
+    if (liveBackend) return proxyToLiveBackend(request, liveBackend)
     await delay(100)
     const url = new URL(request.url)
     return HttpResponse.json(paginate(filterRows(validationQueue, url), url))
   }),
-  http.get('/api/data-submissions/validation/:id', ({ params }) => {
+  http.get('/api/data-submissions/validation/:id', ({ request, params }) => {
+    const liveBackend = getLiveBackendUrl()
+    if (liveBackend) return proxyToLiveBackend(request, liveBackend)
     const detail = submissionDetails[String(params.id)]
     return detail ? HttpResponse.json(detail) : notFound('The submission was not found.')
   }),
   http.post('/api/data-submissions/validation/:id/decisions', async ({ request, params }) => {
+    const liveBackend = getLiveBackendUrl()
+    if (liveBackend) return proxyToLiveBackend(request, liveBackend)
     await delay(200)
     const detail = submissionDetails[String(params.id)]
     if (!detail) return notFound('The submission was not found.')
-    const body = await request.json() as { decision?: keyof typeof decisionStatuses }
+    const body = await request.json() as {
+      decision?: keyof typeof decisionStatuses
+      comments?: string
+    }
     const status = body.decision ? decisionStatuses[body.decision] : undefined
     if (!status) {
       return HttpResponse.json({ message: 'Select a supported validation decision.' }, { status: 400 })
     }
-    detail.status = status
+    const comments = body.comments?.trim() ?? ''
+    if (comments.length < 3) {
+      return HttpResponse.json({ message: 'Provide review comments with the decision.' }, { status: 400 })
+    }
+    synchronizeSubmissionDecision(detail, status, body.decision!, comments)
+
+    const published =
+      body.decision === 'approved' || body.decision === 'provisional'
+        ? publishExtractedValues(
+            detail.id,
+            detail.extractedValues,
+            body.decision,
+            detail.reviewer,
+          )
+        : []
+
+    const message =
+      published.length > 0
+        ? `Decision recorded: ${status.label}. Published to ${published.map((entry) => entry.kpiName).join(', ')}.`
+        : `Decision recorded: ${status.label}.`
+
     return HttpResponse.json({
-      submissionId: detail.id, status,
-      message: `Decision recorded: ${status.label}.`,
+      submissionId: detail.id, status, message, published,
       nextUrl: '/data-submissions/validation',
     })
   }),
   http.get('/api/data-submissions/overdue', async ({ request }) => {
+    const liveBackend = getLiveBackendUrl()
+    if (liveBackend) return proxyToLiveBackend(request, liveBackend)
     await delay(100)
     const url = new URL(request.url)
     return HttpResponse.json(paginate(filterRows(overdueItems, url), url))
   }),
   http.get('/api/data-submissions/gaps', async ({ request }) => {
+    const liveBackend = getLiveBackendUrl()
+    if (liveBackend) return proxyToLiveBackend(request, liveBackend)
     await delay(100)
     const url = new URL(request.url)
     return HttpResponse.json(paginate(filterRows(dataGaps, url), url))
+  }),
+  /**
+   * The real backend generates its templates fresh on every download (see
+   * BACKEND-CONTRACT.md) and only serves them at this path — the mock never
+   * had an equivalent route, since its own templates are static files under
+   * /templates/*.csv, not an API endpoint. Only reachable in live mode.
+   */
+  http.get('/api/data-submissions/templates/:fileName', async ({ request }) => {
+    const liveBackend = getLiveBackendUrl()
+    if (liveBackend) return proxyToLiveBackend(request, liveBackend)
+    return notFound('Templates are not served through this endpoint in mock mode.')
   }),
 ]

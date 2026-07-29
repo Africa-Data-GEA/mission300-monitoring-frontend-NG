@@ -61,6 +61,21 @@
 
   --color-link: #1570ef;
 
+  /* --- Chart palette -------------------------------------------------------
+   * Blue-led palette for Executive Overview's charts, deliberately separate
+   * from the red/green delivery-status scheme above: stakeholder feedback was
+   * that a leadership-facing overview should read calm, not alarm-coded.
+   * `chart-accent` is reserved for the one segment or value on a chart that
+   * most needs attention, not a per-status colour. See
+   * src/config/chart-colors.ts for the matching JS values used by ApexCharts,
+   * which cannot read CSS custom properties for series colours. */
+  --color-chart-blue-darkest: #1e3a8a;
+  --color-chart-blue-dark: #1d4ed8;
+  --color-chart-blue: #3b82f6;
+  --color-chart-blue-light: #60a5fa;
+  --color-chart-blue-lightest: #bfdbfe;
+  --color-chart-accent: #f59e0b;
+
   /* --- Typography --------------------------------------------------------
    * Deliberately tighter than the Tailwind default: this is a dense
    * operational tool viewed at 100% zoom for long stretches, not a marketing
@@ -69,7 +84,7 @@
    * The root font size is intentionally NOT overridden — doing so breaks the
    * browser font-size preference for users who rely on it. The scale is
    * tightened here instead, so rem units still honour user settings. */
-  --font-sans: 'Inter Tight Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-sans: 'Google Sans', ui-sans-serif, system-ui, sans-serif;
   --font-mono: ui-monospace, 'Cascadia Code', 'Source Code Pro', monospace;
 
   --text-2xs: 0.625rem; /* 10px — badge counters */

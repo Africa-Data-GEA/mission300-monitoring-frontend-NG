@@ -79,19 +79,25 @@ describe('KPI Explorer mock data', () => {
     })
 
     /*
-     * Deliberate edge cases the UI must handle: a data gap and a pending value
-     * (which must never read as confirmed).
+     * Deliberate edge cases the UI must handle: a public-source value (not
+     * yet institutionally confirmed) and a value requiring validation, per
+     * the M300 KPI Matrix's own vocabulary — neither must read as confirmed.
      */
-    it('includes a data-gap indicator', () => {
+    it('includes a public-source indicator', () => {
       expect(
-        kpiExplorerCatalogue.some((row) => row.validationStatus === 'data-gap'),
+        kpiExplorerCatalogue.some((row) => row.validationStatus === 'public-source'),
       ).toBe(true)
     })
 
-    it('includes a pending indicator', () => {
+    it('includes a requires-validation indicator', () => {
       expect(
-        kpiExplorerCatalogue.some((row) => row.validationStatus === 'pending'),
+        kpiExplorerCatalogue.some((row) => row.validationStatus === 'requires-validation'),
       ).toBe(true)
+    })
+
+    it('includes an indicator with no current value yet', () => {
+      const profiles = kpiExplorerCatalogue.map((row) => getKpiProfile(row.id))
+      expect(profiles.some((profile) => profile?.current === null)).toBe(true)
     })
   })
 })

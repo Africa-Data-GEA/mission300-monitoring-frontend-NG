@@ -1,7 +1,39 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
+import { z } from 'zod'
 import { executiveOverviewSchema } from '@/api/schemas/executive-overview'
 import { api } from '@/lib/api-client'
 import type { ExecutiveOverviewQuery } from './types'
+
+const kpiBreakdownSchema = z.array(
+  z.object({
+    disco: z.string(),
+    state: z.string(),
+    value: z.number(),
+  }),
+)
+export type KpiBreakdown = z.infer<typeof kpiBreakdownSchema>
+
+/**
+ * Real per-DisCo/state breakdown for one KPI, fetched directly from the
+ * m300-demo-backend — not through the mock's `/api` same-origin contract,
+ * since this is a live-only feature with no mock equivalent. Disabled
+ * (returns no data, not an error) when VITE_SUBMISSIONS_BACKEND_URL isn't
+ * set, so the section simply doesn't render rather than failing.
+ */
+export function useKpiBreakdown(kpiId: string) {
+  const backendUrl = import.meta.env.VITE_SUBMISSIONS_BACKEND_URL as string | undefined
+
+  return useQuery({
+    queryKey: ['kpi-breakdown', kpiId, backendUrl],
+    queryFn: async () => {
+      const response = await fetch(`${backendUrl}/api/data-submissions/kpis/${kpiId}/breakdown`)
+      if (!response.ok) throw new Error(`Breakdown request failed with status ${response.status}`)
+      return kpiBreakdownSchema.parse(await response.json())
+    },
+    enabled: Boolean(backendUrl),
+    retry: false,
+  })
+}
 
 /** Query keys are centralised so cache invalidation has a single source. */
 export const dashboardKeys = {

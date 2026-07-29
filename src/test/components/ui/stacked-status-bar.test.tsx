@@ -40,12 +40,8 @@ describe('StackedStatusBar', () => {
   it('gives each status its own fill', () => {
     render(<StackedStatusBar counts={counts} total={10} label="Pillar" />)
 
-    expect(screen.getByTestId('segment-on-track')).toHaveClass(
-      'bg-status-on-track',
-    )
-    expect(screen.getByTestId('segment-delayed')).toHaveClass(
-      'bg-status-delayed',
-    )
+    expect(screen.getByTestId('segment-on-track')).toHaveClass('bg-chart-blue-dark')
+    expect(screen.getByTestId('segment-delayed')).toHaveClass('bg-chart-blue-light')
   })
 
   it('omits statuses with a zero count rather than rendering slivers', () => {

@@ -8,7 +8,6 @@ import {
   LayoutGrid,
   MapPin,
   ShieldCheck,
-  TriangleAlert,
   type LucideIcon,
 } from 'lucide-react'
 import { PILLARS, PILLAR_LABELS } from '@/types/domain'
@@ -20,10 +19,16 @@ import { PILLARS, PILLAR_LABELS } from '@/types/domain'
  * disabled so the information architecture is visible and reviewable without
  * pretending the pages exist. Flip the flag when a page ships.
  *
- * Note: the wireframe lists "Implementation register" under both Monitoring &
- * Analysis and Delivery tracking. Treated here as a duplication in the
- * wireframe and placed under Delivery tracking only — worth confirming with
- * the spec owner.
+ * The wireframe originally listed "Implementation register" and
+ * "Bottlenecks & exceptions" as their own top-level items. Both have since
+ * been consolidated into Programs, which now covers programmes, their
+ * projects, and each project's bottlenecks and milestones as drill-down
+ * levels rather than separate pages — so neither has its own nav entry.
+ *
+ * KPI explorer sits in its own "Analytics" group near the bottom rather than
+ * inside Monitoring & Analysis: stakeholder feedback was that it is a
+ * reference catalogue, not a primary page, and reads as more important than
+ * it is when placed near the top next to Executive Overview.
  */
 export interface NavItem {
   readonly label: string
@@ -44,19 +49,17 @@ export const NAVIGATION: readonly NavGroup[] = [
     items: [
       { label: 'Executive Overview', to: '/', icon: Home, ready: true },
       {
-        label: 'Compact pillar dashboards',
+        label: 'Pillar dashboards',
         to: '/pillars',
         icon: BarChart3,
-        ready: false,
+        ready: true,
         children: PILLARS.map((pillar) => ({
           label: PILLAR_LABELS[pillar],
           to: `/pillars/${pillar}`,
         })),
       },
-      { label: 'KPI explorer', to: '/kpis', icon: LayoutGrid, ready: true },
-      { label: 'Programs', to: '/programs', icon: ClipboardList, ready: true },
       {
-        label: 'State and DisCo performance',
+        label: 'State & DisCo',
         to: '/state-disco',
         icon: MapPin,
         ready: true,
@@ -66,25 +69,14 @@ export const NAVIGATION: readonly NavGroup[] = [
   {
     label: 'Delivery tracking',
     items: [
-      {
-        label: 'Implementation register',
-        to: '/implementation-register',
-        icon: ClipboardList,
-        ready: true,
-      },
-      {
-        label: 'Bottlenecks & exceptions',
-        to: '/bottlenecks',
-        icon: TriangleAlert,
-        ready: true,
-      },
+      { label: 'Programs', to: '/programs', icon: ClipboardList, ready: true },
     ],
   },
   {
     label: 'Data operations',
     items: [
       {
-        label: 'Data submissions & validation',
+        label: 'Data submissions',
         to: '/data-submissions',
         icon: Database,
         ready: true,
@@ -93,21 +85,27 @@ export const NAVIGATION: readonly NavGroup[] = [
         label: 'Reports & exports',
         to: '/reports',
         icon: FileBarChart,
-        ready: false,
+        ready: true,
       },
+    ],
+  },
+  {
+    label: 'Analytics',
+    items: [
+      { label: 'KPI Directory', to: '/kpis', icon: LayoutGrid, ready: true },
     ],
   },
   {
     label: 'Administration',
     items: [
       {
-        label: 'Stakeholders & institutions',
+        label: 'Stakeholders',
         to: '/stakeholders',
         icon: Building2,
         ready: true,
       },
       {
-        label: 'User access & administration',
+        label: 'User access',
         to: '/administration',
         icon: ShieldCheck,
         ready: true,

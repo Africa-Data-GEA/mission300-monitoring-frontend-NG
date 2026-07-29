@@ -1,7 +1,7 @@
-import { ChevronDown } from 'lucide-react'
-import { NavLink } from 'react-router'
 import { NAVIGATION } from '@/config/navigation'
 import { cn } from '@/lib/utils'
+import { NavDropdownItem } from './nav-dropdown-item'
+import { NavItem } from './nav-item'
 
 /**
  * Primary navigation.
@@ -11,11 +11,10 @@ import { cn } from '@/lib/utils'
  * this density a border per row draws more attention to the chrome than to the
  * content. Items whose pages are not yet built render as disabled buttons
  * rather than links, so the full information architecture is reviewable
- * without producing dead routes.
+ * without producing dead routes. Items with children (e.g. Compact pillar
+ * dashboards) expand in place as a dropdown rather than linking anywhere
+ * themselves — see NavDropdownItem.
  */
-const ITEM_BASE =
-  'flex w-full items-center gap-2 rounded-control px-2.5 py-1.5 text-sm font-medium transition-colors'
-
 export function Sidebar({
   className,
   onNavigate,
@@ -33,8 +32,7 @@ export function Sidebar({
       )}
     >
       <div className="px-1.5">
-        <p className="text-sm font-semibold text-text-default">Mission 300</p>
-        <p className="text-xs text-text-muted">Monitoring Dashboard</p>
+        <img alt="gEApp" src="/Logos/geapp.png" className="h-7 w-auto object-contain" />
       </div>
 
       {NAVIGATION.map((group) => (
@@ -46,63 +44,10 @@ export function Sidebar({
           <ul className="space-y-0.5">
             {group.items.map((item) => (
               <li key={item.label}>
-                {item.ready ? (
-                  <NavLink
-                    to={item.to}
-                    end={item.to === '/'}
-                    onClick={onNavigate}
-                    className={({ isActive }) =>
-                      cn(
-                        ITEM_BASE,
-                        isActive
-                          ? 'bg-brand-800 text-text-inverse'
-                          : 'bg-surface-sunken/10 text-text-default hover:bg-border-default',
-                      )
-                    }
-                  >
-                    {({ isActive }) => (
-                      <>
-                        <item.icon
-                          aria-hidden="true"
-                          className={cn(
-                            'size-3.5 shrink-0',
-                            isActive ? 'text-text-inverse' : 'text-text-muted',
-                          )}
-                        />
-                        <span className="truncate">{item.label}</span>
-                        {item.children && (
-                          <ChevronDown
-                            aria-hidden="true"
-                            className="ml-auto size-3.5 shrink-0 opacity-70"
-                          />
-                        )}
-                      </>
-                    )}
-                  </NavLink>
+                {item.ready && item.children ? (
+                  <NavDropdownItem item={item} />
                 ) : (
-                  <button
-                    type="button"
-                    disabled
-                    // Communicates "planned, not broken" to everyone reviewing
-                    // the build, including screen-reader users.
-                    aria-describedby="nav-not-available"
-                    className={cn(
-                      ITEM_BASE,
-                      'cursor-not-allowed bg-surface-sunken text-left text-text-subtle',
-                    )}
-                  >
-                    <item.icon
-                      aria-hidden="true"
-                      className="size-3.5 shrink-0 text-text-subtle"
-                    />
-                    <span className="truncate">{item.label}</span>
-                    {item.children && (
-                      <ChevronDown
-                        aria-hidden="true"
-                        className="ml-auto size-3.5 shrink-0 opacity-70"
-                      />
-                    )}
-                  </button>
+                  <NavItem item={item} onNavigate={onNavigate} />
                 )}
               </li>
             ))}
@@ -113,6 +58,24 @@ export function Sidebar({
       <p id="nav-not-available" className="sr-only">
         This section is not yet available.
       </p>
+
+      {/*
+        Placeholder session details — there is no auth context wiring the
+        logged-in user through yet, so this mirrors the same static values
+        the top bar used before, moved here per the current design direction.
+      */}
+      <div className="mt-auto flex items-center gap-2 rounded-control bg-surface-sunken px-2 py-2">
+        <span
+          aria-hidden="true"
+          className="inline-flex size-8 shrink-0 items-center justify-center rounded-full bg-brand-700 text-xs font-semibold text-white"
+        >
+          JO
+        </span>
+        <div className="min-w-0">
+          <p className="truncate text-sm font-medium text-text-default">John Doe</p>
+          <p className="truncate text-xs text-text-muted">Administrator</p>
+        </div>
+      </div>
     </nav>
   )
 }

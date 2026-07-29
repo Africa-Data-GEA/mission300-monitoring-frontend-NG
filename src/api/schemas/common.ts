@@ -86,6 +86,7 @@ export const metricIconNameSchema = z.enum([
   'losses',
   'capital',
   'generation',
+  'cooking',
   'milestones',
   'pillars',
   'kpis',

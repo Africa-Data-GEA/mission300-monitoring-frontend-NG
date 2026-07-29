@@ -1,0 +1,3752 @@
+
+ RUN  v4.1.10 C:/Users/user/EMRC/emrc-geapp
+
+ ❯ src/test/features/dashboard/sections.test.tsx (26 tests | 14 failed) 18220ms
+     × renders the milestone delivery card with its progress bar 656ms
+     × always shows the source year on the access rate card 473ms
+     × renders the generation capacity card with a sparkline 406ms
+     × renders the escalations card with its count and overdue decisions 357ms
+     × exposes the target through the information popover 1378ms
+     × renders all three delivery channels 113ms
+     × renders a progress bar for channels with an approved target 814ms
+     × renders no progress bar for a channel with no approved target 309ms
+     × renders each metric on its own scale 1948ms
+     × flags a metric behind its approved trajectory 730ms
+     × omits the target marker for a metric with no approved target 2163ms
+     × states each pillar record count 430ms
+     × says so plainly when a pillar has no approved records 878ms
+     × renders the ranked exceptions with severity and days unresolved 92ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 14 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/test/features/dashboard/sections.test.tsx > Section A — headline cards > renders the milestone delivery card with its progress bar
+TestingLibraryElementError: Unable to find an element with the text: 15%. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<section[39m
+      [33maria-label[39m=[32m"Headline metrics"[39m
+      [33mclass[39m=[32m"grid gap-3 sm:grid-cols-2 xl:grid-cols-4"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"rounded-card bg-surface flex h-full flex-col p-4"[39m
+        [33mdata-slot[39m=[32m"card"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"flex items-start justify-between gap-2"[39m
+        [36m>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"inline-flex size-8 shrink-0 items-center justify-center rounded-full bg-brand-50"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33maria-hidden[39m=[32m"true"[39m
+              [33mclass[39m=[32m"lucide lucide-calendar-check size-4 text-brand-600"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"24"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"24"[39m
+              [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M8 2v4"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M16 2v4"[39m
+              [36m/>[39m
+              [36m<rect[39m
+                [33mheight[39m=[32m"18"[39m
+                [33mrx[39m=[32m"2"[39m
+                [33mwidth[39m=[32m"18"[39m
+                [33mx[39m=[32m"3"[39m
+                [33my[39m=[32m"4"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M3 10h18"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"m9 16 2 2 4-4"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+          [36m</span>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex min-w-0 shrink-0 items-center gap-1"[39m
+          [36m>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"inline-flex items-center gap-1.5 rounded-pill px-2.5 py-1 text-xs font-medium whitespace-nowrap bg-status-on-track-bg text-status-on-track"[39m
+            [36m>[39m
+              [0mlive • CPR[0m
+            [36m</span>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"relative inline-flex"[39m
+            [36m>[39m
+              [36m<button[39m
+                [33maria-expanded[39m=[32m"false"[39m
+                [33maria-label[39m=[32m"About Priority milestones on time: definition, methodology and data source"[39m
+                [33mclass[39m=[32m"inline-flex size-5 items-center justify-center rounded-full text-text-subtle transition-colors hover:text-text-muted"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [36m<svg[39m
+                  [33maria-hidden[39m=[32m"true"[39m
+                  [33mclass[39m=[32m"lucide lucide-info size-4"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mheight[39m=[32m"24"[39m
+                  [33mstroke[39m=[32m"currentColor"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-linejoin[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"2"[39m
+                  [33mviewBox[39m=[32m"0 0 24 24"[39m
+                  [33mwidth[39m=[32m"24"[39m
+                  [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                [36m>[39m
+                  [36m<circle[39m
+                    [33mcx[39m=[32m"12"[39m
+                    [33mcy[39m=[32m"12"[39m
+                    [33mr[39m=[32m"10"[39m
+                  [36m/>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M12 16v-4"[39m
+                  [36m/>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M12 8h.01"[39m
+                  [36m/>[39m
+                [36m</svg>[39m
+              [36m</button>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"mt-3 line-clamp-2 min-h-9 text-sm text-text-muted"[39m
+          [33mtitle[39m=[32m"Priority milestones on time"[39m
+        [36m>[39m
+          [0mPriority milestones on time[0m
+        [36m</p>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"mt-1 flex flex-wrap items-center gap-x-2 gap-y-1.5"[39m
+        [36m>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"text-4xl leading-none font-semibold tracking-tight whitespace-nowrap text-text-default"[39m
+          [36m>[39m
+            [0m0[0m
+            [0m%[0m
+          [36m</span>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"inline-flex items-center gap-1.5 rounded-pill px-2.5 py-1 text-xs font-medium bg-status-at-risk-bg text-trend-down"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33maria-hidden[39m=[32m"true"[39m
+              [33mclass[39m=[32m"lucide lucide-arrow-down size-3.5 shrink-0"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"24"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"24"[39m
+              [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M12 5v14"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"m19 12-7 7-7-7"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"sr-only"[39m
+            [36m>[39m
+              [0mWorsening:[0m
+            [36m</span>[39m
+            [0m-8pp vs Q2 2025[0m
+          [36m</span>[39m
+        [36m</div>[39m
+        [36m<div[39m
+          [33maria-label[39m=[32m"Priority milestones on time"[39m
+          [33maria-valuemax[39m=[32m"100"[39m
+          [33maria-valuemin[39m=[32m"0"[39m
+          [33maria-valuenow[39m=[32m"0"[39m
+          [33mclass[39m=[32m"h-2 w-full overflow-hidden rounded-pill bg-surface-sunken mt-3"[39m
+          [33mrole[39m=[32m"progressbar"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"h-full rounded-pill bg-brand-500"[39m
+            [33mstyle[39m=[32m"width: 0%;"[39m
+          [36m/>[39m
+     ...
+ ❯ Object.getElementError node_modules/.pnpm/@testing-library+dom@10.4.1/node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ node_modules/.pnpm/@testing-library+dom@10.4.1/node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ❯ node_modules/.pnpm/@testing-library+dom@10.4.1/node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ❯ getByText node_modules/.pnpm/@testing-library+dom@10.4.1/node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ src/test/features/dashboard/sections.test.tsx:36:19
+     34|       screen.getByText('Priority milestones on time'),
+     35|     ).toBeInTheDocument()
+     36|     expect(screen.getByText('15%')).toBeInTheDocument()
+       |                   ^
+     37|     expect(
+     38|       screen.getByRole('progressbar', {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/14]⎯
+
+ FAIL  src/test/features/dashboard/sections.test.tsx > Section A — headline cards > always shows the source year on the access rate card
+TestingLibraryElementError: Unable to find an element with the text: 2024. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<section[39m
+      [33maria-label[39m=[32m"Headline metrics"[39m
+      [33mclass[39m=[32m"grid gap-3 sm:grid-cols-2 xl:grid-cols-4"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"rounded-card bg-surface flex h-full flex-col p-4"[39m
+        [33mdata-slot[39m=[32m"card"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"flex items-start justify-between gap-2"[39m
+        [36m>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"inline-flex size-8 shrink-0 items-center justify-center rounded-full bg-brand-50"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33maria-hidden[39m=[32m"true"[39m
+              [33mclass[39m=[32m"lucide lucide-calendar-check size-4 text-brand-600"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"24"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"24"[39m
+              [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M8 2v4"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M16 2v4"[39m
+              [36m/>[39m
+              [36m<rect[39m
+                [33mheight[39m=[32m"18"[39m
+                [33mrx[39m=[32m"2"[39m
+                [33mwidth[39m=[32m"18"[39m
+                [33mx[39m=[32m"3"[39m
+                [33my[39m=[32m"4"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M3 10h18"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"m9 16 2 2 4-4"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+          [36m</span>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex min-w-0 shrink-0 items-center gap-1"[39m
+          [36m>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"inline-flex items-center gap-1.5 rounded-pill px-2.5 py-1 text-xs font-medium whitespace-nowrap bg-status-on-track-bg text-status-on-track"[39m
+            [36m>[39m
+              [0mlive • CPR[0m
+            [36m</span>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"relative inline-flex"[39m
+            [36m>[39m
+              [36m<button[39m
+                [33maria-expanded[39m=[32m"false"[39m
+                [33maria-label[39m=[32m"About Priority milestones on time: definition, methodology and data source"[39m
+                [33mclass[39m=[32m"inline-flex size-5 items-center justify-center rounded-full text-text-subtle transition-colors hover:text-text-muted"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [36m<svg[39m
+                  [33maria-hidden[39m=[32m"true"[39m
+                  [33mclass[39m=[32m"lucide lucide-info size-4"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mheight[39m=[32m"24"[39m
+                  [33mstroke[39m=[32m"currentColor"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-linejoin[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"2"[39m
+                  [33mviewBox[39m=[32m"0 0 24 24"[39m
+                  [33mwidth[39m=[32m"24"[39m
+                  [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                [36m>[39m
+                  [36m<circle[39m
+                    [33mcx[39m=[32m"12"[39m
+                    [33mcy[39m=[32m"12"[39m
+                    [33mr[39m=[32m"10"[39m
+                  [36m/>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M12 16v-4"[39m
+                  [36m/>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M12 8h.01"[39m
+                  [36m/>[39m
+                [36m</svg>[39m
+              [36m</button>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"mt-3 line-clamp-2 min-h-9 text-sm text-text-muted"[39m
+          [33mtitle[39m=[32m"Priority milestones on time"[39m
+        [36m>[39m
+          [0mPriority milestones on time[0m
+        [36m</p>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"mt-1 flex flex-wrap items-center gap-x-2 gap-y-1.5"[39m
+        [36m>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"text-4xl leading-none font-semibold tracking-tight whitespace-nowrap text-text-default"[39m
+          [36m>[39m
+            [0m0[0m
+            [0m%[0m
+          [36m</span>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"inline-flex items-center gap-1.5 rounded-pill px-2.5 py-1 text-xs font-medium bg-status-at-risk-bg text-trend-down"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33maria-hidden[39m=[32m"true"[39m
+              [33mclass[39m=[32m"lucide lucide-arrow-down size-3.5 shrink-0"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"24"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"24"[39m
+              [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M12 5v14"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"m19 12-7 7-7-7"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"sr-only"[39m
+            [36m>[39m
+              [0mWorsening:[0m
+            [36m</span>[39m
+            [0m-8pp vs Q2 2025[0m
+          [36m</span>[39m
+        [36m</div>[39m
+        [36m<div[39m
+          [33maria-label[39m=[32m"Priority milestones on time"[39m
+          [33maria-valuemax[39m=[32m"100"[39m
+          [33maria-valuemin[39m=[32m"0"[39m
+          [33maria-valuenow[39m=[32m"0"[39m
+          [33mclass[39m=[32m"h-2 w-full overflow-hidden rounded-pill bg-surface-sunken mt-3"[39m
+          [33mrole[39m=[32m"progressbar"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"h-full rounded-pill bg-brand-500"[39m
+            [33mstyle[39m=[32m"width: 0%;"[39m
+          [36m/>[39m
+     ...
+ ❯ Object.getElementError node_modules/.pnpm/@testing-library+dom@10.4.1/node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ node_modules/.pnpm/@testing-library+dom@10.4.1/node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ❯ node_modules/.pnpm/@testing-library+dom@10.4.1/node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ❯ getByText node_modules/.pnpm/@testing-library+dom@10.4.1/node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ src/test/features/dashboard/sections.test.tsx:53:19
+     51|
+     52|     expect(screen.getByText('70%')).toBeInTheDocument()
+     53|     expect(screen.getByText('2024')).toBeInTheDocument()
+       |                   ^
+     54|   })
+     55|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/14]⎯
+
+ FAIL  src/test/features/dashboard/sections.test.tsx > Section A — headline cards > renders the generation capacity card with a sparkline
+TestingLibraryElementError: Unable to find an element with the text: of 13.6 GW installed. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<section[39m
+      [33maria-label[39m=[32m"Headline metrics"[39m
+      [33mclass[39m=[32m"grid gap-3 sm:grid-cols-2 xl:grid-cols-4"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"rounded-card bg-surface flex h-full flex-col p-4"[39m
+        [33mdata-slot[39m=[32m"card"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"flex items-start justify-between gap-2"[39m
+        [36m>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"inline-flex size-8 shrink-0 items-center justify-center rounded-full bg-brand-50"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33maria-hidden[39m=[32m"true"[39m
+              [33mclass[39m=[32m"lucide lucide-calendar-check size-4 text-brand-600"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"24"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"24"[39m
+              [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M8 2v4"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M16 2v4"[39m
+              [36m/>[39m
+              [36m<rect[39m
+                [33mheight[39m=[32m"18"[39m
+                [33mrx[39m=[32m"2"[39m
+                [33mwidth[39m=[32m"18"[39m
+                [33mx[39m=[32m"3"[39m
+                [33my[39m=[32m"4"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M3 10h18"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"m9 16 2 2 4-4"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+          [36m</span>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex min-w-0 shrink-0 items-center gap-1"[39m
+          [36m>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"inline-flex items-center gap-1.5 rounded-pill px-2.5 py-1 text-xs font-medium whitespace-nowrap bg-status-on-track-bg text-status-on-track"[39m
+            [36m>[39m
+              [0mlive • CPR[0m
+            [36m</span>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"relative inline-flex"[39m
+            [36m>[39m
+              [36m<button[39m
+                [33maria-expanded[39m=[32m"false"[39m
+                [33maria-label[39m=[32m"About Priority milestones on time: definition, methodology and data source"[39m
+                [33mclass[39m=[32m"inline-flex size-5 items-center justify-center rounded-full text-text-subtle transition-colors hover:text-text-muted"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [36m<svg[39m
+                  [33maria-hidden[39m=[32m"true"[39m
+                  [33mclass[39m=[32m"lucide lucide-info size-4"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mheight[39m=[32m"24"[39m
+                  [33mstroke[39m=[32m"currentColor"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-linejoin[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"2"[39m
+                  [33mviewBox[39m=[32m"0 0 24 24"[39m
+                  [33mwidth[39m=[32m"24"[39m
+                  [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                [36m>[39m
+                  [36m<circle[39m
+                    [33mcx[39m=[32m"12"[39m
+                    [33mcy[39m=[32m"12"[39m
+                    [33mr[39m=[32m"10"[39m
+                  [36m/>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M12 16v-4"[39m
+                  [36m/>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M12 8h.01"[39m
+                  [36m/>[39m
+                [36m</svg>[39m
+              [36m</button>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"mt-3 line-clamp-2 min-h-9 text-sm text-text-muted"[39m
+          [33mtitle[39m=[32m"Priority milestones on time"[39m
+        [36m>[39m
+          [0mPriority milestones on time[0m
+        [36m</p>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"mt-1 flex flex-wrap items-center gap-x-2 gap-y-1.5"[39m
+        [36m>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"text-4xl leading-none font-semibold tracking-tight whitespace-nowrap text-text-default"[39m
+          [36m>[39m
+            [0m0[0m
+            [0m%[0m
+          [36m</span>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"inline-flex items-center gap-1.5 rounded-pill px-2.5 py-1 text-xs font-medium bg-status-at-risk-bg text-trend-down"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33maria-hidden[39m=[32m"true"[39m
+              [33mclass[39m=[32m"lucide lucide-arrow-down size-3.5 shrink-0"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"24"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"24"[39m
+              [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M12 5v14"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"m19 12-7 7-7-7"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"sr-only"[39m
+            [36m>[39m
+              [0mWorsening:[0m
+            [36m</span>[39m
+            [0m-8pp vs Q2 2025[0m
+          [36m</span>[39m
+        [36m</div>[39m
+        [36m<div[39m
+          [33maria-label[39m=[32m"Priority milestones on time"[39m
+          [33maria-valuemax[39m=[32m"100"[39m
+          [33maria-valuemin[39m=[32m"0"[39m
+          [33maria-valuenow[39m=[32m"0"[39m
+          [33mclass[39m=[32m"h-2 w-full overflow-hidden rounded-pill bg-surface-sunken mt-3"[39m
+          [33mrole[39m=[32m"progressbar"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"h-full rounded-pill bg-brand-500"[39m
+            [33mstyle[39m=[32m"width: 0%;"[39m
+          [36m/>[39m
+     ...
+ ❯ Object.getElementError node_modules/.pnpm/@testing-library+dom@10.4.1/node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ node_modules/.pnpm/@testing-library+dom@10.4.1/node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ❯ node_modules/.pnpm/@testing-library+dom@10.4.1/node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ❯ getByText node_modules/.pnpm/@testing-library+dom@10.4.1/node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ src/test/features/dashboard/sections.test.tsx:60:19
+     58|
+     59|     expect(screen.getByText('5.4 GW')).toBeInTheDocument()
+     60|     expect(screen.getByText('of 13.6 GW installed')).toBeInTheDocument…
+       |                   ^
+     61|     expect(container.querySelector('polyline')).toBeInTheDocument()
+     62|   })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/14]⎯
+
+ FAIL  src/test/features/dashboard/sections.test.tsx > Section A — headline cards > renders the escalations card with its count and overdue decisions
+TestingLibraryElementError: Unable to find a label with the text of: 4 unresolved critical escalations
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<section[39m
+      [33maria-label[39m=[32m"Headline metrics"[39m
+      [33mclass[39m=[32m"grid gap-3 sm:grid-cols-2 xl:grid-cols-4"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"rounded-card bg-surface flex h-full flex-col p-4"[39m
+        [33mdata-slot[39m=[32m"card"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"flex items-start justify-between gap-2"[39m
+        [36m>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"inline-flex size-8 shrink-0 items-center justify-center rounded-full bg-brand-50"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33maria-hidden[39m=[32m"true"[39m
+              [33mclass[39m=[32m"lucide lucide-calendar-check size-4 text-brand-600"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"24"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"24"[39m
+              [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M8 2v4"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M16 2v4"[39m
+              [36m/>[39m
+              [36m<rect[39m
+                [33mheight[39m=[32m"18"[39m
+                [33mrx[39m=[32m"2"[39m
+                [33mwidth[39m=[32m"18"[39m
+                [33mx[39m=[32m"3"[39m
+                [33my[39m=[32m"4"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M3 10h18"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"m9 16 2 2 4-4"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+          [36m</span>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex min-w-0 shrink-0 items-center gap-1"[39m
+          [36m>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"inline-flex items-center gap-1.5 rounded-pill px-2.5 py-1 text-xs font-medium whitespace-nowrap bg-status-on-track-bg text-status-on-track"[39m
+            [36m>[39m
+              [0mlive • CPR[0m
+            [36m</span>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"relative inline-flex"[39m
+            [36m>[39m
+              [36m<button[39m
+                [33maria-expanded[39m=[32m"false"[39m
+                [33maria-label[39m=[32m"About Priority milestones on time: definition, methodology and data source"[39m
+                [33mclass[39m=[32m"inline-flex size-5 items-center justify-center rounded-full text-text-subtle transition-colors hover:text-text-muted"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [36m<svg[39m
+                  [33maria-hidden[39m=[32m"true"[39m
+                  [33mclass[39m=[32m"lucide lucide-info size-4"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mheight[39m=[32m"24"[39m
+                  [33mstroke[39m=[32m"currentColor"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-linejoin[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"2"[39m
+                  [33mviewBox[39m=[32m"0 0 24 24"[39m
+                  [33mwidth[39m=[32m"24"[39m
+                  [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                [36m>[39m
+                  [36m<circle[39m
+                    [33mcx[39m=[32m"12"[39m
+                    [33mcy[39m=[32m"12"[39m
+                    [33mr[39m=[32m"10"[39m
+                  [36m/>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M12 16v-4"[39m
+                  [36m/>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M12 8h.01"[39m
+                  [36m/>[39m
+                [36m</svg>[39m
+              [36m</button>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"mt-3 line-clamp-2 min-h-9 text-sm text-text-muted"[39m
+          [33mtitle[39m=[32m"Priority milestones on time"[39m
+        [36m>[39m
+          [0mPriority milestones on time[0m
+        [36m</p>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"mt-1 flex flex-wrap items-center gap-x-2 gap-y-1.5"[39m
+        [36m>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"text-4xl leading-none font-semibold tracking-tight whitespace-nowrap text-text-default"[39m
+          [36m>[39m
+            [0m0[0m
+            [0m%[0m
+          [36m</span>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"inline-flex items-center gap-1.5 rounded-pill px-2.5 py-1 text-xs font-medium bg-status-at-risk-bg text-trend-down"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33maria-hidden[39m=[32m"true"[39m
+              [33mclass[39m=[32m"lucide lucide-arrow-down size-3.5 shrink-0"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"24"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"24"[39m
+              [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M12 5v14"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"m19 12-7 7-7-7"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"sr-only"[39m
+            [36m>[39m
+              [0mWorsening:[0m
+            [36m</span>[39m
+            [0m-8pp vs Q2 2025[0m
+          [36m</span>[39m
+        [36m</div>[39m
+        [36m<div[39m
+          [33maria-label[39m=[32m"Priority milestones on time"[39m
+          [33maria-valuemax[39m=[32m"100"[39m
+          [33maria-valuemin[39m=[32m"0"[39m
+          [33maria-valuenow[39m=[32m"0"[39m
+          [33mclass[39m=[32m"h-2 w-full overflow-hidden rounded-pill bg-surface-sunken mt-3"[39m
+          [33mrole[39m=[32m"progressbar"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"h-full rounded-pill bg-brand-500"[39m
+            [33mstyle[39m=[32m"width: 0%;"[39m
+          [36m/>[39m
+     ...
+ ❯ Object.getElementError node_modules/.pnpm/@testing-library+dom@10.4.1/node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ getAllByLabelText node_modules/.pnpm/@testing-library+dom@10.4.1/node_modules/@testing-library/dom/dist/queries/label-text.js:111:38
+ ❯ node_modules/.pnpm/@testing-library+dom@10.4.1/node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ❯ getByLabelText node_modules/.pnpm/@testing-library+dom@10.4.1/node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ src/test/features/dashboard/sections.test.tsx:68:14
+     66|
+     67|     expect(
+     68|       screen.getByLabelText('4 unresolved critical escalations'),
+       |              ^
+     69|     ).toBeInTheDocument()
+     70|     expect(screen.getByText(/3 overdue/)).toBeInTheDocument()
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/14]⎯
+
+ FAIL  src/test/features/dashboard/sections.test.tsx > Section A — headline cards > exposes the target through the information popover
+Error: [2mexpect([22m[31melement[39m[2m).toHaveTextContent()[22m
+
+Expected element to have text content:
+[32m  100% of due priority milestones on time[39m
+Received:
+[31m  Target100% of due priority milestones delivered on timeBaselinebaseline 0% (Jan 2025)Full breakdown0 completed, 0 on track, 0 delayed, 1 blockedDefinitionPriority milestones completed by their due dates.MethodologyOn-time completed priority milestones divided by priority milestones due by the selected date, multiplied by 100.Data sourceCompact Progress Report and project milestone tracker.Last updated14 Oct 2025, 10:12[39m
+ ❯ src/test/features/dashboard/sections.test.tsx:121:20
+    119|
+    120|     const dialog = await screen.findByRole('dialog')
+    121|     expect(dialog).toHaveTextContent('100% of due priority milestones …
+       |                    ^
+    122|     expect(dialog).toHaveTextContent('baseline 0% (Jan 2025)')
+    123|   })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/14]⎯
+
+ FAIL  src/test/features/dashboard/sections.test.tsx > Section B — access delivery by channel > renders all three delivery channels
+TestingLibraryElementError: Unable to find an element with the text: New grid connections. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"rounded-card bg-surface-sunken p-4"[39m
+      [33mdata-slot[39m=[32m"card"[39m
+    [36m>[39m
+      [36m<h2[39m
+        [33mclass[39m=[32m"text-lg font-semibold text-text-default"[39m
+      [36m>[39m
+        [0mAccess delivery by channel[0m
+      [36m</h2>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"mt-3 grid items-start gap-4 xl:grid-cols-[1fr_1.2fr]"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"rounded-card bg-surface p-4"[39m
+          [33mdata-slot[39m=[32m"card"[39m
+        [36m>[39m
+          [36m<h3[39m
+            [33mclass[39m=[32m"text-xs font-medium tracking-wide text-text-subtle uppercase"[39m
+          [36m>[39m
+            [0mProgress to target[0m
+          [36m</h3>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"mt-2"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33maria-label[39m=[32m"Current progress toward the approved target for each access delivery channel"[39m
+              [33mrole[39m=[32m"img"[39m
+            [36m>[39m
+              [36m<div[39m
+                [33mstyle[39m=[32m"min-height: 235px;"[39m
+              [36m>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"apexcharts-canvas apexchartsygixslbn"[39m
+                  [33mid[39m=[32m"apexchartsygixslbn"[39m
+                  [33mstyle[39m=[32m"width: 0px; height: 220px;"[39m
+                [36m>[39m
+                  [36m<svg[39m
+                    [33maria-label[39m=[32m"bar chart with 1 data series: Current"[39m
+                    [33mclass[39m=[32m"apexcharts-svg"[39m
+                    [33mheight[39m=[32m"220"[39m
+                    [33mrole[39m=[32m"application"[39m
+                    [33mtransform[39m=[32m"translate(0, 0)"[39m
+                    [33mwidth[39m=[32m"0"[39m
+                    [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                    [33mxmlns:data[39m=[32m"ApexChartsNS"[39m
+                  [36m>[39m
+                    [36m<foreignobject[39m
+                      [33mheight[39m=[32m"220"[39m
+                      [33mwidth[39m=[32m"0"[39m
+                      [33mx[39m=[32m"0"[39m
+                      [33my[39m=[32m"0"[39m
+                    [36m/>[39m
+                    [36m<g[39m
+                      [33mclass[39m=[32m"apexcharts-inner apexcharts-graphical"[39m
+                    [36m>[39m
+                      [36m<defs />[39m
+                    [36m</g>[39m
+                  [36m</svg>[39m
+                  [36m<div[39m
+                    [33mclass[39m=[32m"apexcharts-legend"[39m
+                  [36m/>[39m
+                  [36m<div[39m
+                    [33maria-atomic[39m=[32m"true"[39m
+                    [33maria-live[39m=[32m"polite"[39m
+                    [33mclass[39m=[32m"apexcharts-sr-status"[39m
+                    [33mrole[39m=[32m"status"[39m
+                  [36m/>[39m
+                [36m</div>[39m
+              [36m</div>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+        [36m<ul[39m
+          [33maria-label[39m=[32m"Access delivery channels"[39m
+          [33mclass[39m=[32m"grid grid-cols-2 gap-3"[39m
+        [36m>[39m
+          [36m<li>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"rounded-card bg-surface flex h-full flex-col p-4"[39m
+              [33mdata-slot[39m=[32m"card"[39m
+            [36m>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex items-start justify-between gap-3"[39m
+              [36m>[39m
+                [36m<h3[39m
+                  [33mclass[39m=[32m"text-sm font-medium text-text-muted"[39m
+                [36m>[39m
+                  [0mNew Grid Connections (Annual)[0m
+                [36m</h3>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"flex shrink-0 items-center gap-1.5"[39m
+                [36m>[39m
+                  [36m<div[39m
+                    [33mclass[39m=[32m"relative inline-flex"[39m
+                  [36m>[39m
+                    [36m<button[39m
+                      [33maria-expanded[39m=[32m"false"[39m
+                      [33maria-label[39m=[32m"About New Grid Connections (Annual): definition, methodology and data source"[39m
+                      [33mclass[39m=[32m"inline-flex size-5 items-center justify-center rounded-full text-text-subtle transition-colors hover:text-text-muted"[39m
+                      [33mtype[39m=[32m"button"[39m
+                    [36m>[39m
+                      [36m<svg[39m
+                        [33maria-hidden[39m=[32m"true"[39m
+                        [33mclass[39m=[32m"lucide lucide-info size-4"[39m
+                        [33mfill[39m=[32m"none"[39m
+                        [33mheight[39m=[32m"24"[39m
+                        [33mstroke[39m=[32m"currentColor"[39m
+                        [33mstroke-linecap[39m=[32m"round"[39m
+                        [33mstroke-linejoin[39m=[32m"round"[39m
+                        [33mstroke-width[39m=[32m"2"[39m
+                        [33mviewBox[39m=[32m"0 0 24 24"[39m
+                        [33mwidth[39m=[32m"24"[39m
+                        [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                      [36m>[39m
+                        [36m<circle[39m
+                          [33mcx[39m=[32m"12"[39m
+                          [33mcy[39m=[32m"12"[39m
+                          [33mr[39m=[32m"10"[39m
+                        [36m/>[39m
+                        [36m<path[39m
+                          [33md[39m=[32m"M12 16v-4"[39m
+                        [36m/>[39m
+                        [36m<path[39m
+                          [33md[39m=[32m"M12 8h.01"[39m
+                        [36m/>[39m
+                      [36m</svg>[39m
+                    [36m</button>[39m
+                  [36m</div>[39m
+                [36m</div>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"mt-2 flex flex-wrap items-baseline gap-x-2.5 gap-y-1"[39m
+              [36m>[39m
+                [36m<p[39m
+                  [33mclass[39m=[32m"text-2xl font-semibold tracking-tight text-text-default"[39m
+                [36m>[39m
+                  [0m412,880[0m
+                [36m</p>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"inline-flex items-center gap-1.5 rounded-pill px-2.5 py-1 text-xs font-medium bg-status-on-track-bg text-trend-up"[39m
+                [36m>[39m
+                  [36m<svg[39m
+                    [33maria-hidden[39m=[32m"true"[39m
+                    [33mclass[39m=[32m"lucide lucide-arrow-up size-3.5 shrink-0"[39m
+                    [33mfill[39m=[32m"none"[39m
+                    [33mheight[39m=[32m"24"[39m
+                    [33mstroke[39m=[32m"currentColor"[39m
+                    [33mstroke-linecap[39m=[32m"round"[39m
+                    [33mstroke-linejoin[39m=[32m"round"[39m
+                    [33mstroke-width[39m=[32m"2"[39m
+                    [33mviewBox[39m=[32m"0 0 24 24"[39m
+                    [33mwidth[39m=[32m"24"[39m
+                    [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                  [36m>[39m
+                    [36m<path[39m
+                      [33md[39m=[32m"m5 12 7-7 7 7"[39m
+                    [36m/>[39m
+                    [36m<path[39m
+                      [33md[39m=[32m"M12 19V5"[39m
+                    [36m/>[39m
+                  [36m</svg>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"sr-only"[39m
+                  [36m>[39m
+                    [0mImproving:[0m
+                  [36m</span>[39m
+                  [0m+38,400 vs Q2 2025[0m
+                [36m</span>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"mt-3 h-2"[39m
+              [36m/>[39m
+            [36m</div>[39m
+          [36m</li>[39m
+          [36m<li>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"rounded-card bg-surface flex h-full flex-col p-4"[39m
+              [33mdata-slot[39m=[32m"card"[39m
+            [36m>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex items-start justify-between gap-3"[39m
+              [36m>[39m
+                [36m<h3[39m
+                  [33mclass[39m=[32m"text-sm font-medium text-text-muted"[39m
+                [36m>[39m
+                  [0mMini-Grid Customer Connections[0m
+                [36m</h3>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"flex shrink-0 items-center gap-1.5"[39m
+                [36m>[39m
+                  [36m<div[39m
+                    [33mclass[39m=[32m"relative inline-flex"[39m
+                  [36m>[39m
+                    [36m<button[39m
+                      [33maria-expanded[39m=[32m"false"[39m
+                      [33maria-label[39m=[32m"About Mini-Grid Customer Connections: definition, methodology and data source"[39m
+                      [33mclass[39m=[32m"inline-flex size-5 items-center justify-center rounded-full text-text-subtle transition-colors hover:text-text-muted"[39m
+                      [33mtype[39m=[32m"button"[39m
+                    [36m>[39m
+                      [36m<svg[39m
+                        [33maria-hidden[39m=[32m"true"[39m
+                        [33mclass[39m=[32m"lucide lucide-info size-4"[39m
+                        [33mfill[39m=[32m"none"[39m
+                        [33mheight[39m=[32m"24"[39m
+                        [33mstroke[39m=[32m"currentColor"[39m
+                        [33mstroke-linecap[39m=[32m"round"[39m
+                        [33mstroke-linejoin[39m=[32m"round"[39m
+                        [33mstroke-width[39m=[32m"2"[39m
+                        [33mviewBox[39m=[32m"0 0 24 24"[39m
+                        [33mwidth[39m=[32m"24"[39m
+                        [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                      [36m>[39m
+                        [36m<circle[39m
+                          [33mcx[39m=[32m"12"[39m
+                          [33mcy[39m=[32m"12"[39m
+                          [33mr[39m=[32m"10"[39m
+                        [36m/>[39m
+                        [36m<path[39m
+                          [33md[39m=[32m"M12 16v-4"[39m
+                        [36m/>[39m
+                        [36m<path[39m
+                          [33md[39m=[32m"M12 8h.01"[39m
+                        [36m/>[39m
+                      [36m</svg>[39m
+                    [36m</button>[39m
+                  [36m</div>[39m
+                [36m</div>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"mt-2 flex flex-wrap items-baseline gap-x-2.5 gap-y-1"[39m
+              [36m>[39m
+                [36m<p[39m
+                  [33mclass[39m=[32m"text-2xl font-semibold tracking-tight text-text-default"[39m
+                [36m>[39m
+                  [0m128,450[0m
+                [36m</p>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"inline-flex items-center gap-1.5 rounded-pill px-2.5 py-1 text-xs font-medium bg-status-on-track-bg text-trend-up"[39m
+                [36m>[39m
+                  [36m<svg[39m
+                    [33maria-hidden[39m=[32m"true"[39m
+                    [33mclass[39m=[32m"lucide lucide-arrow-up size-3.5 shrink-0"[39m
+                    [33mfill[39m=[32m"none"[39m
+                    [33mheight[39m=[32m"24"[39m
+                    [33mstroke[39m=[32m"currentColor"[39m
+                    [33mstroke-linecap[39m=[32m"round"[39m
+                    [33mstroke-linejoin[39m=[32m"round"[39m
+                    [33mstroke-width[39m=[32m"2"[39m
+                    [33mviewBox[39m=[32m"0 0 24 24"[39m
+                    [33mwidth[39m=[32m"24"[39m
+                    [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                  [36m>[39m
+                    [36m<path[39m
+                      [33md[39m=[32m"m5 12 7-7 7 7"[39m
+                    [36m/>[39m
+                    [36m<path[39m
+                      [33md[39m=[32m"M12 19V5"[39m
+                    [36m/>[39m
+                  [36m</svg>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"sr-only"[39m
+                  [36m>[39m
+                    [0mImproving:[0m
+                  [36m</span>[39m
+                  [0m+9,200 vs Q2 2025[0m
+                [36m</span>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33maria-label[39m=[32m"Mini-Grid Customer Connections"[39m
+                [33maria-valuemax[39m=[32m"100"[39m
+                [33maria-valuemin[39m=[32m"0"[39m
+                [33maria-valuenow[39m=[32m"17.1"[39m
+                [33mclass[39m=[32m"h-2 w-full overflow-hidden rounded-pill bg-surface-sunken mt-3"[39m
+                [33mrole[39m=[32m"progressbar"[39m
+              [36m>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"h-full rounded-pill bg-brand-500"[39m
+                  [33mstyle[39m=[32m"width: 17.1%;"[39m
+                [36m/>[39m
+              [36m</div>[39m
+            [36m</div>[39m
+          [36m</li>[39m
+          [36m<li>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"rounded-card bg-surface flex h-full flex-col p-4"[39m
+              [33mdata-slot[39m=[32m"card"[39m
+            [36m>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex items-start justify-between gap-3"[39m
+              [36m>[39m
+                [36m<h3[39m
+                  [33mclass[39m=[32m"text-sm font-medium text-text-muted"[39m
+                [36m>[39m
+                  [0mSolar Home Systems Deployed[0m
+                [36m</h3>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"flex shrink-0 items-center gap-1.5"[39m
+                [36m>[39m
+                  [36m<div[39m
+                    [33mclass[39m=[32m"relative inline-flex"[39m
+                  [36m>[39m
+                    [36m<button[39m
+                      [33maria-expanded[39m=[32m"false"[39m
+                      [33maria-label[39m=[32m"About Solar Home Systems Deployed: definition, methodology and data source"[39m
+                      [33mclass[39m=[32m"inline-flex size-5 items-center justify-center rounded-full text-text-subtle transition-colors hover:text-text-muted"[39m
+                      [33mtype[39m=[32m"button"[39m
+                    [36m>[39m
+                      [36m<svg[39m
+                        [33maria-hidden[39m=[32m"true"[39m
+                        [33mclass[39m=[32m"lucide lucide-info size-4"[39m
+                        [33mfill[39m=[32m"none"[39m
+                        [33mheight[39m=[32m"24"[39m
+                        [33mstroke[39m=[32m"currentColor"[39m
+                        [33mstroke-linecap[39m=[32m"round"[39m
+                        [33mstroke-linejoin[39m=[32m"round"[39m
+                        [33mstroke-width[39m=[32m"2"[39m
+                        [33mviewBox[39m=[32m"0 0 24 24"[39m
+                        [33mwidth[39m=[32m"24"[39m
+                        [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                      [36m>[39m
+                        [36m<circle[39m
+                          [33mcx[39m=[32m"12"[39m
+                          [33mcy[39m=[32m"12"[39m
+                          [33mr[39m=[32m"10"[39m
+                        [36m/>[39m
+                        [36m<path[39m
+                          [33md[39m=[32m"M12 16v-4"[39m
+                        [36m/>[39m
+                        [36m<path[39m
+                          [33md[39m=[32m"M12 8h.01"[39m
+                        [36m/>[39m
+                      [36m</svg>[39m
+                    [36m</button>[39m
+                  [36m</div>[39m
+                [36m</div>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"mt-2 flex flex-wrap items-baseline gap-x-2.5 gap-y-1"[39m
+              [36m>[39m
+                [36m<p[39m
+                  [33mclass[39m=[32m"text-2xl font-semibold tracking-tight text-text-default"[39m
+                [36m>[39m
+                  [0m486,300[0m
+                [36m</p>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"inline-flex items-center gap-1.5 rounded-pill px-2.5 py-1 text-xs font-medium bg-status-on-track-bg text-trend-up"[39m
+                [36m>[39m
+                  [36m<svg[39m
+                    [33maria-hidden[39m=[32m"true"[39m
+                    [33mclass[39m=[32m"lucide lucide-arrow-up size-3.5 shrink-0"[39m
+                    [33mfill[39m=[32m"none"[39m
+                    [33mheight[39m=[32m"24"[39m
+                    [33mstroke[39m=[32m"currentColor"[39m
+                    [33mstroke-linecap[39m=[32m"round"[39m
+                    [33mstroke-linejoin[39m=[32m"round"[39m
+                    [33mstroke-width[39m=[32m"2"[39m
+                    [33mviewBox[39m=[32m"0 0 24 24"[39m
+                    [33mwidth[39m=[32m"24"[39m
+                    [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                  [36m>[39m
+                    [36m<path[39m
+                      [33md[39m=[32m"m5 12 7-7 7 7"[39m
+                    [36m/>[39m
+                    [36m<path[39m
+                      [33md[39m=[32m"M12 19V5"[39m
+                    [36m/>[39m
+                  [36m</svg>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"sr-only"[39m
+                  [36m>[39m
+                    [0mImproving:[0m
+                  [36m</span>[39m
+                  [0m+41,700 vs Q2 2025[0m
+                [36m</span>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33maria-label[39m=[32m"Solar Home Systems Deployed"[39m
+                [33maria-valuemax[39m=[32m"100"[39m
+                [33maria-valuemin[39m=[32m"0"[39m
+                [33maria-valuenow[39m=[32m"17.7"[39m
+                [33mclass[39m=[32m"h-2 w-full overflow-hidden rounded-pill bg-surface-sunken mt-3"[39m
+                [33mrole[39m=[32m"progressbar"[39m
+              [36m>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"h-full rounded-pill bg-brand-500"[39m
+                  [33mstyle[39m=[32m"width: 17.7%;"[39m
+                [36m/>[39m
+              [36m</div>[39m
+            [36m</div>[39m
+          [36m</li>[39m
+        [36m</ul>[39m
+      [36m</div>[39m
+    [36m</div>[39m
+  [36m</div>[39m
+[36m</body>[39m
+ ❯ Object.getElementError node_modules/.pnpm/@testing-library+dom@10.4.1/node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ node_modules/.pnpm/@testing-library+dom@10.4.1/node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ❯ node_modules/.pnpm/@testing-library+dom@10.4.1/node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ❯ getByText node_modules/.pnpm/@testing-library+dom@10.4.1/node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ src/test/features/dashboard/sections.test.tsx:132:19
+    130|     render(<AccessDeliverySection channels={accessDelivery} />)
+    131|
+    132|     expect(screen.getByText('New grid connections')).toBeInTheDocument…
+       |                   ^
+    133|     expect(
+    134|       screen.getByText('Mini-grid household connections'),
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/14]⎯
+
+ FAIL  src/test/features/dashboard/sections.test.tsx > Section B — access delivery by channel > renders a progress bar for channels with an approved target
+TestingLibraryElementError: Unable to find an accessible element with the role "progressbar" and name "Mini-grid household connections"
+
+Here are the accessible roles:
+
+  heading:
+
+  Name "Access delivery by channel":
+  [36m<h2[39m
+    [33mclass[39m=[32m"text-lg font-semibold text-text-default"[39m
+  [36m/>[39m
+
+  Name "Progress to target":
+  [36m<h3[39m
+    [33mclass[39m=[32m"text-xs font-medium tracking-wide text-text-subtle uppercase"[39m
+  [36m/>[39m
+
+  Name "New Grid Connections (Annual)":
+  [36m<h3[39m
+    [33mclass[39m=[32m"text-sm font-medium text-text-muted"[39m
+  [36m/>[39m
+
+  Name "Mini-Grid Customer Connections":
+  [36m<h3[39m
+    [33mclass[39m=[32m"text-sm font-medium text-text-muted"[39m
+  [36m/>[39m
+
+  Name "Solar Home Systems Deployed":
+  [36m<h3[39m
+    [33mclass[39m=[32m"text-sm font-medium text-text-muted"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  img:
+
+  Name "Current progress toward the approved target for each access delivery channel":
+  [36m<div[39m
+    [33maria-label[39m=[32m"Current progress toward the approved target for each access delivery channel"[39m
+    [33mrole[39m=[32m"img"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  application:
+
+  Name "bar chart with 1 data series: Current":
+  [36m<svg[39m
+    [33maria-label[39m=[32m"bar chart with 1 data series: Current"[39m
+    [33mclass[39m=[32m"apexcharts-svg"[39m
+    [33mheight[39m=[32m"220"[39m
+    [33mrole[39m=[32m"application"[39m
+    [33mtransform[39m=[32m"translate(0, 0)"[39m
+    [33mwidth[39m=[32m"0"[39m
+    [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+    [33mxmlns:data[39m=[32m"ApexChartsNS"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  status:
+
+  Name "":
+  [36m<div[39m
+    [33maria-atomic[39m=[32m"true"[39m
+    [33maria-live[39m=[32m"polite"[39m
+    [33mclass[39m=[32m"apexcharts-sr-status"[39m
+    [33mrole[39m=[32m"status"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  list:
+
+  Name "Access delivery channels":
+  [36m<ul[39m
+    [33maria-label[39m=[32m"Access delivery channels"[39m
+    [33mclass[39m=[32m"grid grid-cols-2 gap-3"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  listitem:
+
+  Name "":
+  [36m<li />[39m
+
+  Name "":
+  [36m<li />[39m
+
+  Name "":
+  [36m<li />[39m
+
+  --------------------------------------------------
+  button:
+
+  Name "About New Grid Connections (Annual): definition, methodology and data source":
+  [36m<button[39m
+    [33maria-expanded[39m=[32m"false"[39m
+    [33maria-label[39m=[32m"About New Grid Connections (Annual): definition, methodology and data source"[39m
+    [33mclass[39m=[32m"inline-flex size-5 items-center justify-center rounded-full text-text-subtle transition-colors hover:text-text-muted"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "About Mini-Grid Customer Connections: definition, methodology and data source":
+  [36m<button[39m
+    [33maria-expanded[39m=[32m"false"[39m
+    [33maria-label[39m=[32m"About Mini-Grid Customer Connections: definition, methodology and data source"[39m
+    [33mclass[39m=[32m"inline-flex size-5 items-center justify-center rounded-full text-text-subtle transition-colors hover:text-text-muted"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "About Solar Home Systems Deployed: definition, methodology and data source":
+  [36m<button[39m
+    [33maria-expanded[39m=[32m"false"[39m
+    [33maria-label[39m=[32m"About Solar Home Systems Deployed: definition, methodology and data source"[39m
+    [33mclass[39m=[32m"inline-flex size-5 items-center justify-center rounded-full text-text-subtle transition-colors hover:text-text-muted"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  paragraph:
+
+  Name "":
+  [36m<p[39m
+    [33mclass[39m=[32m"text-2xl font-semibold tracking-tight text-text-default"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<p[39m
+    [33mclass[39m=[32m"text-2xl font-semibold tracking-tight text-text-default"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<p[39m
+    [33mclass[39m=[32m"text-2xl font-semibold tracking-tight text-text-default"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  progressbar:
+
+  Name "Mini-Grid Customer Connections":
+  [36m<div[39m
+    [33maria-label[39m=[32m"Mini-Grid Customer Connections"[39m
+    [33maria-valuemax[39m=[32m"100"[39m
+    [33maria-valuemin[39m=[32m"0"[39m
+    [33maria-valuenow[39m=[32m"17.1"[39m
+    [33mclass[39m=[32m"h-2 w-full overflow-hidden rounded-pill bg-surface-sunken mt-3"[39m
+    [33mrole[39m=[32m"progressbar"[39m
+  [36m/>[39m
+
+  Name "Solar Home Systems Deployed":
+  [36m<div[39m
+    [33maria-label[39m=[32m"Solar Home Systems Deployed"[39m
+    [33maria-valuemax[39m=[32m"100"[39m
+    [33maria-valuemin[39m=[32m"0"[39m
+    [33maria-valuenow[39m=[32m"17.7"[39m
+    [33mclass[39m=[32m"h-2 w-full overflow-hidden rounded-pill bg-surface-sunken mt-3"[39m
+    [33mrole[39m=[32m"progressbar"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"rounded-card bg-surface-sunken p-4"[39m
+      [33mdata-slot[39m=[32m"card"[39m
+    [36m>[39m
+      [36m<h2[39m
+        [33mclass[39m=[32m"text-lg font-semibold text-text-default"[39m
+      [36m>[39m
+        [0mAccess delivery by channel[0m
+      [36m</h2>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"mt-3 grid items-start gap-4 xl:grid-cols-[1fr_1.2fr]"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"rounded-card bg-surface p-4"[39m
+          [33mdata-slot[39m=[32m"card"[39m
+        [36m>[39m
+          [36m<h3[39m
+            [33mclass[39m=[32m"text-xs font-medium tracking-wide text-text-subtle uppercase"[39m
+          [36m>[39m
+            [0mProgress to target[0m
+          [36m</h3>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"mt-2"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33maria-label[39m=[32m"Current progress toward the approved target for each access delivery channel"[39m
+              [33mrole[39m=[32m"img"[39m
+            [36m>[39m
+              [36m<div[39m
+                [33mstyle[39m=[32m"min-height: 235px;"[39m
+              [36m>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"apexcharts-canvas apexcharts1jgv5eo3"[39m
+                  [33mid[39m=[32m"apexcharts1jgv5eo3"[39m
+                  [33mstyle[39m=[32m"width: 0px; height: 220px;"[39m
+                [36m>[39m
+                  [36m<svg[39m
+                    [33maria-label[39m=[32m"bar chart with 1 data series: Current"[39m
+                    [33mclass[39m=[32m"apexcharts-svg"[39m
+                    [33mheight[39m=[32m"220"[39m
+                    [33mrole[39m=[32m"application"[39m
+                    [33mtransform[39m=[32m"translate(0, 0)"[39m
+                    [33mwidth[39m=[32m"0"[39m
+                    [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                    [33mxmlns:data[39m=[32m"ApexChartsNS"[39m
+                  [36m>[39m
+                    [36m<foreignobject[39m
+                      [33mheight[39m=[32m"220"[39m
+                      [33mwidth[39m=[32m"0"[39m
+                      [33mx[39m=[32m"0"[39m
+                      [33my[39m=[32m"0"[39m
+                    [36m/>[39m
+                    [36m<g[39m
+                      [33mclass[39m=[32m"apexcharts-inner apexcharts-graphical"[39m
+                    [36m>[39m
+                      [36m<defs />[39m
+                    [36m</g>[39m
+                  [36m</svg>[39m
+                  [36m<div[39m
+                    [33mclass[39m=[32m"apexcharts-legend"[39m
+                  [36m/>[39m
+                  [36m<div[39m
+                    [33maria-atomic[39m=[32m"true"[39m
+                    [33maria-live[39m=[32m"polite"[39m
+                    [33mclass[39m=[32m"apexcharts-sr-status"[39m
+                    [33mrole[39m=[32m"status"[39m
+                  [36m/>[39m
+                [36m</div>[39m
+              [36m</div>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+        [36m<ul[39m
+          [33maria-label[39m=[32m"Access delivery channels"[39m
+          [33mclass[39m=[32m"grid grid-cols-2 gap-3"[39m
+        [36m>[39m
+          [36m<li>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"rounded-card bg-surface flex h-full flex-col p-4"[39m
+              [33mdata-slot[39m=[32m"card"[39m
+            [36m>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex items-start justify-between gap-3"[39m
+              [36m>[39m
+                [36m<h3[39m
+                  [33mclass[39m=[32m"text-sm font-medium text-text-muted"[39m
+                [36m>[39m
+                  [0mNew Grid Connections (Annual)[0m
+                [36m</h3>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"flex shrink-0 items-center gap-1.5"[39m
+                [36m>[39m
+                  [36m<div[39m
+                    [33mclass[39m=[32m"relative inline-flex"[39m
+                  [36m>[39m
+                    [36m<button[39m
+                      [33maria-expanded[39m=[32m"false"[39m
+                      [33maria-label[39m=[32m"About New Grid Connections (Annual): definition, methodology and data source"[39m
+                      [33mclass[39m=[32m"inline-flex size-5 items-center justify-center rounded-full text-text-subtle transition-colors hover:text-text-muted"[39m
+                      [33mtype[39m=[32m"button"[39m
+                    [36m>[39m
+                      [36m<svg[39m
+                        [33maria-hidden[39m=[32m"true"[39m
+                        [33mclass[39m=[32m"lucide lucide-info size-4"[39m
+                        [33mfill[39m=[32m"none"[39m
+                        [33mheight[39m=[32m"24"[39m
+                        [33mstroke[39m=[32m"currentColor"[39m
+                        [33mstroke-linecap[39m=[32m"round"[39m
+                        [33mstroke-linejoin[39m=[32m"round"[39m
+                        [33mstroke-width[39m=[32m"2"[39m
+                        [33mviewBox[39m=[32m"0 0 24 24"[39m
+                        [33mwidth[39m=[32m"24"[39m
+                        [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                      [36m>[39m
+                        [36m<circle[39m
+                          [33mcx[39m=[32m"12"[39m
+                          [33mcy[39m=[32m"12"[39m
+                          [33mr[39m=[32m"10"[39m
+                        [36m/>[39m
+                        [36m<path[39m
+                          [33md[39m=[32m"M12 16v-4"[39m
+                        [36m/>[39m
+                        [36m<path[39m
+                          [33md[39m=[32m"M12 8h.01"[39m
+                        [36m/>[39m
+                      [36m</svg>[39m
+                    [36m</button>[39m
+                  [36m</div>[39m
+                [36m</div>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"mt-2 flex flex-wrap items-baseline gap-x-2.5 gap-y-1"[39m
+              [36m>[39m
+                [36m<p[39m
+                  [33mclass[39m=[32m"text-2xl font-semibold tracking-tight text-text-default"[39m
+                [36m>[39m
+                  [0m412,880[0m
+                [36m</p>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"inline-flex items-center gap-1.5 rounded-pill px-2.5 py-1 text-xs font-medium bg-status-on-track-bg text-trend-up"[39m
+                [36m>[39m
+                  [36m<svg[39m
+                    [33maria-hidden[39m=[32m"true"[39m
+                    [33mclass[39m=[32m"lucide lucide-arrow-up size-3.5 shrink-0"[39m
+                    [33mfill[39m=[32m"none"[39m
+                    [33mheight[39m=[32m"24"[39m
+                    [33mstroke[39m=[32m"currentColor"[39m
+                    [33mstroke-linecap[39m=[32m"round"[39m
+                    [33mstroke-linejoin[39m=[32m"round"[39m
+                    [33mstroke-width[39m=[32m"2"[39m
+                    [33mviewBox[39m=[32m"0 0 24 24"[39m
+                    [33mwidth[39m=[32m"24"[39m
+                    [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                  [36m>[39m
+                    [36m<path[39m
+                      [33md[39m=[32m"m5 12 7-7 7 7"[39m
+                    [36m/>[39m
+                    [36m<path[39m
+                      [33md[39m=[32m"M12 19V5"[39m
+                    [36m/>[39m
+                  [36m</svg>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"sr-only"[39m
+                  [36m>[39m
+                    [0mImproving:[0m
+                  [36m</span>[39m
+                  [0m+38,400 vs Q2 2025[0m
+                [36m</span>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"mt-3 h-2"[39m
+              [36m/>[39m
+            [36m</div>[39m
+          [36m</li>[39m
+          [36m<li>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"rounded-card bg-surface flex h-full flex-col p-4"[39m
+              [33mdata-slot[39m=[32m"card"[39m
+            [36m>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex items-start justify-between gap-3"[39m
+              [36m>[39m
+                [36m<h3[39m
+                  [33mclass[39m=[32m"text-sm font-medium text-text-muted"[39m
+                [36m>[39m
+                  [0mMini-Grid Customer Connections[0m
+                [36m</h3>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"flex shrink-0 items-center gap-1.5"[39m
+                [36m>[39m
+                  [36m<div[39m
+                    [33mclass[39m=[32m"relative inline-flex"[39m
+                  [36m>[39m
+                    [36m<button[39m
+                      [33maria-expanded[39m=[32m"false"[39m
+                      [33maria-label[39m=[32m"About Mini-Grid Customer Connections: definition, methodology and data source"[39m
+                      [33mclass[39m=[32m"inline-flex size-5 items-center justify-center rounded-full text-text-subtle transition-colors hover:text-text-muted"[39m
+                      [33mtype[39m=[32m"button"[39m
+                    [36m>[39m
+                      [36m<svg[39m
+                        [33maria-hidden[39m=[32m"true"[39m
+                        [33mclass[39m=[32m"lucide lucide-info size-4"[39m
+                        [33mfill[39m=[32m"none"[39m
+                        [33mheight[39m=[32m"24"[39m
+                        [33mstroke[39m=[32m"currentColor"[39m
+                        [33mstroke-linecap[39m=[32m"round"[39m
+                        [33mstroke-linejoin[39m=[32m"round"[39m
+                        [33mstroke-width[39m=[32m"2"[39m
+                        [33mviewBox[39m=[32m"0 0 24 24"[39m
+                        [33mwidth[39m=[32m"24"[39m
+                        [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                      [36m>[39m
+                        [36m<circle[39m
+                          [33mcx[39m=[32m"12"[39m
+                          [33mcy[39m=[32m"12"[39m
+                          [33mr[39m=[32m"10"[39m
+                        [36m/>[39m
+                        [36m<path[39m
+                          [33md[39m=[32m"M12 16v-4"[39m
+                        [36m/>[39m
+                        [36m<path[39m
+                          [33md[39m=[32m"M12 8h.01"[39m
+                        [36m/>[39m
+                      [36m</svg>[39m
+                    [36m</button>[39m
+                  [36m</div>[39m
+                [36m</div>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"mt-2 flex flex-wrap items-baseline gap-x-2.5 gap-y-1"[39m
+              [36m>[39m
+                [36m<p[39m
+                  [33mclass[39m=[32m"text-2xl font-semibold tracking-tight text-text-default"[39m
+                [36m>[39m
+                  [0m128,450[0m
+                [36m</p>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"inline-flex items-center gap-1.5 rounded-pill px-2.5 py-1 text-xs font-medium bg-status-on-track-bg text-trend-up"[39m
+                [36m>[39m
+                  [36m<svg[39m
+                    [33maria-hidden[39m=[32m"true"[39m
+                    [33mclass[39m=[32m"lucide lucide-arrow-up size-3.5 shrink-0"[39m
+                    [33mfill[39m=[32m"none"[39m
+                    [33mheight[39m=[32m"24"[39m
+                    [33mstroke[39m=[32m"currentColor"[39m
+                    [33mstroke-linecap[39m=[32m"round"[39m
+                    [33mstroke-linejoin[39m=[32m"round"[39m
+                    [33mstroke-width[39m=[32m"2"[39m
+                    [33mviewBox[39m=[32m"0 0 24 24"[39m
+                    [33mwidth[39m=[32m"24"[39m
+                    [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                  [36m>[39m
+                    [36m<path[39m
+                      [33md[39m=[32m"m5 12 7-7 7 7"[39m
+                    [36m/>[39m
+                    [36m<path[39m
+                      [33md[39m=[32m"M12 19V5"[39m
+                    [36m/>[39m
+                  [36m</svg>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"sr-only"[39m
+                  [36m>[39m
+                    [0mImproving:[0m
+                  [36m</span>[39m
+                  [0m+9,200 vs Q2 2025[0m
+                [36m</span>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33maria-label[39m=[32m"Mini-Grid Customer Connections"[39m
+                [33maria-valuemax[39m=[32m"100"[39m
+                [33maria-valuemin[39m=[32m"0"[39m
+                [33maria-valuenow[39m=[32m"17.1"[39m
+                [33mclass[39m=[32m"h-2 w-full overflow-hidden rounded-pill bg-surface-sunken mt-3"[39m
+                [33mrole[39m=[32m"progressbar"[39m
+              [36m>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"h-full rounded-pill bg-brand-500"[39m
+                  [33mstyle[39m=[32m"width: 17.1%;"[39m
+                [36m/>[39m
+              [36m</div>[39m
+            [36m</div>[39m
+          [36m</li>[39m
+          [36m<li>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"rounded-card bg-surface flex h-full flex-col p-4"[39m
+              [33mdata-slot[39m=[32m"card"[39m
+            [36m>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex items-start justify-between gap-3"[39m
+              [36m>[39m
+                [36m<h3[39m
+                  [33mclass[39m=[32m"text-sm font-medium text-text-muted"[39m
+                [36m>[39m
+                  [0mSolar Home Systems Deployed[0m
+                [36m</h3>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"flex shrink-0 items-center gap-1.5"[39m
+                [36m>[39m
+                  [36m<div[39m
+                    [33mclass[39m=[32m"relative inline-flex"[39m
+                  [36m>[39m
+                    [36m<button[39m
+                      [33maria-expanded[39m=[32m"false"[39m
+                      [33maria-label[39m=[32m"About Solar Home Systems Deployed: definition, methodology and data source"[39m
+                      [33mclass[39m=[32m"inline-flex size-5 items-center justify-center rounded-full text-text-subtle transition-colors hover:text-text-muted"[39m
+                      [33mtype[39m=[32m"button"[39m
+                    [36m>[39m
+                      [36m<svg[39m
+                        [33maria-hidden[39m=[32m"true"[39m
+                        [33mclass[39m=[32m"lucide lucide-info size-4"[39m
+                        [33mfill[39m=[32m"none"[39m
+                        [33mheight[39m=[32m"24"[39m
+                        [33mstroke[39m=[32m"currentColor"[39m
+                        [33mstroke-linecap[39m=[32m"round"[39m
+                        [33mstroke-linejoin[39m=[32m"round"[39m
+                        [33mstroke-width[39m=[32m"2"[39m
+                        [33mviewBox[39m=[32m"0 0 24 24"[39m
+                        [33mwidth[39m=[32m"24"[39m
+                        [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                      [36m>[39m
+                        [36m<circle[39m
+                          [33mcx[39m=[32m"12"[39m
+                          [33mcy[39m=[32m"12"[39m
+                          [33mr[39m=[32m"10"[39m
+                        [36m/>[39m
+                        [36m<path[39m
+                          [33md[39m=[32m"M12 16v-4"[39m
+                        [36m/>[39m
+                        [36m<path[39m
+                          [33md[39m=[32m"M12 8h.01"[39m
+                        [36m/>[39m
+                      [36m</svg>[39m
+                    [36m</button>[39m
+                  [36m</div>[39m
+                [36m</div>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"mt-2 flex flex-wrap items-baseline gap-x-2.5 gap-y-1"[39m
+              [36m>[39m
+                [36m<p[39m
+                  [33mclass[39m=[32m"text-2xl font-semibold tracking-tight text-text-default"[39m
+                [36m>[39m
+                  [0m486,300[0m
+                [36m</p>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"inline-flex items-center gap-1.5 rounded-pill px-2.5 py-1 text-xs font-medium bg-status-on-track-bg text-trend-up"[39m
+                [36m>[39m
+                  [36m<svg[39m
+                    [33maria-hidden[39m=[32m"true"[39m
+                    [33mclass[39m=[32m"lucide lucide-arrow-up size-3.5 shrink-0"[39m
+                    [33mfill[39m=[32m"none"[39m
+                    [33mheight[39m=[32m"24"[39m
+                    [33mstroke[39m=[32m"currentColor"[39m
+                    [33mstroke-linecap[39m=[32m"round"[39m
+                    [33mstroke-linejoin[39m=[32m"round"[39m
+                    [33mstroke-width[39m=[32m"2"[39m
+                    [33mviewBox[39m=[32m"0 0 24 24"[39m
+                    [33mwidth[39m=[32m"24"[39m
+                    [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                  [36m>[39m
+                    [36m<path[39m
+                      [33md[39m=[32m"m5 12 7-7 7 7"[39m
+                    [36m/>[39m
+                    [36m<path[39m
+                      [33md[39m=[32m"M12 19V5"[39m
+                    [36m/>[39m
+                  [36m</svg>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"sr-only"[39m
+                  [36m>[39m
+                    [0mImproving:[0m
+                  [36m</span>[39m
+                  [0m+41,700 vs Q2 2025[0m
+                [36m</span>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33maria-label[39m=[32m"Solar Home Systems Deployed"[39m
+                [33maria-valuemax[39m=[32m"100"[39m
+                [33maria-valuemin[39m=[32m"0"[39m
+                [33maria-valuenow[39m=[32m"17.7"[39m
+                [33mclass[39m=[32m"h-2 w-full overflow-hidden rounded-pill bg-surface-sunken mt-3"[39m
+                [33mrole[39m=[32m"progressbar"[39m
+              [36m>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"h-full rounded-pill bg-brand-500"[39m
+                  [33mstyle[39m=[32m"width: 17.7%;"[39m
+                [36m/>[39m
+              [36m</div>[39m
+            [36m</div>[39m
+          [36m</li>[39m
+        [36m</ul>[39m
+      [36m</div>[39m
+    [36m</div>[39m
+  [36m</div>[39m
+[36m</body>[39m
+ ❯ Object.getElementError node_modules/.pnpm/@testing-library+dom@10.4.1/node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ node_modules/.pnpm/@testing-library+dom@10.4.1/node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ❯ node_modules/.pnpm/@testing-library+dom@10.4.1/node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ❯ getByRole node_modules/.pnpm/@testing-library+dom@10.4.1/node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ src/test/features/dashboard/sections.test.tsx:143:14
+    141|
+    142|     expect(
+    143|       screen.getByRole('progressbar', {
+       |              ^
+    144|         name: 'Mini-grid household connections',
+    145|       }),
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/14]⎯
+
+ FAIL  src/test/features/dashboard/sections.test.tsx > Section B — access delivery by channel > renders no progress bar for a channel with no approved target
+TestingLibraryElementError: Unable to find an element with the text: Annual target to be confirmed. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"rounded-card bg-surface-sunken p-4"[39m
+      [33mdata-slot[39m=[32m"card"[39m
+    [36m>[39m
+      [36m<h2[39m
+        [33mclass[39m=[32m"text-lg font-semibold text-text-default"[39m
+      [36m>[39m
+        [0mAccess delivery by channel[0m
+      [36m</h2>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"mt-3 grid items-start gap-4 xl:grid-cols-[1fr_1.2fr]"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"rounded-card bg-surface p-4"[39m
+          [33mdata-slot[39m=[32m"card"[39m
+        [36m>[39m
+          [36m<h3[39m
+            [33mclass[39m=[32m"text-xs font-medium tracking-wide text-text-subtle uppercase"[39m
+          [36m>[39m
+            [0mProgress to target[0m
+          [36m</h3>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"mt-2"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33maria-label[39m=[32m"Current progress toward the approved target for each access delivery channel"[39m
+              [33mrole[39m=[32m"img"[39m
+            [36m>[39m
+              [36m<div[39m
+                [33mstyle[39m=[32m"min-height: 235px;"[39m
+              [36m>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"apexcharts-canvas apexchartsq7biugwg"[39m
+                  [33mid[39m=[32m"apexchartsq7biugwg"[39m
+                  [33mstyle[39m=[32m"width: 0px; height: 220px;"[39m
+                [36m>[39m
+                  [36m<svg[39m
+                    [33maria-label[39m=[32m"bar chart with 1 data series: Current"[39m
+                    [33mclass[39m=[32m"apexcharts-svg"[39m
+                    [33mheight[39m=[32m"220"[39m
+                    [33mrole[39m=[32m"application"[39m
+                    [33mtransform[39m=[32m"translate(0, 0)"[39m
+                    [33mwidth[39m=[32m"0"[39m
+                    [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                    [33mxmlns:data[39m=[32m"ApexChartsNS"[39m
+                  [36m>[39m
+                    [36m<foreignobject[39m
+                      [33mheight[39m=[32m"220"[39m
+                      [33mwidth[39m=[32m"0"[39m
+                      [33mx[39m=[32m"0"[39m
+                      [33my[39m=[32m"0"[39m
+                    [36m/>[39m
+                    [36m<g[39m
+                      [33mclass[39m=[32m"apexcharts-inner apexcharts-graphical"[39m
+                    [36m>[39m
+                      [36m<defs />[39m
+                    [36m</g>[39m
+                  [36m</svg>[39m
+                  [36m<div[39m
+                    [33mclass[39m=[32m"apexcharts-legend"[39m
+                  [36m/>[39m
+                  [36m<div[39m
+                    [33maria-atomic[39m=[32m"true"[39m
+                    [33maria-live[39m=[32m"polite"[39m
+                    [33mclass[39m=[32m"apexcharts-sr-status"[39m
+                    [33mrole[39m=[32m"status"[39m
+                  [36m/>[39m
+                [36m</div>[39m
+              [36m</div>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+        [36m<ul[39m
+          [33maria-label[39m=[32m"Access delivery channels"[39m
+          [33mclass[39m=[32m"grid grid-cols-2 gap-3"[39m
+        [36m>[39m
+          [36m<li>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"rounded-card bg-surface flex h-full flex-col p-4"[39m
+              [33mdata-slot[39m=[32m"card"[39m
+            [36m>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex items-start justify-between gap-3"[39m
+              [36m>[39m
+                [36m<h3[39m
+                  [33mclass[39m=[32m"text-sm font-medium text-text-muted"[39m
+                [36m>[39m
+                  [0mNew Grid Connections (Annual)[0m
+                [36m</h3>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"flex shrink-0 items-center gap-1.5"[39m
+                [36m>[39m
+                  [36m<div[39m
+                    [33mclass[39m=[32m"relative inline-flex"[39m
+                  [36m>[39m
+                    [36m<button[39m
+                      [33maria-expanded[39m=[32m"false"[39m
+                      [33maria-label[39m=[32m"About New Grid Connections (Annual): definition, methodology and data source"[39m
+                      [33mclass[39m=[32m"inline-flex size-5 items-center justify-center rounded-full text-text-subtle transition-colors hover:text-text-muted"[39m
+                      [33mtype[39m=[32m"button"[39m
+                    [36m>[39m
+                      [36m<svg[39m
+                        [33maria-hidden[39m=[32m"true"[39m
+                        [33mclass[39m=[32m"lucide lucide-info size-4"[39m
+                        [33mfill[39m=[32m"none"[39m
+                        [33mheight[39m=[32m"24"[39m
+                        [33mstroke[39m=[32m"currentColor"[39m
+                        [33mstroke-linecap[39m=[32m"round"[39m
+                        [33mstroke-linejoin[39m=[32m"round"[39m
+                        [33mstroke-width[39m=[32m"2"[39m
+                        [33mviewBox[39m=[32m"0 0 24 24"[39m
+                        [33mwidth[39m=[32m"24"[39m
+                        [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                      [36m>[39m
+                        [36m<circle[39m
+                          [33mcx[39m=[32m"12"[39m
+                          [33mcy[39m=[32m"12"[39m
+                          [33mr[39m=[32m"10"[39m
+                        [36m/>[39m
+                        [36m<path[39m
+                          [33md[39m=[32m"M12 16v-4"[39m
+                        [36m/>[39m
+                        [36m<path[39m
+                          [33md[39m=[32m"M12 8h.01"[39m
+                        [36m/>[39m
+                      [36m</svg>[39m
+                    [36m</button>[39m
+                  [36m</div>[39m
+                [36m</div>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"mt-2 flex flex-wrap items-baseline gap-x-2.5 gap-y-1"[39m
+              [36m>[39m
+                [36m<p[39m
+                  [33mclass[39m=[32m"text-2xl font-semibold tracking-tight text-text-default"[39m
+                [36m>[39m
+                  [0m412,880[0m
+                [36m</p>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"inline-flex items-center gap-1.5 rounded-pill px-2.5 py-1 text-xs font-medium bg-status-on-track-bg text-trend-up"[39m
+                [36m>[39m
+                  [36m<svg[39m
+                    [33maria-hidden[39m=[32m"true"[39m
+                    [33mclass[39m=[32m"lucide lucide-arrow-up size-3.5 shrink-0"[39m
+                    [33mfill[39m=[32m"none"[39m
+                    [33mheight[39m=[32m"24"[39m
+                    [33mstroke[39m=[32m"currentColor"[39m
+                    [33mstroke-linecap[39m=[32m"round"[39m
+                    [33mstroke-linejoin[39m=[32m"round"[39m
+                    [33mstroke-width[39m=[32m"2"[39m
+                    [33mviewBox[39m=[32m"0 0 24 24"[39m
+                    [33mwidth[39m=[32m"24"[39m
+                    [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                  [36m>[39m
+                    [36m<path[39m
+                      [33md[39m=[32m"m5 12 7-7 7 7"[39m
+                    [36m/>[39m
+                    [36m<path[39m
+                      [33md[39m=[32m"M12 19V5"[39m
+                    [36m/>[39m
+                  [36m</svg>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"sr-only"[39m
+                  [36m>[39m
+                    [0mImproving:[0m
+                  [36m</span>[39m
+                  [0m+38,400 vs Q2 2025[0m
+                [36m</span>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"mt-3 h-2"[39m
+              [36m/>[39m
+            [36m</div>[39m
+          [36m</li>[39m
+          [36m<li>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"rounded-card bg-surface flex h-full flex-col p-4"[39m
+              [33mdata-slot[39m=[32m"card"[39m
+            [36m>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex items-start justify-between gap-3"[39m
+              [36m>[39m
+                [36m<h3[39m
+                  [33mclass[39m=[32m"text-sm font-medium text-text-muted"[39m
+                [36m>[39m
+                  [0mMini-Grid Customer Connections[0m
+                [36m</h3>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"flex shrink-0 items-center gap-1.5"[39m
+                [36m>[39m
+                  [36m<div[39m
+                    [33mclass[39m=[32m"relative inline-flex"[39m
+                  [36m>[39m
+                    [36m<button[39m
+                      [33maria-expanded[39m=[32m"false"[39m
+                      [33maria-label[39m=[32m"About Mini-Grid Customer Connections: definition, methodology and data source"[39m
+                      [33mclass[39m=[32m"inline-flex size-5 items-center justify-center rounded-full text-text-subtle transition-colors hover:text-text-muted"[39m
+                      [33mtype[39m=[32m"button"[39m
+                    [36m>[39m
+                      [36m<svg[39m
+                        [33maria-hidden[39m=[32m"true"[39m
+                        [33mclass[39m=[32m"lucide lucide-info size-4"[39m
+                        [33mfill[39m=[32m"none"[39m
+                        [33mheight[39m=[32m"24"[39m
+                        [33mstroke[39m=[32m"currentColor"[39m
+                        [33mstroke-linecap[39m=[32m"round"[39m
+                        [33mstroke-linejoin[39m=[32m"round"[39m
+                        [33mstroke-width[39m=[32m"2"[39m
+                        [33mviewBox[39m=[32m"0 0 24 24"[39m
+                        [33mwidth[39m=[32m"24"[39m
+                        [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                      [36m>[39m
+                        [36m<circle[39m
+                          [33mcx[39m=[32m"12"[39m
+                          [33mcy[39m=[32m"12"[39m
+                          [33mr[39m=[32m"10"[39m
+                        [36m/>[39m
+                        [36m<path[39m
+                          [33md[39m=[32m"M12 16v-4"[39m
+                        [36m/>[39m
+                        [36m<path[39m
+                          [33md[39m=[32m"M12 8h.01"[39m
+                        [36m/>[39m
+                      [36m</svg>[39m
+                    [36m</button>[39m
+                  [36m</div>[39m
+                [36m</div>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"mt-2 flex flex-wrap items-baseline gap-x-2.5 gap-y-1"[39m
+              [36m>[39m
+                [36m<p[39m
+                  [33mclass[39m=[32m"text-2xl font-semibold tracking-tight text-text-default"[39m
+                [36m>[39m
+                  [0m128,450[0m
+                [36m</p>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"inline-flex items-center gap-1.5 rounded-pill px-2.5 py-1 text-xs font-medium bg-status-on-track-bg text-trend-up"[39m
+                [36m>[39m
+                  [36m<svg[39m
+                    [33maria-hidden[39m=[32m"true"[39m
+                    [33mclass[39m=[32m"lucide lucide-arrow-up size-3.5 shrink-0"[39m
+                    [33mfill[39m=[32m"none"[39m
+                    [33mheight[39m=[32m"24"[39m
+                    [33mstroke[39m=[32m"currentColor"[39m
+                    [33mstroke-linecap[39m=[32m"round"[39m
+                    [33mstroke-linejoin[39m=[32m"round"[39m
+                    [33mstroke-width[39m=[32m"2"[39m
+                    [33mviewBox[39m=[32m"0 0 24 24"[39m
+                    [33mwidth[39m=[32m"24"[39m
+                    [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                  [36m>[39m
+                    [36m<path[39m
+                      [33md[39m=[32m"m5 12 7-7 7 7"[39m
+                    [36m/>[39m
+                    [36m<path[39m
+                      [33md[39m=[32m"M12 19V5"[39m
+                    [36m/>[39m
+                  [36m</svg>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"sr-only"[39m
+                  [36m>[39m
+                    [0mImproving:[0m
+                  [36m</span>[39m
+                  [0m+9,200 vs Q2 2025[0m
+                [36m</span>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33maria-label[39m=[32m"Mini-Grid Customer Connections"[39m
+                [33maria-valuemax[39m=[32m"100"[39m
+                [33maria-valuemin[39m=[32m"0"[39m
+                [33maria-valuenow[39m=[32m"17.1"[39m
+                [33mclass[39m=[32m"h-2 w-full overflow-hidden rounded-pill bg-surface-sunken mt-3"[39m
+                [33mrole[39m=[32m"progressbar"[39m
+              [36m>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"h-full rounded-pill bg-brand-500"[39m
+                  [33mstyle[39m=[32m"width: 17.1%;"[39m
+                [36m/>[39m
+              [36m</div>[39m
+            [36m</div>[39m
+          [36m</li>[39m
+          [36m<li>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"rounded-card bg-surface flex h-full flex-col p-4"[39m
+              [33mdata-slot[39m=[32m"card"[39m
+            [36m>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex items-start justify-between gap-3"[39m
+              [36m>[39m
+                [36m<h3[39m
+                  [33mclass[39m=[32m"text-sm font-medium text-text-muted"[39m
+                [36m>[39m
+                  [0mSolar Home Systems Deployed[0m
+                [36m</h3>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"flex shrink-0 items-center gap-1.5"[39m
+                [36m>[39m
+                  [36m<div[39m
+                    [33mclass[39m=[32m"relative inline-flex"[39m
+                  [36m>[39m
+                    [36m<button[39m
+                      [33maria-expanded[39m=[32m"false"[39m
+                      [33maria-label[39m=[32m"About Solar Home Systems Deployed: definition, methodology and data source"[39m
+                      [33mclass[39m=[32m"inline-flex size-5 items-center justify-center rounded-full text-text-subtle transition-colors hover:text-text-muted"[39m
+                      [33mtype[39m=[32m"button"[39m
+                    [36m>[39m
+                      [36m<svg[39m
+                        [33maria-hidden[39m=[32m"true"[39m
+                        [33mclass[39m=[32m"lucide lucide-info size-4"[39m
+                        [33mfill[39m=[32m"none"[39m
+                        [33mheight[39m=[32m"24"[39m
+                        [33mstroke[39m=[32m"currentColor"[39m
+                        [33mstroke-linecap[39m=[32m"round"[39m
+                        [33mstroke-linejoin[39m=[32m"round"[39m
+                        [33mstroke-width[39m=[32m"2"[39m
+                        [33mviewBox[39m=[32m"0 0 24 24"[39m
+                        [33mwidth[39m=[32m"24"[39m
+                        [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                      [36m>[39m
+                        [36m<circle[39m
+                          [33mcx[39m=[32m"12"[39m
+                          [33mcy[39m=[32m"12"[39m
+                          [33mr[39m=[32m"10"[39m
+                        [36m/>[39m
+                        [36m<path[39m
+                          [33md[39m=[32m"M12 16v-4"[39m
+                        [36m/>[39m
+                        [36m<path[39m
+                          [33md[39m=[32m"M12 8h.01"[39m
+                        [36m/>[39m
+                      [36m</svg>[39m
+                    [36m</button>[39m
+                  [36m</div>[39m
+                [36m</div>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"mt-2 flex flex-wrap items-baseline gap-x-2.5 gap-y-1"[39m
+              [36m>[39m
+                [36m<p[39m
+                  [33mclass[39m=[32m"text-2xl font-semibold tracking-tight text-text-default"[39m
+                [36m>[39m
+                  [0m486,300[0m
+                [36m</p>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"inline-flex items-center gap-1.5 rounded-pill px-2.5 py-1 text-xs font-medium bg-status-on-track-bg text-trend-up"[39m
+                [36m>[39m
+                  [36m<svg[39m
+                    [33maria-hidden[39m=[32m"true"[39m
+                    [33mclass[39m=[32m"lucide lucide-arrow-up size-3.5 shrink-0"[39m
+                    [33mfill[39m=[32m"none"[39m
+                    [33mheight[39m=[32m"24"[39m
+                    [33mstroke[39m=[32m"currentColor"[39m
+                    [33mstroke-linecap[39m=[32m"round"[39m
+                    [33mstroke-linejoin[39m=[32m"round"[39m
+                    [33mstroke-width[39m=[32m"2"[39m
+                    [33mviewBox[39m=[32m"0 0 24 24"[39m
+                    [33mwidth[39m=[32m"24"[39m
+                    [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                  [36m>[39m
+                    [36m<path[39m
+                      [33md[39m=[32m"m5 12 7-7 7 7"[39m
+                    [36m/>[39m
+                    [36m<path[39m
+                      [33md[39m=[32m"M12 19V5"[39m
+                    [36m/>[39m
+                  [36m</svg>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"sr-only"[39m
+                  [36m>[39m
+                    [0mImproving:[0m
+                  [36m</span>[39m
+                  [0m+41,700 vs Q2 2025[0m
+                [36m</span>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33maria-label[39m=[32m"Solar Home Systems Deployed"[39m
+                [33maria-valuemax[39m=[32m"100"[39m
+                [33maria-valuemin[39m=[32m"0"[39m
+                [33maria-valuenow[39m=[32m"17.7"[39m
+                [33mclass[39m=[32m"h-2 w-full overflow-hidden rounded-pill bg-surface-sunken mt-3"[39m
+                [33mrole[39m=[32m"progressbar"[39m
+              [36m>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"h-full rounded-pill bg-brand-500"[39m
+                  [33mstyle[39m=[32m"width: 17.7%;"[39m
+                [36m/>[39m
+              [36m</div>[39m
+            [36m</div>[39m
+          [36m</li>[39m
+        [36m</ul>[39m
+      [36m</div>[39m
+    [36m</div>[39m
+  [36m</div>[39m
+[36m</body>[39m
+ ❯ Object.getElementError node_modules/.pnpm/@testing-library+dom@10.4.1/node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ node_modules/.pnpm/@testing-library+dom@10.4.1/node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ❯ node_modules/.pnpm/@testing-library+dom@10.4.1/node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ❯ getByText node_modules/.pnpm/@testing-library+dom@10.4.1/node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ src/test/features/dashboard/sections.test.tsx:160:19
+    158|       screen.queryByRole('progressbar', { name: 'New grid connections'…
+    159|     ).not.toBeInTheDocument()
+    160|     expect(screen.getByText('Annual target to be confirmed')).toBeInTh…
+       |                   ^
+    161|   })
+    162|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/14]⎯
+
+ FAIL  src/test/features/dashboard/sections.test.tsx > Section C — national performance > renders each metric on its own scale
+TestingLibraryElementError: Unable to find an accessible element with the role "img" and name `/National metering rate/`
+
+Here are the accessible roles:
+
+  heading:
+
+  Name "National performance and target progress":
+  [36m<h2[39m
+    [33mclass[39m=[32m"text-lg font-semibold text-text-default"[39m
+  [36m/>[39m
+
+  Name "Renewable Energy Share in Generation Mix":
+  [36m<h3[39m
+    [33mclass[39m=[32m"text-sm font-medium text-text-default"[39m
+  [36m/>[39m
+
+  Name "Metering Rate":
+  [36m<h3[39m
+    [33mclass[39m=[32m"text-sm font-medium text-text-default"[39m
+  [36m/>[39m
+
+  Name "ATC&C Loss Rate":
+  [36m<h3[39m
+    [33mclass[39m=[32m"text-sm font-medium text-text-default"[39m
+  [36m/>[39m
+
+  Name "DisCo Remittance to NBET/GenCos":
+  [36m<h3[39m
+    [33mclass[39m=[32m"text-sm font-medium text-text-default"[39m
+  [36m/>[39m
+
+  Name "Subsidy / Tariff Shortfall":
+  [36m<h3[39m
+    [33mclass[39m=[32m"text-sm font-medium text-text-default"[39m
+  [36m/>[39m
+
+  Name "Private Capital Mobilized for Last-Mile Access":
+  [36m<h3[39m
+    [33mclass[39m=[32m"text-sm font-medium text-text-default"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  list:
+
+  Name "":
+  [36m<ul[39m
+    [33mclass[39m=[32m"flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-text-muted"[39m
+  [36m/>[39m
+
+  Name "National performance metrics":
+  [36m<ul[39m
+    [33maria-label[39m=[32m"National performance metrics"[39m
+    [33mclass[39m=[32m"mt-3 grid gap-3 lg:grid-cols-2 2xl:grid-cols-3"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  listitem:
+
+  Name "":
+  [36m<li[39m
+    [33mclass[39m=[32m"flex items-center gap-1.5"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<li[39m
+    [33mclass[39m=[32m"flex items-center gap-1.5"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<li[39m
+    [33mclass[39m=[32m"flex items-center gap-1.5"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<li />[39m
+
+  Name "":
+  [36m<li />[39m
+
+  Name "":
+  [36m<li />[39m
+
+  Name "":
+  [36m<li />[39m
+
+  Name "":
+  [36m<li />[39m
+
+  Name "":
+  [36m<li />[39m
+
+  --------------------------------------------------
+  button:
+
+  Name "About Renewable Energy Share in Generation Mix: definition, methodology and data source":
+  [36m<button[39m
+    [33maria-expanded[39m=[32m"false"[39m
+    [33maria-label[39m=[32m"About Renewable Energy Share in Generation Mix: definition, methodology and data source"[39m
+    [33mclass[39m=[32m"inline-flex size-5 items-center justify-center rounded-full text-text-subtle transition-colors hover:text-text-muted"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "About Metering Rate: definition, methodology and data source":
+  [36m<button[39m
+    [33maria-expanded[39m=[32m"false"[39m
+    [33maria-label[39m=[32m"About Metering Rate: definition, methodology and data source"[39m
+    [33mclass[39m=[32m"inline-flex size-5 items-center justify-center rounded-full text-text-subtle transition-colors hover:text-text-muted"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "About ATC&C Loss Rate: definition, methodology and data source":
+  [36m<button[39m
+    [33maria-expanded[39m=[32m"false"[39m
+    [33maria-label[39m=[32m"About ATC&C Loss Rate: definition, methodology and data source"[39m
+    [33mclass[39m=[32m"inline-flex size-5 items-center justify-center rounded-full text-text-subtle transition-colors hover:text-text-muted"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "About DisCo Remittance to NBET/GenCos: definition, methodology and data source":
+  [36m<button[39m
+    [33maria-expanded[39m=[32m"false"[39m
+    [33maria-label[39m=[32m"About DisCo Remittance to NBET/GenCos: definition, methodology and data source"[39m
+    [33mclass[39m=[32m"inline-flex size-5 items-center justify-center rounded-full text-text-subtle transition-colors hover:text-text-muted"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "About Subsidy / Tariff Shortfall: definition, methodology and data source":
+  [36m<button[39m
+    [33maria-expanded[39m=[32m"false"[39m
+    [33maria-label[39m=[32m"About Subsidy / Tariff Shortfall: definition, methodology and data source"[39m
+    [33mclass[39m=[32m"inline-flex size-5 items-center justify-center rounded-full text-text-subtle transition-colors hover:text-text-muted"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "About Private Capital Mobilized for Last-Mile Access: definition, methodology and data source":
+  [36m<button[39m
+    [33maria-expanded[39m=[32m"false"[39m
+    [33maria-label[39m=[32m"About Private Capital Mobilized for Last-Mile Access: definition, methodology and data source"[39m
+    [33mclass[39m=[32m"inline-flex size-5 items-center justify-center rounded-full text-text-subtle transition-colors hover:text-text-muted"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  img:
+
+  Name "Renewable Energy Share in Generation Mix: 38.3%, baseline 22, expected 27 for this period, target 50, at or ahead of the approved trajectory":
+  [36m<div[39m
+    [33maria-label[39m=[32m"Renewable Energy Share in Generation Mix: 38.3%, baseline 22, expected 27 for this period, target 50, at or ahead of the approved trajectory"[39m
+    [33mclass[39m=[32m"relative h-6 w-full mt-3"[39m
+    [33mrole[39m=[32m"img"[39m
+  [36m/>[39m
+
+  Name "Metering Rate: 57%, baseline 42, expected 68 for this period, target 100, behind the approved trajectory":
+  [36m<div[39m
+    [33maria-label[39m=[32m"Metering Rate: 57%, baseline 42, expected 68 for this period, target 100, behind the approved trajectory"[39m
+    [33mclass[39m=[32m"relative h-6 w-full mt-3"[39m
+    [33mrole[39m=[32m"img"[39m
+  [36m/>[39m
+
+  Name "ATC&C Loss Rate: 34.9%, baseline 45, expected 31 for this period, behind the approved trajectory":
+  [36m<div[39m
+    [33maria-label[39m=[32m"ATC&C Loss Rate: 34.9%, baseline 45, expected 31 for this period, behind the approved trajectory"[39m
+    [33mclass[39m=[32m"relative h-6 w-full mt-3"[39m
+    [33mrole[39m=[32m"img"[39m
+  [36m/>[39m
+
+  Name "DisCo Remittance to NBET/GenCos: 92.7%, baseline 95.21, expected 85 for this period, target 100, at or ahead of the approved trajectory":
+  [36m<div[39m
+    [33maria-label[39m=[32m"DisCo Remittance to NBET/GenCos: 92.7%, baseline 95.21, expected 85 for this period, target 100, at or ahead of the approved trajectory"[39m
+    [33mclass[39m=[32m"relative h-6 w-full mt-3"[39m
+    [33mrole[39m=[32m"img"[39m
+  [36m/>[39m
+
+  Name "Subsidy / Tariff Shortfall: ₦0.42tn, baseline 2200, expected 1700 for this period, target 0, at or ahead of the approved trajectory":
+  [36m<div[39m
+    [33maria-label[39m=[32m"Subsidy / Tariff Shortfall: ₦0.42tn, baseline 2200, expected 1700 for this period, target 0, at or ahead of the approved trajectory"[39m
+    [33mclass[39m=[32m"relative h-6 w-full mt-3"[39m
+    [33mrole[39m=[32m"img"[39m
+  [36m/>[39m
+
+  Name "Private Capital Mobilized for Last-Mile Access: $0.0B, baseline 0, expected 2400 for this period, target 15500, behind the approved trajectory":
+  [36m<div[39m
+    [33maria-label[39m=[32m"Private Capital Mobilized for Last-Mile Access: $0.0B, baseline 0, expected 2400 for this period, target 15500, behind the approved trajectory"[39m
+    [33mclass[39m=[32m"relative h-6 w-full mt-3"[39m
+    [33mrole[39m=[32m"img"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"rounded-card bg-surface-sunken p-4"[39m
+      [33mdata-slot[39m=[32m"card"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"flex flex-wrap items-baseline justify-between gap-2"[39m
+      [36m>[39m
+        [36m<h2[39m
+          [33mclass[39m=[32m"text-lg font-semibold text-text-default"[39m
+        [36m>[39m
+          [0mNational performance and target progress[0m
+        [36m</h2>[39m
+        [36m<ul[39m
+          [33mclass[39m=[32m"flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-text-muted"[39m
+        [36m>[39m
+          [36m<li[39m
+            [33mclass[39m=[32m"flex items-center gap-1.5"[39m
+          [36m>[39m
+            [36m<span[39m
+              [33maria-hidden[39m=[32m"true"[39m
+              [33mclass[39m=[32m"h-3 w-0.5 rounded-full bg-text-subtle"[39m
+            [36m/>[39m
+            [0mBaseline[0m
+          [36m</li>[39m
+          [36m<li[39m
+            [33mclass[39m=[32m"flex items-center gap-1.5"[39m
+          [36m>[39m
+            [36m<span[39m
+              [33maria-hidden[39m=[32m"true"[39m
+              [33mclass[39m=[32m"h-3 w-0.5 rounded-full bg-text-muted"[39m
+            [36m/>[39m
+            [0mExpected this period[0m
+          [36m</li>[39m
+          [36m<li[39m
+            [33mclass[39m=[32m"flex items-center gap-1.5"[39m
+          [36m>[39m
+            [36m<span[39m
+              [33maria-hidden[39m=[32m"true"[39m
+              [33mclass[39m=[32m"h-3 w-1 rounded-full bg-text-default"[39m
+            [36m/>[39m
+            [0mTarget[0m
+          [36m</li>[39m
+        [36m</ul>[39m
+      [36m</div>[39m
+      [36m<ul[39m
+        [33maria-label[39m=[32m"National performance metrics"[39m
+        [33mclass[39m=[32m"mt-3 grid gap-3 lg:grid-cols-2 2xl:grid-cols-3"[39m
+      [36m>[39m
+        [36m<li>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"rounded-card bg-surface flex h-full flex-col p-4"[39m
+            [33mdata-slot[39m=[32m"card"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex items-start justify-between gap-3"[39m
+            [36m>[39m
+              [36m<h3[39m
+                [33mclass[39m=[32m"text-sm font-medium text-text-default"[39m
+              [36m>[39m
+                [0mRenewable Energy Share in Generation Mix[0m
+              [36m</h3>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex shrink-0 items-center gap-1.5"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"inline-flex items-center gap-1.5 rounded-pill px-2.5 py-1 text-xs font-medium whitespace-nowrap bg-status-on-track-bg text-status-on-track"[39m
+                [36m>[39m
+                  [0mPublic source[0m
+                [36m</span>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"relative inline-flex"[39m
+                [36m>[39m
+                  [36m<button[39m
+                    [33maria-expanded[39m=[32m"false"[39m
+                    [33maria-label[39m=[32m"About Renewable Energy Share in Generation Mix: definition, methodology and data source"[39m
+                    [33mclass[39m=[32m"inline-flex size-5 items-center justify-center rounded-full text-text-subtle transition-colors hover:text-text-muted"[39m
+                    [33mtype[39m=[32m"button"[39m
+                  [36m>[39m
+                    [36m<svg[39m
+                      [33maria-hidden[39m=[32m"true"[39m
+                      [33mclass[39m=[32m"lucide lucide-info size-4"[39m
+                      [33mfill[39m=[32m"none"[39m
+                      [33mheight[39m=[32m"24"[39m
+                      [33mstroke[39m=[32m"currentColor"[39m
+                      [33mstroke-linecap[39m=[32m"round"[39m
+                      [33mstroke-linejoin[39m=[32m"round"[39m
+                      [33mstroke-width[39m=[32m"2"[39m
+                      [33mviewBox[39m=[32m"0 0 24 24"[39m
+                      [33mwidth[39m=[32m"24"[39m
+                      [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                    [36m>[39m
+                      [36m<circle[39m
+                        [33mcx[39m=[32m"12"[39m
+                        [33mcy[39m=[32m"12"[39m
+                        [33mr[39m=[32m"10"[39m
+                      [36m/>[39m
+                      [36m<path[39m
+                        [33md[39m=[32m"M12 16v-4"[39m
+                      [36m/>[39m
+                      [36m<path[39m
+                        [33md[39m=[32m"M12 8h.01"[39m
+                      [36m/>[39m
+                    [36m</svg>[39m
+                  [36m</button>[39m
+                [36m</div>[39m
+              [36m</div>[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"mt-2 flex flex-wrap items-baseline gap-x-2.5 gap-y-1"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"text-2xl font-semibold tracking-tight text-text-default"[39m
+              [36m>[39m
+                [0m38.3%[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"inline-flex items-center gap-1.5 rounded-pill px-2.5 py-1 text-xs font-medium bg-status-on-track-bg text-trend-up"[39m
+              [36m>[39m
+                [36m<svg[39m
+                  [33maria-hidden[39m=[32m"true"[39m
+                  [33mclass[39m=[32m"lucide lucide-arrow-up size-3.5 shrink-0"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mheight[39m=[32m"24"[39m
+                  [33mstroke[39m=[32m"currentColor"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-linejoin[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"2"[39m
+                  [33mviewBox[39m=[32m"0 0 24 24"[39m
+                  [33mwidth[39m=[32m"24"[39m
+                  [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                [36m>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"m5 12 7-7 7 7"[39m
+                  [36m/>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M12 19V5"[39m
+                  [36m/>[39m
+                [36m</svg>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"sr-only"[39m
+                [36m>[39m
+                  [0mImproving:[0m
+                [36m</span>[39m
+                [0m+1.2 pts vs prior year[0m
+              [36m</span>[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33maria-label[39m=[32m"Renewable Energy Share in Generation Mix: 3...
+ ❯ Object.getElementError node_modules/.pnpm/@testing-library+dom@10.4.1/node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ node_modules/.pnpm/@testing-library+dom@10.4.1/node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ❯ node_modules/.pnpm/@testing-library+dom@10.4.1/node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ❯ getByRole node_modules/.pnpm/@testing-library+dom@10.4.1/node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ src/test/features/dashboard/sections.test.tsx:192:14
+    190|     // Metering rate: 55 on a 0–100 scale.
+    191|     expect(
+    192|       screen.getByRole('img', { name: /National metering rate/ }),
+       |              ^
+    193|     ).toBeInTheDocument()
+    194|     // Tariff shortfall: ₦2.2tn on a 0–3 scale.
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/14]⎯
+
+ FAIL  src/test/features/dashboard/sections.test.tsx > Section C — national performance > flags a metric behind its approved trajectory
+TestingLibraryElementError: Unable to find an accessible element with the role "img" and name `/National metering rate/`
+
+Here are the accessible roles:
+
+  heading:
+
+  Name "National performance and target progress":
+  [36m<h2[39m
+    [33mclass[39m=[32m"text-lg font-semibold text-text-default"[39m
+  [36m/>[39m
+
+  Name "Renewable Energy Share in Generation Mix":
+  [36m<h3[39m
+    [33mclass[39m=[32m"text-sm font-medium text-text-default"[39m
+  [36m/>[39m
+
+  Name "Metering Rate":
+  [36m<h3[39m
+    [33mclass[39m=[32m"text-sm font-medium text-text-default"[39m
+  [36m/>[39m
+
+  Name "ATC&C Loss Rate":
+  [36m<h3[39m
+    [33mclass[39m=[32m"text-sm font-medium text-text-default"[39m
+  [36m/>[39m
+
+  Name "DisCo Remittance to NBET/GenCos":
+  [36m<h3[39m
+    [33mclass[39m=[32m"text-sm font-medium text-text-default"[39m
+  [36m/>[39m
+
+  Name "Subsidy / Tariff Shortfall":
+  [36m<h3[39m
+    [33mclass[39m=[32m"text-sm font-medium text-text-default"[39m
+  [36m/>[39m
+
+  Name "Private Capital Mobilized for Last-Mile Access":
+  [36m<h3[39m
+    [33mclass[39m=[32m"text-sm font-medium text-text-default"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  list:
+
+  Name "":
+  [36m<ul[39m
+    [33mclass[39m=[32m"flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-text-muted"[39m
+  [36m/>[39m
+
+  Name "National performance metrics":
+  [36m<ul[39m
+    [33maria-label[39m=[32m"National performance metrics"[39m
+    [33mclass[39m=[32m"mt-3 grid gap-3 lg:grid-cols-2 2xl:grid-cols-3"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  listitem:
+
+  Name "":
+  [36m<li[39m
+    [33mclass[39m=[32m"flex items-center gap-1.5"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<li[39m
+    [33mclass[39m=[32m"flex items-center gap-1.5"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<li[39m
+    [33mclass[39m=[32m"flex items-center gap-1.5"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<li />[39m
+
+  Name "":
+  [36m<li />[39m
+
+  Name "":
+  [36m<li />[39m
+
+  Name "":
+  [36m<li />[39m
+
+  Name "":
+  [36m<li />[39m
+
+  Name "":
+  [36m<li />[39m
+
+  --------------------------------------------------
+  button:
+
+  Name "About Renewable Energy Share in Generation Mix: definition, methodology and data source":
+  [36m<button[39m
+    [33maria-expanded[39m=[32m"false"[39m
+    [33maria-label[39m=[32m"About Renewable Energy Share in Generation Mix: definition, methodology and data source"[39m
+    [33mclass[39m=[32m"inline-flex size-5 items-center justify-center rounded-full text-text-subtle transition-colors hover:text-text-muted"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "About Metering Rate: definition, methodology and data source":
+  [36m<button[39m
+    [33maria-expanded[39m=[32m"false"[39m
+    [33maria-label[39m=[32m"About Metering Rate: definition, methodology and data source"[39m
+    [33mclass[39m=[32m"inline-flex size-5 items-center justify-center rounded-full text-text-subtle transition-colors hover:text-text-muted"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "About ATC&C Loss Rate: definition, methodology and data source":
+  [36m<button[39m
+    [33maria-expanded[39m=[32m"false"[39m
+    [33maria-label[39m=[32m"About ATC&C Loss Rate: definition, methodology and data source"[39m
+    [33mclass[39m=[32m"inline-flex size-5 items-center justify-center rounded-full text-text-subtle transition-colors hover:text-text-muted"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "About DisCo Remittance to NBET/GenCos: definition, methodology and data source":
+  [36m<button[39m
+    [33maria-expanded[39m=[32m"false"[39m
+    [33maria-label[39m=[32m"About DisCo Remittance to NBET/GenCos: definition, methodology and data source"[39m
+    [33mclass[39m=[32m"inline-flex size-5 items-center justify-center rounded-full text-text-subtle transition-colors hover:text-text-muted"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "About Subsidy / Tariff Shortfall: definition, methodology and data source":
+  [36m<button[39m
+    [33maria-expanded[39m=[32m"false"[39m
+    [33maria-label[39m=[32m"About Subsidy / Tariff Shortfall: definition, methodology and data source"[39m
+    [33mclass[39m=[32m"inline-flex size-5 items-center justify-center rounded-full text-text-subtle transition-colors hover:text-text-muted"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "About Private Capital Mobilized for Last-Mile Access: definition, methodology and data source":
+  [36m<button[39m
+    [33maria-expanded[39m=[32m"false"[39m
+    [33maria-label[39m=[32m"About Private Capital Mobilized for Last-Mile Access: definition, methodology and data source"[39m
+    [33mclass[39m=[32m"inline-flex size-5 items-center justify-center rounded-full text-text-subtle transition-colors hover:text-text-muted"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  img:
+
+  Name "Renewable Energy Share in Generation Mix: 38.3%, baseline 22, expected 27 for this period, target 50, at or ahead of the approved trajectory":
+  [36m<div[39m
+    [33maria-label[39m=[32m"Renewable Energy Share in Generation Mix: 38.3%, baseline 22, expected 27 for this period, target 50, at or ahead of the approved trajectory"[39m
+    [33mclass[39m=[32m"relative h-6 w-full mt-3"[39m
+    [33mrole[39m=[32m"img"[39m
+  [36m/>[39m
+
+  Name "Metering Rate: 57%, baseline 42, expected 68 for this period, target 100, behind the approved trajectory":
+  [36m<div[39m
+    [33maria-label[39m=[32m"Metering Rate: 57%, baseline 42, expected 68 for this period, target 100, behind the approved trajectory"[39m
+    [33mclass[39m=[32m"relative h-6 w-full mt-3"[39m
+    [33mrole[39m=[32m"img"[39m
+  [36m/>[39m
+
+  Name "ATC&C Loss Rate: 34.9%, baseline 45, expected 31 for this period, behind the approved trajectory":
+  [36m<div[39m
+    [33maria-label[39m=[32m"ATC&C Loss Rate: 34.9%, baseline 45, expected 31 for this period, behind the approved trajectory"[39m
+    [33mclass[39m=[32m"relative h-6 w-full mt-3"[39m
+    [33mrole[39m=[32m"img"[39m
+  [36m/>[39m
+
+  Name "DisCo Remittance to NBET/GenCos: 92.7%, baseline 95.21, expected 85 for this period, target 100, at or ahead of the approved trajectory":
+  [36m<div[39m
+    [33maria-label[39m=[32m"DisCo Remittance to NBET/GenCos: 92.7%, baseline 95.21, expected 85 for this period, target 100, at or ahead of the approved trajectory"[39m
+    [33mclass[39m=[32m"relative h-6 w-full mt-3"[39m
+    [33mrole[39m=[32m"img"[39m
+  [36m/>[39m
+
+  Name "Subsidy / Tariff Shortfall: ₦0.42tn, baseline 2200, expected 1700 for this period, target 0, at or ahead of the approved trajectory":
+  [36m<div[39m
+    [33maria-label[39m=[32m"Subsidy / Tariff Shortfall: ₦0.42tn, baseline 2200, expected 1700 for this period, target 0, at or ahead of the approved trajectory"[39m
+    [33mclass[39m=[32m"relative h-6 w-full mt-3"[39m
+    [33mrole[39m=[32m"img"[39m
+  [36m/>[39m
+
+  Name "Private Capital Mobilized for Last-Mile Access: $0.0B, baseline 0, expected 2400 for this period, target 15500, behind the approved trajectory":
+  [36m<div[39m
+    [33maria-label[39m=[32m"Private Capital Mobilized for Last-Mile Access: $0.0B, baseline 0, expected 2400 for this period, target 15500, behind the approved trajectory"[39m
+    [33mclass[39m=[32m"relative h-6 w-full mt-3"[39m
+    [33mrole[39m=[32m"img"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"rounded-card bg-surface-sunken p-4"[39m
+      [33mdata-slot[39m=[32m"card"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"flex flex-wrap items-baseline justify-between gap-2"[39m
+      [36m>[39m
+        [36m<h2[39m
+          [33mclass[39m=[32m"text-lg font-semibold text-text-default"[39m
+        [36m>[39m
+          [0mNational performance and target progress[0m
+        [36m</h2>[39m
+        [36m<ul[39m
+          [33mclass[39m=[32m"flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-text-muted"[39m
+        [36m>[39m
+          [36m<li[39m
+            [33mclass[39m=[32m"flex items-center gap-1.5"[39m
+          [36m>[39m
+            [36m<span[39m
+              [33maria-hidden[39m=[32m"true"[39m
+              [33mclass[39m=[32m"h-3 w-0.5 rounded-full bg-text-subtle"[39m
+            [36m/>[39m
+            [0mBaseline[0m
+          [36m</li>[39m
+          [36m<li[39m
+            [33mclass[39m=[32m"flex items-center gap-1.5"[39m
+          [36m>[39m
+            [36m<span[39m
+              [33maria-hidden[39m=[32m"true"[39m
+              [33mclass[39m=[32m"h-3 w-0.5 rounded-full bg-text-muted"[39m
+            [36m/>[39m
+            [0mExpected this period[0m
+          [36m</li>[39m
+          [36m<li[39m
+            [33mclass[39m=[32m"flex items-center gap-1.5"[39m
+          [36m>[39m
+            [36m<span[39m
+              [33maria-hidden[39m=[32m"true"[39m
+              [33mclass[39m=[32m"h-3 w-1 rounded-full bg-text-default"[39m
+            [36m/>[39m
+            [0mTarget[0m
+          [36m</li>[39m
+        [36m</ul>[39m
+      [36m</div>[39m
+      [36m<ul[39m
+        [33maria-label[39m=[32m"National performance metrics"[39m
+        [33mclass[39m=[32m"mt-3 grid gap-3 lg:grid-cols-2 2xl:grid-cols-3"[39m
+      [36m>[39m
+        [36m<li>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"rounded-card bg-surface flex h-full flex-col p-4"[39m
+            [33mdata-slot[39m=[32m"card"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex items-start justify-between gap-3"[39m
+            [36m>[39m
+              [36m<h3[39m
+                [33mclass[39m=[32m"text-sm font-medium text-text-default"[39m
+              [36m>[39m
+                [0mRenewable Energy Share in Generation Mix[0m
+              [36m</h3>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex shrink-0 items-center gap-1.5"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"inline-flex items-center gap-1.5 rounded-pill px-2.5 py-1 text-xs font-medium whitespace-nowrap bg-status-on-track-bg text-status-on-track"[39m
+                [36m>[39m
+                  [0mPublic source[0m
+                [36m</span>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"relative inline-flex"[39m
+                [36m>[39m
+                  [36m<button[39m
+                    [33maria-expanded[39m=[32m"false"[39m
+                    [33maria-label[39m=[32m"About Renewable Energy Share in Generation Mix: definition, methodology and data source"[39m
+                    [33mclass[39m=[32m"inline-flex size-5 items-center justify-center rounded-full text-text-subtle transition-colors hover:text-text-muted"[39m
+                    [33mtype[39m=[32m"button"[39m
+                  [36m>[39m
+                    [36m<svg[39m
+                      [33maria-hidden[39m=[32m"true"[39m
+                      [33mclass[39m=[32m"lucide lucide-info size-4"[39m
+                      [33mfill[39m=[32m"none"[39m
+                      [33mheight[39m=[32m"24"[39m
+                      [33mstroke[39m=[32m"currentColor"[39m
+                      [33mstroke-linecap[39m=[32m"round"[39m
+                      [33mstroke-linejoin[39m=[32m"round"[39m
+                      [33mstroke-width[39m=[32m"2"[39m
+                      [33mviewBox[39m=[32m"0 0 24 24"[39m
+                      [33mwidth[39m=[32m"24"[39m
+                      [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                    [36m>[39m
+                      [36m<circle[39m
+                        [33mcx[39m=[32m"12"[39m
+                        [33mcy[39m=[32m"12"[39m
+                        [33mr[39m=[32m"10"[39m
+                      [36m/>[39m
+                      [36m<path[39m
+                        [33md[39m=[32m"M12 16v-4"[39m
+                      [36m/>[39m
+                      [36m<path[39m
+                        [33md[39m=[32m"M12 8h.01"[39m
+                      [36m/>[39m
+                    [36m</svg>[39m
+                  [36m</button>[39m
+                [36m</div>[39m
+              [36m</div>[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"mt-2 flex flex-wrap items-baseline gap-x-2.5 gap-y-1"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"text-2xl font-semibold tracking-tight text-text-default"[39m
+              [36m>[39m
+                [0m38.3%[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"inline-flex items-center gap-1.5 rounded-pill px-2.5 py-1 text-xs font-medium bg-status-on-track-bg text-trend-up"[39m
+              [36m>[39m
+                [36m<svg[39m
+                  [33maria-hidden[39m=[32m"true"[39m
+                  [33mclass[39m=[32m"lucide lucide-arrow-up size-3.5 shrink-0"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mheight[39m=[32m"24"[39m
+                  [33mstroke[39m=[32m"currentColor"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-linejoin[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"2"[39m
+                  [33mviewBox[39m=[32m"0 0 24 24"[39m
+                  [33mwidth[39m=[32m"24"[39m
+                  [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                [36m>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"m5 12 7-7 7 7"[39m
+                  [36m/>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M12 19V5"[39m
+                  [36m/>[39m
+                [36m</svg>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"sr-only"[39m
+                [36m>[39m
+                  [0mImproving:[0m
+                [36m</span>[39m
+                [0m+1.2 pts vs prior year[0m
+              [36m</span>[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33maria-label[39m=[32m"Renewable Energy Share in Generation Mix: 3...
+ ❯ Object.getElementError node_modules/.pnpm/@testing-library+dom@10.4.1/node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ node_modules/.pnpm/@testing-library+dom@10.4.1/node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ❯ node_modules/.pnpm/@testing-library+dom@10.4.1/node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ❯ getByRole node_modules/.pnpm/@testing-library+dom@10.4.1/node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ src/test/features/dashboard/sections.test.tsx:206:10
+    204|     expect(
+    205|       screen
+    206|         .getByRole('img', { name: /National metering rate/ })
+       |          ^
+    207|         .getAttribute('aria-label'),
+    208|     ).toContain('behind the approved trajectory')
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/14]⎯
+
+ FAIL  src/test/features/dashboard/sections.test.tsx > Section C — national performance > omits the target marker for a metric with no approved target
+TestingLibraryElementError: Unable to find an accessible element with the role "img" and name `/ATC&C loss rate/`
+
+Here are the accessible roles:
+
+  heading:
+
+  Name "National performance and target progress":
+  [36m<h2[39m
+    [33mclass[39m=[32m"text-lg font-semibold text-text-default"[39m
+  [36m/>[39m
+
+  Name "Renewable Energy Share in Generation Mix":
+  [36m<h3[39m
+    [33mclass[39m=[32m"text-sm font-medium text-text-default"[39m
+  [36m/>[39m
+
+  Name "Metering Rate":
+  [36m<h3[39m
+    [33mclass[39m=[32m"text-sm font-medium text-text-default"[39m
+  [36m/>[39m
+
+  Name "ATC&C Loss Rate":
+  [36m<h3[39m
+    [33mclass[39m=[32m"text-sm font-medium text-text-default"[39m
+  [36m/>[39m
+
+  Name "DisCo Remittance to NBET/GenCos":
+  [36m<h3[39m
+    [33mclass[39m=[32m"text-sm font-medium text-text-default"[39m
+  [36m/>[39m
+
+  Name "Subsidy / Tariff Shortfall":
+  [36m<h3[39m
+    [33mclass[39m=[32m"text-sm font-medium text-text-default"[39m
+  [36m/>[39m
+
+  Name "Private Capital Mobilized for Last-Mile Access":
+  [36m<h3[39m
+    [33mclass[39m=[32m"text-sm font-medium text-text-default"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  list:
+
+  Name "":
+  [36m<ul[39m
+    [33mclass[39m=[32m"flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-text-muted"[39m
+  [36m/>[39m
+
+  Name "National performance metrics":
+  [36m<ul[39m
+    [33maria-label[39m=[32m"National performance metrics"[39m
+    [33mclass[39m=[32m"mt-3 grid gap-3 lg:grid-cols-2 2xl:grid-cols-3"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  listitem:
+
+  Name "":
+  [36m<li[39m
+    [33mclass[39m=[32m"flex items-center gap-1.5"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<li[39m
+    [33mclass[39m=[32m"flex items-center gap-1.5"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<li[39m
+    [33mclass[39m=[32m"flex items-center gap-1.5"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<li />[39m
+
+  Name "":
+  [36m<li />[39m
+
+  Name "":
+  [36m<li />[39m
+
+  Name "":
+  [36m<li />[39m
+
+  Name "":
+  [36m<li />[39m
+
+  Name "":
+  [36m<li />[39m
+
+  --------------------------------------------------
+  button:
+
+  Name "About Renewable Energy Share in Generation Mix: definition, methodology and data source":
+  [36m<button[39m
+    [33maria-expanded[39m=[32m"false"[39m
+    [33maria-label[39m=[32m"About Renewable Energy Share in Generation Mix: definition, methodology and data source"[39m
+    [33mclass[39m=[32m"inline-flex size-5 items-center justify-center rounded-full text-text-subtle transition-colors hover:text-text-muted"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "About Metering Rate: definition, methodology and data source":
+  [36m<button[39m
+    [33maria-expanded[39m=[32m"false"[39m
+    [33maria-label[39m=[32m"About Metering Rate: definition, methodology and data source"[39m
+    [33mclass[39m=[32m"inline-flex size-5 items-center justify-center rounded-full text-text-subtle transition-colors hover:text-text-muted"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "About ATC&C Loss Rate: definition, methodology and data source":
+  [36m<button[39m
+    [33maria-expanded[39m=[32m"false"[39m
+    [33maria-label[39m=[32m"About ATC&C Loss Rate: definition, methodology and data source"[39m
+    [33mclass[39m=[32m"inline-flex size-5 items-center justify-center rounded-full text-text-subtle transition-colors hover:text-text-muted"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "About DisCo Remittance to NBET/GenCos: definition, methodology and data source":
+  [36m<button[39m
+    [33maria-expanded[39m=[32m"false"[39m
+    [33maria-label[39m=[32m"About DisCo Remittance to NBET/GenCos: definition, methodology and data source"[39m
+    [33mclass[39m=[32m"inline-flex size-5 items-center justify-center rounded-full text-text-subtle transition-colors hover:text-text-muted"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "About Subsidy / Tariff Shortfall: definition, methodology and data source":
+  [36m<button[39m
+    [33maria-expanded[39m=[32m"false"[39m
+    [33maria-label[39m=[32m"About Subsidy / Tariff Shortfall: definition, methodology and data source"[39m
+    [33mclass[39m=[32m"inline-flex size-5 items-center justify-center rounded-full text-text-subtle transition-colors hover:text-text-muted"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  Name "About Private Capital Mobilized for Last-Mile Access: definition, methodology and data source":
+  [36m<button[39m
+    [33maria-expanded[39m=[32m"false"[39m
+    [33maria-label[39m=[32m"About Private Capital Mobilized for Last-Mile Access: definition, methodology and data source"[39m
+    [33mclass[39m=[32m"inline-flex size-5 items-center justify-center rounded-full text-text-subtle transition-colors hover:text-text-muted"[39m
+    [33mtype[39m=[32m"button"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  img:
+
+  Name "Renewable Energy Share in Generation Mix: 38.3%, baseline 22, expected 27 for this period, target 50, at or ahead of the approved trajectory":
+  [36m<div[39m
+    [33maria-label[39m=[32m"Renewable Energy Share in Generation Mix: 38.3%, baseline 22, expected 27 for this period, target 50, at or ahead of the approved trajectory"[39m
+    [33mclass[39m=[32m"relative h-6 w-full mt-3"[39m
+    [33mrole[39m=[32m"img"[39m
+  [36m/>[39m
+
+  Name "Metering Rate: 57%, baseline 42, expected 68 for this period, target 100, behind the approved trajectory":
+  [36m<div[39m
+    [33maria-label[39m=[32m"Metering Rate: 57%, baseline 42, expected 68 for this period, target 100, behind the approved trajectory"[39m
+    [33mclass[39m=[32m"relative h-6 w-full mt-3"[39m
+    [33mrole[39m=[32m"img"[39m
+  [36m/>[39m
+
+  Name "ATC&C Loss Rate: 34.9%, baseline 45, expected 31 for this period, behind the approved trajectory":
+  [36m<div[39m
+    [33maria-label[39m=[32m"ATC&C Loss Rate: 34.9%, baseline 45, expected 31 for this period, behind the approved trajectory"[39m
+    [33mclass[39m=[32m"relative h-6 w-full mt-3"[39m
+    [33mrole[39m=[32m"img"[39m
+  [36m/>[39m
+
+  Name "DisCo Remittance to NBET/GenCos: 92.7%, baseline 95.21, expected 85 for this period, target 100, at or ahead of the approved trajectory":
+  [36m<div[39m
+    [33maria-label[39m=[32m"DisCo Remittance to NBET/GenCos: 92.7%, baseline 95.21, expected 85 for this period, target 100, at or ahead of the approved trajectory"[39m
+    [33mclass[39m=[32m"relative h-6 w-full mt-3"[39m
+    [33mrole[39m=[32m"img"[39m
+  [36m/>[39m
+
+  Name "Subsidy / Tariff Shortfall: ₦0.42tn, baseline 2200, expected 1700 for this period, target 0, at or ahead of the approved trajectory":
+  [36m<div[39m
+    [33maria-label[39m=[32m"Subsidy / Tariff Shortfall: ₦0.42tn, baseline 2200, expected 1700 for this period, target 0, at or ahead of the approved trajectory"[39m
+    [33mclass[39m=[32m"relative h-6 w-full mt-3"[39m
+    [33mrole[39m=[32m"img"[39m
+  [36m/>[39m
+
+  Name "Private Capital Mobilized for Last-Mile Access: $0.0B, baseline 0, expected 2400 for this period, target 15500, behind the approved trajectory":
+  [36m<div[39m
+    [33maria-label[39m=[32m"Private Capital Mobilized for Last-Mile Access: $0.0B, baseline 0, expected 2400 for this period, target 15500, behind the approved trajectory"[39m
+    [33mclass[39m=[32m"relative h-6 w-full mt-3"[39m
+    [33mrole[39m=[32m"img"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"rounded-card bg-surface-sunken p-4"[39m
+      [33mdata-slot[39m=[32m"card"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"flex flex-wrap items-baseline justify-between gap-2"[39m
+      [36m>[39m
+        [36m<h2[39m
+          [33mclass[39m=[32m"text-lg font-semibold text-text-default"[39m
+        [36m>[39m
+          [0mNational performance and target progress[0m
+        [36m</h2>[39m
+        [36m<ul[39m
+          [33mclass[39m=[32m"flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-text-muted"[39m
+        [36m>[39m
+          [36m<li[39m
+            [33mclass[39m=[32m"flex items-center gap-1.5"[39m
+          [36m>[39m
+            [36m<span[39m
+              [33maria-hidden[39m=[32m"true"[39m
+              [33mclass[39m=[32m"h-3 w-0.5 rounded-full bg-text-subtle"[39m
+            [36m/>[39m
+            [0mBaseline[0m
+          [36m</li>[39m
+          [36m<li[39m
+            [33mclass[39m=[32m"flex items-center gap-1.5"[39m
+          [36m>[39m
+            [36m<span[39m
+              [33maria-hidden[39m=[32m"true"[39m
+              [33mclass[39m=[32m"h-3 w-0.5 rounded-full bg-text-muted"[39m
+            [36m/>[39m
+            [0mExpected this period[0m
+          [36m</li>[39m
+          [36m<li[39m
+            [33mclass[39m=[32m"flex items-center gap-1.5"[39m
+          [36m>[39m
+            [36m<span[39m
+              [33maria-hidden[39m=[32m"true"[39m
+              [33mclass[39m=[32m"h-3 w-1 rounded-full bg-text-default"[39m
+            [36m/>[39m
+            [0mTarget[0m
+          [36m</li>[39m
+        [36m</ul>[39m
+      [36m</div>[39m
+      [36m<ul[39m
+        [33maria-label[39m=[32m"National performance metrics"[39m
+        [33mclass[39m=[32m"mt-3 grid gap-3 lg:grid-cols-2 2xl:grid-cols-3"[39m
+      [36m>[39m
+        [36m<li>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"rounded-card bg-surface flex h-full flex-col p-4"[39m
+            [33mdata-slot[39m=[32m"card"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex items-start justify-between gap-3"[39m
+            [36m>[39m
+              [36m<h3[39m
+                [33mclass[39m=[32m"text-sm font-medium text-text-default"[39m
+              [36m>[39m
+                [0mRenewable Energy Share in Generation Mix[0m
+              [36m</h3>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex shrink-0 items-center gap-1.5"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"inline-flex items-center gap-1.5 rounded-pill px-2.5 py-1 text-xs font-medium whitespace-nowrap bg-status-on-track-bg text-status-on-track"[39m
+                [36m>[39m
+                  [0mPublic source[0m
+                [36m</span>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"relative inline-flex"[39m
+                [36m>[39m
+                  [36m<button[39m
+                    [33maria-expanded[39m=[32m"false"[39m
+                    [33maria-label[39m=[32m"About Renewable Energy Share in Generation Mix: definition, methodology and data source"[39m
+                    [33mclass[39m=[32m"inline-flex size-5 items-center justify-center rounded-full text-text-subtle transition-colors hover:text-text-muted"[39m
+                    [33mtype[39m=[32m"button"[39m
+                  [36m>[39m
+                    [36m<svg[39m
+                      [33maria-hidden[39m=[32m"true"[39m
+                      [33mclass[39m=[32m"lucide lucide-info size-4"[39m
+                      [33mfill[39m=[32m"none"[39m
+                      [33mheight[39m=[32m"24"[39m
+                      [33mstroke[39m=[32m"currentColor"[39m
+                      [33mstroke-linecap[39m=[32m"round"[39m
+                      [33mstroke-linejoin[39m=[32m"round"[39m
+                      [33mstroke-width[39m=[32m"2"[39m
+                      [33mviewBox[39m=[32m"0 0 24 24"[39m
+                      [33mwidth[39m=[32m"24"[39m
+                      [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                    [36m>[39m
+                      [36m<circle[39m
+                        [33mcx[39m=[32m"12"[39m
+                        [33mcy[39m=[32m"12"[39m
+                        [33mr[39m=[32m"10"[39m
+                      [36m/>[39m
+                      [36m<path[39m
+                        [33md[39m=[32m"M12 16v-4"[39m
+                      [36m/>[39m
+                      [36m<path[39m
+                        [33md[39m=[32m"M12 8h.01"[39m
+                      [36m/>[39m
+                    [36m</svg>[39m
+                  [36m</button>[39m
+                [36m</div>[39m
+              [36m</div>[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"mt-2 flex flex-wrap items-baseline gap-x-2.5 gap-y-1"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"text-2xl font-semibold tracking-tight text-text-default"[39m
+              [36m>[39m
+                [0m38.3%[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"inline-flex items-center gap-1.5 rounded-pill px-2.5 py-1 text-xs font-medium bg-status-on-track-bg text-trend-up"[39m
+              [36m>[39m
+                [36m<svg[39m
+                  [33maria-hidden[39m=[32m"true"[39m
+                  [33mclass[39m=[32m"lucide lucide-arrow-up size-3.5 shrink-0"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mheight[39m=[32m"24"[39m
+                  [33mstroke[39m=[32m"currentColor"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-linejoin[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"2"[39m
+                  [33mviewBox[39m=[32m"0 0 24 24"[39m
+                  [33mwidth[39m=[32m"24"[39m
+                  [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                [36m>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"m5 12 7-7 7 7"[39m
+                  [36m/>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M12 19V5"[39m
+                  [36m/>[39m
+                [36m</svg>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"sr-only"[39m
+                [36m>[39m
+                  [0mImproving:[0m
+                [36m</span>[39m
+                [0m+1.2 pts vs prior year[0m
+              [36m</span>[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33maria-label[39m=[32m"Renewable Energy Share in Generation Mix: 3...
+ ❯ Object.getElementError node_modules/.pnpm/@testing-library+dom@10.4.1/node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ node_modules/.pnpm/@testing-library+dom@10.4.1/node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ❯ node_modules/.pnpm/@testing-library+dom@10.4.1/node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ❯ getByRole node_modules/.pnpm/@testing-library+dom@10.4.1/node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ src/test/features/dashboard/sections.test.tsx:216:10
+    214|     expect(
+    215|       screen
+    216|         .getByRole('img', { name: /ATC&C loss rate/ })
+       |          ^
+    217|         .getAttribute('aria-label'),
+    218|     ).not.toContain('target')
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/14]⎯
+
+ FAIL  src/test/features/dashboard/sections.test.tsx > Section D — delivery status and exceptions > states each pillar record count
+TestingLibraryElementError: Unable to find an element with the text: 21 records. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"rounded-card bg-surface-sunken p-4"[39m
+      [33mdata-slot[39m=[32m"card"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"flex flex-wrap items-start justify-between gap-3"[39m
+      [36m>[39m
+        [36m<div>[39m
+          [36m<h2[39m
+            [33mclass[39m=[32m"text-lg font-semibold text-text-default"[39m
+          [36m>[39m
+            [0mDelivery status, bottlenecks and decisions[0m
+          [36m</h2>[39m
+        [36m</div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"flex items-center gap-2"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"relative inline-flex"[39m
+          [36m>[39m
+            [36m<button[39m
+              [33maria-expanded[39m=[32m"false"[39m
+              [33maria-label[39m=[32m"About Delivery status and exceptions: definition, methodology and data source"[39m
+              [33mclass[39m=[32m"inline-flex size-5 items-center justify-center rounded-full text-text-subtle transition-colors hover:text-text-muted"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mclass[39m=[32m"lucide lucide-info size-4"[39m
+                [33mfill[39m=[32m"none"[39m
+                [33mheight[39m=[32m"24"[39m
+                [33mstroke[39m=[32m"currentColor"[39m
+                [33mstroke-linecap[39m=[32m"round"[39m
+                [33mstroke-linejoin[39m=[32m"round"[39m
+                [33mstroke-width[39m=[32m"2"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+                [33mwidth[39m=[32m"24"[39m
+                [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+              [36m>[39m
+                [36m<circle[39m
+                  [33mcx[39m=[32m"12"[39m
+                  [33mcy[39m=[32m"12"[39m
+                  [33mr[39m=[32m"10"[39m
+                [36m/>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M12 16v-4"[39m
+                [36m/>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M12 8h.01"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+            [36m</button>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"mt-3 grid gap-3 xl:grid-cols-[1.1fr_1fr]"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"rounded-card bg-surface p-4"[39m
+          [33mdata-slot[39m=[32m"card"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex flex-wrap items-baseline justify-between gap-2"[39m
+          [36m>[39m
+            [36m<h3[39m
+              [33mclass[39m=[32m"text-sm font-semibold text-text-default"[39m
+            [36m>[39m
+              [0mPriority delivery status by pillar[0m
+            [36m</h3>[39m
+            [36m<ul[39m
+              [33mclass[39m=[32m"flex flex-wrap items-center gap-x-4 gap-y-1.5"[39m
+            [36m>[39m
+              [36m<li[39m
+                [33mclass[39m=[32m"flex items-center gap-1.5 text-xs text-text-muted"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33maria-hidden[39m=[32m"true"[39m
+                  [33mclass[39m=[32m"size-2 shrink-0 rounded-full bg-chart-blue-darkest"[39m
+                [36m/>[39m
+                [0mCompleted[0m
+              [36m</li>[39m
+              [36m<li[39m
+                [33mclass[39m=[32m"flex items-center gap-1.5 text-xs text-text-muted"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33maria-hidden[39m=[32m"true"[39m
+                  [33mclass[39m=[32m"size-2 shrink-0 rounded-full bg-chart-blue-dark"[39m
+                [36m/>[39m
+                [0mOn track[0m
+              [36m</li>[39m
+              [36m<li[39m
+                [33mclass[39m=[32m"flex items-center gap-1.5 text-xs text-text-muted"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33maria-hidden[39m=[32m"true"[39m
+                  [33mclass[39m=[32m"size-2 shrink-0 rounded-full bg-chart-blue"[39m
+                [36m/>[39m
+                [0mAt risk[0m
+              [36m</li>[39m
+              [36m<li[39m
+                [33mclass[39m=[32m"flex items-center gap-1.5 text-xs text-text-muted"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33maria-hidden[39m=[32m"true"[39m
+                  [33mclass[39m=[32m"size-2 shrink-0 rounded-full bg-chart-blue-light"[39m
+                [36m/>[39m
+                [0mDelayed[0m
+              [36m</li>[39m
+              [36m<li[39m
+                [33mclass[39m=[32m"flex items-center gap-1.5 text-xs text-text-muted"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33maria-hidden[39m=[32m"true"[39m
+                  [33mclass[39m=[32m"size-2 shrink-0 rounded-full bg-chart-accent"[39m
+                [36m/>[39m
+                [0mBlocked[0m
+              [36m</li>[39m
+            [36m</ul>[39m
+          [36m</div>[39m
+          [36m<ul[39m
+            [33maria-label[39m=[32m"Priority delivery status by pillar"[39m
+            [33mclass[39m=[32m"mt-4 space-y-3.5"[39m
+          [36m>[39m
+            [36m<li>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex items-baseline justify-between gap-3"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"text-sm font-medium text-text-default"[39m
+                [36m>[39m
+                  [0mGeneration & network[0m
+                [36m</span>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"text-xs text-text-muted"[39m
+                [36m>[39m
+                  [0m6[0m
+                  [0m record[0m
+                  [0ms[0m
+                [36m</span>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33maria-label[39m=[32m"Generation & network: 2 on track, 2 at risk, 2 delayed, 6 total"[39m
+                [33mclass[39m=[32m"flex h-2.5 w-full overflow-hidden rounded-pill mt-1.5"[39m
+                [33mrole[39m=[32m"img"[39m
+              [36m>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"bg-chart-blue-dark"[39m
+                  [33mdata-testid[39m=[32m"segment-on-track"[39m
+                  [33mstyle[39m=[32m"width: 33.33333333333333%;"[39m
+                  [33mtitle[39m=[32m"On track: 2"[39m
+                [36m/>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"bg-chart-blue"[39m
+           ...
+ ❯ Object.getElementError node_modules/.pnpm/@testing-library+dom@10.4.1/node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ node_modules/.pnpm/@testing-library+dom@10.4.1/node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ❯ node_modules/.pnpm/@testing-library+dom@10.4.1/node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ❯ getByText node_modules/.pnpm/@testing-library+dom@10.4.1/node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ src/test/features/dashboard/sections.test.tsx:245:19
+    243|     renderWithRouter(<DeliveryStatusSection panel={deliveryStatus} />)
+    244|
+    245|     expect(screen.getByText('21 records')).toBeInTheDocument()
+       |                   ^
+    246|   })
+    247|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/14]⎯
+
+ FAIL  src/test/features/dashboard/sections.test.tsx > Section D — delivery status and exceptions > says so plainly when a pillar has no approved records
+TestingLibraryElementError: Found multiple elements with the text: No approved priority records
+
+Here are the matching elements:
+
+Ignored nodes: comments, script, style
+[36m<p[39m
+  [33mclass[39m=[32m"text-xs text-text-subtle mt-1.5"[39m
+[36m>[39m
+  [0mNo approved priority records[0m
+[36m</p>[39m
+
+Ignored nodes: comments, script, style
+[36m<p[39m
+  [33mclass[39m=[32m"text-xs text-text-subtle mt-1.5"[39m
+[36m>[39m
+  [0mNo approved priority records[0m
+[36m</p>[39m
+
+Ignored nodes: comments, script, style
+[36m<p[39m
+  [33mclass[39m=[32m"text-xs text-text-subtle mt-1.5"[39m
+[36m>[39m
+  [0mNo approved priority records[0m
+[36m</p>[39m
+
+(If this is intentional, then use the `*AllBy*` variant of the query (like `queryAllByText`, `getAllByText`, or `findAllByText`)).
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"rounded-card bg-surface-sunken p-4"[39m
+      [33mdata-slot[39m=[32m"card"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"flex flex-wrap items-start justify-between gap-3"[39m
+      [36m>[39m
+        [36m<div>[39m
+          [36m<h2[39m
+            [33mclass[39m=[32m"text-lg font-semibold text-text-default"[39m
+          [36m>[39m
+            [0mDelivery status, bottlenecks and decisions[0m
+          [36m</h2>[39m
+        [36m</div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"flex items-center gap-2"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"relative inline-flex"[39m
+          [36m>[39m
+            [36m<button[39m
+              [33maria-expanded[39m=[32m"false"[39m
+              [33maria-label[39m=[32m"About Delivery status and exceptions: definition, methodology and data source"[39m
+              [33mclass[39m=[32m"inline-flex size-5 items-center justify-center rounded-full text-text-subtle transition-colors hover:text-text-muted"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mclass[39m=[32m"lucide lucide-info size-4"[39m
+                [33mfill[39m=[32m"none"[39m
+                [33mheight[39m=[32m"24"[39m
+                [33mstroke[39m=[32m"currentColor"[39m
+                [33mstroke-linecap[39m=[32m"round"[39m
+                [33mstroke-linejoin[39m=[32m"round"[39m
+                [33mstroke-width[39m=[32m"2"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+                [33mwidth[39m=[32m"24"[39m
+                [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+              [36m>[39m
+                [36m<circle[39m
+                  [33mcx[39m=[32m"12"[39m
+                  [33mcy[39m=[32m"12"[39m
+                  [33mr[39m=[32m"10"[39m
+                [36m/>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M12 16v-4"[39m
+                [36m/>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M12 8h.01"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+            [36m</button>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"mt-3 grid gap-3 xl:grid-cols-[1.1fr_1fr]"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"rounded-card bg-surface p-4"[39m
+          [33mdata-slot[39m=[32m"card"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex flex-wrap items-baseline justify-between gap-2"[39m
+          [36m>[39m
+            [36m<h3[39m
+              [33mclass[39m=[32m"text-sm font-semibold text-text-default"[39m
+            [36m>[39m
+              [0mPriority delivery status by pillar[0m
+            [36m</h3>[39m
+            [36m<ul[39m
+              [33mclass[39m=[32m"flex flex-wrap items-center gap-x-4 gap-y-1.5"[39m
+            [36m>[39m
+              [36m<li[39m
+                [33mclass[39m=[32m"flex items-center gap-1.5 text-xs text-text-muted"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33maria-hidden[39m=[32m"true"[39m
+                  [33mclass[39m=[32m"size-2 shrink-0 rounded-full bg-chart-blue-darkest"[39m
+                [36m/>[39m
+                [0mCompleted[0m
+              [36m</li>[39m
+              [36m<li[39m
+                [33mclass[39m=[32m"flex items-center gap-1.5 text-xs text-text-muted"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33maria-hidden[39m=[32m"true"[39m
+                  [33mclass[39m=[32m"size-2 shrink-0 rounded-full bg-chart-blue-dark"[39m
+                [36m/>[39m
+                [0mOn track[0m
+              [36m</li>[39m
+              [36m<li[39m
+                [33mclass[39m=[32m"flex items-center gap-1.5 text-xs text-text-muted"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33maria-hidden[39m=[32m"true"[39m
+                  [33mclass[39m=[32m"size-2 shrink-0 rounded-full bg-chart-blue"[39m
+                [36m/>[39m
+                [0mAt risk[0m
+              [36m</li>[39m
+              [36m<li[39m
+                [33mclass[39m=[32m"flex items-center gap-1.5 text-xs text-text-muted"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33maria-hidden[39m=[32m"true"[39m
+                  [33mclass[39m=[32m"size-2 shrink-0 rounded-full bg-chart-blue-light"[39m
+                [36m/>[39m
+                [0mDelayed[0m
+              [36m</li>[39m
+              [36m<li[39m
+                [33mclass[39m=[32m"flex items-center gap-1.5 text-xs text-text-muted"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33maria-hidden[39m=[32m"true"[39m
+                  [33mclass[39m=[32m"size-2 shrink-0 rounded-full bg-chart-accent"[39m
+                [36m/>[39m
+                [0mBlocked[0m
+              [36m</li>[39m
+            [36m</ul>[39m
+          [36m</div>[39m
+          [36m<ul[39m
+            [33maria-label[39m=[32m"Priority delivery status by pillar"[39m
+            [33mclass[39m=[32m"mt-4 space-y-3.5"[39m
+          [36m>[39m
+            [36m<li>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex items-baseline justify-between gap-3"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"text-sm font-medium text-text-default"[39m
+                [36m>[39m
+                  [0mGeneration & network[0m
+                [36m</span>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"text-xs text-text-muted"[39m
+                [36m>[39m
+                  [0m6[0m
+                  [0m record[0m
+                  [0ms[0m
+                [36m</span>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33maria-label[39m=[32m"Generation & network: 2 on track, 2 at risk, 2 delayed, 6 total"[39m
+                [33mclass[39m=[32m"flex h-2.5 w-full overflow-hidden rounded-pill mt-1.5"[39m
+                [33mrole[39m=[32m"img"[39m
+              [36m>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"bg-chart-blue-dark"[39m
+                  [33mdata-testid[39m=[32m"segment-on-track"[39m
+                  [33mstyle[39m=[32m"width: 33.33333333333333%;"[39m
+                  [33mtitle[39m=[32m"On track: 2"[39m
+                [36m/>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"bg-chart-blue"[39m
+           ...
+ ❯ Object.getElementError node_modules/.pnpm/@testing-library+dom@10.4.1/node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ getElementError node_modules/.pnpm/@testing-library+dom@10.4.1/node_modules/@testing-library/dom/dist/query-helpers.js:20:35
+ ❯ getMultipleElementsFoundError node_modules/.pnpm/@testing-library+dom@10.4.1/node_modules/@testing-library/dom/dist/query-helpers.js:23:10
+ ❯ node_modules/.pnpm/@testing-library+dom@10.4.1/node_modules/@testing-library/dom/dist/query-helpers.js:55:13
+ ❯ getByText node_modules/.pnpm/@testing-library+dom@10.4.1/node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ src/test/features/dashboard/sections.test.tsx:251:19
+    249|     renderWithRouter(<DeliveryStatusSection panel={deliveryStatus} />)
+    250|
+    251|     expect(screen.getByText('No approved priority records')).toBeInThe…
+       |                   ^
+    252|   })
+    253|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/14]⎯
+
+ FAIL  src/test/features/dashboard/sections.test.tsx > Section D — delivery status and exceptions > renders the ranked exceptions with severity and days unresolved
+TestingLibraryElementError: Unable to find an element with the text: Tariff shortfall / cost-reflectivity. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"rounded-card bg-surface-sunken p-4"[39m
+      [33mdata-slot[39m=[32m"card"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"flex flex-wrap items-start justify-between gap-3"[39m
+      [36m>[39m
+        [36m<div>[39m
+          [36m<h2[39m
+            [33mclass[39m=[32m"text-lg font-semibold text-text-default"[39m
+          [36m>[39m
+            [0mDelivery status, bottlenecks and decisions[0m
+          [36m</h2>[39m
+        [36m</div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"flex items-center gap-2"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"relative inline-flex"[39m
+          [36m>[39m
+            [36m<button[39m
+              [33maria-expanded[39m=[32m"false"[39m
+              [33maria-label[39m=[32m"About Delivery status and exceptions: definition, methodology and data source"[39m
+              [33mclass[39m=[32m"inline-flex size-5 items-center justify-center rounded-full text-text-subtle transition-colors hover:text-text-muted"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mclass[39m=[32m"lucide lucide-info size-4"[39m
+                [33mfill[39m=[32m"none"[39m
+                [33mheight[39m=[32m"24"[39m
+                [33mstroke[39m=[32m"currentColor"[39m
+                [33mstroke-linecap[39m=[32m"round"[39m
+                [33mstroke-linejoin[39m=[32m"round"[39m
+                [33mstroke-width[39m=[32m"2"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+                [33mwidth[39m=[32m"24"[39m
+                [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+              [36m>[39m
+                [36m<circle[39m
+                  [33mcx[39m=[32m"12"[39m
+                  [33mcy[39m=[32m"12"[39m
+                  [33mr[39m=[32m"10"[39m
+                [36m/>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M12 16v-4"[39m
+                [36m/>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M12 8h.01"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+            [36m</button>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"mt-3 grid gap-3 xl:grid-cols-[1.1fr_1fr]"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"rounded-card bg-surface p-4"[39m
+          [33mdata-slot[39m=[32m"card"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex flex-wrap items-baseline justify-between gap-2"[39m
+          [36m>[39m
+            [36m<h3[39m
+              [33mclass[39m=[32m"text-sm font-semibold text-text-default"[39m
+            [36m>[39m
+              [0mPriority delivery status by pillar[0m
+            [36m</h3>[39m
+            [36m<ul[39m
+              [33mclass[39m=[32m"flex flex-wrap items-center gap-x-4 gap-y-1.5"[39m
+            [36m>[39m
+              [36m<li[39m
+                [33mclass[39m=[32m"flex items-center gap-1.5 text-xs text-text-muted"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33maria-hidden[39m=[32m"true"[39m
+                  [33mclass[39m=[32m"size-2 shrink-0 rounded-full bg-chart-blue-darkest"[39m
+                [36m/>[39m
+                [0mCompleted[0m
+              [36m</li>[39m
+              [36m<li[39m
+                [33mclass[39m=[32m"flex items-center gap-1.5 text-xs text-text-muted"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33maria-hidden[39m=[32m"true"[39m
+                  [33mclass[39m=[32m"size-2 shrink-0 rounded-full bg-chart-blue-dark"[39m
+                [36m/>[39m
+                [0mOn track[0m
+              [36m</li>[39m
+              [36m<li[39m
+                [33mclass[39m=[32m"flex items-center gap-1.5 text-xs text-text-muted"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33maria-hidden[39m=[32m"true"[39m
+                  [33mclass[39m=[32m"size-2 shrink-0 rounded-full bg-chart-blue"[39m
+                [36m/>[39m
+                [0mAt risk[0m
+              [36m</li>[39m
+              [36m<li[39m
+                [33mclass[39m=[32m"flex items-center gap-1.5 text-xs text-text-muted"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33maria-hidden[39m=[32m"true"[39m
+                  [33mclass[39m=[32m"size-2 shrink-0 rounded-full bg-chart-blue-light"[39m
+                [36m/>[39m
+                [0mDelayed[0m
+              [36m</li>[39m
+              [36m<li[39m
+                [33mclass[39m=[32m"flex items-center gap-1.5 text-xs text-text-muted"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33maria-hidden[39m=[32m"true"[39m
+                  [33mclass[39m=[32m"size-2 shrink-0 rounded-full bg-chart-accent"[39m
+                [36m/>[39m
+                [0mBlocked[0m
+              [36m</li>[39m
+            [36m</ul>[39m
+          [36m</div>[39m
+          [36m<ul[39m
+            [33maria-label[39m=[32m"Priority delivery status by pillar"[39m
+            [33mclass[39m=[32m"mt-4 space-y-3.5"[39m
+          [36m>[39m
+            [36m<li>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex items-baseline justify-between gap-3"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"text-sm font-medium text-text-default"[39m
+                [36m>[39m
+                  [0mGeneration & network[0m
+                [36m</span>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"text-xs text-text-muted"[39m
+                [36m>[39m
+                  [0m6[0m
+                  [0m record[0m
+                  [0ms[0m
+                [36m</span>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33maria-label[39m=[32m"Generation & network: 2 on track, 2 at risk, 2 delayed, 6 total"[39m
+                [33mclass[39m=[32m"flex h-2.5 w-full overflow-hidden rounded-pill mt-1.5"[39m
+                [33mrole[39m=[32m"img"[39m
+              [36m>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"bg-chart-blue-dark"[39m
+                  [33mdata-testid[39m=[32m"segment-on-track"[39m
+                  [33mstyle[39m=[32m"width: 33.33333333333333%;"[39m
+                  [33mtitle[39m=[32m"On track: 2"[39m
+                [36m/>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"bg-chart-blue"[39m
+           ...
+ ❯ Object.getElementError node_modules/.pnpm/@testing-library+dom@10.4.1/node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ node_modules/.pnpm/@testing-library+dom@10.4.1/node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ❯ node_modules/.pnpm/@testing-library+dom@10.4.1/node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ❯ getByText node_modules/.pnpm/@testing-library+dom@10.4.1/node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ src/test/features/dashboard/sections.test.tsx:267:14
+    265|
+    266|     expect(
+    267|       screen.getByText('Tariff shortfall / cost-reflectivity'),
+       |              ^
+    268|     ).toBeInTheDocument()
+    269|     expect(screen.getAllByText('Critical')).not.toHaveLength(0)
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[14/14]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  14 failed | 12 passed (26)
+   Start at  19:38:27
+   Duration  140.43s (transform 40.31s, setup 26.17s, import 41.80s, tests 18.22s, environment 49.41s)
+

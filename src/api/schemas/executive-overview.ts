@@ -1,7 +1,6 @@
 import { z } from 'zod'
 import {
   dataConfidenceSchema,
-  deliveryStatusSchema,
   improvementDirectionSchema,
   metricIconNameSchema,
   metricProvenanceSchema,
@@ -10,6 +9,7 @@ import {
   trendSchema,
 } from './common'
 import { dashboardFilterValuesSchema } from './filters'
+import { executionStatusSchema } from './programs'
 
 /**
  * Contract for GET /api/executive-overview.
@@ -27,24 +27,26 @@ import { dashboardFilterValuesSchema } from './filters'
  * card cannot go missing without failing validation.
  * ------------------------------------------------------------------ */
 
-/** A1. Wide progress card with the delivery-status breakdown. */
-export const milestoneDeliveryCardSchema = z.object({
+/** Mission 300 high-level outcome shown as baseline → current → 2030 target. */
+export const compactOutcomeCardSchema = z.object({
   title: z.string().min(1),
   icon: metricIconNameSchema,
-  /** Percentage of due priority milestones completed on schedule. */
-  percentComplete: z.number().min(0).max(100),
-  breakdown: z.array(
-    z.object({
-      status: deliveryStatusSchema,
-      label: z.string().min(1),
-      count: z.number().int().min(0),
-    }),
-  ),
+  value: z.string().min(1),
+  current: z.number().min(0),
+  baseline: z.number().min(0),
+  target: z.number().positive(),
+  scaleMin: z.number(),
+  scaleMax: z.number(),
+  reportingPeriod: z.string().min(1),
   baselineLabel: z.string(),
   targetLabel: z.string(),
-  trend: trendSchema.optional(),
+  direction: improvementDirectionSchema,
   source: sourceTagSchema,
+  confidence: dataConfidenceSchema,
   provenance: metricProvenanceSchema,
+}).refine((card) => card.scaleMax > card.scaleMin, {
+  message: 'scaleMax must be greater than scaleMin',
+  path: ['scaleMax'],
 })
 
 /**
@@ -66,6 +68,8 @@ export const accessRateCardSchema = z.object({
   source: sourceTagSchema,
   confidence: dataConfidenceSchema,
   provenance: metricProvenanceSchema,
+  /** Ordered oldest-to-newest readings, one per prior publication. */
+  sparkline: z.array(z.number()),
 })
 
 /** A3. Available generation capacity, with a trend sparkline. */
@@ -86,29 +90,11 @@ export const generationCapacityCardSchema = z.object({
   provenance: metricProvenanceSchema,
 })
 
-/**
- * A4. Critical escalations alert card.
- *
- * Improvement means the count going DOWN, so the trend direction is
- * lower-is-better and a falling count renders green.
- */
-export const escalationsCardSchema = z.object({
-  title: z.string().min(1),
-  icon: metricIconNameSchema,
-  unresolvedCritical: z.number().int().min(0),
-  overdueDecisions: z.number().int().min(0),
-  longestDaysUnresolved: z.number().int().min(0),
-  targetLabel: z.string(),
-  trend: trendSchema.optional(),
-  source: sourceTagSchema,
-  provenance: metricProvenanceSchema,
-})
-
 export const headlineCardsSchema = z.object({
-  milestoneDelivery: milestoneDeliveryCardSchema,
+  peopleWithElectricityAccess: compactOutcomeCardSchema,
   accessRate: accessRateCardSchema,
   generationCapacity: generationCapacityCardSchema,
-  escalations: escalationsCardSchema,
+  cleanCookingAccess: compactOutcomeCardSchema,
 })
 
 /* ------------------------------------------------------------------ *
@@ -201,29 +187,30 @@ export const bottleneckSchema = z.object({
   provenance: metricProvenanceSchema,
 })
 
-/** Per-pillar record counts, rendered as a horizontal stacked bar. */
-export const pillarDeliveryStatusSchema = z
-  .object({
-    pillar: pillarIdSchema,
-    label: z.string().min(1),
-    counts: z.array(
-      z.object({
-        status: deliveryStatusSchema,
-        count: z.number().int().min(0),
-      }),
-    ),
-    total: z.number().int().min(0),
-  })
-  // The bar divides each count by the total, so a mismatch would render
-  // segments that do not fill the bar.
-  .refine(
-    (entry) =>
-      entry.counts.reduce((sum, count) => sum + count.count, 0) === entry.total,
-    { message: 'counts must sum to total', path: ['total'] },
-  )
-
 export const deliveryStatusPanelSchema = z.object({
-  pillars: z.array(pillarDeliveryStatusSchema),
+  ongoingProjects: z.array(
+    z.object({
+      id: z.string().min(1),
+      name: z.string().min(1),
+      programmeId: z.string().min(1),
+      programmeName: z.string().min(1),
+      pillar: pillarIdSchema,
+      pillarLabel: z.string().min(1),
+      owner: z.string().min(1),
+      location: z.string().min(1),
+      latitude: z.number().min(-90).max(90),
+      longitude: z.number().min(-180).max(180),
+      currentStatus: executionStatusSchema.exclude(['completed']),
+      startDate: z.iso.datetime(),
+      endDate: z.iso.datetime(),
+    }),
+  ),
+  statusSummary: z.array(
+    z.object({
+      status: executionStatusSchema.exclude(['completed']),
+      count: z.number().int().min(0),
+    }),
+  ),
   exceptions: z.array(bottleneckSchema),
   trend: trendSchema.optional(),
   provenance: metricProvenanceSchema,
@@ -250,16 +237,20 @@ export const executiveOverviewSchema = z.object({
 export const executiveOverviewQuerySchema =
   dashboardFilterValuesSchema.partial()
 
-export type MilestoneDeliveryCard = z.infer<typeof milestoneDeliveryCardSchema>
+export type CompactOutcomeCard = z.infer<typeof compactOutcomeCardSchema>
 export type AccessRateCard = z.infer<typeof accessRateCardSchema>
 export type GenerationCapacityCard = z.infer<typeof generationCapacityCardSchema>
-export type EscalationsCard = z.infer<typeof escalationsCardSchema>
 export type HeadlineCards = z.infer<typeof headlineCardsSchema>
 export type AccessChannel = z.infer<typeof accessChannelSchema>
 export type BulletMetric = z.infer<typeof bulletMetricSchema>
 export type BottleneckSeverity = z.infer<typeof bottleneckSeveritySchema>
 export type Bottleneck = z.infer<typeof bottleneckSchema>
-export type PillarDeliveryStatus = z.infer<typeof pillarDeliveryStatusSchema>
+export type OngoingProject = z.infer<
+  typeof deliveryStatusPanelSchema.shape.ongoingProjects.element
+>
+export type ProjectStatusSummary = z.infer<
+  typeof deliveryStatusPanelSchema.shape.statusSummary.element
+>
 export type DeliveryStatusPanel = z.infer<typeof deliveryStatusPanelSchema>
 export type ExecutiveOverview = z.infer<typeof executiveOverviewSchema>
 export type ExecutiveOverviewQuery = z.infer<typeof executiveOverviewQuerySchema>

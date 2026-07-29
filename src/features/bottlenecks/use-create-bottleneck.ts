@@ -16,7 +16,7 @@ import { createBottleneck } from './api'
  * server-error and success-message state the dialog reads to decide which
  * view to show.
  */
-export function useCreateBottleneck(onCreated: () => void) {
+export function useCreateBottleneck(onCreated: () => void, defaultLinkedRecord = '') {
   const [serverError, setServerError] = useState('')
   const [successMessage, setSuccessMessage] = useState('')
   const form = useForm<CreateBottleneckRequest>({
@@ -26,7 +26,7 @@ export function useCreateBottleneck(onCreated: () => void) {
       category: 'coordination',
       severity: 'medium',
       pillar: 'generation-network',
-      linkedRecord: '',
+      linkedRecord: defaultLinkedRecord,
       institution: '',
       lifecycleStage: 'identification',
       followUp: '',

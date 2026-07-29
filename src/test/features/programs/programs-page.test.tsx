@@ -2,13 +2,20 @@ import { screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it } from 'vitest'
 import { ProgramsPage } from '@/features/programs/programs-page'
-import { renderWithProviders } from '@/test/render'
+import { ProgrammeDetailPage } from '@/features/programs/programme-detail-page'
+import { renderRoutesWithProviders, renderWithProviders } from '@/test/render'
 
 describe('ProgramsPage', () => {
-  it('renders the portfolio summary card and the programme table', async () => {
+  it('renders the headline cards and the programme table', async () => {
     renderWithProviders(<ProgramsPage />, { route: '/programs' })
 
-    expect(await screen.findByRole('heading', { name: 'Programs' })).toBeInTheDocument()
+    expect(
+      await screen.findByRole('heading', { name: 'Programs' }, { timeout: 3000 }),
+    ).toBeInTheDocument()
+
+    expect(
+      screen.getByRole('region', { name: 'Headline performance cards' }),
+    ).toBeInTheDocument()
     expect(screen.getByText('Active programmes and projects')).toBeInTheDocument()
 
     const table = screen.getByRole('table', {
@@ -17,21 +24,29 @@ describe('ProgramsPage', () => {
     expect(within(table).getByText('PRG-2025-001')).toBeInTheDocument()
   })
 
-  it('links through to the full Implementation Register', async () => {
-    renderWithProviders(<ProgramsPage />, { route: '/programs' })
+  it('navigates to a programme detail page when a programme is clicked', async () => {
+    const user = userEvent.setup()
+    renderRoutesWithProviders(
+      [
+        { path: 'programs', element: <ProgramsPage /> },
+        { path: 'programs/:programmeId', element: <ProgrammeDetailPage /> },
+      ],
+      { route: '/programs' },
+    )
 
-    await screen.findByRole('heading', { name: 'Programs' })
+    await screen.findByRole('heading', { name: 'Programs' }, { timeout: 3000 })
+    await user.click(screen.getByRole('button', { name: 'Transmission Rehabilitation Programme' }))
 
     expect(
-      screen.getByRole('link', { name: /Open Implementation Register/ }),
-    ).toHaveAttribute('href', '/implementation-register')
+      await screen.findByRole('heading', { name: 'Transmission Rehabilitation Programme' }),
+    ).toBeInTheDocument()
   })
 
-  it('opens the advanced filters popover with this page\'s own three filters', async () => {
+  it("opens the advanced filters popover with this page's own three filters", async () => {
     const user = userEvent.setup()
     renderWithProviders(<ProgramsPage />, { route: '/programs' })
 
-    await screen.findByRole('heading', { name: 'Programs' })
+    await screen.findByRole('heading', { name: 'Programs' }, { timeout: 3000 })
     await user.click(screen.getByRole('button', { name: /Filters/ }))
 
     const dialog = screen.getByRole('dialog', { name: 'More filters' })

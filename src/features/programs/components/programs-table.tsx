@@ -1,23 +1,24 @@
-import type { ProgrammeRecord } from '@/api/schemas/implementation-register'
-import { PROGRAMME_COLUMNS } from '@/features/implementation-register/components/programme-columns'
+import type { ProgrammeRecord } from '@/api/schemas/programs'
 import { Card } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Pagination } from '@/components/ui/pagination'
+import { buildProgrammeColumns } from './programme-columns'
 
-/** The programme portfolio table — reuses the Implementation Register's
- * programme columns since both surfaces show the same record shape. */
+/** The programme portfolio table. Click a programme to drill into its projects. */
 export function ProgramsTable({
   records,
   page,
   pageSize,
   total,
   onPageChange,
+  onOpenProgramme,
 }: {
   records: readonly ProgrammeRecord[]
   page: number
   pageSize: number
   total: number
   onPageChange: (page: number) => void
+  onOpenProgramme: (programme: ProgrammeRecord) => void
 }) {
   return (
     <Card variant="well" className="p-2 sm:p-4">
@@ -26,7 +27,7 @@ export function ProgramsTable({
       <Card className="mt-2 min-w-0 overflow-hidden p-0 sm:mt-3 sm:p-1">
         <DataTable
           caption="Approved programmes in the Mission 300 portfolio"
-          columns={PROGRAMME_COLUMNS}
+          columns={buildProgrammeColumns(onOpenProgramme)}
           rows={records}
           getRowId={(row) => row.id}
           className="[&_table]:min-w-[1400px]"

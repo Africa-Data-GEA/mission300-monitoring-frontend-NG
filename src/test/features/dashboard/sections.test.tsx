@@ -27,18 +27,14 @@ describe('Section A — headline cards', () => {
     expect(within(section).getAllByRole('button', { name: /^About/ })).toHaveLength(4)
   })
 
-  it('renders the milestone delivery card with its progress bar', () => {
+  it('renders people with electricity access against its baseline and target', () => {
     render(<HeadlineCards cards={headlineCards} />)
 
+    expect(screen.getByText('People with electricity access')).toBeInTheDocument()
+    expect(screen.getByText('137.3M')).toBeInTheDocument()
     expect(
-      screen.getByText('Priority milestones on time'),
-    ).toBeInTheDocument()
-    expect(screen.getByText('15%')).toBeInTheDocument()
-    expect(
-      screen.getByRole('progressbar', {
-        name: 'Priority milestones on time',
-      }),
-    ).toHaveAttribute('aria-valuenow', '15')
+      screen.getByRole('img', { name: /People with electricity access/ }),
+    ).toHaveAttribute('aria-label', expect.stringContaining('baseline 86.6'))
   })
 
   /*
@@ -61,51 +57,28 @@ describe('Section A — headline cards', () => {
     expect(container.querySelector('polyline')).toBeInTheDocument()
   })
 
-  it('renders the escalations card with its count and overdue decisions', () => {
+  it('renders clean cooking access against its baseline and target', () => {
     render(<HeadlineCards cards={headlineCards} />)
 
+    expect(screen.getByText('Clean cooking access')).toBeInTheDocument()
+    expect(screen.getByText('26%')).toBeInTheDocument()
     expect(
-      screen.getByLabelText('4 unresolved critical escalations'),
-    ).toBeInTheDocument()
-    expect(screen.getByText(/3 overdue/)).toBeInTheDocument()
+      screen.getByRole('img', { name: /Clean cooking access/ }),
+    ).toHaveAttribute('aria-label', expect.stringContaining('target 100'))
   })
 
   /*
    * A rising escalation count is a worsening, so the trend must be
    * lower-is-better — otherwise "+1 vs Q2" would render green.
    */
-  it('treats a rising escalation count as a worsening', () => {
-    render(<HeadlineCards cards={headlineCards} />)
-
-    // getByText resolves to the trend pill itself, which carries the colour.
-    expect(screen.getByText('+1 vs Q2 2025')).toHaveClass('text-trend-down')
-  })
-
-  it('presents a cleared escalation count calmly rather than as an alert', () => {
-    render(
-      <HeadlineCards
-        cards={{
-          ...headlineCards,
-          escalations: {
-            ...headlineCards.escalations,
-            unresolvedCritical: 0,
-            overdueDecisions: 0,
-          },
-        }}
-      />,
-    )
-
-    expect(
-      screen.getByLabelText('0 unresolved critical escalations'),
-    ).toHaveClass('text-status-on-track')
-  })
-
   it('moves targets and baselines into the information popover, not the card', () => {
     render(<HeadlineCards cards={headlineCards} />)
 
     // The target text must not be printed on the card face.
     expect(
-      screen.queryByText('100% of due priority milestones on time'),
+      screen.queryByText(
+        'Cumulative number of people with electricity access across grid, mini-grid and solar home system solutions.',
+      ),
     ).not.toBeInTheDocument()
   })
 
@@ -114,12 +87,12 @@ describe('Section A — headline cards', () => {
     render(<HeadlineCards cards={headlineCards} />)
 
     await user.click(
-      screen.getByRole('button', { name: /About Priority milestones/ }),
+      screen.getByRole('button', { name: /About People with electricity access/ }),
     )
 
     const dialog = await screen.findByRole('dialog')
-    expect(dialog).toHaveTextContent('100% of due priority milestones on time')
-    expect(dialog).toHaveTextContent('baseline 0% (Jan 2025)')
+    expect(dialog).toHaveTextContent('236.7M by 2030')
+    expect(dialog).toHaveTextContent('86.6M baseline (2024)')
   })
 })
 
@@ -230,25 +203,71 @@ describe('Section C — national performance', () => {
 /* ---------------- Section D ---------------- */
 
 describe('Section D — delivery status and exceptions', () => {
-  it('renders a stacked bar per pillar', () => {
+  it('renders ongoing projects in a paginated table with drill-down links', () => {
     renderWithRouter(<DeliveryStatusSection panel={deliveryStatus} />)
 
-    const list = screen.getByRole('list', {
-      name: 'Priority delivery status by pillar',
+    expect(screen.getByRole('table')).toBeInTheDocument()
+    expect(screen.getByText(/Showing 1.*5 of 6 records/)).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'North East 330kV Line Upgrade' })).toHaveAttribute(
+      'href',
+      '/programs/projects/PRJ-2025-011',
+    )
+    expect(screen.getByRole('link', { name: 'Transmission Rehabilitation Programme' })).toHaveAttribute(
+      'href',
+      '/programs/PRG-2025-001',
+    )
+  })
+
+  it('paginates the project table', async () => {
+    const user = userEvent.setup()
+    renderWithRouter(<DeliveryStatusSection panel={deliveryStatus} />)
+
+    await user.click(screen.getByRole('button', { name: 'Next page' }))
+
+    expect(screen.getByText(/Showing 6.*6 of 6 records/)).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Feeder Rehabilitation Lots, Lagos' })).toBeInTheDocument()
+  })
+
+  it('searches projects and paginates the filtered results', async () => {
+    const user = userEvent.setup()
+    renderWithRouter(<DeliveryStatusSection panel={deliveryStatus} />)
+
+    await user.type(screen.getByRole('searchbox', { name: 'Search projects' }), 'Lagos')
+
+    expect(screen.getByText('2 projects found')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Ikeja Franchise Meter Rollout, Phase 2' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Feeder Rehabilitation Lots, Lagos' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Next page' })).toBeDisabled()
+  })
+
+  it('switches to an overall project-status chart', async () => {
+    const user = userEvent.setup()
+    renderWithRouter(<DeliveryStatusSection panel={deliveryStatus} />)
+
+    await user.click(screen.getByRole('tab', { name: 'Chart' }))
+
+    expect(
+      screen.getByRole('img', {
+        name: 'Delivery status distribution for 6 ongoing projects',
+      }),
+    ).toBeInTheDocument()
+  })
+
+  it('shows project locations and hover details in the map view', async () => {
+    const user = userEvent.setup()
+    renderWithRouter(<DeliveryStatusSection panel={deliveryStatus} />)
+
+    await user.click(screen.getByRole('tab', { name: 'Map' }))
+
+    expect(
+      screen.getByRole('region', { name: 'Map of Nigeria showing 6 ongoing project locations' }),
+    ).toBeInTheDocument()
+
+    const point = screen.getByRole('link', {
+      name: 'Open North East 330kV Line Upgrade in North East',
     })
-    expect(within(list).getAllByRole('listitem')).toHaveLength(6)
-  })
-
-  it('states each pillar record count', () => {
-    renderWithRouter(<DeliveryStatusSection panel={deliveryStatus} />)
-
-    expect(screen.getByText('21 records')).toBeInTheDocument()
-  })
-
-  it('says so plainly when a pillar has no approved records', () => {
-    renderWithRouter(<DeliveryStatusSection panel={deliveryStatus} />)
-
-    expect(screen.getByText('No approved priority records')).toBeInTheDocument()
+    await user.hover(point)
+    expect(screen.getByText('Transmission Rehabilitation Programme')).toBeInTheDocument()
   })
 
   it('links to the full bottlenecks module', () => {

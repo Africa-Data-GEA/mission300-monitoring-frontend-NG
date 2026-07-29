@@ -1,14 +1,14 @@
+import { BarChart3, Map, Table2 } from 'lucide-react'
 import { Link } from 'react-router'
 import { Card } from '@/components/ui/card'
 import { InfoPopover } from '@/components/ui/info-popover'
 import { SeverityBadge } from '@/components/ui/status-badge'
-import {
-  StackedStatusBar,
-  StatusLegend,
-} from '@/components/ui/stacked-status-bar'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { TrendIndicator } from '@/components/ui/trend-indicator'
-import type { DeliveryStatus } from '@/types/domain'
 import type { DeliveryStatusPanel } from '../types'
+import { OngoingProjectsTable } from './ongoing-projects-table'
+import { ProjectStatusChart } from './project-status-chart'
+import { ProjectsMap } from './projects-map'
 
 /**
  * Section D — Delivery Status, Bottlenecks and Decisions.
@@ -19,14 +19,6 @@ import type { DeliveryStatusPanel } from '../types'
  * and Exceptions module.
  */
 const MAX_VISIBLE_EXCEPTIONS = 5
-
-const LEGEND_STATUSES: readonly DeliveryStatus[] = [
-  'completed',
-  'on-track',
-  'at-risk',
-  'delayed',
-  'blocked',
-]
 
 export function DeliveryStatusSection({ panel }: { panel: DeliveryStatusPanel }) {
   // Enforced here rather than trusted to the API, so an over-long response
@@ -50,36 +42,47 @@ export function DeliveryStatusSection({ panel }: { panel: DeliveryStatusPanel })
         </div>
       </div>
 
-      <div className="mt-3 grid gap-3 xl:grid-cols-[1.1fr_1fr]">
-        {/* Pillar delivery status */}
+      <div className="mt-3 space-y-3">
+        {/* Ongoing project delivery */}
         <Card className="p-4">
-          <div className="flex flex-wrap items-baseline justify-between gap-2">
-            <h3 className="text-sm font-semibold text-text-default">
-              Priority delivery status by pillar
-            </h3>
-            <StatusLegend statuses={LEGEND_STATUSES} />
+          <div>
+            <div>
+              <h3 className="text-sm font-semibold text-text-default">
+                Priority project delivery status
+              </h3>
+              <p className="mt-1 text-xs text-text-muted">
+                {panel.ongoingProjects.length} ongoing project{panel.ongoingProjects.length === 1 ? '' : 's'}.
+                Open a project or its parent programme for the full delivery record.
+              </p>
+            </div>
           </div>
 
-          <ul aria-label="Priority delivery status by pillar" className="mt-4 space-y-3.5">
-            {panel.pillars.map((pillar) => (
-              <li key={pillar.pillar}>
-                <div className="flex items-baseline justify-between gap-3">
-                  <span className="text-sm font-medium text-text-default">
-                    {pillar.label}
-                  </span>
-                  <span className="text-xs text-text-muted">
-                    {pillar.total} record{pillar.total === 1 ? '' : 's'}
-                  </span>
-                </div>
-                <StackedStatusBar
-                  className="mt-1.5"
-                  counts={pillar.counts}
-                  total={pillar.total}
-                  label={pillar.label}
-                />
-              </li>
-            ))}
-          </ul>
+          <Tabs defaultValue="table" className="mt-3">
+            <TabsList aria-label="Project delivery views">
+              <TabsTrigger value="table" className="inline-flex items-center gap-2">
+                <Table2 className="size-4" aria-hidden="true" />
+                Table
+              </TabsTrigger>
+              <TabsTrigger value="chart" className="inline-flex items-center gap-2">
+                <BarChart3 className="size-4" aria-hidden="true" />
+                Chart
+              </TabsTrigger>
+              <TabsTrigger value="map" className="inline-flex items-center gap-2">
+                <Map className="size-4" aria-hidden="true" />
+                Map
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="table" className="pt-0">
+              <OngoingProjectsTable projects={panel.ongoingProjects} />
+            </TabsContent>
+            <TabsContent value="chart">
+              <ProjectStatusChart summary={panel.statusSummary} />
+            </TabsContent>
+            <TabsContent value="map">
+              <ProjectsMap projects={panel.ongoingProjects} />
+            </TabsContent>
+          </Tabs>
         </Card>
 
         {/* Ranked exceptions */}
@@ -107,8 +110,7 @@ export function DeliveryStatusSection({ panel }: { panel: DeliveryStatusPanel })
                     {exception.title}
                   </p>
                   <p className="mt-0.5 text-xs text-text-muted">
-                    {exception.category} • {exception.institution} •{' '}
-                    {exception.reference} • {exception.daysUnresolved} days
+                    {exception.category} • {exception.institution}
                   </p>
                 </div>
                 <div className="flex shrink-0 items-center gap-1.5">
@@ -116,6 +118,13 @@ export function DeliveryStatusSection({ panel }: { panel: DeliveryStatusPanel })
                   <InfoPopover
                     provenance={exception.provenance}
                     label={exception.title}
+                    details={[
+                      { label: 'Reference', value: exception.reference },
+                      {
+                        label: 'Time unresolved',
+                        value: `${exception.daysUnresolved} days`,
+                      },
+                    ]}
                   />
                 </div>
               </li>

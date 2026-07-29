@@ -11,11 +11,23 @@ describe('Sidebar', () => {
     expect(screen.getByRole('navigation', { name: 'Primary' })).toBeInTheDocument()
   })
 
-  it('renders the product name', () => {
+  it('renders the brand mark', () => {
     renderWithRouter(<Sidebar />)
 
-    expect(screen.getByText('Mission 300')).toBeInTheDocument()
-    expect(screen.getByText('Monitoring Dashboard')).toBeInTheDocument()
+    expect(screen.getByAltText('gEApp')).toBeInTheDocument()
+  })
+
+  it('renders the signed-in user and role', () => {
+    renderWithRouter(<Sidebar />)
+
+    expect(screen.getByText('John Doe')).toBeInTheDocument()
+    expect(screen.getByText('Administrator')).toBeInTheDocument()
+  })
+
+  it('hides the decorative user initials from assistive technology', () => {
+    renderWithRouter(<Sidebar />)
+
+    expect(screen.getByText('JO')).toHaveAttribute('aria-hidden', 'true')
   })
 
   it('renders every navigation group heading', () => {

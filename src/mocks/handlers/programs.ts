@@ -1,5 +1,11 @@
 import { delay, http, HttpResponse } from 'msw'
-import { implementationRegisterOverview, implementationRegisterProgrammes } from '../data/implementation-register'
+import {
+  milestones,
+  programmes,
+  programsFilterOptions,
+  programsOverview,
+  projects,
+} from '../data/programs'
 
 function positiveInteger(value: string | null, fallback: number) {
   const parsed = Number(value)
@@ -19,44 +25,20 @@ function paginate<T>(items: T[], requestedPage: number, pageSize: number) {
   }
 }
 
-const PROGRAMS_FILTER_OPTIONS = {
-  pillars: [
-    { value: 'all', label: 'All pillars' },
-    { value: 'generation-network', label: 'Generation & network' },
-    { value: 'last-mile-access', label: 'Last-mile access' },
-    { value: 'financially-viable-utilities', label: 'Viable utilities' },
-    { value: 'private-sector-participation', label: 'Private sector' },
-    { value: 'regional-integration', label: 'Regional integration' },
-    { value: 'clean-cooking', label: 'Clean cooking' },
-  ],
-  institutions: [
-    { value: 'all', label: 'All institutions' },
-    { value: 'Federal Ministry of Power', label: 'Federal Ministry of Power' },
-    { value: 'NERC', label: 'NERC' },
-    { value: 'Rural Electrification Agency', label: 'Rural Electrification Agency' },
-    { value: 'Transmission Company of Nigeria', label: 'Transmission Company of Nigeria' },
-  ],
-  statuses: [
-    { value: 'all', label: 'All statuses' },
-    { value: 'on-track', label: 'On track' },
-    { value: 'at-risk', label: 'At risk' },
-    { value: 'delayed', label: 'Delayed' },
-    { value: 'blocked', label: 'Blocked' },
-    { value: 'completed', label: 'Completed' },
-  ],
+function notFound(message: string) {
+  return HttpResponse.json({ message }, { status: 404 })
 }
 
 export const programsHandlers = [
   /** GET /api/programs/filters — this page's own three filters. */
-  http.get('/api/programs/filters', () => HttpResponse.json(PROGRAMS_FILTER_OPTIONS)),
+  http.get('/api/programs/filters', () => HttpResponse.json(programsFilterOptions)),
 
   /**
    * GET /api/programs
    *
-   * A lighter, read-only monitoring surface over the same programme data the
-   * Implementation Register manages: the portfolio summary card plus the
-   * programme table. Query (all optional): search, pillar, institution,
-   * status, page, pageSize.
+   * Query (all optional): search, pillar, institution, status, page,
+   * pageSize. The headline cards describe the full portfolio, not the
+   * filtered slice — they are period benchmarks, not a filter response.
    */
   http.get('/api/programs', async ({ request }) => {
     await delay(300)
@@ -67,7 +49,7 @@ export const programsHandlers = [
     const institution = params.get('institution') ?? 'all'
     const status = params.get('status') ?? 'all'
 
-    const filtered = implementationRegisterProgrammes.filter((row) => {
+    const filtered = programmes.filter((row) => {
       const matchesSearch =
         !search ||
         [row.id, row.name, row.leadInstitution].some((field) =>
@@ -85,9 +67,77 @@ export const programsHandlers = [
     const pageSize = Math.min(50, positiveInteger(params.get('pageSize'), 10))
 
     return HttpResponse.json({
-      lastUpdated: implementationRegisterOverview.lastUpdated,
-      summary: implementationRegisterOverview.headlineCards.summary,
+      lastUpdated: programsOverview.lastUpdated,
+      headlineCards: programsOverview.headlineCards,
       programmes: paginate(filtered, page, pageSize),
     })
+  }),
+
+  /** GET /api/programs/:programmeId — a single programme's detail header. */
+  http.get('/api/programs/:programmeId', ({ params }) => {
+    const programme = programmes.find((entry) => entry.id === String(params.programmeId))
+    return programme ? HttpResponse.json(programme) : notFound('The programme was not found.')
+  }),
+
+  /**
+   * GET /api/programs/:programmeId/projects
+   *
+   * The projects delivering one programme. Query (all optional): search,
+   * status, page, pageSize.
+   */
+  http.get('/api/programs/:programmeId/projects', async ({ request, params }) => {
+    await delay(200)
+
+    const programmeId = String(params.programmeId)
+    if (!programmes.some((entry) => entry.id === programmeId)) {
+      return notFound('The programme was not found.')
+    }
+
+    const url = new URL(request.url)
+    const search = url.searchParams.get('search')?.trim().toLowerCase() ?? ''
+    const status = url.searchParams.get('status') ?? 'all'
+
+    const filtered = projects.filter((row) => {
+      if (row.programmeId !== programmeId) return false
+      const matchesSearch =
+        !search ||
+        [row.id, row.name, row.owner, row.location].some((field) =>
+          field.toLowerCase().includes(search),
+        )
+      return matchesSearch && (status === 'all' || row.currentStatus === status)
+    })
+
+    const page = positiveInteger(url.searchParams.get('page'), 1)
+    const pageSize = Math.min(50, positiveInteger(url.searchParams.get('pageSize'), 10))
+
+    return HttpResponse.json(paginate(filtered, page, pageSize))
+  }),
+
+  /** GET /api/programs/projects/:projectId — a single project's full profile. */
+  http.get('/api/programs/projects/:projectId', ({ params }) => {
+    const project = projects.find((entry) => entry.id === String(params.projectId))
+    return project ? HttpResponse.json(project) : notFound('The project was not found.')
+  }),
+
+  /**
+   * GET /api/programs/projects/:projectId/milestones
+   *
+   * The milestones for one project. Query (all optional): page, pageSize.
+   */
+  http.get('/api/programs/projects/:projectId/milestones', async ({ request, params }) => {
+    await delay(200)
+
+    const projectId = String(params.projectId)
+    if (!projects.some((entry) => entry.id === projectId)) {
+      return notFound('The project was not found.')
+    }
+
+    const filtered = milestones.filter((row) => row.projectId === projectId)
+
+    const url = new URL(request.url)
+    const page = positiveInteger(url.searchParams.get('page'), 1)
+    const pageSize = Math.min(50, positiveInteger(url.searchParams.get('pageSize'), 10))
+
+    return HttpResponse.json(paginate(filtered, page, pageSize))
   }),
 ]

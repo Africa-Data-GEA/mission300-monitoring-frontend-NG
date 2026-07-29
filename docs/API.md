@@ -109,7 +109,7 @@ by section — see [`docs/specs/executive-overview.md`](specs/executive-overview
   "headlineCards": { … },          // Section A — exactly four, see below
   "accessDelivery": [ … ],         // Section B — three channels
   "nationalPerformance": [ … ],    // Section C — six bullet metrics
-  "deliveryStatus": { … }          // Section D — pillars + exceptions
+  "deliveryStatus": { … }          // Section D — ongoing projects, chart counts + exceptions
 }
 ```
 
@@ -126,21 +126,13 @@ four cards appear at the top", so a missing card is a validation failure.
 
 | Field | Card | Notable requirements |
 | --- | --- | --- |
-| `milestoneDelivery` | Priority milestones on time | `percentComplete` 0–100; `breakdown[]` of `{status, label, count}` |
+| `peopleWithElectricityAccess` | People with electricity access | Baseline, current value and 2030 target on a shared scale |
 | `accessRate` | Electricity access rate | **`sourceYear` is required** — the spec says it must be visible at all times, because this is an annual official publication that must never read as current-period data |
 | `generationCapacity` | Available generation capacity | `sparkline[]` — ordered oldest→newest; needs ≥2 points to render |
-| `escalations` | Critical escalations | `trend.direction` must be `lower-is-better` — a rising count is a worsening |
+| `cleanCookingAccess` | Clean cooking access | Baseline, current percentage and 2030 target on a shared scale |
 
-**Dynamic pillar behaviour** (specification requirement, only partly
-implemented in the mock): when `pillar` is not `all`, the delivery card
-recalculates for that pillar, **the middle two cards change to the most
-important metrics for that pillar**, and the escalation card filters to it.
-
-> ⚠️ **Open contract item.** The mock narrows Sections C and D and recalculates
-> the delivery card, but it does *not* swap the middle two cards for
-> pillar-specific metrics, because that needs data the mock does not carry.
-> The real implementation must do this. We need to agree which metrics each
-> pillar surfaces.
+Headline outcomes remain national when a pillar is selected. Sections C and D
+narrow to the selected pillar.
 
 ### Section B — `accessDelivery`
 
@@ -166,11 +158,16 @@ improvement and renders green.
 
 ### Section D — `deliveryStatus`
 
-- `pillars[]` — one entry per Compact pillar, with `counts[]` by status and a
-  `total`. **`counts` must sum to `total`** (enforced) — the stacked bar
-  divides by the total. A pillar with no approved records sends `total: 0` and
-  `counts: []`; the UI says "No approved priority records" rather than
-  rendering a misleading bar.
+- `ongoingProjects[]` — compact project rows shared by the searchable table
+  and map views. The backend must
+  exclude `completed` records. Each row includes project/programme IDs and
+  names, pillar and label, owner, location, latitude, longitude, current
+  status, start date and end date. IDs power the project and programme
+  drill-down links. Coordinates drive the Nigeria map. The frontend does not
+  geocode location strings.
+- `statusSummary[]` — backend-calculated overall counts for `on-track`,
+  `at-risk`, `delayed` and `blocked`. The Apex donut chart renders these
+  values directly and does not group or calculate them by pillar.
 - `exceptions[]` — ranked by severity, delivery impact and days unresolved.
   The UI displays at most five; sending more is allowed and harmless.
 
@@ -191,7 +188,7 @@ Closed sets. A value outside these fails validation.
 | `SourceTag` | `live`, `live-cpr`, `public-source`, `indicative`, `requires-validation` |
 | `ImprovementDirection` | `higher-is-better`, `lower-is-better` |
 | `BottleneckSeverity` | `critical`, `regulatory`, `delayed`, `blocked` |
-| `MetricIconName` | `access`, `metering`, `losses`, `capital`, `generation`, `milestones`, `pillars`, `kpis`, `escalations`, `institutions`, `generic` |
+| `MetricIconName` | `access`, `metering`, `losses`, `capital`, `generation`, `cooking`, `milestones`, `pillars`, `kpis`, `escalations`, `institutions`, `generic` |
 
 `limited-data` and `provisional` are **not** performance judgements. They mean
 the dashboard cannot yet assert how something is performing — a pillar with no

@@ -1,10 +1,28 @@
-import { STATUS_FILL, STATUS_LABEL } from '@/lib/status-colors'
+import { STATUS_LABEL } from '@/lib/status-colors'
 import { cn } from '@/lib/utils'
 import type { DeliveryStatus } from '@/types/domain'
 
 export interface StatusCount {
   readonly status: DeliveryStatus
   readonly count: number
+}
+
+/**
+ * Fill colour per delivery status for this chart specifically — a blue scale
+ * with the accent colour reserved for `blocked`, the one status that most
+ * needs attention. Deliberately its own palette rather than the shared
+ * status-colors.ts red/green scheme: stakeholder feedback was that Executive
+ * Overview should read calm, not alarm-coded.
+ */
+const CHART_STATUS_FILL: Record<DeliveryStatus, string> = {
+  completed: 'bg-chart-blue-darkest',
+  'on-track': 'bg-chart-blue-dark',
+  'at-risk': 'bg-chart-blue',
+  lagging: 'bg-chart-blue',
+  delayed: 'bg-chart-blue-light',
+  blocked: 'bg-chart-accent',
+  'limited-data': 'bg-border-strong',
+  provisional: 'bg-border-strong',
 }
 
 /**
@@ -55,7 +73,7 @@ export function StackedStatusBar({
           key={entry.status}
           data-testid={`segment-${entry.status}`}
           title={`${STATUS_LABEL[entry.status]}: ${entry.count}`}
-          className={STATUS_FILL[entry.status]}
+          className={CHART_STATUS_FILL[entry.status]}
           style={{ width: `${(entry.count / total) * 100}%` }}
         />
       ))}
@@ -77,7 +95,7 @@ export function StatusLegend({
         <li key={status} className="flex items-center gap-1.5 text-xs text-text-muted">
           <span
             aria-hidden="true"
-            className={cn('size-2 shrink-0 rounded-full', STATUS_FILL[status])}
+            className={cn('size-2 shrink-0 rounded-full', CHART_STATUS_FILL[status])}
           />
           {STATUS_LABEL[status]}
         </li>

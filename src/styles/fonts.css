@@ -1,0 +1,37 @@
+/**
+ * Google Sans, self-hosted rather than loaded from Google's CDN at runtime —
+ * consistent with how Inter Tight is already served via @fontsource-variable.
+ * Only the weights the design system actually uses (400/500/600/700) are
+ * included; Google's CDN does not serve 300 or 800 for this family.
+ */
+@font-face {
+  font-family: 'Google Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../assets/fonts/google-sans-400.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Google Sans';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('../assets/fonts/google-sans-500.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Google Sans';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('../assets/fonts/google-sans-600.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Google Sans';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('../assets/fonts/google-sans-700.ttf') format('truetype');
+}

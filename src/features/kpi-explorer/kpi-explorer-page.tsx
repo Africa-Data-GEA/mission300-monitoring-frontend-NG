@@ -27,7 +27,7 @@ export function KpiExplorerPage() {
   if (page.isError) {
     return (
       <ErrorState
-        title="KPI Explorer could not be loaded"
+        title="KPI Directory could not be loaded"
         message={page.error.message}
         onRetry={page.retry}
       />
@@ -44,11 +44,11 @@ export function KpiExplorerPage() {
         <Breadcrumb
           items={[
             { label: 'Monitoring & Analysis' },
-            { label: 'KPI Explorer' },
+            { label: 'KPI Directory' },
           ]}
         />
         <h1 className="mt-2 text-3xl font-semibold tracking-tight text-text-default">
-          KPI Explorer
+          KPI Directory
         </h1>
       </div>
 

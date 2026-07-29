@@ -1,8 +1,7 @@
 import type { HeadlineCards as HeadlineCardsData } from '../../types'
 import { AccessRateCard } from './access-rate-card'
-import { EscalationsCard } from './escalations-card'
+import { CompactOutcomeCard } from './compact-outcome-card'
 import { GenerationCapacityCard } from './generation-capacity-card'
-import { MilestoneDeliveryCard } from './milestone-delivery-card'
 
 /**
  * Section A of the page specification — exactly four headline cards.
@@ -22,10 +21,10 @@ export function HeadlineCards({ cards }: { cards: HeadlineCardsData }) {
       aria-label="Headline metrics"
       className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4"
     >
-      <MilestoneDeliveryCard data={cards.milestoneDelivery} />
+      <CompactOutcomeCard data={cards.peopleWithElectricityAccess} />
       <AccessRateCard data={cards.accessRate} />
       <GenerationCapacityCard data={cards.generationCapacity} />
-      <EscalationsCard data={cards.escalations} />
+      <CompactOutcomeCard data={cards.cleanCookingAccess} />
     </section>
   )
 }

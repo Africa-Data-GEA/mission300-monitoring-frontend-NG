@@ -1,5 +1,5 @@
 /* Self-hosted so the dashboard has no runtime dependency on a font CDN. */
-@import '@fontsource-variable/inter-tight';
+@import './styles/fonts.css';
 @import 'tailwindcss';
 
 /*
@@ -22,8 +22,8 @@
   }
 
   /*
-   * Inter Tight's default tracking is loose at large sizes. Tightening
-   * headings keeps big KPI figures from looking airy in a dense layout.
+   * Tightening headings keeps big KPI figures from looking airy in a dense
+   * layout at large sizes.
    */
   h1,
   h2,

@@ -6,6 +6,7 @@ import {
   bottlenecksOverview,
   bottlenecksRegister,
 } from '../data/bottlenecks'
+import { projects } from '../data/programs'
 
 function positiveInteger(value: string | null, fallback: number) {
   const parsed = Number(value)
@@ -25,9 +26,6 @@ function paginate<T>(items: T[], requestedPage: number, pageSize: number) {
   }
 }
 
-/** Records created via POST during this session, kept in front of the
- * seeded register so a newly created bottleneck appears immediately. */
-const createdRecords: BottleneckRecord[] = []
 let nextRecordNumber = bottlenecksRegister.length + 1
 
 export const bottlenecksHandlers = [
@@ -57,9 +55,7 @@ export const bottlenecksHandlers = [
     const category = params.get('category') ?? 'all'
     const institution = params.get('institution') ?? 'all'
 
-    const allRecords = [...createdRecords, ...bottlenecksRegister]
-
-    const filtered = allRecords.filter((row) => {
+    const filtered = bottlenecksRegister.filter((row) => {
       const matchesSearch =
         !search ||
         [row.id, row.issue, row.institution].some((field) =>
@@ -130,11 +126,41 @@ export const bottlenecksHandlers = [
     }
 
     nextRecordNumber += 1
-    createdRecords.unshift(record)
+    bottlenecksRegister.unshift(record)
+
+    // linkedRecord carries a project id when raised from a project's page
+    // (see Programs' project detail page) — keep the project's own
+    // `bottlenecks` list in sync so the new record shows up there immediately.
+    const project = projects.find((entry) => entry.id === record.linkedRecord)
+    project?.bottlenecks.unshift(record.id)
 
     return HttpResponse.json({
       record,
       message: `${record.id} has been added to the bottleneck register.`,
     })
+  }),
+
+  /**
+   * GET /api/bottlenecks/by-project/:projectId
+   *
+   * The bottlenecks linked to one project, for Programs' project detail
+   * page. Filtered by the project's own `bottlenecks` id list rather than by
+   * matching free-text, since that list is the real foreign key.
+   */
+  http.get('/api/bottlenecks/by-project/:projectId', async ({ request, params }) => {
+    await delay(200)
+
+    const project = projects.find((entry) => entry.id === String(params.projectId))
+    if (!project) {
+      return HttpResponse.json({ message: 'The project was not found.' }, { status: 404 })
+    }
+
+    const linked = bottlenecksRegister.filter((row) => project.bottlenecks.includes(row.id))
+
+    const url = new URL(request.url)
+    const page = positiveInteger(url.searchParams.get('page'), 1)
+    const pageSize = Math.min(50, positiveInteger(url.searchParams.get('pageSize'), 10))
+
+    return HttpResponse.json(paginate(linked, page, pageSize))
   }),
 ]

@@ -9,6 +9,7 @@ const ALL_NAMES: readonly MetricIconName[] = [
   'losses',
   'capital',
   'generation',
+  'cooking',
   'milestones',
   'pillars',
   'kpis',

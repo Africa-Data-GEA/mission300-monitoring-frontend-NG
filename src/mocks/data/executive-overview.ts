@@ -1,563 +1,424 @@
-import type { ExecutiveOverview } from '@/features/dashboard/types'
+import type { DataConfidence, SourceTag } from '@/api/schemas/common'
+import { PILLAR_LABELS } from '@/api/schemas/common'
+import type { BottleneckRecord } from '@/api/schemas/bottlenecks'
+import type { ValidationStatus } from '@/api/schemas/kpi-explorer'
+import type {
+  AccessChannel,
+  AccessRateCard,
+  Bottleneck,
+  BottleneckSeverity,
+  BulletMetric,
+  CompactOutcomeCard,
+  ExecutiveOverview,
+  GenerationCapacityCard,
+  OngoingProject,
+  ProjectStatusSummary,
+} from '@/features/dashboard/types'
+import { bottlenecksRegister } from './bottlenecks'
+import { getKpiProfile } from './kpi-explorer'
+import { projects } from './programs'
 
 /**
- * Mock payload for GET /api/executive-overview.
- *
- * Follows the page specification (docs/specs/executive-overview.md) section by
- * section. Figures come from the wireframe's Q3 2025 view and the targets
- * named in the workbook, so the UI is exercised with realistic magnitudes,
- * currencies and edge cases — including a zero value (private capital), a
- * metric with no approved target (grid connections), and a pillar with no
- * records. Do not replace these with round numbers.
+ * Derives the Executive Overview from data that already exists elsewhere,
+ * the same way buildPillarDashboard() does for the Compact pillar
+ * dashboards: headline figures and bullet metrics come from real KpiProfile
+ * records (kpi-explorer.ts), milestone delivery comes from the Programs
+ * register, and the delivery-status panel comes from Projects and Bottlenecks
+ * records grouped by pillar. Nothing here is a separate,
+ * re-typed copy of that data — approving a submission that publishes a KPI
+ * value (see publishKpiValue in kpi-explorer.ts) changes what this page
+ * shows on the next fetch.
  */
-export const executiveOverview: ExecutiveOverview = {
-  lastUpdated: '2025-10-14T09:12:00Z',
-  appliedPillar: 'all',
 
+const LAST_UPDATED = '2025-10-14T09:12:00Z'
+const numberFormatter = new Intl.NumberFormat('en-US')
 
-  /* ---------------- Section A — Headline cards (exactly four) -------- */
-  headlineCards: {
-    milestoneDelivery: {
-      title: 'Priority milestones on time',
-      icon: 'milestones',
-      percentComplete: 15,
-      breakdown: [
-        { status: 'completed', label: 'completed', count: 8 },
-        { status: 'on-track', label: 'on track', count: 31 },
-        { status: 'delayed', label: 'delayed', count: 14 },
-        { status: 'blocked', label: 'blocked', count: 8 },
-      ],
-      baselineLabel: 'baseline 0% (Jan 2025)',
-      targetLabel: '100% of due priority milestones on time',
-      trend: {
-        change: 3,
-        label: '+3 pts vs Q2 2025',
-        direction: 'higher-is-better',
-      },
-      source: 'live-cpr',
-      provenance: {
-        definition:
-          'Share of priority milestones completed by their due date. This is an implementation-delivery measure, not an average of all Key Performance Indicators.',
-        methodology:
-          'Priority milestones completed by their due dates divided by priority milestones due by the selected reporting date, multiplied by 100.',
-        source:
-          'Approved Compact Progress Report, Implementation Register and updates from responsible institutions.',
-        lastUpdated: '2025-10-14T09:12:00Z',
-      },
-    },
+function toSourceTag(status: ValidationStatus): SourceTag {
+  switch (status) {
+    case 'confirmed':
+      return 'live'
+    case 'public-source':
+      return 'public-source'
+    case 'provisional':
+      return 'indicative'
+    case 'requires-validation':
+    case 'future':
+    default:
+      return 'requires-validation'
+  }
+}
 
-    accessRate: {
-      title: 'Electricity access rate',
-      icon: 'access',
-      value: '70%',
-      rawValue: 70,
-      sourceYear: '2024',
-      previousPublication: 'previous publication 68% (2023)',
-      targetLabel: 'approved path 9%/year',
-      trend: {
-        change: 2,
-        label: '+2 pts vs previous publication',
-        direction: 'higher-is-better',
-      },
-      source: 'public-source',
-      confidence: 'confirmed',
-      provenance: {
-        definition:
-          'Latest officially published national electricity-access rate, shown with its source year.',
-        methodology:
-          'Use only the latest officially published national rate. Do not extrapolate the figure monthly or quarterly.',
-        source:
-          'Official Sustainable Development Goal 7 tracking publication and approved national source.',
-        lastUpdated: '2025-06-30T00:00:00Z',
-      },
-    },
+function toConfidence(status: ValidationStatus): DataConfidence {
+  if (status === 'confirmed') return 'confirmed'
+  if (status === 'future') return 'future-gap'
+  return 'requires-validation'
+}
 
-    generationCapacity: {
-      title: 'Available generation capacity',
-      icon: 'generation',
-      availableMw: 5400,
-      installedMw: 13600,
-      value: '5.4 GW',
-      availabilityRatio: 39.7,
-      // Twelve monthly readings, oldest first.
-      sparkline: [
-        4900, 5050, 4820, 5180, 5240, 5010, 5320, 5460, 5280, 5390, 5350, 5400,
-      ],
-      benchmarkLabel: 'of 13.6 GW installed',
-      trend: {
-        change: 50,
-        label: '+50 MW vs Q2 2025',
-        direction: 'higher-is-better',
-      },
-      source: 'public-source',
-      confidence: 'confirmed',
-      provenance: {
-        definition:
-          'Average daily available or dispatched capacity against installed nameplate capacity. Installed, available, actual generation and transmission capacity are distinct measures.',
-        methodology:
-          'Average daily available or dispatched capacity during the selected reporting period. Availability ratio equals available capacity divided by installed nameplate capacity, multiplied by 100.',
-        source:
-          'Nigerian Independent System Operator, Transmission Company of Nigeria and NERC.',
-        lastUpdated: '2025-09-30T00:00:00Z',
-      },
-    },
+/* ---------------- Section A — Headline cards ------------------------- */
 
-    escalations: {
-      title: 'Critical escalations',
-      icon: 'escalations',
-      unresolvedCritical: 4,
-      overdueDecisions: 3,
-      longestDaysUnresolved: 118,
-      targetLabel: 'zero unresolved critical escalations',
-      // Improvement is a FALLING count, so this is lower-is-better.
-      trend: {
-        change: 1,
-        label: '+1 vs Q2 2025',
-        direction: 'lower-is-better',
-      },
-      source: 'live-cpr',
-      provenance: {
-        definition:
-          'Unresolved critical bottlenecks, blocked priority actions and leadership decisions whose due dates have passed.',
-        methodology:
-          'Count unresolved critical bottlenecks, blocked priority actions and leadership decisions past their due date.',
-        source: 'Implementation Register and Bottleneck Register.',
-        lastUpdated: '2025-10-14T09:12:00Z',
-      },
-    },
-  },
-
-  /* ---------------- Section B — Access delivery by channel ----------- */
-  accessDelivery: [
-    {
-      id: 'grid-connections',
-      title: 'New grid connections',
-      value: '412,880',
-      rawValue: 412_880,
-      // No approved target: the specification forbids deriving one from the
-      // 9% access commitment, so this shows trend only.
-      target: null,
-      targetLabel: 'Annual target to be confirmed',
-      percentComplete: null,
-      trend: {
-        change: 38_400,
-        label: '+38,400 vs Q2 2025',
-        direction: 'higher-is-better',
-      },
-      source: 'public-source',
-      confidence: 'requires-validation',
-      provenance: {
-        definition:
-          'A direct customer connection to a Distribution Company network. Not a mini-grid connection.',
-        methodology:
-          'Current active registered grid customers minus comparable prior-period active registered customers.',
-        source:
-          'NERC Quarterly Reports and Monthly Metering Factsheet.',
-        lastUpdated: '2025-09-30T00:00:00Z',
-      },
-    },
-    {
-      id: 'mini-grid-connections',
-      title: 'Mini-grid household connections',
-      value: '128,450',
-      rawValue: 128_450,
-      target: 750_000,
-      targetLabel: '750,000 by 2030 (DARES)',
-      percentComplete: 17.1,
-      trend: {
-        change: 9_200,
-        label: '+9,200 vs Q2 2025',
-        direction: 'higher-is-better',
-      },
-      source: 'live',
-      confidence: 'requires-validation',
-      provenance: {
-        definition:
-          'Cumulative active household connections served by operational mini-grids. Business connections are reported separately and must not be added without a clear label.',
-        methodology:
-          'Cumulative active household connections divided by the 750,000 DARES target.',
-        source: 'Rural Electrification Agency programme records.',
-        lastUpdated: '2025-09-30T00:00:00Z',
-      },
-    },
-    {
-      id: 'solar-home-systems',
-      title: 'Solar Home Systems deployed',
-      value: '486,300',
-      rawValue: 486_300,
-      target: 2_750_000,
-      targetLabel: '2.75 million by 2030',
-      percentComplete: 17.7,
-      trend: {
-        change: 41_700,
-        label: '+41,700 vs Q2 2025',
-        direction: 'higher-is-better',
-      },
-      source: 'live',
-      confidence: 'requires-validation',
-      provenance: {
-        definition:
-          'Cumulative eligible Solar Home Systems deployed through approved programmes since the approved baseline.',
-        methodology:
-          'Eligible additional systems deployed since the approved baseline, divided by 2.75 million. Reporting-period and cumulative deployment are distinguishable.',
-        source:
-          'Rural Electrification Agency programme records and approved national reports.',
-        lastUpdated: '2025-09-30T00:00:00Z',
-      },
-    },
-  ],
-
-  /* ---------------- Section C — National performance ---------------- */
-  nationalPerformance: [
-    {
-      id: 'renewable-share',
-      title: 'Renewable generation share',
-      pillar: 'generation-network',
-      scaleMin: 0,
-      scaleMax: 60,
-      baseline: 22,
-      current: 24.8,
-      expected: 27,
-      target: 50,
-      direction: 'higher-is-better',
-      value: '24.8%',
-      targetLabel: '50% by 2030',
-      caption: 'Seasonal — retains the reporting period',
-      trend: {
-        change: 0.6,
-        label: '+0.6 pts vs Q2 2025',
-        direction: 'higher-is-better',
-      },
-      source: 'public-source',
-      confidence: 'confirmed',
-      provenance: {
-        definition:
-          'Renewable electricity generated as a share of total electricity generated. Renewable sources include hydro, solar and wind.',
-        methodology:
-          'Renewable electricity generated divided by total electricity generated, multiplied by 100. Renewable output is seasonal, so the reporting period must remain visible.',
-        source: 'NISO, TCN and NERC generation records.',
-        lastUpdated: '2025-09-30T00:00:00Z',
-      },
-    },
-    {
-      id: 'metering-rate',
-      title: 'National metering rate',
-      pillar: 'financially-viable-utilities',
-      scaleMin: 0,
-      scaleMax: 100,
-      baseline: 44,
-      current: 55,
-      expected: 68,
-      target: 100,
-      direction: 'higher-is-better',
-      value: '55%',
-      targetLabel: '100% by 2027',
-      trend: {
-        change: 2.1,
-        label: '+2.1 pts vs Q2 2025',
-        direction: 'higher-is-better',
-      },
-      source: 'public-source',
-      confidence: 'confirmed',
-      provenance: {
-        definition:
-          'Total metered active customers as a share of total active registered customers.',
-        methodology:
-          'Total metered active customers divided by total active registered customers, multiplied by 100.',
-        source: 'NERC Monthly Metering Factsheet and Quarterly Reports.',
-        lastUpdated: '2025-09-30T00:00:00Z',
-      },
-    },
-    {
-      id: 'atcc-losses',
-      title: 'ATC&C loss rate',
-      pillar: 'financially-viable-utilities',
-      scaleMin: 0,
-      scaleMax: 60,
-      baseline: 47,
-      current: 33.3,
-      expected: 31,
-      // No single national Compact target; benchmark only.
-      target: null,
-      direction: 'lower-is-better',
-      value: '33.3%',
-      targetLabel: 'MYTO / PIP benchmark — no Compact target',
-      caption: 'Lower is better',
-      trend: {
-        change: -1.4,
-        label: '−1.4 pts vs Q2 2025',
-        direction: 'lower-is-better',
-      },
-      source: 'public-source',
-      confidence: 'confirmed',
-      provenance: {
-        definition:
-          'Aggregate Technical, Commercial and Collection loss rate. Improvement is a falling value.',
-        methodology:
-          'Display the official NERC weighted national ATC&C loss rate. System recalculation may support quality checking but does not replace the official reported value.',
-        source: 'NERC Quarterly Reports.',
-        lastUpdated: '2025-09-30T00:00:00Z',
-      },
-    },
-    {
-      id: 'market-remittance',
-      title: 'Market-remittance performance',
-      pillar: 'financially-viable-utilities',
-      scaleMin: 0,
-      scaleMax: 100,
-      baseline: 62,
-      current: 78.4,
-      expected: 85,
-      target: 100,
-      direction: 'higher-is-better',
-      value: '78.4%',
-      targetLabel: '100% obligation compliance',
-      trend: {
-        change: 3.2,
-        label: '+3.2 pts vs Q2 2025',
-        direction: 'higher-is-better',
-      },
-      source: 'public-source',
-      confidence: 'confirmed',
-      provenance: {
-        definition:
-          'Actual remittance as a share of the applicable remittance obligation. NBET and Market Operator values are calculated separately before aggregation.',
-        methodology:
-          'Actual remittance divided by the applicable remittance obligation, multiplied by 100.',
-        source: 'NERC market-remittance tables.',
-        lastUpdated: '2025-09-30T00:00:00Z',
-      },
-    },
-    {
-      id: 'tariff-shortfall',
-      title: 'Tariff shortfall',
-      pillar: 'financially-viable-utilities',
-      scaleMin: 0,
-      scaleMax: 3,
-      baseline: 2.6,
-      current: 2.2,
-      expected: 1.7,
-      target: 0,
-      direction: 'lower-is-better',
-      value: '₦2.2tn',
-      targetLabel: 'Zero by 2027',
-      caption: 'Outstanding = approved requirement − funded',
-      trend: {
-        change: -0.15,
-        label: '−₦0.15tn vs Q2 2025',
-        direction: 'lower-is-better',
-      },
-      source: 'public-source',
-      confidence: 'confirmed',
-      provenance: {
-        definition:
-          'Approved annual or year-to-date tariff shortfall. Outstanding shortfall equals approved subsidy requirement minus subsidy funded or paid.',
-        methodology:
-          'Display the approved annual or year-to-date tariff shortfall in Nigerian naira.',
-        source: 'NERC and Federal Ministry of Finance.',
-        lastUpdated: '2025-09-30T00:00:00Z',
-      },
-    },
-    {
-      id: 'private-capital',
-      title: 'Private capital mobilized',
-      pillar: 'private-sector-participation',
-      scaleMin: 0,
-      scaleMax: 15.5,
-      baseline: 0,
-      current: 0,
-      expected: 2.4,
-      target: 15.5,
-      direction: 'higher-is-better',
-      value: '$0.0B',
-      targetLabel: 'USD 15.5bn by 2030',
-      caption: 'Tracked from the January 2025 baseline',
-      trend: {
-        change: 0,
-        label: 'no change vs Q2 2025',
-        direction: 'higher-is-better',
-      },
-      source: 'requires-validation',
-      confidence: 'requires-validation',
-      provenance: {
-        definition:
-          'Cumulative eligible private capital mobilized for last-mile access since the January 2025 Mission 300 tracking baseline.',
-        methodology:
-          'Cumulative eligible private capital mobilized divided by the USD 15.5 billion target. Excludes public funding and duplicate transactions.',
-        source:
-          'Federal Ministry of Power, REA, NERC, Federal Ministry of Finance and implementing institutions.',
-        lastUpdated: '2025-10-01T00:00:00Z',
-      },
-    },
-  ],
-
-  /* ---------------- Section D — Delivery status and exceptions ------- */
-  deliveryStatus: {
-    trend: {
-      change: 2,
-      label: '+2 exceptions vs Q2 2025',
-      direction: 'lower-is-better',
-    },
+function buildPeopleWithElectricityAccessCard(): CompactOutcomeCard {
+  return {
+    title: 'People with electricity access',
+    icon: 'access',
+    value: '137.3M',
+    current: 137.3,
+    baseline: 86.6,
+    target: 236.7,
+    scaleMin: 0,
+    scaleMax: 236.7,
+    reportingPeriod: 'End 2025',
+    baselineLabel: '86.6M baseline (2024)',
+    targetLabel: '236.7M by 2030',
+    direction: 'higher-is-better',
+    source: 'live-cpr',
+    confidence: 'confirmed',
     provenance: {
       definition:
-        'Consolidated priority delivery status by pillar, linked to unresolved bottlenecks and overdue decisions.',
+        'Cumulative number of people with electricity access across grid, mini-grid and solar home system solutions.',
       methodology:
-        'Count approved priority records by Completed, On Track, At Risk, Delayed and Blocked status. Rank exceptions by severity, delivery impact and days unresolved. Unrelated performance percentages are never averaged.',
-      source:
-        'Compact Progress Report, Implementation Register and Bottleneck Register.',
-      lastUpdated: '2025-10-14T09:12:00Z',
+        'Country-reported connections are converted to people using the nationally supplied household-size methodology and validated by the CDMU.',
+      source: 'Nigeria Mission 300 Compact Progress Report, Q1 2026.',
+      lastUpdated: '2026-05-05T00:00:00Z',
     },
-    pillars: [
-      {
-        pillar: 'generation-network',
-        label: 'Generation & network',
-        total: 18,
-        counts: [
-          { status: 'completed', count: 2 },
-          { status: 'on-track', count: 7 },
-          { status: 'at-risk', count: 3 },
-          { status: 'delayed', count: 4 },
-          { status: 'blocked', count: 2 },
-        ],
-      },
-      {
-        pillar: 'last-mile-access',
-        label: 'Last-mile access',
-        total: 21,
-        counts: [
-          { status: 'completed', count: 4 },
-          { status: 'on-track', count: 12 },
-          { status: 'at-risk', count: 2 },
-          { status: 'delayed', count: 3 },
-          { status: 'blocked', count: 0 },
-        ],
-      },
-      {
-        pillar: 'financially-viable-utilities',
-        label: 'Viable utilities',
-        total: 16,
-        counts: [
-          { status: 'completed', count: 1 },
-          { status: 'on-track', count: 5 },
-          { status: 'at-risk', count: 4 },
-          { status: 'delayed', count: 4 },
-          { status: 'blocked', count: 2 },
-        ],
-      },
-      {
-        pillar: 'private-sector-participation',
-        label: 'Private sector',
-        total: 9,
-        counts: [
-          { status: 'completed', count: 0 },
-          { status: 'on-track', count: 3 },
-          { status: 'at-risk', count: 3 },
-          { status: 'delayed', count: 2 },
-          { status: 'blocked', count: 1 },
-        ],
-      },
-      {
-        pillar: 'regional-integration',
-        label: 'Regional integration',
-        // No approved priority records yet — renders as an empty bar with a
-        // "no records" label rather than a misleading full-width segment.
-        total: 0,
-        counts: [],
-      },
-      {
-        pillar: 'clean-cooking',
-        label: 'Clean cooking',
-        total: 7,
-        counts: [
-          { status: 'completed', count: 1 },
-          { status: 'on-track', count: 4 },
-          { status: 'at-risk', count: 1 },
-          { status: 'delayed', count: 1 },
-          { status: 'blocked', count: 0 },
-        ],
-      },
-    ],
-    exceptions: [
-      {
-        id: 'cpr-004',
-        title: 'Tariff shortfall / cost-reflectivity',
-        category: 'Financing',
-        institution: 'NERC / FMoF',
-        reference: '₦2.2tn subsidy',
-        severity: 'critical',
-        daysUnresolved: 118,
-        provenance: {
-          definition:
-            'Outstanding tariff shortfall blocking progress toward cost-reflective tariffs.',
-          methodology:
-            'Approved subsidy requirement minus subsidy funded or paid.',
-          source: 'NERC and Federal Ministry of Finance.',
-          lastUpdated: '2025-10-10T00:00:00Z',
-        },
-      },
-      {
-        id: 'cpr-015',
-        title: 'Bilateral contracts on hold',
-        category: 'Market reform',
-        institution: 'NERC',
-        reference: 'CPR-015/016/017',
-        severity: 'regulatory',
-        daysUnresolved: 74,
-        provenance: {
-          definition:
-            'Bilateral contracting arrangements awaiting regulatory determination.',
-          methodology: 'Tracked as an unresolved regulatory bottleneck.',
-          source: 'Bottleneck Register.',
-          lastUpdated: '2025-10-08T00:00:00Z',
-        },
-      },
-      {
-        id: 'cpr-011',
-        title: 'Gas Master Plan update',
-        category: 'Implementation',
-        institution: 'FMoP',
-        reference: 'CPR-011',
-        severity: 'delayed',
-        daysUnresolved: 52,
-        provenance: {
-          definition: 'Pending update to the Gas Master Plan.',
-          methodology: 'Tracked as a delayed priority milestone.',
-          source: 'Implementation Register.',
-          lastUpdated: '2025-10-05T00:00:00Z',
-        },
-      },
-      {
-        id: 'cpr-016',
-        title: 'Metering gap in franchise areas',
-        category: 'Delivery',
-        institution: 'NERC / DisCos',
-        reference: 'CPR-016',
-        severity: 'blocked',
-        daysUnresolved: 39,
-        provenance: {
-          definition:
-            'Metering rollout blocked in specific DisCo franchise areas.',
-          methodology: 'Tracked as a blocked priority action.',
-          source: 'Implementation Register.',
-          lastUpdated: '2025-10-02T00:00:00Z',
-        },
-      },
-      {
-        id: 'cpr-022',
-        title: 'Transmission evacuation constraint — North East',
-        category: 'Implementation',
-        institution: 'TCN',
-        reference: 'CPR-022',
-        severity: 'critical',
-        daysUnresolved: 31,
-        provenance: {
-          definition:
-            'Evacuation capacity constraint limiting dispatch of available generation.',
-          methodology: 'Tracked as an unresolved critical bottleneck.',
-          source: 'Bottleneck Register.',
-          lastUpdated: '2025-10-11T00:00:00Z',
-        },
-      },
-    ],
-  },
+  }
 }
+
+function buildAccessRateCard(): AccessRateCard {
+  const profile = getKpiProfile('M300-PX-001')!
+  const history = profile.history
+  const previous = history.length > 1 ? history[history.length - 2] : null
+
+  return {
+    title: 'Electricity access rate',
+    icon: 'access',
+    value: `${profile.current}%`,
+    rawValue: profile.current ?? 0,
+    sourceYear: profile.reportingPeriod,
+    previousPublication: previous
+      ? `previous publication ${previous.value}% (${previous.period})`
+      : 'No previous publication on record',
+    targetLabel: profile.targetLabel,
+    trend: profile.trend,
+    source: toSourceTag(profile.validationStatus),
+    confidence: toConfidence(profile.validationStatus),
+    provenance: profile.provenance,
+    sparkline: history.map((point) => point.value),
+  }
+}
+
+function buildGenerationCapacityCard(): GenerationCapacityCard {
+  const profile = getKpiProfile('M300-P1-003')!
+  const availableMw = profile.current ?? 0
+  // Installed nameplate capacity (13.6 GW) is not yet its own tracked KPI
+  // Explorer indicator — only available/dispatched capacity is. Kept as a
+  // known infrastructure constant rather than inventing a bespoke KPI for it.
+  const installedMw = 13_600
+
+  return {
+    title: 'Available generation capacity',
+    icon: 'generation',
+    availableMw,
+    installedMw,
+    value: `${(availableMw / 1000).toFixed(1)} GW`,
+    availabilityRatio: Math.round((availableMw / installedMw) * 1000) / 10,
+    sparkline: profile.history.map((point) => point.value),
+    benchmarkLabel: `of ${(installedMw / 1000).toFixed(1)} GW installed`,
+    trend: profile.trend,
+    source: toSourceTag(profile.validationStatus),
+    confidence: toConfidence(profile.validationStatus),
+    provenance: profile.provenance,
+  }
+}
+
+function buildCleanCookingAccessCard(): CompactOutcomeCard {
+  return {
+    title: 'Clean cooking access',
+    icon: 'cooking',
+    value: '26%',
+    current: 26,
+    baseline: 22,
+    target: 100,
+    scaleMin: 0,
+    scaleMax: 100,
+    reportingPeriod: 'End 2025',
+    baselineLabel: '22% baseline (2024)',
+    targetLabel: '100% by 2030',
+    direction: 'higher-is-better',
+    // Overdue leadership decisions live in the Escalation Register, a
+    // separate array (bottlenecksEscalations) not yet imported by this
+    // build — approximated here as escalated-but-unresolved critical or
+    // high-severity bottlenecks pending a dedicated escalations feed.
+    // Reuses the Bottlenecks module's own trend for open high/critical
+    // records — the two figures track the same underlying register, so
+    // this is the same real trend, not an invented one.
+    source: 'live-cpr',
+    confidence: 'confirmed',
+    provenance: {
+      definition:
+        'Share of Nigeria’s population with access to clean fuels and technologies for cooking.',
+      methodology:
+        'Country-reported clean-cooking access measured under the national methodology and validated through the Compact Delivery and Monitoring Unit.',
+      source: 'Nigeria Mission 300 Compact Progress Report, Q1 2026.',
+      lastUpdated: '2026-05-05T00:00:00Z',
+    },
+  }
+}
+
+/* ---------------- Section B — Access delivery by channel -------------- */
+
+const ACCESS_CHANNEL_KPI_IDS: Record<string, string> = {
+  'grid-connections': 'M300-P2-001',
+  'mini-grid-connections': 'M300-P2-003',
+  'solar-home-systems': 'M300-P2-006',
+}
+
+function buildAccessChannel(id: string, kpiId: string): AccessChannel {
+  const profile = getKpiProfile(kpiId)!
+  const current = profile.current ?? 0
+  const percentComplete = profile.target
+    ? Math.round((current / profile.target) * 1000) / 10
+    : null
+
+  return {
+    id,
+    title: profile.name,
+    value: numberFormatter.format(current),
+    rawValue: current,
+    target: profile.target,
+    targetLabel: profile.targetLabel,
+    percentComplete,
+    trend: profile.trend,
+    source: toSourceTag(profile.validationStatus),
+    confidence: toConfidence(profile.validationStatus),
+    provenance: profile.provenance,
+  }
+}
+
+/* ---------------- Section C — National performance --------------------
+ *
+ * `scaleMin`/`scaleMax` (the chart axis) and `expected` (the value the
+ * approved trajectory predicts for this period) are presentation concerns
+ * the KPI Explorer profile does not model — it carries baseline/current/
+ * target only, not a full trajectory. Kept here as this section's own
+ * config, applied on top of the live baseline/current/target/direction
+ * pulled from the KPI profile.
+ * ------------------------------------------------------------------- */
+
+const NATIONAL_PERFORMANCE_METRICS: {
+  id: string
+  kpiId: string
+  scaleMin: number
+  scaleMax: number
+  expected: number | null
+  caption?: string
+  formatValue: (current: number) => string
+}[] = [
+  {
+    id: 'renewable-share',
+    kpiId: 'M300-P1-004',
+    scaleMin: 0,
+    scaleMax: 80,
+    expected: 27,
+    caption: 'Seasonal — retains the reporting period',
+    formatValue: (v) => `${v.toFixed(1)}%`,
+  },
+  {
+    id: 'metering-rate',
+    kpiId: 'M300-P3-004',
+    scaleMin: 0,
+    scaleMax: 100,
+    expected: 68,
+    formatValue: (v) => `${v.toFixed(0)}%`,
+  },
+  {
+    id: 'atcc-losses',
+    kpiId: 'M300-P3-006',
+    scaleMin: 0,
+    scaleMax: 60,
+    expected: 31,
+    caption: 'Lower is better',
+    formatValue: (v) => `${v.toFixed(1)}%`,
+  },
+  {
+    id: 'market-remittance',
+    kpiId: 'M300-P3-009',
+    scaleMin: 0,
+    scaleMax: 100,
+    expected: 85,
+    formatValue: (v) => `${v.toFixed(1)}%`,
+  },
+  {
+    id: 'tariff-shortfall',
+    kpiId: 'M300-P3-010',
+    scaleMin: 0,
+    scaleMax: 2500,
+    expected: 1700,
+    caption: 'Outstanding = approved requirement − funded',
+    formatValue: (v) => `₦${(v / 1000).toFixed(2)}tn`,
+  },
+  {
+    id: 'private-capital',
+    kpiId: 'M300-P4-002',
+    scaleMin: 0,
+    scaleMax: 15_500,
+    expected: 2_400,
+    caption: 'Tracked from the January 2025 baseline',
+    formatValue: (v) => `$${(v / 1000).toFixed(1)}B`,
+  },
+]
+
+function buildBulletMetric(config: (typeof NATIONAL_PERFORMANCE_METRICS)[number]): BulletMetric {
+  const profile = getKpiProfile(config.kpiId)!
+  const current = profile.current ?? 0
+
+  return {
+    id: config.id,
+    title: profile.name,
+    pillar: profile.pillar,
+    scaleMin: config.scaleMin,
+    scaleMax: config.scaleMax,
+    baseline: profile.baseline ?? config.scaleMin,
+    current,
+    expected: config.expected,
+    target: profile.target,
+    direction: profile.direction,
+    value: config.formatValue(current),
+    targetLabel: profile.targetLabel,
+    caption: config.caption,
+    trend: profile.trend,
+    source: toSourceTag(profile.validationStatus),
+    confidence: toConfidence(profile.validationStatus),
+    provenance: profile.provenance,
+  }
+}
+
+/* ---------------- Section D — Delivery status and exceptions ---------- */
+
+const PROJECT_COORDINATES: Record<string, { latitude: number; longitude: number }> = {
+  'PRJ-2025-011': { latitude: 11.8311, longitude: 13.151 },
+  'PRJ-2025-014': { latitude: 6.5244, longitude: 3.3792 },
+  'PRJ-2025-021': { latitude: 7.7322, longitude: 8.5391 },
+  'PRJ-2025-026': { latitude: 9.0765, longitude: 7.3986 },
+  'PRJ-2025-033': { latitude: 9.15, longitude: 7.5 },
+  'PRJ-2025-038': { latitude: 6.6, longitude: 3.45 },
+}
+
+function buildOngoingProjects(): OngoingProject[] {
+  return projects.flatMap((row) =>
+    row.currentStatus === 'completed'
+      ? []
+      : [{
+          id: row.id,
+          name: row.name,
+          programmeId: row.programmeId,
+          programmeName: row.programmeName,
+          pillar: row.pillar,
+          pillarLabel: PILLAR_LABELS[row.pillar],
+          owner: row.owner,
+          location: row.location,
+          latitude: PROJECT_COORDINATES[row.id]?.latitude ?? 9.0765,
+          longitude: PROJECT_COORDINATES[row.id]?.longitude ?? 7.3986,
+          currentStatus: row.currentStatus,
+          startDate: row.startDate,
+          endDate: row.endDate,
+        }],
+  )
+}
+
+const ongoingProjects = buildOngoingProjects()
+
+export function buildProjectStatusSummary(
+  projectRows: readonly OngoingProject[],
+): ProjectStatusSummary[] {
+  return (['on-track', 'at-risk', 'delayed', 'blocked'] as const).map((status) => ({
+    status,
+    count: projectRows.filter((project) => project.currentStatus === status).length,
+  }))
+}
+
+const SEVERITY_RANK: Record<string, number> = { critical: 0, high: 1, medium: 2, low: 3 }
+
+/**
+ * Reconciles bottlenecks.ts's real 4-tier severity ('critical'|'high'|
+ * 'medium'|'low') against this section's own 4-tag exception schema
+ * ('critical'|'regulatory'|'delayed'|'blocked'), which describes the kind
+ * of exception as much as its severity. Blocked status and critical
+ * severity are checked first since they are the most specific true facts;
+ * everything else falls back to category or a generic 'delayed' tag.
+ */
+function mapBottleneckSeverity(row: BottleneckRecord): BottleneckSeverity {
+  if (row.status === 'blocked') return 'blocked'
+  if (row.severity === 'critical') return 'critical'
+  if (row.category === 'regulatory-approval') return 'regulatory'
+  return 'delayed'
+}
+
+function buildExceptions(): Bottleneck[] {
+  return [...bottlenecksRegister]
+    .filter((row) => row.status !== 'resolved')
+    .sort((a, b) => {
+      const severityDelta = (SEVERITY_RANK[a.severity] ?? 0) - (SEVERITY_RANK[b.severity] ?? 0)
+      return severityDelta !== 0 ? severityDelta : b.ageDays - a.ageDays
+    })
+    .slice(0, 5)
+    .map((row) => ({
+      id: row.id,
+      title: row.issue,
+      category: row.category,
+      institution: row.institution,
+      reference: row.linkedRecord,
+      severity: mapBottleneckSeverity(row),
+      daysUnresolved: row.ageDays,
+      provenance: {
+        definition: row.followUp,
+        methodology: `Tracked as a ${row.status} ${row.category} bottleneck.`,
+        source: 'Bottleneck Register.',
+        lastUpdated: row.dateRaised,
+      },
+    }))
+}
+
+/* ---------------------------------------------------------------------- */
+
+export function buildExecutiveOverview(): ExecutiveOverview {
+  return {
+    lastUpdated: LAST_UPDATED,
+    appliedPillar: 'all',
+
+    headlineCards: {
+      peopleWithElectricityAccess: buildPeopleWithElectricityAccessCard(),
+      accessRate: buildAccessRateCard(),
+      generationCapacity: buildGenerationCapacityCard(),
+      cleanCookingAccess: buildCleanCookingAccessCard(),
+    },
+
+    accessDelivery: Object.entries(ACCESS_CHANNEL_KPI_IDS).map(([id, kpiId]) =>
+      buildAccessChannel(id, kpiId),
+    ),
+
+    nationalPerformance: NATIONAL_PERFORMANCE_METRICS.map(buildBulletMetric),
+
+    deliveryStatus: {
+      provenance: {
+        definition:
+          'Ongoing project delivery status by pillar, linked to unresolved bottlenecks and overdue decisions.',
+        methodology:
+          'Exclude completed projects, then count ongoing projects by On Track, At Risk, Delayed and Blocked status for each pillar. Rank exceptions by severity, delivery impact and days unresolved. Unrelated performance percentages are never averaged.',
+        source: 'Compact Progress Report, Implementation Register and Bottleneck Register.',
+        lastUpdated: LAST_UPDATED,
+      },
+      ongoingProjects,
+      statusSummary: buildProjectStatusSummary(ongoingProjects),
+      exceptions: buildExceptions(),
+    },
+  }
+}
+
+/**
+ * Mock payload for GET /api/executive-overview. Built from the KPI
+ * Explorer, Programs and Bottlenecks registers above, so approving a data
+ * submission that publishes a KPI value or changing a programme/bottleneck
+ * status is visible here on the next fetch — not a separate, hand-typed
+ * dataset.
+ */
+export const executiveOverview: ExecutiveOverview = buildExecutiveOverview()

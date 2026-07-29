@@ -1,3 +1,4 @@
+import { useId, useState } from 'react'
 import { cn } from '@/lib/utils'
 import type { ImprovementDirection } from '@/types/domain'
 
@@ -27,6 +28,10 @@ function toPercent(value: number, min: number, max: number): number {
  *   - the EXPECTED tick is the approved trajectory's value for this period
  *                                                ("should we be further on?")
  *   - the TARGET tick is the approved end state  ("how far is left?")
+ *
+ * Uses a consistent blue scale rather than the red/green "traffic light"
+ * scheme used for status badges elsewhere: a stronger blue means on or ahead
+ * of trajectory, while a lighter blue distinguishes a metric that is behind.
  *
  * Every metric carries its own scale because they are not comparable — a
  * percentage, a naira total and a loss rate share no axis.
@@ -60,6 +65,8 @@ export function BulletChart({
   valueLabel: string
   className?: string
 }) {
+  const [tooltipOpen, setTooltipOpen] = useState(false)
+  const tooltipId = useId()
   const currentPercent = toPercent(current, scaleMin, scaleMax)
   const baselinePercent = toPercent(baseline, scaleMin, scaleMax)
   const expectedPercent =
@@ -78,6 +85,13 @@ export function BulletChart({
       : direction === 'higher-is-better'
         ? current < expected
         : current > expected
+
+  const trajectoryLabel =
+    isBehind === null
+      ? 'No approved trajectory'
+      : isBehind
+        ? 'Behind expected trajectory'
+        : 'On or ahead of trajectory'
 
   // The bar alone conveys nothing to a screen reader, so state every plotted
   // value in words.
@@ -99,8 +113,48 @@ export function BulletChart({
     <div
       role="img"
       aria-label={description}
-      className={cn('relative h-6 w-full', className)}
+      aria-describedby={tooltipOpen ? tooltipId : undefined}
+      tabIndex={0}
+      onMouseEnter={() => setTooltipOpen(true)}
+      onMouseLeave={() => setTooltipOpen(false)}
+      onFocus={() => setTooltipOpen(true)}
+      onBlur={() => setTooltipOpen(false)}
+      className={cn(
+        'relative h-6 w-full cursor-help rounded-pill outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2',
+        tooltipOpen && 'z-40',
+        className,
+      )}
     >
+      {tooltipOpen && <div
+        id={tooltipId}
+        role="tooltip"
+        data-testid="bullet-tooltip"
+        className="pointer-events-none absolute bottom-full left-1/2 z-50 mb-2 w-64 -translate-x-1/2 rounded-control bg-text-default px-3 py-2 text-xs text-white shadow-lg"
+      >
+        <p className="font-semibold">{label}</p>
+        <dl className="mt-1.5 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1">
+          <dt className="text-white/70">Current</dt>
+          <dd className="text-right font-medium">{valueLabel}</dd>
+          <dt className="text-white/70">Baseline</dt>
+          <dd className="text-right">{baseline}</dd>
+          {expected !== null && (
+            <>
+              <dt className="text-white/70">Expected</dt>
+              <dd className="text-right">{expected}</dd>
+            </>
+          )}
+          {target !== null && (
+            <>
+              <dt className="text-white/70">Target</dt>
+              <dd className="text-right">{target}</dd>
+            </>
+          )}
+        </dl>
+        <p className="mt-1.5 border-t border-white/20 pt-1.5 font-medium">
+          {trajectoryLabel}
+        </p>
+      </div>}
+
       {/* Track */}
       <div className="absolute inset-x-0 top-1/2 h-2.5 -translate-y-1/2 overflow-hidden rounded-pill bg-surface-sunken" />
 
@@ -109,7 +163,7 @@ export function BulletChart({
         data-testid="bullet-current"
         className={cn(
           'absolute top-1/2 left-0 h-2.5 -translate-y-1/2 rounded-pill transition-[width]',
-          isBehind ? 'bg-status-lagging' : 'bg-brand-600',
+          isBehind ? 'bg-chart-blue-light' : 'bg-chart-blue-dark',
         )}
         style={{ width: `${currentPercent}%` }}
       />

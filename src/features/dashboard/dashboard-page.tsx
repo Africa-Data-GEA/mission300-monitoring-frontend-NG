@@ -7,6 +7,7 @@ import { DashboardSkeleton } from './components/dashboard-skeleton'
 import { DeliveryStatusSection } from './components/delivery-status-section'
 import { HeadlineCards } from './components/headline-cards/headline-cards'
 import { NationalPerformanceSection } from './components/national-performance/national-performance-section'
+import { RegionalPerformanceSection } from './components/regional-performance-section'
 
 /**
  * Executive Overview — the Compact's leadership view.
@@ -65,6 +66,7 @@ export function DashboardPage() {
         <HeadlineCards cards={data.headlineCards} />
         <AccessDeliverySection channels={data.accessDelivery} />
         <NationalPerformanceSection metrics={data.nationalPerformance} />
+        <RegionalPerformanceSection />
         <DeliveryStatusSection panel={data.deliveryStatus} />
       </div>
     </div>

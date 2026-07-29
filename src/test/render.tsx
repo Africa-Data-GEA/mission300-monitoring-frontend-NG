@@ -1,6 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { render as rtlRender } from '@testing-library/react'
-import { createMemoryRouter, RouterProvider } from 'react-router'
+import { createMemoryRouter, Outlet, RouterProvider, type RouteObject } from 'react-router'
 import type { ReactElement, ReactNode } from 'react'
 import { GlobalFiltersProvider } from '@/app/global-filters'
 
@@ -46,6 +46,31 @@ export function renderWithProviders(
         element: <GlobalFiltersProvider>{ui}</GlobalFiltersProvider>,
       },
     ],
+    { initialEntries: [route] },
+  )
+
+  return rtlRender(
+    <QueryClientProvider client={queryClient}>
+      <RouterProvider router={router} />
+    </QueryClientProvider>,
+  )
+}
+
+/**
+ * Renders a real, multi-route tree with the same providers as
+ * renderWithProviders — for flows where navigation moves between distinct
+ * pages that each read their own `useParams()` (e.g. Programs' Programmes →
+ * Projects → Project detail drill-down), which a single catch-all route
+ * cannot exercise.
+ */
+export function renderRoutesWithProviders(
+  routes: RouteObject[],
+  { route = '/' }: { route?: string } = {},
+) {
+  const queryClient = createTestQueryClient()
+
+  const router = createMemoryRouter(
+    [{ path: '/', element: <GlobalFiltersProvider><Outlet /></GlobalFiltersProvider>, children: routes }],
     { initialEntries: [route] },
   )
 

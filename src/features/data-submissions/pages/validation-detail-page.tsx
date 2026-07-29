@@ -5,6 +5,7 @@ import { ListState } from '../components/list-state'
 import { ReviewDecisionForm } from '../components/review-decision-form'
 import { WorkflowShell } from '../components/workflow-shell'
 import { useSubmissionReview, useValidationDecision } from '../api'
+import { ExtractedValuesCard } from './extracted-values-card'
 import { ISSUE_COLUMNS } from './issue-columns'
 import { SubmissionSummaryCard } from './submission-summary-card'
 import { VersionHistoryCard } from './version-history-card'
@@ -45,6 +46,8 @@ export function ValidationDetailPage() {
                 </div>
               </Card>
 
+              <ExtractedValuesCard submission={review.data} />
+
               <VersionHistoryCard history={review.data.history} />
             </div>
 
@@ -54,7 +57,13 @@ export function ValidationDetailPage() {
               error={decision.error}
               onSubmit={(input) =>
                 decision.mutate(input, {
-                  onSuccess: (result) => navigate(result.nextUrl),
+                  onSuccess: (result) =>
+                    navigate(result.nextUrl, {
+                      state:
+                        result.published.length > 0
+                          ? { publishedMessage: result.message }
+                          : undefined,
+                    }),
                 })
               }
             />

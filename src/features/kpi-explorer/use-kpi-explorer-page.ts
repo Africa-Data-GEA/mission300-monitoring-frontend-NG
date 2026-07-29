@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { useSearchParams } from 'react-router'
 import type { KpiCatalogueRow, KpiExplorerQuery } from '@/api/schemas/kpi-explorer'
 import { useKpiExplorer, useKpiExplorerFilters, useKpiProfile } from './api'
 import type { KpiFilterValues } from './components/kpi-explorer-filters'
@@ -38,9 +39,14 @@ function countActiveFilters(filters: KpiFilterValues): number {
  * presentation: it reads this hook and renders, with no state of its own.
  */
 export function useKpiExplorerPage() {
+  const [searchParams, setSearchParams] = useSearchParams()
   const [filters, setFilters] = useState<KpiFilterValues>(DEFAULT_FILTERS)
   const [page, setPage] = useState(1)
-  const [selectedId, setSelectedId] = useState<string | null>(null)
+  // Deep-linkable: a "?kpi=" query param (e.g. from the Data Submissions
+  // review screen) opens straight to that indicator's profile on load.
+  const [selectedId, setSelectedId] = useState<string | null>(() =>
+    searchParams.get('kpi'),
+  )
 
   const query = useMemo<KpiExplorerQuery>(
     () => ({ ...filters, page }),
@@ -64,10 +70,20 @@ export function useKpiExplorerPage() {
 
   function openProfile(row: KpiCatalogueRow) {
     setSelectedId(row.id)
+    setSearchParams((current) => {
+      const next = new URLSearchParams(current)
+      next.set('kpi', row.id)
+      return next
+    })
   }
 
   function closeProfile() {
     setSelectedId(null)
+    setSearchParams((current) => {
+      const next = new URLSearchParams(current)
+      next.delete('kpi')
+      return next
+    })
   }
 
   return {

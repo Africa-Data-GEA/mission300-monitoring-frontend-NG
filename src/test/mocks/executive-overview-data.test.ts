@@ -3,7 +3,6 @@ import { executiveOverviewSchema } from '@/api/schemas/executive-overview'
 import { dashboardFilterOptionsSchema } from '@/api/schemas/filters'
 import { executiveOverview } from '@/mocks/data/executive-overview'
 import { filterOptions } from '@/mocks/data/filters'
-import { PILLARS } from '@/types/domain'
 import type { FilterOption } from '@/types/filters'
 
 /**
@@ -15,10 +14,10 @@ const { headlineCards, accessDelivery, nationalPerformance, deliveryStatus } =
   executiveOverview
 
 const allCards = [
-  headlineCards.milestoneDelivery,
+  headlineCards.peopleWithElectricityAccess,
   headlineCards.accessRate,
   headlineCards.generationCapacity,
-  headlineCards.escalations,
+  headlineCards.cleanCookingAccess,
 ]
 
 describe('executive overview mock payload', () => {
@@ -126,12 +125,14 @@ describe('executive overview mock payload', () => {
       ])
     })
 
-    it('reports delivery status for all six Compact pillars', () => {
-      const reported = deliveryStatus.pillars.map((entry) => entry.pillar)
-
-      expect(new Set(reported).size).toBe(PILLARS.length)
-      for (const pillar of PILLARS) {
-        expect(reported, pillar).toContain(pillar)
+    it('provides only ongoing projects with coordinates for map rendering', () => {
+      expect(deliveryStatus.ongoingProjects).not.toHaveLength(0)
+      for (const project of deliveryStatus.ongoingProjects) {
+        expect(project.currentStatus).not.toBe('completed')
+        expect(project.latitude).toBeGreaterThanOrEqual(-90)
+        expect(project.latitude).toBeLessThanOrEqual(90)
+        expect(project.longitude).toBeGreaterThanOrEqual(-180)
+        expect(project.longitude).toBeLessThanOrEqual(180)
       }
     })
 
@@ -161,13 +162,6 @@ describe('executive overview mock payload', () => {
       expect(new Set(ids).size).toBe(ids.length)
     })
 
-    it('matches each pillar total to the sum of its status counts', () => {
-      for (const pillar of deliveryStatus.pillars) {
-        const sum = pillar.counts.reduce((total, entry) => total + entry.count, 0)
-        expect(sum, pillar.label).toBe(pillar.total)
-      }
-    })
-
     it('keeps every bullet metric inside its own declared scale', () => {
       for (const metric of nationalPerformance) {
         expect(metric.scaleMax, metric.id).toBeGreaterThan(metric.scaleMin)
@@ -178,10 +172,14 @@ describe('executive overview mock payload', () => {
       }
     })
 
-    it('keeps milestone delivery within 0–100', () => {
-      const { percentComplete } = headlineCards.milestoneDelivery
-      expect(percentComplete).toBeGreaterThanOrEqual(0)
-      expect(percentComplete).toBeLessThanOrEqual(100)
+    it('keeps every compact outcome card inside its own declared scale', () => {
+      for (const card of [headlineCards.peopleWithElectricityAccess, headlineCards.cleanCookingAccess]) {
+        expect(card.scaleMax, card.title).toBeGreaterThan(card.scaleMin)
+        expect(card.current, card.title).toBeGreaterThanOrEqual(card.scaleMin)
+        expect(card.current, card.title).toBeLessThanOrEqual(card.scaleMax)
+        expect(card.baseline, card.title).toBeGreaterThanOrEqual(card.scaleMin)
+        expect(card.baseline, card.title).toBeLessThanOrEqual(card.scaleMax)
+      }
     })
 
     it('gives every filter option a unique value and a label', () => {
@@ -213,10 +211,6 @@ describe('executive overview mock payload', () => {
         expect(metric?.trend?.direction).toBe('lower-is-better')
       },
     )
-
-    it('marks a rising escalation count as a worsening', () => {
-      expect(headlineCards.escalations.trend?.direction).toBe('lower-is-better')
-    })
 
     it.each(['renewable-share', 'metering-rate', 'market-remittance', 'private-capital'])(
       'marks %s as higher-is-better',
@@ -251,12 +245,6 @@ describe('executive overview mock payload', () => {
 
       expect(zero).toBeDefined()
       expect(zero?.value).toBe('$0.0B')
-    })
-
-    it('includes a pillar with no approved records', () => {
-      expect(
-        deliveryStatus.pillars.find((pillar) => pillar.total === 0),
-      ).toBeDefined()
     })
 
     it('includes an unvalidated data source', () => {

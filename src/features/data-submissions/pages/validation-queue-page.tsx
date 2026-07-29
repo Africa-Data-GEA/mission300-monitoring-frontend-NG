@@ -1,5 +1,5 @@
 import { ClipboardCheck } from 'lucide-react'
-import { Link } from 'react-router'
+import { Link, useLocation } from 'react-router'
 import type { ValidationQueueItem } from '@/api/schemas/data-submissions'
 import type { Column } from '@/components/ui/data-table'
 import { Button } from '@/components/ui/button'
@@ -12,6 +12,7 @@ import { WorkflowFilters } from '../components/workflow-filters'
 import { WorkflowShell } from '../components/workflow-shell'
 import { WorkflowStatusBadge } from '../components/workflow-status'
 import { useWorkflowQuery } from '../use-workflow-query'
+import { PublishConfirmationBanner } from './publish-confirmation-banner'
 
 const columns: Column<ValidationQueueItem>[] = [
   {
@@ -31,9 +32,18 @@ export function ValidationQueuePage() {
   const filters = useSubmissionFilters()
   const list = useValidationQueue(state.query)
   const error = filters.error ?? list.error
+  const location = useLocation()
+  const publishedMessage =
+    typeof location.state === 'object' &&
+    location.state !== null &&
+    'publishedMessage' in location.state &&
+    typeof location.state.publishedMessage === 'string'
+      ? location.state.publishedMessage
+      : null
 
   return (
     <WorkflowShell title="Validation queue" description="Review server validation results and record a controlled publication decision.">
+      {publishedMessage && <PublishConfirmationBanner message={publishedMessage} />}
       {filters.data && <WorkflowFilters options={filters.data} query={state.query} onChange={state.update} onReset={state.reset} />}
       <ListState pending={filters.isPending || list.isPending} error={error} retry={() => void list.refetch()}>
         {list.data && (

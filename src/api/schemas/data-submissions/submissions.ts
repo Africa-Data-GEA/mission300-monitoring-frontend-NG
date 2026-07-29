@@ -48,6 +48,19 @@ export const validationQueueItemSchema = submissionListItemSchema.extend({
 
 export const validationQueueSchema = pageOf(validationQueueItemSchema)
 
+/**
+ * One value this submission would publish to a KPI's current value and
+ * history, if approved (or accepted provisionally). Shown on the review
+ * screen before a decision is made, so a reviewer can see what publishing
+ * will affect — and returned again, confirmed, after the decision.
+ */
+export const kpiExtractionSchema = z.object({
+  kpiId: z.string().min(1),
+  kpiName: z.string().min(1),
+  reportingPeriod: z.string().min(1),
+  value: z.number(),
+})
+
 export const submissionDetailSchema = validationQueueItemSchema.extend({
   fileName: z.string().nullable(),
   sourceReference: z.string(),
@@ -55,6 +68,7 @@ export const submissionDetailSchema = validationQueueItemSchema.extend({
   issues: z.array(validationIssueSchema),
   history: z.array(statusHistoryItemSchema),
   permittedDecisions: z.array(z.enum(['approved', 'provisional', 'returned', 'rejected'])),
+  extractedValues: z.array(kpiExtractionSchema),
 })
 
 export const validationDecisionRequestSchema = z.object({
@@ -67,9 +81,13 @@ export const validationDecisionResponseSchema = z.object({
   status: workflowStatusSchema,
   message: z.string().min(1),
   nextUrl: z.string().min(1),
+  /** KPIs actually published to as a result of this decision. Empty when the
+   * decision does not publish (returned, rejected) or nothing was extracted. */
+  published: z.array(kpiExtractionSchema),
 })
 
 export type SubmissionListItem = z.infer<typeof submissionListItemSchema>
 export type ValidationQueueItem = z.infer<typeof validationQueueItemSchema>
+export type KpiExtraction = z.infer<typeof kpiExtractionSchema>
 export type SubmissionDetail = z.infer<typeof submissionDetailSchema>
 export type ValidationDecisionRequest = z.infer<typeof validationDecisionRequestSchema>

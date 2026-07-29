@@ -21,12 +21,6 @@ const AdministrationPage = lazy(() =>
   })),
 )
 
-const BottlenecksPage = lazy(() =>
-  import('@/features/bottlenecks/bottlenecks-page').then((module) => ({
-    default: module.BottlenecksPage,
-  })),
-)
-
 const StakeholdersPage = lazy(() =>
   import('@/features/stakeholders/stakeholders-page').then((module) => ({
     default: module.StakeholdersPage,
@@ -39,15 +33,39 @@ const KpiExplorerPage = lazy(() =>
   })),
 )
 
-const ImplementationRegisterPage = lazy(() =>
-  import('@/features/implementation-register/implementation-register-page').then((module) => ({
-    default: module.ImplementationRegisterPage,
+const PillarDashboardPage = lazy(() =>
+  import('@/features/pillar-dashboard/pillar-dashboard-page').then((module) => ({
+    default: module.PillarDashboardPage,
+  })),
+)
+
+const PillarIndexPage = lazy(() =>
+  import('@/features/pillar-dashboard/pillar-index-page').then((module) => ({
+    default: module.PillarIndexPage,
   })),
 )
 
 const ProgramsPage = lazy(() =>
   import('@/features/programs/programs-page').then((module) => ({
     default: module.ProgramsPage,
+  })),
+)
+
+const ReportsPage = lazy(() =>
+  import('@/features/reports/reports-page').then((module) => ({
+    default: module.ReportsPage,
+  })),
+)
+
+const ProgrammeDetailPage = lazy(() =>
+  import('@/features/programs/programme-detail-page').then((module) => ({
+    default: module.ProgrammeDetailPage,
+  })),
+)
+
+const ProjectDetailPage = lazy(() =>
+  import('@/features/programs/project-detail-page').then((module) => ({
+    default: module.ProjectDetailPage,
   })),
 )
 
@@ -80,6 +98,11 @@ function lazyRoute(element: React.ReactNode) {
  * filter bar. Most monitoring modules do; User Access and Administration does
  * not, because the specification gives it its own eight filters and narrowing
  * an account registry by Compact pillar is meaningless.
+ *
+ * The standalone Implementation Register and Bottlenecks & Exceptions pages
+ * have been folded into Programs as drill-down levels
+ * (/programs → /programs/:programmeId → /programs/projects/:projectId)
+ * rather than separate top-level routes.
  */
 export interface RouteHandle {
   readonly globalFilters?: boolean
@@ -113,13 +136,28 @@ export const router = createBrowserRouter([
         handle: { globalFilters: false } satisfies RouteHandle,
       },
       {
+        path: 'pillars',
+        element: lazyRoute(<PillarIndexPage />),
+        handle: { globalFilters: false } satisfies RouteHandle,
+      },
+      {
+        path: 'pillars/:pillar',
+        element: lazyRoute(<PillarDashboardPage />),
+        handle: { globalFilters: false } satisfies RouteHandle,
+      },
+      {
         path: 'programs',
         element: lazyRoute(<ProgramsPage />),
         handle: { globalFilters: false } satisfies RouteHandle,
       },
       {
-        path: 'implementation-register',
-        element: lazyRoute(<ImplementationRegisterPage />),
+        path: 'programs/:programmeId',
+        element: lazyRoute(<ProgrammeDetailPage />),
+        handle: { globalFilters: false } satisfies RouteHandle,
+      },
+      {
+        path: 'programs/projects/:projectId',
+        element: lazyRoute(<ProjectDetailPage />),
         handle: { globalFilters: false } satisfies RouteHandle,
       },
       {
@@ -133,13 +171,13 @@ export const router = createBrowserRouter([
         handle: { globalFilters: false } satisfies RouteHandle,
       },
       {
-        path: 'bottlenecks',
-        element: lazyRoute(<BottlenecksPage />),
+        path: 'data-submissions',
+        children: dataSubmissionRoutes,
         handle: { globalFilters: false } satisfies RouteHandle,
       },
       {
-        path: 'data-submissions',
-        children: dataSubmissionRoutes,
+        path: 'reports',
+        element: lazyRoute(<ReportsPage />),
         handle: { globalFilters: false } satisfies RouteHandle,
       },
       {
