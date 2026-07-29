@@ -32,7 +32,10 @@ export function ProgressBar({
       )}
     >
       <div
-        className={cn('h-full rounded-pill bg-brand-500', barClassName)}
+        className={cn(
+          'h-full rounded-pill bg-brand-500 transition-[width] duration-500 ease-out motion-reduce:transition-none',
+          barClassName,
+        )}
         style={{ width: `${clamped}%` }}
       />
     </div>

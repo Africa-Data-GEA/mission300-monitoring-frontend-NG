@@ -55,7 +55,7 @@ import type {
   RoleDefinition,
   ScopeAssignment,
 } from '@/api/schemas/administration'
-import type { ExecutiveOverview } from '@/features/dashboard/types'
+import type { ExecutiveOverview, OngoingProject } from '@/features/dashboard/types'
 import { bottlenecksHandlers } from './handlers/bottlenecks'
 import { dataSubmissionHandlers } from './handlers/data-submissions'
 import { pillarDashboardHandlers } from './handlers/pillar-dashboard'
@@ -116,6 +116,176 @@ function applyPillarFilter(
       exceptions,
     },
   }
+}
+
+const PERIOD_FACTORS: Record<string, number> = {
+  'q1-2025': 0.9,
+  'q2-2025': 0.95,
+  'q3-2025': 1,
+  'fy-2025': 1.04,
+}
+
+const PERIOD_PROJECT_STATUSES: Record<string, readonly OngoingProject['currentStatus'][]> = {
+  'q1-2025': ['blocked', 'blocked', 'at-risk', 'delayed', 'delayed', 'at-risk'],
+  'q2-2025': ['delayed', 'blocked', 'on-track', 'at-risk', 'delayed', 'on-track'],
+  'q3-2025': ['delayed', 'blocked', 'on-track', 'at-risk', 'delayed', 'on-track'],
+  'fy-2025': ['at-risk', 'at-risk', 'on-track', 'on-track', 'at-risk', 'on-track'],
+}
+
+function formatMetricValue(id: string, value: number) {
+  if (id === 'metering-rate') return `${value.toFixed(0)}%`
+  if (id === 'renewable-share' || id === 'atcc-losses' || id === 'market-remittance') {
+    return `${value.toFixed(1)}%`
+  }
+  if (id === 'tariff-shortfall') return `₦${(value / 1000).toFixed(2)}tn`
+  if (id === 'private-capital') return `$${(value / 1000).toFixed(1)}B`
+  return String(value)
+}
+
+function applyPeriodFilter(payload: ExecutiveOverview, period: string): ExecutiveOverview {
+  const factor = PERIOD_FACTORS[period]
+  if (!factor) return payload
+
+  const projectStatuses = PERIOD_PROJECT_STATUSES[period] ?? PERIOD_PROJECT_STATUSES['q3-2025']!
+  const ongoingProjects = payload.deliveryStatus.ongoingProjects.map((project, index) => ({
+    ...project,
+    currentStatus: projectStatuses[index] ?? project.currentStatus,
+  }))
+
+  const peopleCurrent = Math.round(payload.headlineCards.peopleWithElectricityAccess.current * factor * 10) / 10
+  const cookingCurrent = Math.min(100, Math.round(payload.headlineCards.cleanCookingAccess.current * factor * 10) / 10)
+  const availableMw = Math.round(payload.headlineCards.generationCapacity.availableMw * factor)
+
+  return {
+    ...payload,
+    headlineCards: {
+      ...payload.headlineCards,
+      peopleWithElectricityAccess: {
+        ...payload.headlineCards.peopleWithElectricityAccess,
+        current: peopleCurrent,
+        value: `${peopleCurrent.toFixed(1)}M`,
+        reportingPeriod: period.toUpperCase(),
+      },
+      accessRate: {
+        ...payload.headlineCards.accessRate,
+        rawValue: Math.round(payload.headlineCards.accessRate.rawValue * factor * 10) / 10,
+        value: `${Math.round(payload.headlineCards.accessRate.rawValue * factor * 10) / 10}%`,
+      },
+      generationCapacity: {
+        ...payload.headlineCards.generationCapacity,
+        availableMw,
+        value: `${(availableMw / 1000).toFixed(1)} GW`,
+        availabilityRatio:
+          Math.round((availableMw / payload.headlineCards.generationCapacity.installedMw) * 1000) / 10,
+      },
+      cleanCookingAccess: {
+        ...payload.headlineCards.cleanCookingAccess,
+        current: cookingCurrent,
+        value: `${cookingCurrent.toFixed(1)}%`,
+        reportingPeriod: period.toUpperCase(),
+      },
+    },
+    accessDelivery: payload.accessDelivery.map((channel) => {
+      const rawValue = Math.round(channel.rawValue * factor)
+      return {
+        ...channel,
+        rawValue,
+        value: new Intl.NumberFormat('en-US').format(rawValue),
+        percentComplete: channel.target
+          ? Math.round((rawValue / channel.target) * 1000) / 10
+          : null,
+      }
+    }),
+    nationalPerformance: payload.nationalPerformance.map((metric) => {
+      const adjusted = metric.direction === 'lower-is-better'
+        ? metric.current / factor
+        : metric.current * factor
+      const current = Math.min(metric.scaleMax, Math.max(metric.scaleMin, Math.round(adjusted * 10) / 10))
+      const adjustedExpected = metric.expected === null
+        ? null
+        : metric.direction === 'lower-is-better'
+          ? metric.expected / factor
+          : metric.expected * factor
+      const expected = adjustedExpected === null
+        ? null
+        : Math.min(metric.scaleMax, Math.max(metric.scaleMin, Math.round(adjustedExpected * 10) / 10))
+      return { ...metric, current, expected, value: formatMetricValue(metric.id, current) }
+    }),
+    deliveryStatus: {
+      ...payload.deliveryStatus,
+      ongoingProjects,
+      statusSummary: buildProjectStatusSummary(ongoingProjects),
+    },
+  }
+}
+
+const INSTITUTION_TERMS: Record<string, readonly string[]> = {
+  fmop: ['federal ministry of power', 'fmop'],
+  fmof: ['federal ministry of finance', 'fmof'],
+  nerc: ['nerc'],
+  rea: ['rural electrification agency', 'rea'],
+  tcn: ['transmission company of nigeria', 'tcn'],
+  niso: ['nigerian independent system operator', 'niso'],
+  nbet: ['nigerian bulk electricity trading', 'nbet'],
+}
+
+const METRIC_INSTITUTIONS: Record<string, readonly string[]> = {
+  'renewable-share': ['fmop'],
+  'metering-rate': ['nerc'],
+  'atcc-losses': ['nerc'],
+  'market-remittance': ['nerc', 'nbet'],
+  'tariff-shortfall': ['nerc', 'fmof'],
+  'private-capital': ['fmop', 'fmof', 'rea'],
+}
+
+const CHANNEL_INSTITUTIONS: Record<string, readonly string[]> = {
+  'grid-connections': ['tcn', 'fmop'],
+  'mini-grid-connections': ['rea'],
+  'solar-home-systems': ['rea'],
+}
+
+function institutionMatches(value: string, institution: string) {
+  const normalized = value.toLocaleLowerCase()
+  return (INSTITUTION_TERMS[institution] ?? []).some((term) => normalized.includes(term))
+}
+
+function applyInstitutionFilter(
+  payload: ExecutiveOverview,
+  institution: string,
+): ExecutiveOverview {
+  if (!institution || institution === 'all' || !INSTITUTION_TERMS[institution]) return payload
+
+  const ongoingProjects = payload.deliveryStatus.ongoingProjects.filter((project) =>
+    institutionMatches(project.owner, institution),
+  )
+
+  return {
+    ...payload,
+    accessDelivery: payload.accessDelivery.filter((channel) =>
+      CHANNEL_INSTITUTIONS[channel.id]?.includes(institution),
+    ),
+    nationalPerformance: payload.nationalPerformance.filter((metric) =>
+      METRIC_INSTITUTIONS[metric.id]?.includes(institution),
+    ),
+    deliveryStatus: {
+      ...payload.deliveryStatus,
+      ongoingProjects,
+      statusSummary: buildProjectStatusSummary(ongoingProjects),
+      exceptions: payload.deliveryStatus.exceptions.filter((exception) =>
+        institutionMatches(exception.institution, institution),
+      ),
+    },
+  }
+}
+
+function applyExecutiveFilters(
+  payload: ExecutiveOverview,
+  filters: { period: string; pillar: string; institution: string },
+) {
+  return applyInstitutionFilter(
+    applyPillarFilter(applyPeriodFilter(payload, filters.period), filters.pillar),
+    filters.institution,
+  )
 }
 
 const INSTITUTIONS: Record<string, string> = {
@@ -586,12 +756,7 @@ export const handlers = [
   /**
    * GET /api/executive-overview
    *
-   * Query (all optional): period, pillar, institution, priority,
-   * geographicScope, distributionCompany, technology.
-   *
-   * The mock applies the `pillar` filter to demonstrate the required dynamic
-   * behaviour. The remaining filters are accepted and echoed but do not narrow
-   * the mock data; the real implementation must apply all seven.
+   * Query (all optional): period, pillar and institution.
    *
    * The artificial delay exists so loading states are exercised during
    * development rather than flashing past.
@@ -599,8 +764,13 @@ export const handlers = [
   http.get('/api/executive-overview', async ({ request }) => {
     await delay(400)
 
-    const pillar = new URL(request.url).searchParams.get('pillar') ?? 'all'
-
-    return HttpResponse.json(applyPillarFilter(executiveOverview, pillar))
+    const params = new URL(request.url).searchParams
+    return HttpResponse.json(
+      applyExecutiveFilters(executiveOverview, {
+        period: params.get('period') ?? 'q3-2025',
+        pillar: params.get('pillar') ?? 'all',
+        institution: params.get('institution') ?? 'all',
+      }),
+    )
   }),
 ]

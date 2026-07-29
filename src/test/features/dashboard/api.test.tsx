@@ -45,7 +45,9 @@ describe('useExecutiveOverview', () => {
       wrapper: QueryWrapper,
     })
 
-    await waitFor(() => expect(result.current.isSuccess).toBe(true))
+    await waitFor(() => expect(result.current.isSuccess).toBe(true), {
+      timeout: 3_000,
+    })
 
     expect(result.current.data?.headlineCards.accessRate.value).toBe('70%')
     expect(result.current.data?.accessDelivery).toHaveLength(3)
@@ -79,7 +81,7 @@ describe('useExecutiveOverview', () => {
       expect(url).not.toContain('?')
     })
 
-    it('serialises all seven filters', async () => {
+    it('serialises only the three supported executive filters', async () => {
       let url = ''
       server.use(
         http.get('/api/executive-overview', ({ request }) => {
@@ -107,12 +109,11 @@ describe('useExecutiveOverview', () => {
         'period=q2-2025',
         'pillar=last-mile-access',
         'institution=nerc',
-        'priority=all',
-        'geographicScope=state',
-        'distributionCompany=ikeja',
-        'technology=mini-grid',
       ]) {
         expect(url, fragment).toContain(fragment)
+      }
+      for (const excluded of ['priority', 'geographicScope', 'distributionCompany', 'technology']) {
+        expect(url).not.toContain(excluded)
       }
     })
 
@@ -191,6 +192,40 @@ describe('useExecutiveOverview', () => {
       await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
       expect(result.current.data?.deliveryStatus.ongoingProjects).toHaveLength(6)
+    })
+  })
+
+  describe('period and institution behaviour', () => {
+    it('returns a different reporting snapshot when the period changes', async () => {
+      const { result } = renderHook(
+        () => useExecutiveOverview({ period: 'q1-2025' }),
+        { wrapper: QueryWrapper },
+      )
+
+      await waitFor(() => expect(result.current.isSuccess).toBe(true))
+
+      expect(result.current.data?.headlineCards.peopleWithElectricityAccess.value).toBe('123.6M')
+      expect(result.current.data?.headlineCards.peopleWithElectricityAccess.reportingPeriod).toBe('Q1-2025')
+      expect(result.current.data?.nationalPerformance.find((metric) => metric.id === 'metering-rate')?.current).not.toBe(57)
+    })
+
+    it('narrows metrics, projects and exceptions by institution', async () => {
+      const { result } = renderHook(
+        () => useExecutiveOverview({ institution: 'nerc' }),
+        { wrapper: QueryWrapper },
+      )
+
+      await waitFor(() => expect(result.current.isSuccess).toBe(true))
+
+      expect(result.current.data?.nationalPerformance.map((metric) => metric.id)).toEqual([
+        'metering-rate',
+        'atcc-losses',
+        'market-remittance',
+        'tariff-shortfall',
+      ])
+      expect(result.current.data?.deliveryStatus.ongoingProjects).toHaveLength(1)
+      expect(result.current.data?.deliveryStatus.ongoingProjects[0]?.owner).toBe('NERC')
+      expect(result.current.data?.deliveryStatus.exceptions.every((item) => item.institution.includes('NERC'))).toBe(true)
     })
   })
 

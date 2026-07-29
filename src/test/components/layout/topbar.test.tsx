@@ -1,55 +1,80 @@
-import { render, screen } from '@testing-library/react'
+import { screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { describe, expect, it } from 'vitest'
 import { Topbar } from '@/components/layout/topbar'
+import { renderWithRouter } from '@/test/render'
 
 describe('Topbar', () => {
   it('renders as a banner landmark', () => {
-    render(<Topbar />)
+    renderWithRouter(<Topbar />)
 
     expect(screen.getByRole('banner')).toBeInTheDocument()
   })
 
   it('renders the product mark', () => {
-    render(<Topbar />)
+    renderWithRouter(<Topbar />)
 
     expect(screen.getByText('M300')).toBeInTheDocument()
   })
 
   describe('search', () => {
     it('has an accessible name', () => {
-      render(<Topbar />)
+      renderWithRouter(<Topbar />)
 
       expect(
         screen.getByRole('searchbox', {
-          name: /Search navigations, KPIs, programs and pillars/,
+          name: /Search navigation, KPIs, programs and pillars/,
         }),
       ).toBeInTheDocument()
     })
 
     /*
-     * Search has no endpoint yet. It is disabled rather than wired to a no-op
-     * so nobody mistakes it for a working feature during review.
+     * Search is interactive and exposes matching navigation targets.
      */
-    it('is disabled until a search endpoint exists', () => {
-      render(<Topbar />)
+    it('is active and shows matching destinations', async () => {
+      const user = userEvent.setup()
+      renderWithRouter(<Topbar />)
 
-      expect(screen.getByRole('searchbox')).toBeDisabled()
+      const search = screen.getByRole('searchbox')
+      expect(search).toBeEnabled()
+
+      await user.type(search, 'Programs')
+      expect(screen.getByRole('button', { name: /ProgramsDelivery tracking/ })).toBeInTheDocument()
     })
   })
 
   describe('notifications', () => {
     it('conveys the unread count in its accessible name', () => {
-      render(<Topbar />)
+      renderWithRouter(<Topbar />)
 
       expect(
-        screen.getByRole('button', { name: /Notifications, 99 or more unread/ }),
+        screen.getByRole('button', { name: /Notifications, 3 unread/ }),
       ).toBeInTheDocument()
     })
 
-    it('is disabled until a notifications endpoint exists', () => {
-      render(<Topbar />)
+    it('opens the notification panel and can mark all as read', async () => {
+      const user = userEvent.setup()
+      renderWithRouter(<Topbar />)
 
-      expect(screen.getByRole('button', { name: /Notifications/ })).toBeDisabled()
+      await user.click(screen.getByRole('button', { name: /Notifications, 3 unread/ }))
+      expect(screen.getByRole('heading', { name: 'Notifications' })).toBeInTheDocument()
+      expect(screen.getByText('Metering submission awaiting validation')).toBeInTheDocument()
+
+      await user.click(screen.getByRole('button', { name: 'Mark all as read' }))
+      expect(screen.getByRole('button', { name: /Notifications, 0 unread/ })).toBeInTheDocument()
     })
+  })
+
+  it('exposes a filter toggle when the page supports executive filters', async () => {
+    const user = userEvent.setup()
+    let open = false
+    renderWithRouter(
+      <Topbar filtersOpen={open} onToggleFilters={() => { open = true }} />,
+    )
+
+    const toggle = screen.getByRole('button', { name: 'Open filters' })
+    expect(toggle).toHaveAttribute('aria-expanded', 'false')
+    await user.click(toggle)
+    expect(open).toBe(true)
   })
 })

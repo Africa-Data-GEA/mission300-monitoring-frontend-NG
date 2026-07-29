@@ -46,6 +46,10 @@ The definition/methodology/source payload behind every info-icon popover.
 ### Global dashboard filters (`filters.ts`)
 `DashboardFilterValues`: `{ period, pillar, institution, priority, geographicScope, distributionCompany, technology }` — one shared filter bar state, read from the URL, applied by pages that opt in (`handle.globalFilters: true` in the route table).
 
+The Executive Overview currently exposes and sends only `period`, `pillar`
+and `institution`. Its endpoint owns all KPI calculations and aggregation; the
+frontend only renders the returned snapshot and transitions between values.
+
 ### Pagination envelope — `paginated<T>()` (`administration.ts`)
 Every paginated list in the app returns this shape:
 | Field | Type |

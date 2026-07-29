@@ -55,12 +55,18 @@ describe('AppShell', () => {
     expect(screen.getByRole('navigation', { name: 'Primary' })).toBeInTheDocument()
   })
 
-  it('renders the global filter bar', async () => {
+  it('opens and closes the global filter bar from the sticky header', async () => {
+    const user = userEvent.setup()
     renderShell()
 
+    expect(screen.queryByRole('region', { name: 'Dashboard filters' })).not.toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Open filters' }))
     expect(
       await screen.findByRole('region', { name: 'Dashboard filters' }),
     ).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Close filter panel' }))
+    expect(screen.queryByRole('region', { name: 'Dashboard filters' })).not.toBeInTheDocument()
   })
 
   it('renders routed content in a main landmark', () => {
@@ -92,7 +98,7 @@ describe('AppShell', () => {
     it('hides the persistent sidebar below the large breakpoint', () => {
       renderShell()
 
-      expect(screen.getByRole('navigation', { name: 'Primary' })).toHaveClass(
+      expect(screen.getByRole('complementary')).toHaveClass(
         'hidden',
         'lg:flex',
       )

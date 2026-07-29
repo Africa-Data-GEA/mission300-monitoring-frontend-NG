@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useSearchParams } from 'react-router'
 import type { ProgramsQuery } from '@/api/schemas/programs'
 import { usePrograms, useProgramsFilters } from './api'
 
@@ -10,7 +11,11 @@ const DEFAULT_QUERY: Required<ProgramsQuery> = {
 }
 
 export function useProgramsPage() {
-  const [query, setQuery] = useState<Required<ProgramsQuery>>(DEFAULT_QUERY)
+  const [searchParams] = useSearchParams()
+  const [query, setQuery] = useState<Required<ProgramsQuery>>(() => ({
+    ...DEFAULT_QUERY,
+    search: searchParams.get('search') ?? '',
+  }))
   const [page, setPage] = useState(1)
 
   const filters = useProgramsFilters()

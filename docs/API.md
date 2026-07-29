@@ -65,20 +65,16 @@ identifier sent back in queries, `label` is displayed.
 {
   "reportingPeriods":      [{ "value": "q3-2025", "label": "Q3 2025" }],
   "pillars":               [{ "value": "all", "label": "All pillars" }],
-  "institutions":          [{ "value": "nerc", "label": "NERC" }],
-  "priorities":            [{ "value": "priority", "label": "Priority actions" }],
-  "geographicScopes":      [{ "value": "national", "label": "National" }],
-  "distributionCompanies": [{ "value": "ikeja", "label": "Ikeja DisCo" }],
-  "technologies":          [{ "value": "mini-grid", "label": "Mini-grids" }]
+  "institutions":          [{ "value": "nerc", "label": "NERC" }]
 }
 ```
 
 Notes:
 - `pillars` values must match the pillar IDs listed under *Enumerations* below,
   plus `all`.
-- `reportingPeriods` should include `{ "value": "custom" }` to enable the
-  custom date-range picker.
-- Options are server-driven so adding a DisCo or an institution needs no
+- The Executive Overview exposes only reporting period, Compact pillar and
+  institution. Other module-specific filters belong to their own endpoints.
+- Options are server-driven so adding a period or institution needs no
   frontend release.
 
 ---
@@ -95,10 +91,12 @@ by section — see [`docs/specs/executive-overview.md`](specs/executive-overview
 | `period` | `q3-2025` |
 | `pillar` | `last-mile-access` or `all` |
 | `institution` | `nerc` or `all` |
-| `priority` | `priority` or `all` |
-| `geographicScope` | `national` |
-| `distributionCompany` | `ikeja` or `all` |
-| `technology` | `mini-grid` or `all` |
+
+The backend must apply every supplied parameter before returning the payload.
+The frontend does not calculate KPI values, project status totals or progress;
+it renders the endpoint response and animates between the previous and new
+server snapshots. When a filter has no matching records, return empty arrays
+for the affected sections rather than reusing the unfiltered data.
 
 **Response** (abbreviated — see the schema for every field):
 
@@ -330,9 +328,9 @@ the returned page only** — see open question 6.
    behaviour)
 2. **Pre-formatted values** — keep display strings, or move to structured
    values as proposed above?
-3. **Filter reach** — the specification notes geographic scope, DisCo and
-   technology "only affect metrics that support those breakdowns". Which
-   metrics support which breakdowns?
+3. **Filter reach** — resolved for Executive Overview: only reporting period,
+   Compact pillar and institution are accepted. Module-specific geography,
+   DisCo and technology filters remain outside this endpoint.
 4. **Auth** — not yet specified. We assume a bearer token on every request;
    confirm the scheme and the login flow.
 5. **Pagination** — ✅ resolved. Convention is `?page=1&pageSize=25` returning

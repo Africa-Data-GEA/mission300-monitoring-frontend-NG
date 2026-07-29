@@ -14,6 +14,7 @@ import { Topbar } from './topbar'
  */
 export function AppShell() {
   const [isNavOpen, setNavOpen] = useState(false)
+  const [filtersOpen, setFiltersOpen] = useState(false)
 
   /*
    * A route opts out of the application-wide filter bar via
@@ -42,7 +43,7 @@ export function AppShell() {
     <GlobalFiltersProvider>
     <div className="flex min-h-svh bg-surface-page">
       {/* Persistent sidebar from lg upward. */}
-      <Sidebar className="sticky top-0 hidden h-svh overflow-y-auto lg:flex" />
+      <Sidebar className="sticky top-0 hidden h-svh lg:flex" />
 
       {/* Slide-over drawer below lg. */}
       {isNavOpen && (
@@ -62,7 +63,7 @@ export function AppShell() {
             className="absolute inset-0 bg-black/40"
           />
           <Sidebar
-            className="relative h-full w-72 overflow-y-auto shadow-xl"
+            className="relative h-full w-72 shadow-xl"
             // Following a link should dismiss the drawer, or the new page
             // opens behind it.
             onNavigate={() => setNavOpen(false)}
@@ -71,11 +72,17 @@ export function AppShell() {
       )}
 
       <div className="flex min-w-0 flex-1 flex-col gap-3 p-3 sm:gap-4 sm:p-4">
-        <Topbar
-          isNavOpen={isNavOpen}
-          onToggleNav={() => setNavOpen((previous) => !previous)}
-        />
-        {showGlobalFilters && <GlobalFilterBar />}
+        <div className="sticky top-3 z-40 space-y-3">
+          <Topbar
+            isNavOpen={isNavOpen}
+            filtersOpen={filtersOpen}
+            onToggleNav={() => setNavOpen((previous) => !previous)}
+            onToggleFilters={showGlobalFilters ? () => setFiltersOpen((open) => !open) : undefined}
+          />
+          {showGlobalFilters && filtersOpen && (
+            <GlobalFilterBar onClose={() => setFiltersOpen(false)} />
+          )}
+        </div>
         <main className="min-w-0 flex-1">
           <Outlet />
         </main>

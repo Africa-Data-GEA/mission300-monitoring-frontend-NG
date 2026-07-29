@@ -40,7 +40,10 @@ function countActiveFilters(filters: KpiFilterValues): number {
  */
 export function useKpiExplorerPage() {
   const [searchParams, setSearchParams] = useSearchParams()
-  const [filters, setFilters] = useState<KpiFilterValues>(DEFAULT_FILTERS)
+  const [filters, setFilters] = useState<KpiFilterValues>(() => ({
+    ...DEFAULT_FILTERS,
+    search: searchParams.get('search') ?? '',
+  }))
   const [page, setPage] = useState(1)
   // Deep-linkable: a "?kpi=" query param (e.g. from the Data Submissions
   // review screen) opens straight to that indicator's profile on load.

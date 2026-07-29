@@ -162,7 +162,7 @@ export function BulletChart({
       <div
         data-testid="bullet-current"
         className={cn(
-          'absolute top-1/2 left-0 h-2.5 -translate-y-1/2 rounded-pill transition-[width]',
+          'absolute top-1/2 left-0 h-2.5 -translate-y-1/2 rounded-pill transition-[width] duration-500 ease-out motion-reduce:transition-none',
           isBehind ? 'bg-chart-blue-light' : 'bg-chart-blue-dark',
         )}
         style={{ width: `${currentPercent}%` }}
@@ -172,7 +172,7 @@ export function BulletChart({
       <div
         data-testid="bullet-baseline"
         title={`Baseline ${baseline}`}
-        className="absolute top-1/2 h-3 w-0.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-text-subtle"
+        className="absolute top-1/2 h-3 w-0.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-text-subtle transition-[left] duration-500 ease-out motion-reduce:transition-none"
         style={{ left: `${baselinePercent}%` }}
       />
 
@@ -181,7 +181,7 @@ export function BulletChart({
         <div
           data-testid="bullet-expected"
           title={`Expected ${expected}`}
-          className="absolute top-1/2 h-4 w-0.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-text-muted"
+          className="absolute top-1/2 h-4 w-0.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-text-muted transition-[left] duration-500 ease-out motion-reduce:transition-none"
           style={{ left: `${expectedPercent}%` }}
         />
       )}
@@ -191,7 +191,7 @@ export function BulletChart({
         <div
           data-testid="bullet-target"
           title={`Target ${target}`}
-          className="absolute top-1/2 h-5 w-1 -translate-x-1/2 -translate-y-1/2 rounded-full bg-text-default"
+          className="absolute top-1/2 h-5 w-1 -translate-x-1/2 -translate-y-1/2 rounded-full bg-text-default transition-[left] duration-500 ease-out motion-reduce:transition-none"
           style={{ left: `${targetPercent}%` }}
         />
       )}

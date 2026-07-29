@@ -19,55 +19,19 @@ describe('GlobalFilterBar', () => {
     ).toBeInTheDocument()
   })
 
-  it('shows the four primary filters up front', async () => {
+  it('shows only the three executive filters', async () => {
     await renderBar()
 
     for (const name of [
       /Reporting period/,
       /Compact pillar/,
       /Institution/,
-      /Priority/,
     ]) {
       expect(screen.getByRole('combobox', { name })).toBeInTheDocument()
     }
-  })
 
-  /*
-   * Geographic scope, DisCo and Technology sit behind a disclosure because the
-   * specification notes they only affect metrics supporting those breakdowns.
-   */
-  it('hides the three secondary filters behind More filters', async () => {
-    await renderBar()
-
-    expect(
-      screen.queryByRole('combobox', { name: /Geographic scope/ }),
-    ).not.toBeInTheDocument()
-  })
-
-  it('reveals the secondary filters when More filters is opened', async () => {
-    const user = userEvent.setup()
-    await renderBar()
-
-    await user.click(screen.getByRole('button', { name: /More filters/ }))
-
-    for (const name of [
-      /Geographic scope/,
-      /Distribution Company/,
-      /Technology/,
-    ]) {
-      expect(screen.getByRole('combobox', { name })).toBeInTheDocument()
-    }
-  })
-
-  it('explains that the secondary filters have limited reach', async () => {
-    const user = userEvent.setup()
-    await renderBar()
-
-    await user.click(screen.getByRole('button', { name: /More filters/ }))
-
-    expect(
-      screen.getByText('These apply only to metrics that support the breakdown.'),
-    ).toBeInTheDocument()
+    expect(screen.queryByRole('combobox', { name: /Priority/ })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /More filters/ })).not.toBeInTheDocument()
   })
 
   /*
@@ -135,21 +99,4 @@ describe('GlobalFilterBar', () => {
     })
   })
 
-  describe('custom reporting period', () => {
-    it('hides the date-range picker for preset periods', async () => {
-      await renderBar()
-
-      expect(
-        screen.queryByRole('button', { name: /Custom range/ }),
-      ).not.toBeInTheDocument()
-    })
-
-    it('reveals the date-range picker for a custom period', async () => {
-      await renderBar('/?period=custom')
-
-      expect(
-        screen.getByRole('button', { name: /Custom range/ }),
-      ).toBeInTheDocument()
-    })
-  })
 })

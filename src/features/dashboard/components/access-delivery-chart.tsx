@@ -46,7 +46,12 @@ export function AccessDeliveryChart({ channels }: { channels: readonly AccessCha
           chart: {
             type: 'bar',
             toolbar: { show: false },
-            animations: { enabled: false },
+            animations: {
+              enabled: true,
+              easing: 'easeinout',
+              speed: 500,
+              dynamicAnimation: { enabled: true, speed: 500 },
+            },
             fontFamily: FONT_FAMILY,
           },
           plotOptions: {

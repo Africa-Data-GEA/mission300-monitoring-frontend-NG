@@ -1,4 +1,5 @@
 import { screen, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { describe, expect, it } from 'vitest'
 import { Sidebar } from '@/components/layout/sidebar'
 import { NAVIGATION } from '@/config/navigation'
@@ -14,7 +15,7 @@ describe('Sidebar', () => {
   it('renders the brand mark', () => {
     renderWithRouter(<Sidebar />)
 
-    expect(screen.getByAltText('gEApp')).toBeInTheDocument()
+    expect(screen.getByAltText('gEApp')).toHaveClass('h-11')
   })
 
   it('renders the signed-in user and role', () => {
@@ -27,7 +28,21 @@ describe('Sidebar', () => {
   it('hides the decorative user initials from assistive technology', () => {
     renderWithRouter(<Sidebar />)
 
-    expect(screen.getByText('JO')).toHaveAttribute('aria-hidden', 'true')
+    expect(screen.getByText('JD')).toHaveAttribute('aria-hidden', 'true')
+  })
+
+  it('opens account actions, profile editing and the help centre', async () => {
+    const user = userEvent.setup()
+    renderWithRouter(<Sidebar />)
+
+    await user.click(screen.getByRole('button', { name: 'Open user menu' }))
+    expect(screen.getByRole('button', { name: 'View and edit profile' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Help centre' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Log out' })).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'View and edit profile' }))
+    expect(screen.getByRole('dialog', { name: 'Your profile' })).toBeInTheDocument()
+    expect(screen.getByLabelText('Full name')).toHaveValue('John Doe')
   })
 
   it('renders every navigation group heading', () => {
@@ -49,7 +64,7 @@ describe('Sidebar', () => {
     }
   })
 
-  describe('built versus planned pages', () => {
+  describe('navigation readiness', () => {
     /*
      * Pages that do not exist yet must not render as links — a link that goes
      * nowhere is worse than a control that is visibly unavailable.
@@ -62,28 +77,26 @@ describe('Sidebar', () => {
       ).toHaveAttribute('href', '/')
     })
 
-    it('renders unbuilt items as disabled buttons, not links', () => {
+    it('renders Reports & exports as a ready link', () => {
       renderWithRouter(<Sidebar />)
 
-      // "Reports & exports" has no page yet.
-      const unbuilt = screen.getByRole('button', { name: /Reports & exports/ })
-      expect(unbuilt).toBeDisabled()
-      expect(
-        screen.queryByRole('link', { name: /Reports & exports/ }),
-      ).not.toBeInTheDocument()
+      const reports = screen.getByRole('link', { name: /Reports & exports/ })
+      expect(reports).toHaveAttribute('href', '/reports')
     })
 
-    it('explains unavailability to screen-reader users', () => {
+    it('keeps the unavailable-page description accessible for planned items', () => {
       renderWithRouter(<Sidebar />)
 
-      expect(screen.getByText('This section is not yet available.')).toBeInTheDocument()
+      expect(
+        screen.getByText('This section is not yet available.'),
+      ).toHaveClass('sr-only')
     })
 
     it('links exactly the items marked ready', () => {
       renderWithRouter(<Sidebar />)
 
       const readyCount = NAVIGATION.flatMap((group) => group.items).filter(
-        (item) => item.ready,
+        (item) => item.ready && !item.children,
       ).length
 
       expect(screen.getAllByRole('link')).toHaveLength(readyCount)
@@ -113,16 +126,12 @@ describe('Sidebar', () => {
       expect(inactive).not.toHaveClass('bg-brand-800')
     })
 
-    it('tints unbuilt items more strongly than inactive-but-ready items', () => {
+    it('uses the inactive tint for other ready pages', () => {
       renderWithRouter(<Sidebar />)
 
-      // "Reports & exports" has no page yet, so it renders as a disabled
-      // button with the full-opacity tint — distinct from the /10 tint on
-      // ready items.
-      const unbuilt = screen.getByRole('button', { name: /Reports & exports/ })
-      expect(unbuilt).toHaveClass('bg-surface-sunken')
-      expect(unbuilt).not.toHaveClass('bg-surface-sunken/10')
-      expect(unbuilt).not.toHaveClass('border')
+      const reports = screen.getByRole('link', { name: /Reports & exports/ })
+      expect(reports).toHaveClass('bg-surface-sunken/10')
+      expect(reports).not.toHaveClass('border')
     })
 
     /*
@@ -141,7 +150,7 @@ describe('Sidebar', () => {
   it('accepts a className override', () => {
     renderWithRouter(<Sidebar className="hidden lg:flex" />)
 
-    expect(screen.getByRole('navigation', { name: 'Primary' })).toHaveClass(
+    expect(screen.getByRole('complementary')).toHaveClass(
       'hidden',
     )
   })

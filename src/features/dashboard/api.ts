@@ -43,7 +43,7 @@ export const dashboardKeys = {
 }
 
 /**
- * Serialises the seven Executive Overview filters.
+ * Serialises only the three filters supported by Executive Overview.
  *
  * Empty values are omitted so the query string stays readable and two
  * equivalent filter states produce the same URL.
@@ -51,7 +51,8 @@ export const dashboardKeys = {
 function toSearchParams(query: ExecutiveOverviewQuery): string {
   const params = new URLSearchParams()
 
-  for (const [key, value] of Object.entries(query)) {
+  for (const key of ['period', 'pillar', 'institution'] as const) {
+    const value = query[key]
     if (value) params.set(key, value)
   }
 

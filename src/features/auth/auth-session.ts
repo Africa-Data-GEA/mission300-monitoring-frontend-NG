@@ -31,3 +31,8 @@ export function readPendingAccount(): IdentifiedAccount | null {
 export function clearPendingAccount() {
   sessionStorage.removeItem(PENDING_ACCOUNT_KEY)
 }
+
+export function clearAuthSession() {
+  sessionStorage.removeItem(AUTH_SESSION_KEY)
+  sessionStorage.removeItem(PENDING_ACCOUNT_KEY)
+}

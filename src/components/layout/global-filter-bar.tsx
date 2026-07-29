@@ -1,13 +1,7 @@
-import { SlidersHorizontal } from 'lucide-react'
-import { useState } from 'react'
-import type { DateRange } from 'react-day-picker'
 import { useGlobalFilters } from '@/app/global-filters'
-import { Button } from '@/components/ui/button'
-import { DateRangeField } from '@/components/ui/date-range-field'
 import { SelectField } from '@/components/ui/select-field'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useFilterOptions } from '@/features/filters/api'
-import { CUSTOM_PERIOD } from '@/types/filters'
 
 /**
  * The application-wide filter bar.
@@ -18,15 +12,12 @@ import { CUSTOM_PERIOD } from '@/types/filters'
  * so every page's query reads the same values and a filtered view is a
  * shareable link.
  *
- * Geographic scope, Distribution Company and Technology sit behind a "More
- * filters" disclosure, as the specification describes, because they only
- * affect metrics that support those breakdowns.
+ * Executive Overview deliberately exposes only filters that the endpoint can
+ * apply consistently across leadership metrics and delivery records.
  */
-export function GlobalFilterBar() {
+export function GlobalFilterBar({ onClose }: { onClose?: () => void }) {
   const { filters, setFilter } = useGlobalFilters()
   const { data: options, isPending } = useFilterOptions()
-  const [showMore, setShowMore] = useState(false)
-  const [dateRange, setDateRange] = useState<DateRange | undefined>()
 
   if (isPending || !options) {
     return <Skeleton className="h-16 w-full rounded-card" />
@@ -34,9 +25,28 @@ export function GlobalFilterBar() {
 
   return (
     <section
+      id="executive-filter-panel"
       aria-label="Dashboard filters"
-      className="rounded-card bg-surface px-3 py-3 sm:px-4"
+      className="rounded-card border border-border-default bg-surface px-3 py-3 shadow-lg sm:px-4"
     >
+      <div className="mb-3 flex items-start justify-between gap-3 border-b border-border-default pb-3">
+        <div>
+          <h2 className="text-sm font-semibold text-text-default">Executive filters</h2>
+          <p className="mt-0.5 text-xs text-text-muted">
+            Update the reporting snapshot by period, pillar or accountable institution.
+          </p>
+        </div>
+        {onClose && (
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close filter panel"
+            className="inline-flex size-8 shrink-0 items-center justify-center rounded-control text-text-muted hover:bg-surface-sunken hover:text-text-default"
+          >
+            <X aria-hidden="true" className="size-4" />
+          </button>
+        )}
+      </div>
       <div className="flex flex-wrap items-end gap-2.5">
         <SelectField
           label="Reporting period"
@@ -45,15 +55,6 @@ export function GlobalFilterBar() {
           onChange={(period) => setFilter('period', period)}
           className="w-full sm:w-40"
         />
-
-        {filters.period === CUSTOM_PERIOD && (
-          <DateRangeField
-            label="Custom range"
-            value={dateRange}
-            onChange={setDateRange}
-            className="w-full sm:w-60"
-          />
-        )}
 
         <SelectField
           label="Compact pillar"
@@ -71,63 +72,8 @@ export function GlobalFilterBar() {
           className="w-full sm:w-48"
         />
 
-        <SelectField
-          label="Priority"
-          value={filters.priority}
-          options={options.priorities}
-          onChange={(priority) => setFilter('priority', priority)}
-          className="w-full sm:w-36"
-        />
-
-        <Button
-          variant="secondary"
-          onClick={() => setShowMore((previous) => !previous)}
-          aria-expanded={showMore}
-          aria-controls="more-filters"
-        >
-          <SlidersHorizontal />
-          More filters
-        </Button>
       </div>
-
-      {showMore && (
-        <div
-          id="more-filters"
-          className="mt-3 flex flex-wrap items-end gap-2.5 border-t border-border-default pt-3"
-        >
-          <SelectField
-            label="Geographic scope"
-            value={filters.geographicScope}
-            options={options.geographicScopes}
-            onChange={(scope) => setFilter('geographicScope', scope)}
-            className="w-full sm:w-44"
-          />
-
-          <SelectField
-            label="Distribution Company"
-            value={filters.distributionCompany}
-            options={options.distributionCompanies}
-            onChange={(disco) => setFilter('distributionCompany', disco)}
-            className="w-full sm:w-52"
-          />
-
-          <SelectField
-            label="Technology or intervention"
-            value={filters.technology}
-            options={options.technologies}
-            onChange={(technology) => setFilter('technology', technology)}
-            className="w-full sm:w-48"
-          />
-
-          {/*
-            The specification notes these only affect metrics supporting those
-            breakdowns, which is not obvious from the controls alone.
-          */}
-          <p className="mb-2 max-w-xs text-xs text-text-subtle">
-            These apply only to metrics that support the breakdown.
-          </p>
-        </div>
-      )}
     </section>
   )
 }
+import { X } from 'lucide-react'

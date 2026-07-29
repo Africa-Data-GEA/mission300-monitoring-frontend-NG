@@ -39,7 +39,12 @@ export function ProjectStatusChart({ summary }: { summary: readonly ProjectStatu
           chart: {
             type: 'donut',
             toolbar: { show: false },
-            animations: { enabled: false },
+            animations: {
+              enabled: true,
+              easing: 'easeinout',
+              speed: 500,
+              dynamicAnimation: { enabled: true, speed: 500 },
+            },
             fontFamily: FONT_FAMILY,
           },
           labels: summary.map((entry) => EXECUTION_STATUS_LABELS[entry.status]),
@@ -55,7 +60,7 @@ export function ProjectStatusChart({ summary }: { summary: readonly ProjectStatu
             fontFamily: FONT_FAMILY,
             fontSize: '13px',
             formatter: (label, options) => {
-              const count = summary[options.seriesIndex]?.count ?? 0
+              const count = summary[options?.seriesIndex ?? -1]?.count ?? 0
               return `${label}: ${count}`
             },
           },

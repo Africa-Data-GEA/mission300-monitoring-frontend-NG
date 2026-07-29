@@ -21,6 +21,11 @@ export function AccessDeliverySection({
       <h2 className="text-lg font-semibold text-text-default">
         Access delivery by channel
       </h2>
+      {channels.length === 0 ? (
+        <p className="mt-3 rounded-lg border border-dashed border-border-default bg-surface-card px-4 py-8 text-center text-sm text-text-muted">
+          No access-delivery channels are owned by the selected institution and pillar.
+        </p>
+      ) : (
       <div className="mt-3 grid items-start gap-4 xl:grid-cols-[1fr_1.2fr]">
         <Card className="p-4">
           <h3 className="text-xs font-medium tracking-wide text-text-subtle uppercase">
@@ -39,6 +44,7 @@ export function AccessDeliverySection({
           ))}
         </ul>
       </div>
+      )}
     </Card>
   )
 }

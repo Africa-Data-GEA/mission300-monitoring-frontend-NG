@@ -25,16 +25,22 @@ export function NationalPerformanceSection({
         <BulletLegend />
       </div>
 
-      <ul
-        aria-label="National performance metrics"
-        className="mt-3 grid gap-3 lg:grid-cols-2 2xl:grid-cols-3"
-      >
-        {metrics.map((metric) => (
-          <li key={metric.id}>
-            <BulletMetricRow metric={metric} />
-          </li>
-        ))}
-      </ul>
+      {metrics.length === 0 ? (
+        <p className="mt-3 rounded-lg border border-dashed border-border-default bg-surface-card px-4 py-8 text-center text-sm text-text-muted">
+          No national performance metrics match the selected filters.
+        </p>
+      ) : (
+        <ul
+          aria-label="National performance metrics"
+          className="mt-3 grid gap-3 lg:grid-cols-2 2xl:grid-cols-3"
+        >
+          {metrics.map((metric) => (
+            <li key={metric.id}>
+              <BulletMetricRow metric={metric} />
+            </li>
+          ))}
+        </ul>
+      )}
     </Card>
   )
 }
