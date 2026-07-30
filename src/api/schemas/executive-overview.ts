@@ -41,6 +41,7 @@ export const compactOutcomeCardSchema = z.object({
   baselineLabel: z.string(),
   targetLabel: z.string(),
   direction: improvementDirectionSchema,
+  trend: trendSchema.optional(),
   source: sourceTagSchema,
   confidence: dataConfidenceSchema,
   provenance: metricProvenanceSchema,

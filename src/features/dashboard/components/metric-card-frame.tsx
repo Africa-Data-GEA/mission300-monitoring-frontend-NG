@@ -25,6 +25,7 @@ export function MetricCardFrame({
   details,
   children,
   className,
+  hideSource = false,
 }: {
   title: string
   icon: MetricIconName
@@ -36,6 +37,8 @@ export function MetricCardFrame({
   tone?: 'default' | 'alert'
   children: ReactNode
   className?: string
+  /** Skips the top-right provenance pill (e.g. "live • CPR") for cards that read cleaner without it. */
+  hideSource?: boolean
 }) {
   return (
     <Card className={cn('flex h-full flex-col p-4', className)}>
@@ -56,7 +59,7 @@ export function MetricCardFrame({
         </span>
 
         <div className="flex min-w-0 shrink-0 items-center gap-1">
-          <SourceBadge source={source} />
+          {!hideSource && <SourceBadge source={source} />}
           <InfoPopover provenance={provenance} label={title} details={details} />
         </div>
       </div>

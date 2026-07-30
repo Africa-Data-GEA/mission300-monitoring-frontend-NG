@@ -70,6 +70,7 @@ function buildPeopleWithElectricityAccessCard(): CompactOutcomeCard {
     baselineLabel: '86.6M baseline (2024)',
     targetLabel: '236.7M by 2030',
     direction: 'higher-is-better',
+    trend: { change: 137.3 - 86.6, label: '+50.7M vs prior published year', direction: 'higher-is-better' },
     source: 'live-cpr',
     confidence: 'confirmed',
     provenance: {
@@ -144,6 +145,7 @@ function buildCleanCookingAccessCard(): CompactOutcomeCard {
     baselineLabel: '22% baseline (2024)',
     targetLabel: '100% by 2030',
     direction: 'higher-is-better',
+    trend: { change: 26 - 22, label: '+4 pts vs prior published year', direction: 'higher-is-better' },
     // Overdue leadership decisions live in the Escalation Register, a
     // separate array (bottlenecksEscalations) not yet imported by this
     // build — approximated here as escalated-but-unresolved critical or

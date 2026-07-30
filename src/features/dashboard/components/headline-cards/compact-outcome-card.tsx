@@ -1,4 +1,5 @@
 import { BulletChart } from '@/components/ui/bullet-chart'
+import { TrendIndicator } from '@/components/ui/trend-indicator'
 import { cn } from '@/lib/utils'
 import type { CompactOutcomeCard as CompactOutcomeCardData } from '../../types'
 import { MetricCardFrame } from '../metric-card-frame'
@@ -16,6 +17,7 @@ export function CompactOutcomeCard({
       icon={data.icon}
       source={data.source}
       provenance={data.provenance}
+      hideSource
       details={[
         { label: 'Reporting period', value: data.reportingPeriod },
         { label: 'Baseline', value: data.baselineLabel },
@@ -26,9 +28,7 @@ export function CompactOutcomeCard({
         <span className={cn(HEADLINE_VALUE, 'text-text-default')}>
           {data.value}
         </span>
-        <span className="rounded-pill bg-surface-sunken px-2 py-0.5 text-xs font-medium text-text-muted">
-          {data.reportingPeriod}
-        </span>
+        {data.trend && <TrendIndicator trend={data.trend} />}
       </div>
 
       <BulletChart
@@ -43,10 +43,6 @@ export function CompactOutcomeCard({
         label={data.title}
         valueLabel={data.value}
       />
-
-      <p className="mt-auto pt-2 text-xs text-text-muted">
-        {data.baselineLabel} / {data.targetLabel}
-      </p>
     </MetricCardFrame>
   )
 }

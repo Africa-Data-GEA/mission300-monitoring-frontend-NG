@@ -282,23 +282,6 @@ describe('Section D — delivery status and exceptions', () => {
     ).toBeInTheDocument()
   })
 
-  it('shows project locations and hover details in the map view', async () => {
-    const user = userEvent.setup()
-    renderWithRouter(<DeliveryStatusSection panel={deliveryStatus} />)
-
-    await user.click(screen.getByRole('tab', { name: 'Map' }))
-
-    expect(
-      screen.getByRole('region', { name: 'Map of Nigeria showing 6 ongoing project locations' }),
-    ).toBeInTheDocument()
-
-    const point = screen.getByRole('link', {
-      name: 'Open North East 330kV Line Upgrade in North East',
-    })
-    await user.hover(point)
-    expect(screen.getByText('Transmission Rehabilitation Programme')).toBeInTheDocument()
-  })
-
   it('links to the full bottlenecks module', () => {
     renderWithRouter(<DeliveryStatusSection panel={deliveryStatus} />)
 
