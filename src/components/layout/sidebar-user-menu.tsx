@@ -12,7 +12,8 @@ import { useNavigate } from 'react-router'
 import { Button } from '@/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { SideDialog } from '@/components/ui/side-dialog'
-import { clearAuthSession } from '@/features/auth/auth-session'
+import { clearAuthSession, readAuthSession } from '@/features/auth/auth-session'
+import { findAccountById, getRoleLabel } from '@/features/auth/role-access'
 
 interface SidebarUser {
   name: string
@@ -21,11 +22,25 @@ interface SidebarUser {
   institution: string
 }
 
-const INITIAL_USER: SidebarUser = {
+const FALLBACK_USER: SidebarUser = {
   name: 'John Doe',
   email: 'john.doe@emrc.gov.ng',
   role: 'Administrator',
   institution: 'Energy Monitoring and Reform Committee',
+}
+
+/** Derives the sidebar user from the real login session rather than a hardcoded stand-in — falls back only when no one is signed in. */
+function deriveSidebarUser(): SidebarUser {
+  const session = readAuthSession()
+  if (!session) return FALLBACK_USER
+
+  const account = findAccountById(session.user.id)
+  return {
+    name: session.user.name,
+    email: session.user.email,
+    role: getRoleLabel(session.user.role),
+    institution: account?.institution ?? FALLBACK_USER.institution,
+  }
 }
 
 const inputClassName =
@@ -33,8 +48,8 @@ const inputClassName =
 
 export function SidebarUserMenu() {
   const navigate = useNavigate()
-  const [user, setUser] = useState(INITIAL_USER)
-  const [draft, setDraft] = useState(INITIAL_USER)
+  const [user, setUser] = useState(deriveSidebarUser)
+  const [draft, setDraft] = useState(user)
   const [profileOpen, setProfileOpen] = useState(false)
   const [helpOpen, setHelpOpen] = useState(false)
   const [guideOpen, setGuideOpen] = useState(false)

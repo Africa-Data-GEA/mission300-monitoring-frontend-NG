@@ -1,5 +1,5 @@
 import { setupWorker } from 'msw/browser'
 import { handlers } from './handlers'
 
-/** Service-worker-based mocking, used in development only. */
+/** Service-worker API layer used in development and explicit hybrid demos. */
 export const worker = setupWorker(...handlers)

@@ -7,9 +7,9 @@ const allItems = NAVIGATION.flatMap((group) => group.items)
 describe('NAVIGATION', () => {
   /*
    * The wireframe defined four groups; "Analytics" was added afterward on
-   * stakeholder feedback to give KPI explorer — a reference catalogue, not a
-   * primary page — its own clearly-labelled section near the bottom rather
-   * than sitting inside Monitoring & Analysis.
+   * stakeholder feedback to give the KPI Directory — a reference catalogue,
+   * not a primary page — its own clearly-labelled section near the bottom
+   * rather than sitting inside Monitoring & Analysis.
    */
   it('defines the five navigation groups', () => {
     expect(NAVIGATION.map((group) => group.label)).toEqual([
@@ -73,7 +73,7 @@ describe('NAVIGATION', () => {
         ['Programs', '/programs'],
         ['Data submissions', '/data-submissions'],
         ['Reports & exports', '/reports'],
-        ['KPI explorer', '/kpis'],
+        ['KPI Directory', '/kpis'],
         ['Stakeholders', '/stakeholders'],
         ['User access', '/administration'],
       ])

@@ -6,9 +6,9 @@ import { router } from '@/app/router'
 import './index.css'
 
 /**
- * In development the app runs entirely against MSW handlers, so the UI is
- * fully usable before gApp's backend exists. Set VITE_ENABLE_MOCKS=false to
- * point at a real API instead.
+ * Development uses MSW unless explicitly disabled. A deployed demo can opt
+ * into hybrid routing with VITE_ENABLE_MOCKS=true: mock-only routes remain
+ * local while implemented modules proxy to VITE_SUBMISSIONS_BACKEND_URL.
  */
 /**
  * When mock handler code changes during development, MSW installs a new
@@ -30,8 +30,12 @@ function reloadOnServiceWorkerUpdate() {
 }
 
 async function enableMocking() {
-  if (!import.meta.env.DEV) return
-  if (import.meta.env.VITE_ENABLE_MOCKS === 'false') return
+  const mockSetting = import.meta.env.VITE_ENABLE_MOCKS
+  const shouldEnable =
+    mockSetting === 'true' ||
+    (import.meta.env.DEV && mockSetting !== 'false')
+
+  if (!shouldEnable) return
 
   reloadOnServiceWorkerUpdate()
 

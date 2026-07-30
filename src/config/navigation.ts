@@ -36,6 +36,8 @@ export interface NavItem {
   readonly icon: LucideIcon
   readonly ready: boolean
   readonly children?: readonly { readonly label: string; readonly to: string }[]
+  /** Stable key role-based access is checked against — see role-access.ts. Independent of `label`, which can be renamed freely. */
+  readonly moduleKey: string
 }
 
 export interface NavGroup {
@@ -47,12 +49,13 @@ export const NAVIGATION: readonly NavGroup[] = [
   {
     label: 'Monitoring & Analysis',
     items: [
-      { label: 'Executive Overview', to: '/', icon: Home, ready: true },
+      { label: 'Executive Overview', to: '/', icon: Home, ready: true, moduleKey: 'executive-overview' },
       {
         label: 'Pillar dashboards',
         to: '/pillars',
         icon: BarChart3,
         ready: true,
+        moduleKey: 'pillar-dashboards',
         children: PILLARS.map((pillar) => ({
           label: PILLAR_LABELS[pillar],
           to: `/pillars/${pillar}`,
@@ -63,13 +66,14 @@ export const NAVIGATION: readonly NavGroup[] = [
         to: '/state-disco',
         icon: MapPin,
         ready: true,
+        moduleKey: 'state-disco',
       },
     ],
   },
   {
     label: 'Delivery tracking',
     items: [
-      { label: 'Programs', to: '/programs', icon: ClipboardList, ready: true },
+      { label: 'Programs', to: '/programs', icon: ClipboardList, ready: true, moduleKey: 'programs' },
     ],
   },
   {
@@ -80,19 +84,21 @@ export const NAVIGATION: readonly NavGroup[] = [
         to: '/data-submissions',
         icon: Database,
         ready: true,
+        moduleKey: 'data-submissions',
       },
       {
         label: 'Reports & exports',
         to: '/reports',
         icon: FileBarChart,
         ready: true,
+        moduleKey: 'reports',
       },
     ],
   },
   {
     label: 'Analytics',
     items: [
-      { label: 'KPI Directory', to: '/kpis', icon: LayoutGrid, ready: true },
+      { label: 'KPI Directory', to: '/kpis', icon: LayoutGrid, ready: true, moduleKey: 'kpi-directory' },
     ],
   },
   {
@@ -103,12 +109,14 @@ export const NAVIGATION: readonly NavGroup[] = [
         to: '/stakeholders',
         icon: Building2,
         ready: true,
+        moduleKey: 'stakeholders',
       },
       {
         label: 'User access',
         to: '/administration',
         icon: ShieldCheck,
         ready: true,
+        moduleKey: 'administration',
       },
     ],
   },

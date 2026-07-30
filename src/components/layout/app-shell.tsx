@@ -71,7 +71,7 @@ export function AppShell() {
         </div>
       )}
 
-      <div className="flex min-w-0 flex-1 flex-col gap-3 p-3 sm:gap-4 sm:p-4">
+      <div className="mx-auto flex w-full max-w-[1440px] min-w-0 flex-1 flex-col gap-3 p-3 sm:gap-4 sm:p-4">
         <div className="sticky top-3 z-40 space-y-3">
           <Topbar
             isNavOpen={isNavOpen}

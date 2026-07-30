@@ -5,11 +5,14 @@ import type { z } from 'zod'
  *
  * Every network call in the app goes through here so that auth headers, error
  * shape, base URL and response validation are defined in exactly one place.
- * When gApp's backend is ready, only VITE_API_BASE_URL changes — no call sites
- * move.
+ * Hybrid demo mode keeps requests on same-origin `/api` so MSW can decide per
+ * route whether to return mock data or proxy to the submissions backend.
  */
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '/api'
+const USE_HYBRID_MOCK_API = import.meta.env.VITE_ENABLE_MOCKS === 'true'
+const BASE_URL = USE_HYBRID_MOCK_API
+  ? '/api'
+  : (import.meta.env.VITE_API_BASE_URL ?? '/api')
 
 /** Error thrown for any non-2xx response, carrying the status for callers. */
 export class ApiError extends Error {

@@ -1,4 +1,6 @@
 import { NAVIGATION } from '@/config/navigation'
+import { readAuthSession } from '@/features/auth/auth-session'
+import { canRoleReachModule } from '@/features/auth/role-access'
 import { cn } from '@/lib/utils'
 import { NavDropdownItem } from './nav-dropdown-item'
 import { NavItem } from './nav-item'
@@ -24,6 +26,19 @@ export function Sidebar({
   /** Called when a link is followed — used to dismiss the mobile drawer. */
   onNavigate?: () => void
 }) {
+  const session = readAuthSession()
+  const roleSlug = session?.user.role
+
+  // No session (e.g. a dev workflow that never went through /account/login)
+  // shows the full nav rather than nothing — restriction only applies once a
+  // real signed-in role exists to restrict against.
+  const visibleGroups = NAVIGATION.map((group) => ({
+    ...group,
+    items: group.items.filter(
+      (item) => !roleSlug || canRoleReachModule(roleSlug, item.moduleKey),
+    ),
+  })).filter((group) => group.items.length > 0)
+
   return (
     <aside
       className={cn(
@@ -37,7 +52,7 @@ export function Sidebar({
 
       <nav aria-label="Primary" className="min-h-0 flex-1 overflow-y-auto px-2.5 pb-4">
         <div className="space-y-4">
-          {NAVIGATION.map((group) => (
+          {visibleGroups.map((group) => (
             <div key={group.label}>
               <p className="px-1.5 pb-1.5 text-2xs font-medium tracking-wide text-text-subtle uppercase">
                 {group.label}
