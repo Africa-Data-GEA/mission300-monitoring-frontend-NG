@@ -2,8 +2,7 @@
 #
 # Pre-commit gate.
 #
-# Deliberately light: only lint and typecheck, so committing stays fast. The
-# full test suite runs on push (see .husky/pre-push).
+# Deliberately light: only lint and typecheck, so committing stays fast.
 
 set -e
 

@@ -3,6 +3,7 @@ import { ErrorState } from '@/components/ui/error-state'
 import { BuilderSidebar } from './components/builder/builder-sidebar'
 import { ReportDocumentPreview } from './components/builder/report-document-preview'
 import { CompactExportSection } from './components/compact-export-section'
+import { NigeriaProgressReportSection } from './components/nigeria-progress-report-section'
 import { ReportsSkeleton } from './components/reports-skeleton'
 import { SavedReportsFilters } from './components/saved-reports-filters'
 import { SavedReportsTable } from './components/saved-reports-table'
@@ -68,6 +69,8 @@ export function ReportsPage() {
           isPending={page.isPreviewPending}
         />
       </div>
+
+      <NigeriaProgressReportSection />
 
       <CompactExportSection
         cards={page.compactExports}
