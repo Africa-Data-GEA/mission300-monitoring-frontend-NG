@@ -2,7 +2,6 @@ import { Breadcrumb } from '@/components/ui/breadcrumb'
 import { ErrorState } from '@/components/ui/error-state'
 import { BuilderSidebar } from './components/builder/builder-sidebar'
 import { ReportDocumentPreview } from './components/builder/report-document-preview'
-import { CompactExportSection } from './components/compact-export-section'
 import { NigeriaProgressReportSection } from './components/nigeria-progress-report-section'
 import { ReportsSkeleton } from './components/reports-skeleton'
 import { SavedReportsFilters } from './components/saved-reports-filters'
@@ -71,12 +70,6 @@ export function ReportsPage() {
       </div>
 
       <NigeriaProgressReportSection />
-
-      <CompactExportSection
-        cards={page.compactExports}
-        onExport={page.exportCompactCard}
-        pendingKey={page.compactExportKey}
-      />
 
       <div className="flex flex-col gap-3">
         <SavedReportsFilters

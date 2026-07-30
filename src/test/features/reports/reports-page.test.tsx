@@ -4,7 +4,7 @@ import { ReportsPage } from '@/features/reports/reports-page'
 import { renderWithProviders } from '@/test/render'
 
 describe('ReportsPage', () => {
-  it('renders the report builder, CPR/Compact exports and saved reports', async () => {
+  it('renders the report builder and saved reports', async () => {
     renderWithProviders(<ReportsPage />)
 
     expect(await screen.findByRole('heading', { name: 'Reports & Exports' })).toBeInTheDocument()
@@ -17,9 +17,6 @@ describe('ReportsPage', () => {
 
     // The live document preview: cover, then content, then closing page.
     expect(await screen.findByText('End of report', {}, { timeout: 3000 })).toBeInTheDocument()
-
-    expect(screen.getByRole('heading', { name: 'CPR and Compact export' })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: 'Compact Progress Report export' })).toBeInTheDocument()
 
     const savedReports = screen.getByRole('table', {
       name: 'Saved report configurations and generated-report history',
