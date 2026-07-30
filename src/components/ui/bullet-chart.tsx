@@ -52,6 +52,7 @@ export function BulletChart({
   valueLabel,
   showBaseline = true,
   showExpected = true,
+  tone = 'default',
   className,
 }: {
   current: number
@@ -67,6 +68,7 @@ export function BulletChart({
   valueLabel: string
   showBaseline?: boolean
   showExpected?: boolean
+  tone?: 'default' | 'danger'
   className?: string
 }) {
   const [tooltipOpen, setTooltipOpen] = useState(false)
@@ -173,7 +175,11 @@ export function BulletChart({
         data-testid="bullet-current"
         className={cn(
           'absolute top-1/2 left-0 h-2.5 -translate-y-1/2 rounded-pill transition-[width] duration-500 ease-out motion-reduce:transition-none',
-          showExpected && isBehind ? 'bg-chart-blue-light' : 'bg-chart-blue-dark',
+          tone === 'danger'
+            ? 'bg-status-at-risk'
+            : showExpected && isBehind
+              ? 'bg-chart-blue-light'
+              : 'bg-chart-blue-dark',
         )}
         style={{ width: `${currentPercent}%` }}
       />

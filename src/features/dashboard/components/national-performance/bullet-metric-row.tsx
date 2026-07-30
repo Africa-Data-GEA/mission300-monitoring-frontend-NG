@@ -2,6 +2,7 @@ import { BulletChart } from '@/components/ui/bullet-chart'
 import { Card } from '@/components/ui/card'
 import { InfoPopover } from '@/components/ui/info-popover'
 import { TrendIndicator } from '@/components/ui/trend-indicator'
+import { resolveTrend } from '@/lib/trend'
 import type { BulletMetric } from '../../types'
 
 function conciseDataSource(source: string): string {
@@ -21,6 +22,9 @@ function conciseDataSource(source: string): string {
 
 /** One Section C metric: value, trend and its bullet chart. */
 export function BulletMetricRow({ metric }: { metric: BulletMetric }) {
+  const trend = metric.trend ? resolveTrend(metric.trend) : null
+  const isWorsening = trend !== null && !trend.isFlat && !trend.isImproving
+
   return (
     <Card className="relative flex h-full flex-col p-4 transition-[border-color,box-shadow] hover:z-20 hover:border-brand-200 hover:shadow-sm focus-within:z-20">
       <div className="flex items-start justify-between gap-3">
@@ -58,6 +62,7 @@ export function BulletMetricRow({ metric }: { metric: BulletMetric }) {
         valueLabel={metric.value}
         showBaseline={false}
         showExpected={false}
+        tone={isWorsening ? 'danger' : 'default'}
       />
     </Card>
   )

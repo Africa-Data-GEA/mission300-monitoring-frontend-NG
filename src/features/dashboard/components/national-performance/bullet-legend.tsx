@@ -1,4 +1,4 @@
-/** Explains the current fill, remaining track and approved target marker. */
+/** Explains trend-aware current fills, remaining track and target marker. */
 export function BulletLegend() {
   return (
     <ul className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-text-muted">
@@ -7,7 +7,14 @@ export function BulletLegend() {
           aria-hidden="true"
           className="h-2.5 w-5 rounded-pill bg-chart-blue-dark"
         />
-        Current value
+        Improving or stable
+      </li>
+      <li className="flex items-center gap-1.5">
+        <span
+          aria-hidden="true"
+          className="h-2.5 w-5 rounded-pill bg-status-at-risk"
+        />
+        Worsening
       </li>
       <li className="flex items-center gap-1.5">
         <span

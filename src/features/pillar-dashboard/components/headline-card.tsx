@@ -15,6 +15,12 @@ export function HeadlineCard({ card }: { card: PillarHeadlineCard }) {
       ? (card.rawValue / card.target) * 100
       : null
 
+  // The bare figure only — `card.value` carries a full descriptive label
+  // (unit, method, reporting period) meant for the KPI profile it's sourced
+  // from, not for a compact headline card where that text just crowds the number.
+  const displayValue =
+    card.rawValue !== null ? card.rawValue.toLocaleString(undefined, { maximumFractionDigits: 2 }) : card.value
+
   return (
     <Card className="flex h-full flex-col p-4">
       <div className="flex items-start justify-between gap-2">
@@ -32,7 +38,7 @@ export function HeadlineCard({ card }: { card: PillarHeadlineCard }) {
 
       <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1.5">
         <span className="text-3xl leading-none font-semibold tracking-tight text-text-default">
-          {card.value}
+          {displayValue}
         </span>
         {card.trend && <TrendIndicator trend={card.trend} />}
       </div>

@@ -195,9 +195,23 @@ describe('Section C — national performance', () => {
 
     expect(screen.queryByText('Baseline')).not.toBeInTheDocument()
     expect(screen.queryByText('Expected this period')).not.toBeInTheDocument()
-    expect(screen.getByText('Current value')).toBeInTheDocument()
+    expect(screen.getByText('Improving or stable')).toBeInTheDocument()
+    expect(screen.getByText('Worsening')).toBeInTheDocument()
     expect(screen.getByText('Remaining range')).toBeInTheDocument()
     expect(screen.getByText('Target marker')).toBeInTheDocument()
+  })
+
+  it('uses red only when the reported trend is worsening', () => {
+    render(<NationalPerformanceSection metrics={nationalPerformance} />)
+
+    const improving = screen.getByRole('img', { name: /Metering Rate/ })
+    const worsening = screen.getByRole('img', { name: /DisCo Remittance/ })
+    expect(within(improving).getByTestId('bullet-current')).toHaveClass(
+      'bg-chart-blue-dark',
+    )
+    expect(within(worsening).getByTestId('bullet-current')).toHaveClass(
+      'bg-status-at-risk',
+    )
   })
 
   it('uses concise institution sources and no validation badges', async () => {

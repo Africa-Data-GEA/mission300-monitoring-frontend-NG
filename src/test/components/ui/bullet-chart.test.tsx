@@ -159,6 +159,12 @@ describe('BulletChart', () => {
   })
 
   describe('progress against the approved trajectory', () => {
+    it('uses the danger colour when the caller marks performance as worsening', () => {
+      render(<BulletChart {...base} tone="danger" />)
+
+      expect(screen.getByTestId('bullet-current')).toHaveClass('bg-status-at-risk')
+    })
+
     it('flags a higher-is-better metric below its expected value as behind', () => {
       render(<BulletChart {...base} current={55} expected={68} />)
 

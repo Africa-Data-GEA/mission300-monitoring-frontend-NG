@@ -61,16 +61,19 @@ export function PillarDashboardPage() {
 
       <HeadlineCardsSection cards={data.headlineCards} />
 
-      <Card variant="well" className="p-4">
-        <h2 className="text-lg font-semibold text-text-default">
-          Current value vs. target
-        </h2>
-        <div className="mt-3">
-          <KpiPerformanceChart cards={data.headlineCards} />
-        </div>
-      </Card>
+      <div className="grid items-start gap-4 xl:grid-cols-2">
+        <Card variant="well" className="p-4">
+          <h2 className="text-lg font-semibold text-text-default">
+            Current value vs. target
+          </h2>
+          <div className="mt-3">
+            <KpiPerformanceChart cards={data.headlineCards} />
+          </div>
+        </Card>
 
-      <DeliveryStatusPanel status={data.deliveryStatus} />
+        <DeliveryStatusPanel status={data.deliveryStatus} />
+      </div>
+
       <PillarKpiList rows={data.kpis} />
       <BottleneckPanel records={data.bottlenecks} />
     </div>

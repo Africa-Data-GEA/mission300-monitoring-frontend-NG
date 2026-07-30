@@ -59,15 +59,15 @@ function DistributionDonut({
           },
           legend: { position: 'bottom', fontFamily: FONT_FAMILY, fontSize: '11px' },
           plotOptions: {
+            // Centre label off entirely: with a single 100% segment (a
+            // common case here) Apex has no "unhovered" state to fall back
+            // to, so its own always-on centre text renders unpredictably —
+            // the ring's own percentage labels and the legend below already
+            // carry the same information cleanly.
             pie: {
               donut: {
                 size: '66%',
-                labels: {
-                  show: true,
-                  name: { show: true, offsetY: 12 },
-                  value: { show: true, offsetY: -8, fontSize: '20px', fontWeight: 700 },
-                  total: { show: true, showAlways: true, label: 'Total', formatter: () => String(total) },
-                },
+                labels: { show: false },
               },
             },
           },

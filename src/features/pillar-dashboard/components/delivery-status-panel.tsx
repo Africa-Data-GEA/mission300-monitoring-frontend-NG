@@ -18,8 +18,8 @@ export function DeliveryStatusPanel({ status }: { status: PillarDeliveryStatus }
   const populated = status.counts.filter((entry) => entry.count > 0)
 
   return (
-    <Card className="p-4">
-      <h2 className="text-sm font-semibold text-text-default">
+    <Card variant="well" className="p-4">
+      <h2 className="text-lg font-semibold text-text-default">
         Delivery status — programmes and projects
       </h2>
 
@@ -66,7 +66,9 @@ export function DeliveryStatusPanel({ status }: { status: PillarDeliveryStatus }
                     total: {
                       show: true,
                       showAlways: true,
-                      label: 'Total',
+                      label: '',
+                      fontSize: '24px',
+                      fontWeight: 700,
                       formatter: () => String(status.total),
                     },
                   },

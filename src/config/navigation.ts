@@ -10,7 +10,19 @@ import {
   ShieldCheck,
   type LucideIcon,
 } from 'lucide-react'
+import type { PillarId } from '@/api/schemas/common'
 import { PILLARS, PILLAR_LABELS } from '@/types/domain'
+
+/**
+ * Which Compact pillar dashboards are ready to show, shared between the
+ * sidebar dropdown and the pillar picker page so the two never disagree.
+ * Generation & network and Last-mile access are built out with real
+ * analysis; the remaining four are disabled until the same treatment lands.
+ */
+export const READY_PILLARS: ReadonlySet<PillarId> = new Set<PillarId>([
+  'generation-network',
+  'last-mile-access',
+])
 
 /**
  * Sidebar navigation, transcribed from the approved wireframe.
@@ -35,7 +47,7 @@ export interface NavItem {
   readonly to: string
   readonly icon: LucideIcon
   readonly ready: boolean
-  readonly children?: readonly { readonly label: string; readonly to: string }[]
+  readonly children?: readonly { readonly label: string; readonly to: string; readonly ready: boolean }[]
   /** Stable key role-based access is checked against — see role-access.ts. Independent of `label`, which can be renamed freely. */
   readonly moduleKey: string
 }
@@ -59,6 +71,7 @@ export const NAVIGATION: readonly NavGroup[] = [
         children: PILLARS.map((pillar) => ({
           label: PILLAR_LABELS[pillar],
           to: `/pillars/${pillar}`,
+          ready: READY_PILLARS.has(pillar),
         })),
       },
       {

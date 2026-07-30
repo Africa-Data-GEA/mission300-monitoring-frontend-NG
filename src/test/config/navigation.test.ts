@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { NAVIGATION } from '@/config/navigation'
+import { NAVIGATION, READY_PILLARS } from '@/config/navigation'
 import { PILLARS, PILLAR_LABELS } from '@/types/domain'
 
 const allItems = NAVIGATION.flatMap((group) => group.items)
@@ -98,6 +98,7 @@ describe('NAVIGATION', () => {
         expect(pillarItem?.children).toContainEqual({
           label: PILLAR_LABELS[pillar],
           to: `/pillars/${pillar}`,
+          ready: READY_PILLARS.has(pillar),
         })
       }
     })

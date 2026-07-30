@@ -50,23 +50,36 @@ export function NavDropdownItem({ item }: { item: NavItemData }) {
 
       {open && (
         <ul className="mt-0.5 space-y-0.5 border-l border-border-default pl-3.5">
-          {item.children?.map((child) => (
-            <li key={child.to}>
-              <NavLink
-                to={child.to}
-                className={({ isActive }) =>
-                  cn(
-                    'block truncate rounded-control px-2.5 py-1.5 text-sm transition-colors',
-                    isActive
-                      ? 'bg-brand-100 font-semibold text-brand-800'
-                      : 'text-text-muted hover:bg-border-default hover:text-text-default',
-                  )
-                }
-              >
-                {child.label}
-              </NavLink>
-            </li>
-          ))}
+          {item.children?.map((child) =>
+            child.ready ? (
+              <li key={child.to}>
+                <NavLink
+                  to={child.to}
+                  className={({ isActive }) =>
+                    cn(
+                      'block truncate rounded-control px-2.5 py-1.5 text-sm transition-colors',
+                      isActive
+                        ? 'bg-brand-100 font-semibold text-brand-800'
+                        : 'text-text-muted hover:bg-border-default hover:text-text-default',
+                    )
+                  }
+                >
+                  {child.label}
+                </NavLink>
+              </li>
+            ) : (
+              <li key={child.to}>
+                <button
+                  type="button"
+                  disabled
+                  aria-describedby="nav-not-available"
+                  className="block w-full cursor-not-allowed truncate rounded-control px-2.5 py-1.5 text-left text-sm text-text-subtle"
+                >
+                  {child.label}
+                </button>
+              </li>
+            ),
+          )}
         </ul>
       )}
     </div>

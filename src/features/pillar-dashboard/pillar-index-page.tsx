@@ -1,6 +1,7 @@
 import { Link } from 'react-router'
 import { Breadcrumb } from '@/components/ui/breadcrumb'
 import { Card } from '@/components/ui/card'
+import { READY_PILLARS } from '@/config/navigation'
 import { PILLARS, PILLAR_LABELS } from '@/types/domain'
 
 /** Picker for the six Compact pillar dashboards. */
@@ -19,12 +20,16 @@ export function PillarIndexPage() {
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
         {PILLARS.map((pillar) => (
           <Card key={pillar} className="p-4">
-            <Link
-              to={`/pillars/${pillar}`}
-              className="font-medium text-text-default hover:text-brand-700 hover:underline"
-            >
-              {PILLAR_LABELS[pillar]}
-            </Link>
+            {READY_PILLARS.has(pillar) ? (
+              <Link
+                to={`/pillars/${pillar}`}
+                className="font-medium text-text-default hover:text-brand-700 hover:underline"
+              >
+                {PILLAR_LABELS[pillar]}
+              </Link>
+            ) : (
+              <span className="font-medium text-text-subtle">{PILLAR_LABELS[pillar]}</span>
+            )}
           </Card>
         ))}
       </div>
