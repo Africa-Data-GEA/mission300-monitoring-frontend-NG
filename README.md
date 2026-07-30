@@ -3,7 +3,7 @@ d
 # React + TypeScript + Vited
 
 This template provides ad minimal setup to get React working in Vite with HMR and some ESLint rules.
-e
+ee
 Currently, two official plugins are available:d
 
 - [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
