@@ -1,4 +1,5 @@
 import type { z } from 'zod'
+import { environment } from '@/config/environment'
 
 /**
  * Thin typed wrapper over fetch.
@@ -9,10 +10,9 @@ import type { z } from 'zod'
  * route whether to return mock data or proxy to the submissions backend.
  */
 
-const USE_HYBRID_MOCK_API = import.meta.env.VITE_ENABLE_MOCKS === 'true'
-const BASE_URL = USE_HYBRID_MOCK_API
+const BASE_URL = environment.usesBrowserMocks
   ? '/api'
-  : (import.meta.env.VITE_API_BASE_URL ?? '/api')
+  : environment.apiBaseUrl
 
 /** Error thrown for any non-2xx response, carrying the status for callers. */
 export class ApiError extends Error {

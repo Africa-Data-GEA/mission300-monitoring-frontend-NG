@@ -3,12 +3,12 @@ import { createRoot } from 'react-dom/client'
 import { RouterProvider } from 'react-router'
 import { AppProviders } from '@/app/providers'
 import { router } from '@/app/router'
+import { environment } from '@/config/environment'
 import './index.css'
 
 /**
- * Development uses MSW unless explicitly disabled. A deployed demo can opt
- * into hybrid routing with VITE_ENABLE_MOCKS=true: mock-only routes remain
- * local while implemented modules proxy to VITE_SUBMISSIONS_BACKEND_URL.
+ * Mock and hybrid demo modes use MSW. Backend mode never starts the browser
+ * worker; all requests go through the configured API base URL.
  */
 /**
  * When mock handler code changes during development, MSW installs a new
@@ -30,12 +30,7 @@ function reloadOnServiceWorkerUpdate() {
 }
 
 async function enableMocking() {
-  const mockSetting = import.meta.env.VITE_ENABLE_MOCKS
-  const shouldEnable =
-    mockSetting === 'true' ||
-    (import.meta.env.DEV && mockSetting !== 'false')
-
-  if (!shouldEnable) return
+  if (!environment.usesBrowserMocks) return
 
   reloadOnServiceWorkerUpdate()
 

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { FileSpreadsheet } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { environment } from '@/config/environment'
 import { Card } from '@/components/ui/card'
 
 /**
@@ -13,7 +14,7 @@ import { Card } from '@/components/ui/card'
  * configured (VITE_SUBMISSIONS_BACKEND_URL).
  */
 export function NigeriaProgressReportSection() {
-  const backendUrl = import.meta.env.VITE_SUBMISSIONS_BACKEND_URL as string | undefined
+  const backendUrl = environment.hybridBackendUrl
   const [isDownloading, setIsDownloading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 

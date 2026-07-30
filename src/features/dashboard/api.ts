@@ -2,6 +2,7 @@ import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { z } from 'zod'
 import { executiveOverviewSchema } from '@/api/schemas/executive-overview'
 import { api } from '@/lib/api-client'
+import { environment } from '@/config/environment'
 import type { ExecutiveOverviewQuery } from './types'
 
 const kpiBreakdownSchema = z.array(
@@ -21,7 +22,7 @@ export type KpiBreakdown = z.infer<typeof kpiBreakdownSchema>
  * set, so the section simply doesn't render rather than failing.
  */
 export function useKpiBreakdown(kpiId: string) {
-  const backendUrl = import.meta.env.VITE_SUBMISSIONS_BACKEND_URL as string | undefined
+  const backendUrl = environment.hybridBackendUrl
 
   return useQuery({
     queryKey: ['kpi-breakdown', kpiId, backendUrl],

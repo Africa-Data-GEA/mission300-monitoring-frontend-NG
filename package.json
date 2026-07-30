@@ -1,7 +1,13 @@
 {
   "name": "emrc-geapp",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.1.0",
+  "description": "M300 Nigeria Energy Compact monitoring dashboard",
+  "packageManager": "pnpm@10.33.0",
+  "engines": {
+    "node": "24.x",
+    "pnpm": "10.x"
+  },
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -13,6 +19,7 @@
     "test:watch": "vitest",
     "test:ui": "vitest --ui",
     "verify": "pnpm typecheck && pnpm lint && pnpm test",
+    "check": "pnpm verify && pnpm build",
     "prepare": "husky"
   },
   "dependencies": {
@@ -33,11 +40,10 @@
     "react-day-picker": "^10.0.1",
     "react-dom": "^19.2.7",
     "react-hook-form": "^7.82.0",
-    "react-router": "^8.2.0",
-    "recharts": "^3.9.2",
+    "react-router": "^8.3.0",
     "tailwind-merge": "^3.6.0",
     "tailwindcss": "^4.3.3",
-    "xlsx": "^0.18.5",
+    "exceljs": "^4.4.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {

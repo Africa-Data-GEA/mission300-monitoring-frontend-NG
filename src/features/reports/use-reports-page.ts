@@ -104,7 +104,9 @@ export function useReportsPage() {
         sections: generated.sections.filter((section) => !excludedSections.has(section.title)),
       }
       const blob =
-        format === 'pdf' ? await buildReportPdf(filtered, { orientation }) : buildReportWorkbook(filtered)
+        format === 'pdf'
+          ? await buildReportPdf(filtered, { orientation })
+          : await buildReportWorkbook(filtered)
       downloadBlob(blob, savedReport.fileReference)
     } finally {
       setDownloadingFormat(null)
@@ -120,7 +122,9 @@ export function useReportsPage() {
         format,
       })
       const blob =
-        format === 'pdf' ? await buildReportPdf(generated, { orientation: 'portrait' }) : buildReportWorkbook(generated)
+        format === 'pdf'
+          ? await buildReportPdf(generated, { orientation: 'portrait' })
+          : await buildReportWorkbook(generated)
       downloadBlob(blob, savedReport.fileReference)
     } finally {
       setCompactExportKey(null)
@@ -134,7 +138,7 @@ export function useReportsPage() {
       const blob =
         report.format === 'pdf'
           ? await buildReportPdf(generated, { orientation: 'portrait' })
-          : buildReportWorkbook(generated)
+          : await buildReportWorkbook(generated)
       downloadBlob(blob, report.fileReference)
     } finally {
       setRedownloadingId(null)

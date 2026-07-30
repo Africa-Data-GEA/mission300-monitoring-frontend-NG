@@ -1,79 +1,57 @@
-# M300-GEAPP-EMRC
-d
-# React + TypeScript + Vited
+# M300 Nigeria Energy Compact Dashboard
 
-This template provides ad minimal setup to get React working in Vite with HMR and some ESLint rules.
-ee
-Currently, two official plugins are available:d
+Frontend for monitoring delivery of Nigeria's Mission 300 National Energy
+Compact. The application is currently a demonstration system: completed API
+modules can use the NestJS demo backend while unfinished modules remain backed
+by deterministic browser mocks.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Requirements
 
-## React Compilere
-f
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
+- Node.js 24.14.1 (see `.node-version`)
+- pnpm 10.33.0
 
-Note: This will impact Vite dev & build performances.
+## Local development
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```bash
+pnpm install
+copy .env.example .env.local
+pnpm dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+The default development mode is `mock`, so the frontend can run without a
+backend. Environment variables are validated at startup.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Data modes
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+| Mode | Behaviour |
+| --- | --- |
+| `mock` | All `/api` requests are handled by MSW in the browser. |
+| `hybrid` | MSW handles unfinished modules and proxies supported modules to `VITE_SUBMISSIONS_BACKEND_URL`. |
+| `backend` | MSW is disabled and all requests use `VITE_API_BASE_URL`. |
 
+Use `hybrid` only for the demonstration deployment while backend coverage is
+incomplete. Production should move to `backend` mode when all endpoint
+contracts are implemented.
+
+## Quality commands
+
+```bash
+pnpm typecheck
+pnpm lint
+pnpm test
+pnpm build
+pnpm check
 ```
+
+Pull requests and pushes to `main` run dependency audit, typecheck, lint, tests
+and a production build in GitHub Actions.
+
+## Important architecture boundary
+
+The frontend presents values returned by API contracts. KPI calculations,
+submission validation, approval transitions, aggregation, baselines and target
+progress are backend responsibilities. Browser mocks illustrate the expected
+contracts and must not be treated as an authoritative production data source.
+
+More detailed architecture, API, submission-flow and deployment documentation
+is maintained under [`docs/`](docs/).

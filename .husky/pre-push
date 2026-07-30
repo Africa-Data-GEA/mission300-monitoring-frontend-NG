@@ -2,14 +2,10 @@
 #
 # Pre-push gate.
 #
-# Typechecking already runs at pre-commit, so pre-push only repeats lint.
+# The organization CI workflow owns typecheck, tests and the production build.
+# Keep pushes fast and avoid printing a false local verification result.
 #
 # If you genuinely need to bypass this (a hotfix on a broken main, say), use
 # `git push --no-verify` — and say so in the pull request.
 
-set -e
-
-# echo "→ pre-push: lint"
-# pnpm lint
-
-echo "✓ pre-push checks passed"
+echo "→ pre-push: full verification runs in CI"

@@ -2,14 +2,11 @@
 #
 # Pre-commit gate.
 #
-# Deliberately light: only lint and typecheck, so committing stays fast.
+# Deliberately light: CI owns the full typecheck, test and build suite.
 
 set -e
 
-# echo "→ pre-commit: typecheck"
-# pnpm typecheck
-
-# echo "→ pre-commit: lint"
-# pnpm lint
+echo "→ pre-commit: lint"
+pnpm lint
 
 echo "✓ pre-commit checks passed"

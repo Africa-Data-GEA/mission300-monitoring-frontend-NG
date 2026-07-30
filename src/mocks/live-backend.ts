@@ -5,7 +5,7 @@
  * VITE_SUBMISSIONS_BACKEND_URL (e.g. http://localhost:4000) to turn it on.
  */
 export function getLiveBackendUrl(): string | null {
-  const url = import.meta.env.VITE_SUBMISSIONS_BACKEND_URL as string | undefined
+  const url = environment.hybridBackendUrl
   return url ? url.replace(/\/$/, '') : null
 }
 
@@ -29,3 +29,4 @@ export async function proxyToLiveBackend(request: Request, backendUrl: string): 
 
   return new Response(responseBody, { status: response.status, headers: response.headers })
 }
+import { environment } from '@/config/environment'

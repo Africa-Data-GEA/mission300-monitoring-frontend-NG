@@ -11,6 +11,11 @@ node_modules
 dist
 dist-ssr
 *.local
+*.xlsx~
+~$*.xlsx
+*_test_out.txt
+coverage
+.vitest
 
 # Editor directories and files
 .vscode/*
