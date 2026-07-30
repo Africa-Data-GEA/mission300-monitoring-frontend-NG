@@ -13,6 +13,7 @@ export function AccessRateCard({ data }: { data: AccessRateCardData }) {
       icon={data.icon}
       source={data.source}
       provenance={data.provenance}
+      hideSource
       details={[
         { label: 'Target', value: data.targetLabel },
         { label: 'Previous publication', value: data.previousPublication },

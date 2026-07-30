@@ -17,6 +17,7 @@ export function GenerationCapacityCard({
       icon={data.icon}
       source={data.source}
       provenance={data.provenance}
+      hideSource
       details={[
         {
           label: 'Availability ratio',

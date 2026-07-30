@@ -87,6 +87,12 @@ const ForgotPasswordPage = lazy(() =>
   })),
 )
 
+const NotFoundPage = lazy(() =>
+  import('@/features/not-found/not-found-page').then((module) => ({
+    default: module.NotFoundPage,
+  })),
+)
+
 function lazyRoute(element: React.ReactNode) {
   return <Suspense fallback={<RouteFallback />}>{element}</Suspense>
 }
@@ -187,6 +193,11 @@ export const router = createBrowserRouter([
       {
         path: 'state-disco',
         children: stateDiscoRoutes,
+        handle: { globalFilters: false } satisfies RouteHandle,
+      },
+      {
+        path: '*',
+        element: lazyRoute(<NotFoundPage />),
         handle: { globalFilters: false } satisfies RouteHandle,
       },
     ],
