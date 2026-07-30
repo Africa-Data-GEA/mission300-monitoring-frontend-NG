@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react'
-import { createBrowserRouter } from 'react-router'
+import { createBrowserRouter, Navigate } from 'react-router'
 import { AppShell } from '@/components/layout/app-shell'
 import { RouteFallback } from '@/components/layout/route-fallback'
 import { dataSubmissionRoutes } from '@/features/data-submissions/routes'
@@ -126,9 +126,13 @@ export const router = createBrowserRouter([
     element: <AppShell />,
     children: [
       {
-        index: true,
+        path: 'dashboard',
         element: lazyRoute(<DashboardPage />),
         handle: { globalFilters: true } satisfies RouteHandle,
+      },
+      {
+        index: true,
+        element: <Navigate to="/dashboard" replace />,
       },
       {
         path: 'kpis',

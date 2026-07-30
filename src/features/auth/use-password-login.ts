@@ -33,7 +33,7 @@ export function usePasswordLogin() {
     try {
       const session = await authenticate(account.email, password)
       saveAuthSession(session)
-      navigate('/', { replace: true })
+      navigate('/dashboard', { replace: true })
     } catch (error) {
       setServerError(
         error instanceof ApiError ? error.message : 'Something went wrong. Please try again.',

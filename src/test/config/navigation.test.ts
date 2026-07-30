@@ -67,7 +67,7 @@ describe('NAVIGATION', () => {
       const ready = allItems.filter((item) => item.ready)
 
       expect(ready.map((item) => [item.label, item.to])).toEqual([
-        ['Executive Overview', '/'],
+        ['Executive Overview', '/dashboard'],
         ['Pillar dashboards', '/pillars'],
         ['State & DisCo', '/state-disco'],
         ['Programs', '/programs'],

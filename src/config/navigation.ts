@@ -49,7 +49,7 @@ export const NAVIGATION: readonly NavGroup[] = [
   {
     label: 'Monitoring & Analysis',
     items: [
-      { label: 'Executive Overview', to: '/', icon: Home, ready: true, moduleKey: 'executive-overview' },
+      { label: 'Executive Overview', to: '/dashboard', icon: Home, ready: true, moduleKey: 'executive-overview' },
       {
         label: 'Pillar dashboards',
         to: '/pillars',

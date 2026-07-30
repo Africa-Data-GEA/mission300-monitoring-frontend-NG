@@ -2,15 +2,12 @@
 #
 # Pre-push gate.
 #
-# Nothing reaches the remote unless it typechecks and lints clean.
+# Typechecking already runs at pre-commit, so pre-push only repeats lint.
 #
 # If you genuinely need to bypass this (a hotfix on a broken main, say), use
 # `git push --no-verify` — and say so in the pull request.
 
 set -e
-
-echo "→ pre-push: typecheck"
-pnpm typecheck
 
 echo "→ pre-push: lint"
 pnpm lint
