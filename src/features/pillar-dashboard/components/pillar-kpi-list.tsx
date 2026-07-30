@@ -3,6 +3,7 @@ import type { KpiCatalogueRow } from '@/api/schemas/kpi-explorer'
 import { Card } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { buildCatalogueColumns } from '@/features/kpi-explorer/components/catalogue-columns'
+import { KpiDistributionCharts } from './kpi-distribution-charts'
 
 /**
  * Every KPI Matrix indicator tagged to this pillar — the same catalogue rows
@@ -16,6 +17,12 @@ export function PillarKpiList({ rows }: { rows: readonly KpiCatalogueRow[] }) {
   return (
     <Card variant="well" className="p-2 sm:p-4">
       <h2 className="text-lg font-semibold text-text-default">KPIs for this pillar</h2>
+
+      {rows.length > 0 && (
+        <div className="mt-2 sm:mt-3">
+          <KpiDistributionCharts rows={rows} />
+        </div>
+      )}
 
       <Card className="mt-2 min-w-0 overflow-hidden p-0 sm:mt-3 sm:p-1">
         <DataTable

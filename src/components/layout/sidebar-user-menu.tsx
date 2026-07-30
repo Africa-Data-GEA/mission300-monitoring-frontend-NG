@@ -53,6 +53,7 @@ export function SidebarUserMenu() {
   const [profileOpen, setProfileOpen] = useState(false)
   const [helpOpen, setHelpOpen] = useState(false)
   const [guideOpen, setGuideOpen] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
 
   function openProfile() {
     setDraft(user)
@@ -143,8 +144,12 @@ export function SidebarUserMenu() {
           <form
             onSubmit={(event) => {
               event.preventDefault()
-              setUser(draft)
-              setProfileOpen(false)
+              setIsSaving(true)
+              window.setTimeout(() => {
+                setUser(draft)
+                setIsSaving(false)
+                setProfileOpen(false)
+              }, 600)
             }}
             className="grid gap-4 sm:grid-cols-2"
           >
@@ -180,10 +185,17 @@ export function SidebarUserMenu() {
               />
             </label>
             <div className="mt-2 flex justify-end gap-2 border-t border-border-default pt-4 sm:col-span-2">
-              <Button type="button" variant="secondary" onClick={() => setProfileOpen(false)}>
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => setProfileOpen(false)}
+                disabled={isSaving}
+              >
                 Cancel
               </Button>
-              <Button type="submit">Save changes</Button>
+              <Button type="submit" disabled={isSaving}>
+                {isSaving ? 'Saving…' : 'Save changes'}
+              </Button>
             </div>
           </form>
         </div>

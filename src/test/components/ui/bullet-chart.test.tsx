@@ -108,6 +108,25 @@ describe('BulletChart', () => {
   })
 
   describe('optional markers', () => {
+    it('can hide comparison markers and tooltip details', async () => {
+      const user = userEvent.setup()
+      render(<BulletChart {...base} showBaseline={false} showExpected={false} />)
+
+      const chart = screen.getByRole('img')
+      expect(screen.queryByTestId('bullet-baseline')).not.toBeInTheDocument()
+      expect(screen.queryByTestId('bullet-expected')).not.toBeInTheDocument()
+      expect(chart.getAttribute('aria-label')).not.toContain('baseline')
+      expect(chart.getAttribute('aria-label')).not.toContain('expected')
+
+      await user.hover(chart)
+      const tooltip = screen.getByRole('tooltip')
+      expect(tooltip).not.toHaveTextContent('Baseline')
+      expect(tooltip).not.toHaveTextContent('Expected')
+      expect(tooltip).not.toHaveTextContent('trajectory')
+      expect(tooltip).toHaveTextContent('Current55%')
+      expect(tooltip).toHaveTextContent('Target100')
+    })
+
     /*
      * Several Compact metrics have no approved target and the specification
      * forbids inventing one, so the marker must simply be absent.

@@ -531,7 +531,7 @@ export const administrationOverview: AdministrationOverview = {
       description:
         'Leadership view across all pillars with export, but no data entry.',
       permissions: ['view', 'export'],
-      modules: ['Executive Overview', 'Compact pillar dashboards'],
+      modules: ['Executive Overview', 'Compact pillar dashboards', 'Reports & Exports'],
       assignedUsers: 2,
     },
     {

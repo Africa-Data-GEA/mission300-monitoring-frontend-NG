@@ -44,6 +44,7 @@ export function AccessChannelCard({ channel }: { channel: AccessChannel }) {
       ) : (
         <ProgressBar
           className="mt-3"
+          barClassName="bg-[#1d4ed8]"
           value={channel.percentComplete}
           label={channel.title}
         />

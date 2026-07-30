@@ -6,10 +6,9 @@ import { BulletMetricRow } from './bullet-metric-row'
 /**
  * Section C — National Performance and Target Progress.
  *
- * Every metric is a horizontal bullet chart on its own scale, showing
- * baseline, current value, the expected value for the selected period, and the
- * approved target where one exists. The row and legend live in their own files
- * in this folder.
+ * Every metric is a horizontal progress chart on its own scale, showing the
+ * current value and approved target where one exists. The row and legend live
+ * in their own files in this folder.
  */
 export function NationalPerformanceSection({
   metrics,

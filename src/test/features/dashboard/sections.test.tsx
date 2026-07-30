@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react'
+import { fireEvent, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it } from 'vitest'
 import { AccessDeliverySection } from '@/features/dashboard/components/access-delivery-section'
@@ -162,23 +162,22 @@ describe('Section C — national performance', () => {
 
     // Metering rate: 55 on a 0–100 scale.
     expect(
-      screen.getByRole('img', { name: /National metering rate/ }),
+      screen.getByRole('img', { name: /Metering Rate/ }),
     ).toBeInTheDocument()
     // Tariff shortfall: ₦2.2tn on a 0–3 scale.
     expect(
-      screen.getByRole('img', { name: /Tariff shortfall: ₦2.2tn/ }),
+      screen.getByRole('img', { name: /Subsidy.*Tariff Shortfall/ }),
     ).toBeInTheDocument()
   })
 
-  it('flags a metric behind its approved trajectory', () => {
+  it('shows only current value and target comparison in the chart', () => {
     render(<NationalPerformanceSection metrics={nationalPerformance} />)
 
-    // Metering is at 55 against an expected 68.
-    expect(
-      screen
-        .getByRole('img', { name: /National metering rate/ })
-        .getAttribute('aria-label'),
-    ).toContain('behind the approved trajectory')
+    const chart = screen.getByRole('img', { name: /Metering Rate/ })
+    expect(chart.getAttribute('aria-label')).not.toContain('baseline')
+    expect(chart.getAttribute('aria-label')).not.toContain('expected')
+    expect(within(chart).queryByTestId('bullet-baseline')).not.toBeInTheDocument()
+    expect(within(chart).queryByTestId('bullet-expected')).not.toBeInTheDocument()
   })
 
   it('omits the target marker for a metric with no approved target', () => {
@@ -186,17 +185,33 @@ describe('Section C — national performance', () => {
 
     expect(
       screen
-        .getByRole('img', { name: /ATC&C loss rate/ })
+        .getByRole('img', { name: /ATC&C Loss Rate/ })
         .getAttribute('aria-label'),
     ).not.toContain('target')
   })
 
-  it('explains the tick marks in a legend', () => {
+  it('explains current progress, remaining range and the target marker', () => {
     render(<NationalPerformanceSection metrics={nationalPerformance} />)
 
-    expect(screen.getByText('Baseline')).toBeInTheDocument()
-    expect(screen.getByText('Expected this period')).toBeInTheDocument()
-    expect(screen.getByText('Target')).toBeInTheDocument()
+    expect(screen.queryByText('Baseline')).not.toBeInTheDocument()
+    expect(screen.queryByText('Expected this period')).not.toBeInTheDocument()
+    expect(screen.getByText('Current value')).toBeInTheDocument()
+    expect(screen.getByText('Remaining range')).toBeInTheDocument()
+    expect(screen.getByText('Target marker')).toBeInTheDocument()
+  })
+
+  it('uses concise institution sources and no validation badges', async () => {
+    render(<NationalPerformanceSection metrics={nationalPerformance} />)
+
+    expect(screen.queryByText('Public source')).not.toBeInTheDocument()
+    expect(screen.queryByText('Requires validation')).not.toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', {
+      name: /About Renewable Energy Share in Generation Mix/i,
+    }))
+    const dialog = await screen.findByRole('dialog')
+    expect(within(dialog).getByText('NERC')).toBeInTheDocument()
+    expect(dialog).not.toHaveTextContent('NERC Q3 2025 Report generation-by-source table')
   })
 })
 

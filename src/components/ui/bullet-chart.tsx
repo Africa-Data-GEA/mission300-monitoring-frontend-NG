@@ -50,6 +50,8 @@ export function BulletChart({
   direction,
   label,
   valueLabel,
+  showBaseline = true,
+  showExpected = true,
   className,
 }: {
   current: number
@@ -63,6 +65,8 @@ export function BulletChart({
   label: string
   /** Pre-formatted current value, e.g. "₦2.2tn". */
   valueLabel: string
+  showBaseline?: boolean
+  showExpected?: boolean
   className?: string
 }) {
   const [tooltipOpen, setTooltipOpen] = useState(false)
@@ -97,10 +101,10 @@ export function BulletChart({
   // value in words.
   const description = [
     `${label}: ${valueLabel}`,
-    `baseline ${baseline}`,
-    expected === null ? null : `expected ${expected} for this period`,
+    showBaseline ? `baseline ${baseline}` : null,
+    showExpected && expected !== null ? `expected ${expected} for this period` : null,
     target === null ? null : `target ${target}`,
-    isBehind === null
+    !showExpected || isBehind === null
       ? null
       : isBehind
         ? 'behind the approved trajectory'
@@ -135,9 +139,13 @@ export function BulletChart({
         <dl className="mt-1.5 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1">
           <dt className="text-white/70">Current</dt>
           <dd className="text-right font-medium">{valueLabel}</dd>
-          <dt className="text-white/70">Baseline</dt>
-          <dd className="text-right">{baseline}</dd>
-          {expected !== null && (
+          {showBaseline && (
+            <>
+              <dt className="text-white/70">Baseline</dt>
+              <dd className="text-right">{baseline}</dd>
+            </>
+          )}
+          {showExpected && expected !== null && (
             <>
               <dt className="text-white/70">Expected</dt>
               <dd className="text-right">{expected}</dd>
@@ -150,9 +158,11 @@ export function BulletChart({
             </>
           )}
         </dl>
-        <p className="mt-1.5 border-t border-white/20 pt-1.5 font-medium">
-          {trajectoryLabel}
-        </p>
+        {showExpected && (
+          <p className="mt-1.5 border-t border-white/20 pt-1.5 font-medium">
+            {trajectoryLabel}
+          </p>
+        )}
       </div>}
 
       {/* Track */}
@@ -163,21 +173,23 @@ export function BulletChart({
         data-testid="bullet-current"
         className={cn(
           'absolute top-1/2 left-0 h-2.5 -translate-y-1/2 rounded-pill transition-[width] duration-500 ease-out motion-reduce:transition-none',
-          isBehind ? 'bg-chart-blue-light' : 'bg-chart-blue-dark',
+          showExpected && isBehind ? 'bg-chart-blue-light' : 'bg-chart-blue-dark',
         )}
         style={{ width: `${currentPercent}%` }}
       />
 
       {/* Baseline — where the Compact started */}
-      <div
-        data-testid="bullet-baseline"
-        title={`Baseline ${baseline}`}
-        className="absolute top-1/2 h-3 w-0.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-text-subtle transition-[left] duration-500 ease-out motion-reduce:transition-none"
-        style={{ left: `${baselinePercent}%` }}
-      />
+      {showBaseline && (
+        <div
+          data-testid="bullet-baseline"
+          title={`Baseline ${baseline}`}
+          className="absolute top-1/2 h-3 w-0.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-text-subtle transition-[left] duration-500 ease-out motion-reduce:transition-none"
+          style={{ left: `${baselinePercent}%` }}
+        />
+      )}
 
       {/* Expected for the selected period */}
-      {expectedPercent !== null && (
+      {showExpected && expectedPercent !== null && (
         <div
           data-testid="bullet-expected"
           title={`Expected ${expected}`}

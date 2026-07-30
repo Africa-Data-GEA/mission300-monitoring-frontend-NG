@@ -9,13 +9,14 @@ import type { MetricProvenance } from '@/types/domain'
  *
  * The spec mandates that definition, methodology, source and last-updated date
  * are all reachable, so this renders all four rather than a one-line tooltip.
- * It is a click-triggered popover, not a hover tooltip, because the content is
- * long enough to need reading time and must work on touch devices.
+ * Opens on hover/focus (so the content is reachable without an extra click),
+ * and stays click-toggleable too so it still works on touch devices.
  */
 export function InfoPopover({
   provenance,
   label,
   details,
+  sourceLabel,
   className,
 }: {
   provenance: MetricProvenance
@@ -28,6 +29,8 @@ export function InfoPopover({
    * the card face. Falsy values are skipped.
    */
   details?: ReadonlyArray<{ label: string; value: string | null | undefined }>
+  /** Optional concise source label for contexts that show institution only. */
+  sourceLabel?: string
   className?: string
 }) {
   const [open, setOpen] = useState(false)
@@ -53,13 +56,19 @@ export function InfoPopover({
   }, [open])
 
   return (
-    <div ref={containerRef} className={cn('relative inline-flex', className)}>
+    <div
+      ref={containerRef}
+      className={cn('relative inline-flex', className)}
+      onMouseEnter={() => setOpen(true)}
+      onMouseLeave={() => setOpen(false)}
+    >
       <button
         type="button"
         aria-label={`About ${label}: definition, methodology and data source`}
         aria-expanded={open}
         aria-controls={open ? panelId : undefined}
         onClick={() => setOpen((previous) => !previous)}
+        onFocus={() => setOpen(true)}
         className="inline-flex size-5 items-center justify-center rounded-full text-text-subtle transition-colors hover:text-text-muted"
       >
         <Info aria-hidden="true" className="size-4" />
@@ -95,7 +104,9 @@ export function InfoPopover({
             </div>
             <div>
               <dt className="font-semibold text-text-default">Data source</dt>
-              <dd className="mt-0.5 text-text-muted">{provenance.source}</dd>
+              <dd className="mt-0.5 text-text-muted">
+                {sourceLabel ?? provenance.source}
+              </dd>
             </div>
             <div>
               <dt className="font-semibold text-text-default">Last updated</dt>

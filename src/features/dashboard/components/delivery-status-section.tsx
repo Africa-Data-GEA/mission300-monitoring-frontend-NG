@@ -1,4 +1,4 @@
-import { BarChart3, Map, Table2 } from 'lucide-react'
+import { BarChart3, Table2 } from 'lucide-react'
 import { Link } from 'react-router'
 import { Card } from '@/components/ui/card'
 import { InfoPopover } from '@/components/ui/info-popover'
@@ -8,7 +8,6 @@ import { TrendIndicator } from '@/components/ui/trend-indicator'
 import type { DeliveryStatusPanel } from '../types'
 import { OngoingProjectsTable } from './ongoing-projects-table'
 import { ProjectStatusChart } from './project-status-chart'
-import { ProjectsMap } from './projects-map'
 
 /**
  * Section D — Delivery Status, Bottlenecks and Decisions.
@@ -67,10 +66,6 @@ export function DeliveryStatusSection({ panel }: { panel: DeliveryStatusPanel })
                 <BarChart3 className="size-4" aria-hidden="true" />
                 Chart
               </TabsTrigger>
-              <TabsTrigger value="map" className="inline-flex items-center gap-2">
-                <Map className="size-4" aria-hidden="true" />
-                Map
-              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="table" className="pt-0">
@@ -78,9 +73,6 @@ export function DeliveryStatusSection({ panel }: { panel: DeliveryStatusPanel })
             </TabsContent>
             <TabsContent value="chart">
               <ProjectStatusChart summary={panel.statusSummary} />
-            </TabsContent>
-            <TabsContent value="map">
-              <ProjectsMap projects={panel.ongoingProjects} />
             </TabsContent>
           </Tabs>
         </Card>

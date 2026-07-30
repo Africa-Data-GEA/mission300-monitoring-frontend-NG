@@ -1,8 +1,11 @@
 import { useParams } from 'react-router'
 import { Breadcrumb } from '@/components/ui/breadcrumb'
+import { Card } from '@/components/ui/card'
 import { ErrorState } from '@/components/ui/error-state'
 import { BottleneckPanel } from './components/bottleneck-panel'
 import { DeliveryStatusPanel } from './components/delivery-status-panel'
+import { HeadlineCardsSection } from './components/headline-cards-section'
+import { KpiPerformanceChart } from './components/kpi-performance-chart'
 import { PillarDashboardSkeleton } from './components/pillar-dashboard-skeleton'
 import { PillarKpiList } from './components/pillar-kpi-list'
 import { usePillarDashboardPage } from './use-pillar-dashboard-page'
@@ -13,9 +16,13 @@ import { usePillarDashboardPage } from './use-pillar-dashboard-page'
  * Per docs/database-structure.md, this page has no data of its own: the
  * headline cards are real KPI Explorer profiles selected for this pillar,
  * and the delivery/bottleneck panel is Programs and Bottlenecks records
- * filtered by the same `pillar` field they already carry. Scope for this
- * pass is Section A (headline cards) and a delivery/bottleneck panel; the
- * bespoke per-pillar diagnostic sections in docs/specs/ are a follow-up.
+ * filtered by the same `pillar` field they already carry. Reads as an
+ * analysis rather than a bare list — headline cards carry their own
+ * progress-to-target bar, a chart compares current value against target
+ * across the four headline KPIs, delivery status and bottleneck severity
+ * render as charts, and the full KPI catalogue gets a readiness/validation
+ * distribution above the table — the same treatment Executive Overview
+ * gives its own sections.
  */
 export function PillarDashboardPage() {
   const pillarParam = useParams().pillar ?? ''
@@ -52,7 +59,17 @@ export function PillarDashboardPage() {
         </h1>
       </div>
 
-      {/* <HeadlineCardsSection cards={data.headlineCards} /> */}
+      <HeadlineCardsSection cards={data.headlineCards} />
+
+      <Card variant="well" className="p-4">
+        <h2 className="text-lg font-semibold text-text-default">
+          Current value vs. target
+        </h2>
+        <div className="mt-3">
+          <KpiPerformanceChart cards={data.headlineCards} />
+        </div>
+      </Card>
+
       <DeliveryStatusPanel status={data.deliveryStatus} />
       <PillarKpiList rows={data.kpis} />
       <BottleneckPanel records={data.bottlenecks} />
