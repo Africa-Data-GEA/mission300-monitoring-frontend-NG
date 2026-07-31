@@ -14,10 +14,13 @@ import { WorkflowStatusBadge } from '../components/workflow-status'
 import { useWorkflowQuery } from '../use-workflow-query'
 
 const columns: Column<SubmissionListItem>[] = [
+  // The dataset leads instead of the submission code. A row is identified by
+  // dataset plus the institution and period columns beside it; the code is on
+  // the submission's own detail page.
   {
     id: 'submission', header: 'Submission',
-    cell: (row) => <><p className="font-medium">{row.id}</p><p className="text-xs text-text-muted">{row.dataset}</p></>,
-    sortValue: (row) => row.id,
+    cell: (row) => <p className="font-medium">{row.dataset}</p>,
+    sortValue: (row) => row.dataset,
   },
   { id: 'institution', header: 'Institution', cell: (row) => row.institution, sortValue: (row) => row.institution },
   { id: 'period', header: 'Period', cell: (row) => row.reportingPeriod },

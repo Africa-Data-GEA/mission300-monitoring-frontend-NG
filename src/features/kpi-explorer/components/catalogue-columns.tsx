@@ -16,17 +16,11 @@ export function buildCatalogueColumns(
   onOpenProfile: (row: KpiCatalogueRow) => void,
 ): readonly Column<KpiCatalogueRow>[] {
   return [
-    {
-      id: 'id',
-      header: 'Identifier',
-      className: 'min-w-36',
-      sortValue: (row) => row.id,
-      // Shown here for traceability — the specification says the identifier
-      // belongs on this authoritative catalogue but not on executive cards.
-      cell: (row) => (
-        <span className="font-mono text-xs text-text-muted">{row.id}</span>
-      ),
-    },
+    // No identifier column. The specification put the KPI code on this
+    // catalogue for traceability, but the code is not how anyone finds an
+    // indicator here — the name is — and a monospace column of M300-Pn-nnn
+    // dominated the first thing the eye landed on. It remains on the
+    // indicator's profile, which is where a reader goes to cite it.
     {
       id: 'name',
       header: 'Indicator',

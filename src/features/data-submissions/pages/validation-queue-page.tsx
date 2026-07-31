@@ -15,9 +15,13 @@ import { useWorkflowQuery } from '../use-workflow-query'
 import { PublishConfirmationBanner } from './publish-confirmation-banner'
 
 const columns: Column<ValidationQueueItem>[] = [
+  // The dataset leads instead of the submission code. A row is identified by
+  // dataset plus the institution and period columns beside it; the code is on
+  // the submission's own review page.
   {
     id: 'submission', header: 'Submission',
-    cell: (row) => <><p className="font-medium">{row.id}</p><p className="text-xs text-text-muted">{row.dataset}</p></>,
+    cell: (row) => <p className="font-medium">{row.dataset}</p>,
+    sortValue: (row) => row.dataset,
   },
   { id: 'institution', header: 'Institution', cell: (row) => row.institution, sortValue: (row) => row.institution },
   { id: 'period', header: 'Period', cell: (row) => row.reportingPeriod },

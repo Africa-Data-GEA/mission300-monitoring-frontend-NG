@@ -14,15 +14,10 @@ import { KpiDistributionCharts } from './kpi-distribution-charts'
 export function PillarKpiList({ rows }: { rows: readonly KpiCatalogueRow[] }) {
   const navigate = useNavigate()
 
-  /*
-   * The identifier column is dropped here. KPI Explorer's catalogue is the
-   * authoritative list and keeps it — this page is an overview, where the
-   * indicator name is what a reader recognises and the code is noise. Opening
-   * a row still deep-links to the profile, which shows the identifier.
-   */
-  const columns = buildCatalogueColumns((row) => navigate(`/kpis?kpi=${row.id}`)).filter(
-    (column) => column.id !== 'id',
-  )
+  // The identifier column no longer exists on these columns at all — see
+  // buildCatalogueColumns. Opening a row deep-links to the profile, which is
+  // where the code is shown.
+  const columns = buildCatalogueColumns((row) => navigate(`/kpis?kpi=${row.id}`))
 
   return (
     <Card variant="well" className="p-2 sm:p-4">
