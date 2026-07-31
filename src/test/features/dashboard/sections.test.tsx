@@ -64,7 +64,7 @@ describe('Section A — headline cards', () => {
   it('always shows the source year on the access rate card', () => {
     render(<HeadlineCards cards={headlineCards} />)
 
-    expect(screen.getByText('70%')).toBeInTheDocument()
+    expect(screen.getByText('70.0%')).toBeInTheDocument()
     expect(screen.getByText('2024')).toBeInTheDocument()
   })
 
@@ -80,7 +80,7 @@ describe('Section A — headline cards', () => {
     render(<HeadlineCards cards={headlineCards} />)
 
     expect(screen.getByText('Clean cooking access')).toBeInTheDocument()
-    expect(screen.getByText('26%')).toBeInTheDocument()
+    expect(screen.getByText('26.0%')).toBeInTheDocument()
     expect(
       screen.getByRole('img', { name: /Clean cooking access/ }),
     ).toHaveAttribute('aria-label', expect.stringContaining('target 100'))

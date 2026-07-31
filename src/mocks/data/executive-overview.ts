@@ -137,7 +137,9 @@ function buildCleanCookingAccessCard(): CompactOutcomeCard {
   return {
     title: 'Clean cooking access',
     icon: 'cooking',
-    value: '26%',
+    // One decimal, matching the access rate beside it and the value the
+    // period-filtered handler produces for this same card.
+    value: '26.0%',
     current: 26,
     baseline: 22,
     target: 100,

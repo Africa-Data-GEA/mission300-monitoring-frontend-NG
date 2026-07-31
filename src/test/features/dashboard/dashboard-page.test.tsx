@@ -57,7 +57,7 @@ describe('DashboardPage', () => {
     await screen.findByRole('heading', { name: 'Executive Overview', level: 1 })
 
     expect(screen.getByText('15%')).toBeInTheDocument()
-    expect(screen.getByText('70%')).toBeInTheDocument()
+    expect(screen.getByText('70.0%')).toBeInTheDocument()
     expect(screen.getByText('5.4 GW')).toBeInTheDocument()
   })
 

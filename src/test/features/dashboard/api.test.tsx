@@ -49,7 +49,7 @@ describe('useExecutiveOverview', () => {
       timeout: 3_000,
     })
 
-    expect(result.current.data?.headlineCards.accessRate.value).toBe('70%')
+    expect(result.current.data?.headlineCards.accessRate.value).toBe('70.0%')
     expect(result.current.data?.accessDelivery).toHaveLength(3)
     expect(result.current.data?.nationalPerformance).toHaveLength(6)
     expect(result.current.data?.deliveryStatus.ongoingProjects).toHaveLength(6)
@@ -205,7 +205,7 @@ describe('useExecutiveOverview', () => {
       await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
       expect(result.current.data?.headlineCards.peopleWithElectricityAccess.value).toBe('123.6M')
-      expect(result.current.data?.headlineCards.peopleWithElectricityAccess.reportingPeriod).toBe('Q1-2025')
+      expect(result.current.data?.headlineCards.peopleWithElectricityAccess.reportingPeriod).toBe('Q1 2025')
       expect(result.current.data?.nationalPerformance.find((metric) => metric.id === 'metering-rate')?.current).not.toBe(57)
     })
 
