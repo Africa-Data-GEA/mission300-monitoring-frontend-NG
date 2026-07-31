@@ -4,6 +4,7 @@ import { MetricCardFrame } from '../metric-card-frame'
 import type { AccessRateCard as AccessRateCardData } from '../../types'
 import { AccessRateLineChart } from './access-rate-line-chart'
 import { HEADLINE_VALUE } from './headline-value'
+import { ReportingPeriodPill } from './reporting-period-pill'
 
 /** A2. Latest official national electricity access rate. */
 export function AccessRateCard({ data }: { data: AccessRateCardData }) {
@@ -27,9 +28,7 @@ export function AccessRateCard({ data }: { data: AccessRateCardData }) {
           times: this is an annual official publication and must never be read
           as current-period data.
         */}
-        <span className="rounded-pill bg-surface-sunken px-2 py-0.5 text-xs font-medium text-text-muted">
-          {data.sourceYear}
-        </span>
+        <ReportingPeriodPill period={data.sourceYear} />
       </div>
 
       {data.sparkline.length >= 2 && <AccessRateLineChart points={data.sparkline} />}

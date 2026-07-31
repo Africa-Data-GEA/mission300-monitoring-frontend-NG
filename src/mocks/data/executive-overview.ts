@@ -92,7 +92,8 @@ function buildAccessRateCard(): AccessRateCard {
   return {
     title: 'Electricity access rate',
     icon: 'access',
-    value: `${profile.current}%`,
+    // One decimal, matching clean cooking access on the same row.
+    value: `${(profile.current ?? 0).toFixed(1)}%`,
     rawValue: profile.current ?? 0,
     sourceYear: profile.reportingPeriod,
     previousPublication: previous
@@ -124,6 +125,7 @@ function buildGenerationCapacityCard(): GenerationCapacityCard {
     availabilityRatio: Math.round((availableMw / installedMw) * 1000) / 10,
     sparkline: profile.history.map((point) => point.value),
     benchmarkLabel: `of ${(installedMw / 1000).toFixed(1)} GW installed`,
+    reportingPeriod: profile.reportingPeriod,
     trend: profile.trend,
     source: toSourceTag(profile.validationStatus),
     confidence: toConfidence(profile.validationStatus),

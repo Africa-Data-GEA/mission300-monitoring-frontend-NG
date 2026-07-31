@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils'
 import type { CompactOutcomeCard as CompactOutcomeCardData } from '../../types'
 import { MetricCardFrame } from '../metric-card-frame'
 import { HEADLINE_VALUE } from './headline-value'
+import { ReportingPeriodPill } from './reporting-period-pill'
 
 /** A Mission 300 outcome with an official baseline, current value and 2030 target. */
 export function CompactOutcomeCard({
@@ -23,11 +24,20 @@ export function CompactOutcomeCard({
         { label: '2030 target', value: data.targetLabel },
       ]}
     >
+      {/*
+        SHARED SHAPE. All four Section A cards run value row → visual → trend,
+        with the trend pinned to the bottom by `mt-auto`. This card used to
+        carry its trend inline on the value row, so across the row of four the
+        trend badges sat at two different heights and the eye had nowhere to
+        track along. It also left this card with no element claiming the
+        leftover height, so the bullet rail floated mid-card while the two
+        sparkline cards beside it filled to the bottom edge.
+      */}
       <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1.5">
         <span className={cn(HEADLINE_VALUE, 'text-text-default')}>
           {data.value}
         </span>
-        {data.trend && <TrendIndicator trend={data.trend} />}
+        <ReportingPeriodPill period={data.reportingPeriod} />
       </div>
 
       {/*
@@ -51,6 +61,12 @@ export function CompactOutcomeCard({
         label={data.title}
         valueLabel={data.value}
       />
+
+      {data.trend && (
+        <div className="mt-auto pt-3">
+          <TrendIndicator trend={data.trend} />
+        </div>
+      )}
     </MetricCardFrame>
   )
 }

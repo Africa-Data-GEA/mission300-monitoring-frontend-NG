@@ -85,6 +85,7 @@ export const generationCapacityCardSchema = z.object({
   /** Ordered oldest-to-newest readings. Two points minimum to draw a line. */
   sparkline: z.array(z.number()),
   benchmarkLabel: z.string(),
+  reportingPeriod: z.string().min(1),
   trend: trendSchema.optional(),
   source: sourceTagSchema,
   confidence: dataConfidenceSchema,

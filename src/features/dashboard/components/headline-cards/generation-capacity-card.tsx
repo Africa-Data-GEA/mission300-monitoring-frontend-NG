@@ -4,6 +4,7 @@ import { MetricCardFrame } from '../metric-card-frame'
 import type { GenerationCapacityCard as GenerationCapacityCardData } from '../../types'
 import { GenerationCapacityLineChart } from './generation-capacity-line-chart'
 import { HEADLINE_VALUE } from './headline-value'
+import { ReportingPeriodPill } from './reporting-period-pill'
 
 /** A3. Available generation capacity with an Apex line chart. */
 export function GenerationCapacityCard({
@@ -25,10 +26,11 @@ export function GenerationCapacityCard({
         { label: 'Benchmark', value: data.benchmarkLabel },
       ]}
     >
-      <div className="mt-1">
+      <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1.5">
         <span className={cn(HEADLINE_VALUE, 'text-text-default')}>
           {data.value}
         </span>
+        <ReportingPeriodPill period={data.reportingPeriod} />
       </div>
 
       <GenerationCapacityLineChart points={data.sparkline} />

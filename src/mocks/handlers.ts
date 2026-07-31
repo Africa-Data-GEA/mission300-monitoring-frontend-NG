@@ -142,6 +142,23 @@ function formatMetricValue(id: string, value: number) {
   return String(value)
 }
 
+/**
+ * Turns a period filter slug into the label a reader sees: q3-2025 → "Q3 2025",
+ * fy-2025 → "FY 2025".
+ *
+ * The slug is a URL value, not display text. Uppercasing it produced "Q3-2025",
+ * which sat on the Executive Overview beside "Q4 2025" from real KPI data — two
+ * formats for the same idea, one of them a URL fragment. Anything the API hands
+ * back as `reportingPeriod` is a label, and that has to hold on the real backend
+ * too, not just here.
+ */
+function formatPeriodLabel(slug: string): string {
+  return slug
+    .split('-')
+    .map((part, index) => (index === 0 ? part.toUpperCase() : part))
+    .join(' ')
+}
+
 function applyPeriodFilter(payload: ExecutiveOverview, period: string): ExecutiveOverview {
   const factor = PERIOD_FACTORS[period]
   if (!factor) return payload
@@ -164,12 +181,15 @@ function applyPeriodFilter(payload: ExecutiveOverview, period: string): Executiv
         ...payload.headlineCards.peopleWithElectricityAccess,
         current: peopleCurrent,
         value: `${peopleCurrent.toFixed(1)}M`,
-        reportingPeriod: period.toUpperCase(),
+        reportingPeriod: formatPeriodLabel(period),
       },
       accessRate: {
         ...payload.headlineCards.accessRate,
         rawValue: Math.round(payload.headlineCards.accessRate.rawValue * factor * 10) / 10,
-        value: `${Math.round(payload.headlineCards.accessRate.rawValue * factor * 10) / 10}%`,
+        // One decimal, matching clean cooking access. Dividing by 10 drops a
+        // trailing zero, so 70.0 rendered as "70%" beside "26.0%" — two
+        // precisions for two percentages sitting side by side.
+        value: `${(Math.round(payload.headlineCards.accessRate.rawValue * factor * 10) / 10).toFixed(1)}%`,
       },
       generationCapacity: {
         ...payload.headlineCards.generationCapacity,
@@ -182,7 +202,7 @@ function applyPeriodFilter(payload: ExecutiveOverview, period: string): Executiv
         ...payload.headlineCards.cleanCookingAccess,
         current: cookingCurrent,
         value: `${cookingCurrent.toFixed(1)}%`,
-        reportingPeriod: period.toUpperCase(),
+        reportingPeriod: formatPeriodLabel(period),
       },
     },
     accessDelivery: payload.accessDelivery.map((channel) => {
