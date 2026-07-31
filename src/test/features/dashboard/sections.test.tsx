@@ -38,6 +38,25 @@ describe('Section A — headline cards', () => {
   })
 
   /*
+   * A headline card plots current against baseline and target only, and passes
+   * expected={null} to say so. That must not be reported back to the reader as
+   * "No approved trajectory" — Mission 300 has an approved path for these
+   * outcomes; this card simply is not the place it is drawn.
+   */
+  it('never claims a headline outcome has no approved trajectory', async () => {
+    const user = userEvent.setup()
+    render(<HeadlineCards cards={headlineCards} />)
+
+    const chart = screen.getByRole('img', {
+      name: /People with electricity access/,
+    })
+    expect(chart.getAttribute('aria-label')).not.toContain('trajectory')
+
+    await user.hover(chart)
+    expect(screen.getByRole('tooltip')).not.toHaveTextContent('trajectory')
+  })
+
+  /*
    * The specification requires the source year to be visible at all times:
    * the access rate is an annual official publication and must never be read
    * as current-period data.

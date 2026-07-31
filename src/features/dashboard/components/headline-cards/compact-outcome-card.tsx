@@ -30,11 +30,20 @@ export function CompactOutcomeCard({
         {data.trend && <TrendIndicator trend={data.trend} />}
       </div>
 
+      {/*
+        `expected={null}` here is a presentation choice — a headline card plots
+        current against baseline and target only — not a statement that the
+        metric has no approved trajectory. `showExpected` must therefore be
+        false: left at its default the chart reads the null back and captions
+        the tooltip "No approved trajectory", which asserts something about
+        Mission 300's plan that this card has no basis to claim.
+      */}
       <BulletChart
         className="mt-3"
         current={data.current}
         baseline={data.baseline}
         expected={null}
+        showExpected={false}
         target={data.target}
         scaleMin={data.scaleMin}
         scaleMax={data.scaleMax}
