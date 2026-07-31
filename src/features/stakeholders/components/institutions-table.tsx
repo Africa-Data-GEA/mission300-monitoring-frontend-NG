@@ -13,9 +13,7 @@ const COLUMNS: readonly Column<Institution>[] = [
     cell: (item) => (
       <div>
         <p className="font-medium text-text-default">{item.name}</p>
-        <p className="text-xs text-text-muted">
-          {item.shortName} • {item.id}
-        </p>
+        <p className="text-xs text-text-muted">{item.shortName}</p>
       </div>
     ),
   },

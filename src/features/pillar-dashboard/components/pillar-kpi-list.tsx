@@ -14,9 +14,19 @@ import { KpiDistributionCharts } from './kpi-distribution-charts'
 export function PillarKpiList({ rows }: { rows: readonly KpiCatalogueRow[] }) {
   const navigate = useNavigate()
 
+  /*
+   * The identifier column is dropped here. KPI Explorer's catalogue is the
+   * authoritative list and keeps it — this page is an overview, where the
+   * indicator name is what a reader recognises and the code is noise. Opening
+   * a row still deep-links to the profile, which shows the identifier.
+   */
+  const columns = buildCatalogueColumns((row) => navigate(`/kpis?kpi=${row.id}`)).filter(
+    (column) => column.id !== 'id',
+  )
+
   return (
     <Card variant="well" className="p-2 sm:p-4">
-      <h2 className="text-lg font-semibold text-text-default">KPIs for this pillar</h2>
+      <h2 className="text-lg font-semibold text-text-default">Indicators</h2>
 
       {rows.length > 0 && (
         <div className="mt-2 sm:mt-3">
@@ -26,12 +36,12 @@ export function PillarKpiList({ rows }: { rows: readonly KpiCatalogueRow[] }) {
 
       <Card className="mt-2 min-w-0 overflow-hidden p-0 sm:mt-3 sm:p-1">
         <DataTable
-          caption="Key Performance Indicators tagged to this Compact pillar"
-          columns={buildCatalogueColumns((row) => navigate(`/kpis?kpi=${row.id}`))}
+          caption="Indicators tracked for this pillar"
+          columns={columns}
           rows={rows}
           getRowId={(row) => row.id}
-          className="[&_table]:min-w-[1400px]"
-          emptyMessage="No indicators are currently tagged to this pillar."
+          className="[&_table]:min-w-[1200px]"
+          emptyMessage="No indicators are currently tracked for this pillar."
         />
       </Card>
     </Card>

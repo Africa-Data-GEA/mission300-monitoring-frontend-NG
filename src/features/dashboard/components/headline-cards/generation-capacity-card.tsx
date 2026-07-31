@@ -14,7 +14,6 @@ export function GenerationCapacityCard({
   return (
     <MetricCardFrame
       title={data.title}
-      icon={data.icon}
       source={data.source}
       provenance={data.provenance}
       hideSource

@@ -91,8 +91,22 @@ export function KpiDistributionCharts({ rows }: { rows: readonly KpiCatalogueRow
 
   return (
     <div className="grid gap-3 sm:grid-cols-2">
-      <DistributionDonut title="Indicators by readiness tier" counts={readinessCounts} labels={READINESS_LABELS} />
-      <DistributionDonut title="Indicators by validation status" counts={validationCounts} labels={VALIDATION_LABELS} />
+      {/*
+        "Readiness tier" and "validation status" are the KPI Matrix's internal
+        vocabulary. The headings now say what the reader gets out of each ring
+        — whether an indicator is being measured yet, and whether its current
+        number can be relied on. The slice labels still carry the formal terms.
+      */}
+      <DistributionDonut
+        title="How many indicators are being measured"
+        counts={readinessCounts}
+        labels={READINESS_LABELS}
+      />
+      <DistributionDonut
+        title="How far the data can be relied on"
+        counts={validationCounts}
+        labels={VALIDATION_LABELS}
+      />
     </div>
   )
 }

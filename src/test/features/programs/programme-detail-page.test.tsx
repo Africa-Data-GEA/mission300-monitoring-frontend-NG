@@ -20,7 +20,9 @@ describe('ProgrammeDetailPage', () => {
 
     const table = screen.getByRole('table', { name: 'Projects delivering this programme' })
     expect(within(table).getByText('North East 330kV Line Upgrade')).toBeInTheDocument()
-    expect(within(table).getByText('PRJ-2025-011')).toBeInTheDocument()
+    // The record identifier is deliberately absent from list tables — it
+    // belongs on the project's own detail page.
+    expect(within(table).queryByText('PRJ-2025-011')).not.toBeInTheDocument()
   })
 
   it("navigates to a project's detail page when a project is clicked", async () => {

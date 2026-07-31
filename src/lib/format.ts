@@ -52,3 +52,40 @@ export function formatRelativeTime(iso: string, now: Date = new Date()): string 
 
   return formatter.format(Math.round(diffHours / 24), 'day')
 }
+
+/**
+ * How far a delivery deadline is away, or how far past due it is.
+ *
+ * Shown beneath the absolute end date in delivery tables. The absolute date
+ * answers "when", but for a project already marked delayed the question a
+ * reader actually has is "by how much", and making them subtract two dates in
+ * their head is where that reading stops happening.
+ *
+ * Overdue is phrased as "4 months overdue" rather than Intl's "4 months ago":
+ * a deadline in the past is a live problem, not a historical event.
+ */
+export function formatDeadline(iso: string, now: Date = new Date()): string {
+  const date = new Date(iso)
+  if (Number.isNaN(date.getTime())) return '—'
+
+  const days = Math.round((date.getTime() - now.getTime()) / 86_400_000)
+  if (days === 0) return 'due today'
+
+  const magnitude = Math.abs(days)
+  const [value, unit] =
+    magnitude < 31
+      ? ([days, 'day'] as const)
+      : magnitude < 365
+        ? ([Math.round(days / 30), 'month'] as const)
+        : ([Math.round(days / 365), 'year'] as const)
+
+  if (days > 0) {
+    return new Intl.RelativeTimeFormat('en', { numeric: 'always' }).format(
+      value,
+      unit,
+    )
+  }
+
+  const overdueBy = Math.abs(value)
+  return `${overdueBy} ${unit}${overdueBy === 1 ? '' : 's'} overdue`
+}

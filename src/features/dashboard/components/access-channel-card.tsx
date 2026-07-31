@@ -38,17 +38,24 @@ export function AccessChannelCard({ channel }: { channel: AccessChannel }) {
         access-rate commitment. Until a target is approved, this channel shows
         period-on-period trend only — no progress bar, and the absence is
         stated rather than left as a silent gap.
+
+        ALIGNMENT: the bar rail and the substitute line occupy the same slot at
+        the bottom of the card, pushed there by `mt-auto`, so every card in the
+        row ends on the same baseline no matter which branch it takes. An empty
+        spacer was not enough — it left the untargeted card looking unfinished
+        rather than deliberately blank.
       */}
-      {channel.percentComplete === null ? (
-        <div className="mt-3 h-2" />
-      ) : (
-        <ProgressBar
-          className="mt-3"
-          barClassName="bg-[#1d4ed8]"
-          value={channel.percentComplete}
-          label={channel.title}
-        />
-      )}
+      <div className="mt-auto pt-3">
+        {channel.percentComplete === null ? (
+          <p className="text-xs text-text-subtle">Annual target to be confirmed</p>
+        ) : (
+          <ProgressBar
+            barClassName="bg-chart-blue-dark"
+            value={channel.percentComplete}
+            label={channel.title}
+          />
+        )}
+      </div>
     </Card>
   )
 }

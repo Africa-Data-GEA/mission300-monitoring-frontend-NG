@@ -150,10 +150,10 @@ The public gateway should look like the front door of the platform you already u
 
 | Token | Hex | Where it's used today |
 |---|---|---|
-| Brand green | `#027A48` | brand-700, Sidebar & primary actions |
-| Brand green (light) | `#12B76A` | brand-500, progress fills |
-| Chart blue | `#1D4ED8` | Executive Overview's chart accent |
-| Chart blue (dark) | `#1E3A8A` | darkest ring/series colour |
+| Brand green | `#008751` | brand-600, Nigerian flag green — sidebar & primary actions |
+| Brand green (dark) | `#016E44` | brand-700, hover and pressed states |
+| Chart teal | `#1F7FA6` | Executive Overview's mid series colour |
+| Chart navy | `#10314F` | darkest ring/series colour |
 
 ---
 

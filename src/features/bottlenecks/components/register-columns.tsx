@@ -6,15 +6,14 @@ import { BottleneckStatusBadge } from './bottleneck-status-badge'
 import { EscalationStatusBadge } from './escalation-status-badge'
 import { SeverityBadge } from './severity-badge'
 
-/** Column definitions for the bottleneck register (Section B). */
+/**
+ * Column definitions for the bottleneck register (Section B).
+ *
+ * No identifier column: the record ID belongs on the bottleneck's own detail
+ * view, not in a register a reader scans by issue. `issue` is the identifying
+ * column here.
+ */
 export const REGISTER_COLUMNS: readonly Column<BottleneckRecord>[] = [
-  {
-    id: 'id',
-    header: 'ID',
-    className: 'min-w-28',
-    sortValue: (row) => row.id,
-    cell: (row) => <span className="font-mono text-xs text-text-muted">{row.id}</span>,
-  },
   {
     id: 'issue',
     header: 'Issue',

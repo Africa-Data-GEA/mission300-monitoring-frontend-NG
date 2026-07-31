@@ -21,7 +21,12 @@ describe('ProgramsPage', () => {
     const table = screen.getByRole('table', {
       name: 'Approved programmes in the Mission 300 portfolio',
     })
-    expect(within(table).getByText('PRG-2025-001')).toBeInTheDocument()
+    expect(
+      within(table).getByText('Transmission Rehabilitation Programme'),
+    ).toBeInTheDocument()
+    // The record identifier is deliberately absent from list tables — it
+    // belongs on the programme's own detail header.
+    expect(within(table).queryByText('PRG-2025-001')).not.toBeInTheDocument()
   })
 
   it('navigates to a programme detail page when a programme is clicked', async () => {

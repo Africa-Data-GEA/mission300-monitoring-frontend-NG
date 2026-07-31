@@ -19,12 +19,24 @@ describe('ProjectDetailPage', () => {
     ).toBeInTheDocument()
 
     const milestones = screen.getByRole('table', { name: 'Milestones for this project' })
-    expect(within(milestones).getByText('MST-2025-101')).toBeInTheDocument()
+    expect(
+      within(milestones).getByText('North East line upgrade energisation'),
+    ).toBeInTheDocument()
+    // The record identifier is deliberately absent from list tables — it
+    // belongs on the milestone's own detail view.
+    expect(within(milestones).queryByText('MST-2025-101')).not.toBeInTheDocument()
 
     const bottlenecks = screen.getByRole('table', {
       name: 'Structured record of delivery constraints and exceptions',
     })
-    expect(within(bottlenecks).getByText('BTN-2025-022')).toBeInTheDocument()
+    expect(
+      within(bottlenecks).getByText(
+        'Transmission evacuation constraint limiting dispatch, North East',
+      ),
+    ).toBeInTheDocument()
+    // The record identifier is deliberately absent from list tables — it
+    // belongs on the bottleneck's own detail view.
+    expect(within(bottlenecks).queryByText('BTN-2025-022')).not.toBeInTheDocument()
   })
 
   describe('raising a bottleneck scoped to this project', () => {

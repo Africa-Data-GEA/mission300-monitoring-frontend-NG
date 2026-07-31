@@ -15,13 +15,8 @@ export function buildProgrammeColumns(
   onOpenProgramme: (row: ProgrammeRecord) => void,
 ): readonly Column<ProgrammeRecord>[] {
   return [
-  {
-    id: 'id',
-    header: 'ID',
-    className: 'min-w-28',
-    sortValue: (row) => row.id,
-    cell: (row) => <span className="font-mono text-xs text-text-muted">{row.id}</span>,
-  },
+  // No identifier column — the programme name and objectives identify the row.
+  // The ID is shown on the programme's own detail header.
   {
     id: 'name',
     header: 'Programme',

@@ -43,7 +43,7 @@ export function HeadlineCard({ card }: { card: PillarHeadlineCard }) {
       {percentToTarget !== null && (
         <ProgressBar
           className="mt-3"
-          barClassName="bg-[#1d4ed8]"
+          barClassName="bg-chart-blue-dark"
           value={percentToTarget}
           label={`${card.title} progress to target`}
         />

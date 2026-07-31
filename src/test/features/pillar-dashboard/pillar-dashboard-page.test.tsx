@@ -16,21 +16,30 @@ describe('PillarDashboardPage', () => {
 
     const headlineCards = screen.getByRole('region', { name: 'Headline performance cards' })
     expect(headlineCards).toBeInTheDocument()
-    expect(within(headlineCards).getByText('M300-P1-003')).toBeInTheDocument()
+    // The indicator identifier is deliberately absent from headline cards — it
+    // belongs on the indicator's KPI Explorer profile.
+    expect(within(headlineCards).queryByText('M300-P1-003')).not.toBeInTheDocument()
 
     expect(
-      screen.getByRole('heading', { name: 'Delivery status — programmes and projects' }),
+      screen.getByRole('heading', { name: 'Programme and project delivery' }),
     ).toBeInTheDocument()
 
     const kpis = screen.getByRole('table', {
-      name: 'Key Performance Indicators tagged to this Compact pillar',
+      name: 'Indicators tracked for this pillar',
     })
     expect(within(kpis).getByText('Available (Dispatched) Generation Capacity')).toBeInTheDocument()
 
     const bottlenecks = screen.getByRole('table', {
-      name: 'Ranked bottlenecks for this Compact pillar',
+      name: 'Priority bottlenecks, most severe first',
     })
-    expect(within(bottlenecks).getByText('BTN-2025-022')).toBeInTheDocument()
+    expect(
+      within(bottlenecks).getByText(
+        'Transmission evacuation constraint limiting dispatch, North East',
+      ),
+    ).toBeInTheDocument()
+    // The record identifier is deliberately absent from list tables — it
+    // belongs on the bottleneck's own detail view.
+    expect(within(bottlenecks).queryByText('BTN-2025-022')).not.toBeInTheDocument()
   })
 
   it('shows an error state for an unknown pillar', async () => {

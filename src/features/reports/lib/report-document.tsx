@@ -2,7 +2,8 @@ import { Document, Page, StyleSheet, Text, View } from '@react-pdf/renderer'
 import type { ReportPreview } from '@/api/schemas/reports'
 import type { Orientation } from './types'
 
-const ACCENT = '#027A48'
+/** brand-700 in src/styles/theme.css — repeated here because @react-pdf cannot read CSS custom properties. */
+const ACCENT = '#016E44'
 const MUTED = '#5B6472'
 const BORDER = '#D8DCE3'
 const MARGIN = 40

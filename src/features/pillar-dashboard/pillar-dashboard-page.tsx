@@ -64,7 +64,7 @@ export function PillarDashboardPage() {
       <div className="grid items-start gap-4 xl:grid-cols-2">
         <Card variant="well" className="p-4">
           <h2 className="text-lg font-semibold text-text-default">
-            Current value vs. target
+            Progress against target
           </h2>
           <div className="mt-3">
             <KpiPerformanceChart cards={data.headlineCards} />

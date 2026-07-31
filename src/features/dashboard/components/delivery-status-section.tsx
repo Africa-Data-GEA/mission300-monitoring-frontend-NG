@@ -49,10 +49,11 @@ export function DeliveryStatusSection({ panel }: { panel: DeliveryStatusPanel })
               <h3 className="text-sm font-semibold text-text-default">
                 Priority project delivery status
               </h3>
-              <p className="mt-1 text-xs text-text-muted">
-                {panel.ongoingProjects.length} ongoing project{panel.ongoingProjects.length === 1 ? '' : 's'}.
-                Open a project or its parent programme for the full delivery record.
-              </p>
+              {/*
+                No subtitle. The count is already in the table's pagination
+                summary, and the ordering and drill-down are both evident from
+                the table itself.
+              */}
             </div>
           </div>
 

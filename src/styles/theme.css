@@ -21,60 +21,84 @@
 
 @theme {
   /* --- Brand -------------------------------------------------------------
-   * The deep green used for active navigation and primary actions. */
-  --color-brand-50: #ecfdf3;
-  --color-brand-100: #d1fadf;
-  --color-brand-200: #a6f4c5;
-  --color-brand-300: #6ce9a6;
-  --color-brand-400: #32d583;
-  --color-brand-500: #12b76a;
-  --color-brand-600: #039855;
-  --color-brand-700: #027a48;
-  --color-brand-800: #05603a;
-  --color-brand-900: #10432a;
+   * The deep green used for active navigation and primary actions.
+   *
+   * Anchored on #008751 — the green of the Nigerian national flag and of the
+   * coat of arms this platform carries (public/Logos/geapp.png). This is a
+   * Federal Government of Nigeria service, so the brand green is the national
+   * green, not a generic UI-kit green. The ramp is built around brand-600 and
+   * warms very slightly as it darkens, the way pigment does, rather than
+   * running a flat hue at every step.
+   *
+   * brand-600 on white measures 4.58:1, so it is legible as body text. The
+   * previous ramp's 600 measured 3.74:1 and quietly failed AA wherever it was
+   * used for text rather than fills. */
+  --color-brand-50: #e9f6f0;
+  --color-brand-100: #c6e9da;
+  --color-brand-200: #93d6bc;
+  --color-brand-300: #57bf99;
+  --color-brand-400: #22a678;
+  --color-brand-500: #009a63;
+  --color-brand-600: #008751; /* Nigerian flag green */
+  --color-brand-700: #016e44;
+  --color-brand-800: #045637;
+  --color-brand-900: #06402a;
 
   /* --- Delivery status ---------------------------------------------------
    * Maps 1:1 to the status vocabulary in the page specifications. Do not add
-   * a status here without adding it to DeliveryStatus in src/types/domain.ts. */
-  --color-status-on-track: #039855;
-  --color-status-on-track-bg: #ecfdf3;
-  --color-status-at-risk: #b42318;
-  --color-status-at-risk-bg: #fee4e2;
-  --color-status-lagging: #b54708;
-  --color-status-lagging-bg: #fef0c7;
-  --color-status-delayed: #b42318;
-  --color-status-delayed-bg: #fee4e2;
-  --color-status-no-data: #475467;
-  --color-status-no-data-bg: #f2f4f7;
+   * a status here without adding it to DeliveryStatus in src/types/domain.ts.
+   *
+   * At-risk and lagging are pulled deliberately far apart in hue (~2° vs ~35°)
+   * and in lightness. They are the two statuses most often adjacent in a table
+   * and were previously near-identical reds, which is exactly the pair that
+   * collapses for a red-green colour-blind reader. */
+  --color-status-on-track: #00764a;
+  --color-status-on-track-bg: #e6f4ed;
+  --color-status-at-risk: #a8201a;
+  --color-status-at-risk-bg: #fbe9e6;
+  --color-status-lagging: #8f5605;
+  --color-status-lagging-bg: #fbf0d5;
+  --color-status-delayed: #a8201a;
+  --color-status-delayed-bg: #fbe9e6;
+  --color-status-no-data: #4a5462;
+  --color-status-no-data-bg: #eef0f3;
 
   /* --- Data confidence ---------------------------------------------------
    * The dashboard must always disclose how trustworthy a number is. */
-  --color-confidence-confirmed: #039855;
-  --color-confidence-validation: #b54708;
-  --color-confidence-gap: #475467;
+  --color-confidence-confirmed: #00764a;
+  --color-confidence-validation: #8f5605;
+  --color-confidence-gap: #4a5462;
 
   /* --- Trend -------------------------------------------------------------
    * Green means "improving". For a lower-is-better metric such as ATC&C
    * losses that is a DOWNWARD arrow. See src/lib/trend.ts. */
-  --color-trend-up: #039855;
-  --color-trend-down: #b42318;
+  --color-trend-up: #00764a;
+  --color-trend-down: #a8201a;
 
-  --color-link: #1570ef;
+  --color-link: #0b5cad;
 
   /* --- Chart palette -------------------------------------------------------
-   * Blue-led palette for Executive Overview's charts, deliberately separate
+   * Cool-led palette for Executive Overview's charts, deliberately separate
    * from the red/green delivery-status scheme above: stakeholder feedback was
    * that a leadership-facing overview should read calm, not alarm-coded.
+   *
+   * The scale runs teal → navy rather than a stock blue ramp, so it sits
+   * beside the national green as a neighbouring hue instead of competing with
+   * it as an unrelated primary. Lightness descends monotonically across the
+   * five steps, so the series stay separable when printed in greyscale or
+   * photocopied into a briefing pack — which is how these charts actually
+   * reach most ministerial readers.
+   *
    * `chart-accent` is reserved for the one segment or value on a chart that
    * most needs attention, not a per-status colour. See
    * src/config/chart-colors.ts for the matching JS values used by ApexCharts,
    * which cannot read CSS custom properties for series colours. */
-  --color-chart-blue-darkest: #1e3a8a;
-  --color-chart-blue-dark: #1d4ed8;
-  --color-chart-blue: #3b82f6;
-  --color-chart-blue-light: #60a5fa;
-  --color-chart-blue-lightest: #bfdbfe;
-  --color-chart-accent: #f59e0b;
+  --color-chart-blue-darkest: #10314f;
+  --color-chart-blue-dark: #17557f;
+  --color-chart-blue: #1f7fa6;
+  --color-chart-blue-light: #58aac4;
+  --color-chart-blue-lightest: #b6d8e3;
+  --color-chart-accent: #e08214;
 
   /* --- Typography --------------------------------------------------------
    * Deliberately tighter than the Tailwind default: this is a dense

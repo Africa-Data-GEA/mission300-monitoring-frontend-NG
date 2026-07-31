@@ -26,17 +26,31 @@ export function AccessDeliverySection({
           No access-delivery channels are owned by the selected institution and pillar.
         </p>
       ) : (
-      <div className="mt-3 grid items-start gap-4 xl:grid-cols-[1fr_1.2fr]">
-        <Card className="p-4">
+      /*
+        Both columns stretch to the same height, and the cards are stacked one
+        per row rather than laid out two-up. With three channels a two-column
+        grid left a fourth cell empty, and the chart beside it had to stretch
+        past its own content to cover the gap. One card per channel, in the
+        same order as the chart's bars, means each row of the panel reads
+        straight across: bar on the left, its numbers on the right.
+      */
+      <div className="mt-3 grid gap-4 xl:grid-cols-[1fr_1.2fr]">
+        <Card className="flex flex-col p-4">
           <h3 className="text-xs font-medium tracking-wide text-text-subtle uppercase">
             Progress to target
           </h3>
-          <div className="mt-2">
+          {/*
+            Centred in whatever height the row ends up at. The chart is a fixed
+            pixel height, so when this card is stretched to match the taller
+            card column beside it the leftover space would otherwise all pool
+            beneath the plot and read as a rendering gap.
+          */}
+          <div className="mt-2 flex flex-1 flex-col justify-center">
             <AccessDeliveryChart channels={channels} />
           </div>
         </Card>
 
-        <ul aria-label="Access delivery channels" className="grid grid-cols-2 gap-3">
+        <ul aria-label="Access delivery channels" className="grid gap-3">
           {channels.map((channel) => (
             <li key={channel.id}>
               <AccessChannelCard channel={channel} />

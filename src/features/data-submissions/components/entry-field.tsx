@@ -1,4 +1,5 @@
 import type { EntryField as EntryFieldDefinition } from '@/api/schemas/data-submissions'
+import { FieldHint } from '@/components/ui/field-hint'
 
 const controlClass =
   'mt-1.5 h-10 w-full rounded-control border border-border-default bg-surface px-3 text-sm text-text-default'
@@ -23,8 +24,9 @@ export function EntryField({
 
   return (
     <div>
-      <label htmlFor={field.id} className="text-sm font-medium text-text-default">
+      <label htmlFor={field.id} className="inline-flex items-center gap-1 text-sm font-medium text-text-default">
         {field.label}{field.required && <span aria-hidden="true"> *</span>}
+        {field.helpText && <FieldHint label={field.label} text={field.helpText} />}
       </label>
       {field.type === 'select' ? (
         <select {...common} className={controlClass}>
@@ -39,7 +41,6 @@ export function EntryField({
           {field.unit && <span className="absolute right-3 top-1/2 text-xs text-text-muted">{field.unit}</span>}
         </div>
       )}
-      <p className="mt-1 text-xs text-text-muted">{field.helpText}</p>
     </div>
   )
 }

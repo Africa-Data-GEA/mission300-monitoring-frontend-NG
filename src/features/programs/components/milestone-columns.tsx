@@ -4,15 +4,13 @@ import { formatDate } from '@/lib/format'
 import { ExecutionStatusBadge } from './execution-status-badge'
 import { PriorityBadge } from './priority-badge'
 
-/** Column definitions for the Milestone tracker (Section D). */
+/**
+ * Column definitions for the Milestone tracker (Section D).
+ *
+ * No identifier column — the milestone name plus its parent project identify
+ * the row, and the ID belongs on the record's own detail view.
+ */
 export const MILESTONE_COLUMNS: readonly Column<MilestoneRecord>[] = [
-  {
-    id: 'id',
-    header: 'ID',
-    className: 'min-w-28',
-    sortValue: (row) => row.id,
-    cell: (row) => <span className="font-mono text-xs text-text-muted">{row.id}</span>,
-  },
   {
     id: 'name',
     header: 'Milestone',

@@ -20,7 +20,7 @@ export function DeliveryStatusPanel({ status }: { status: PillarDeliveryStatus }
   return (
     <Card variant="well" className="p-4">
       <h2 className="text-lg font-semibold text-text-default">
-        Delivery status — programmes and projects
+        Programme and project delivery
       </h2>
 
       {status.total === 0 ? (

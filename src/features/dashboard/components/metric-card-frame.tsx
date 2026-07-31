@@ -2,13 +2,18 @@ import type { ReactNode } from 'react'
 import { Card } from '@/components/ui/card'
 import { InfoPopover } from '@/components/ui/info-popover'
 import { SourceBadge } from '@/components/ui/status-badge'
-import { MetricIcon } from '@/config/metric-icons'
 import { cn } from '@/lib/utils'
-import type { MetricIconName, MetricProvenance, SourceTag } from '@/types/domain'
+import type { MetricProvenance, SourceTag } from '@/types/domain'
 
 /**
- * Shared chrome for the four Section A headline cards: icon, provenance badge,
- * information popover and title.
+ * Shared chrome for the four Section A headline cards: title, provenance badge
+ * and information popover.
+ *
+ * NO ICON. These cards carry a single large figure each, and a decorative
+ * glyph beside it competes with the number for the first fixation without
+ * distinguishing one card from the next — the titles already do that. The
+ * title takes the top-left slot instead, so the first thing read is what the
+ * number measures.
  *
  * ALIGNMENT: the four cards sit side by side, so their internals must line up
  * even though the titles differ in length. The title is therefore clamped to
@@ -18,23 +23,18 @@ import type { MetricIconName, MetricProvenance, SourceTag } from '@/types/domain
  */
 export function MetricCardFrame({
   title,
-  icon,
   source,
   provenance,
-  tone = 'default',
   details,
   children,
   className,
   hideSource = false,
 }: {
   title: string
-  icon: MetricIconName
   source: SourceTag
   provenance: MetricProvenance
   /** Extra rows for the information popover — target, baseline and similar. */
   details?: ReadonlyArray<{ label: string; value: string | null | undefined }>
-  /** `alert` tints the icon for the escalations card. */
-  tone?: 'default' | 'alert'
   children: ReactNode
   className?: string
   /** Skips the top-right provenance pill (e.g. "live • CPR") for cards that read cleaner without it. */
@@ -43,38 +43,20 @@ export function MetricCardFrame({
   return (
     <Card className={cn('flex h-full flex-col p-4', className)}>
       <div className="flex items-start justify-between gap-2">
-        <span
-          className={cn(
-            'inline-flex size-8 shrink-0 items-center justify-center rounded-full',
-            tone === 'alert' ? 'bg-status-at-risk-bg' : 'bg-brand-50',
-          )}
-        >
-          <MetricIcon
-            name={icon}
-            className={cn(
-              'size-4',
-              tone === 'alert' ? 'text-status-at-risk' : 'text-brand-600',
-            )}
-          />
-        </span>
+        {/*
+          Two-line box reserved whether or not the title wraps, so the value
+          rows across the four cards share a baseline. The full text stays
+          available via the title attribute when it is clamped.
+        */}
+        <p title={title} className="line-clamp-2 min-h-9 text-sm text-text-muted">
+          {title}
+        </p>
 
-        <div className="flex min-w-0 shrink-0 items-center gap-1">
+        <div className="flex shrink-0 items-center gap-1">
           {!hideSource && <SourceBadge source={source} />}
           <InfoPopover provenance={provenance} label={title} details={details} />
         </div>
       </div>
-
-      {/*
-        Two-line box reserved whether or not the title wraps, so the value rows
-        across the four cards share a baseline. The full text stays available
-        via the title attribute when it is clamped.
-      */}
-      <p
-        title={title}
-        className="mt-3 line-clamp-2 min-h-9 text-sm text-text-muted"
-      >
-        {title}
-      </p>
 
       {children}
     </Card>

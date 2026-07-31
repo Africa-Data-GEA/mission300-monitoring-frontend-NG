@@ -3,6 +3,8 @@ import { Search } from 'lucide-react'
 import { Link } from 'react-router'
 import { Pagination } from '@/components/ui/pagination'
 import { ExecutionStatusBadge } from '@/features/programs/components/execution-status-badge'
+import { formatDeadline } from '@/lib/format'
+import { cn } from '@/lib/utils'
 import type { OngoingProject } from '../types'
 
 const PAGE_SIZE = 5
@@ -12,15 +14,51 @@ const dateFormatter = new Intl.DateTimeFormat('en-GB', {
   year: 'numeric',
 })
 
+/**
+ * Worst first. This table is the delivery-exceptions half of Section D, so
+ * leadership must meet the blocked and delayed projects before the healthy
+ * ones — and because the list is paginated at five, an unsorted order can push
+ * a blocked project onto page two where nobody looks.
+ *
+ * `currentStatus` excludes 'completed' at the schema level, so this map is
+ * total over the statuses that can actually appear here.
+ */
+const STATUS_SEVERITY: Record<OngoingProject['currentStatus'], number> = {
+  blocked: 0,
+  delayed: 1,
+  'at-risk': 2,
+  'on-track': 3,
+}
+
 export function OngoingProjectsTable({ projects }: { projects: readonly OngoingProject[] }) {
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState('')
   const searchId = useId()
+
+  // One reading of "now" for the whole table, taken once when it mounts.
+  // Calling Date.now() inside the render body makes every deadline cell
+  // depend on when React happened to re-render, so two rows could disagree
+  // about whether the same date is overdue.
+  const [now] = useState(() => new Date())
+
+  // Ranked once, before filtering, so search results keep the same worst-first
+  // order rather than falling back to whatever order the API returned.
+  const rankedProjects = useMemo(
+    () =>
+      [...projects].sort(
+        (a, b) =>
+          STATUS_SEVERITY[a.currentStatus] - STATUS_SEVERITY[b.currentStatus] ||
+          // Within a status, the nearest deadline is the more urgent one.
+          new Date(a.endDate).getTime() - new Date(b.endDate).getTime(),
+      ),
+    [projects],
+  )
+
   const filteredProjects = useMemo(() => {
     const query = search.trim().toLocaleLowerCase()
-    if (!query) return projects
+    if (!query) return rankedProjects
 
-    return projects.filter((project) =>
+    return rankedProjects.filter((project) =>
       [
         project.id,
         project.name,
@@ -31,7 +69,7 @@ export function OngoingProjectsTable({ projects }: { projects: readonly OngoingP
         project.currentStatus.replace('-', ' '),
       ].some((value) => value.toLocaleLowerCase().includes(query)),
     )
-  }, [projects, search])
+  }, [rankedProjects, search])
   const pageCount = Math.max(1, Math.ceil(filteredProjects.length / PAGE_SIZE))
   const currentPage = Math.min(page, pageCount)
   const firstIndex = (currentPage - 1) * PAGE_SIZE
@@ -62,8 +100,16 @@ export function OngoingProjectsTable({ projects }: { projects: readonly OngoingP
             />
           </div>
         </div>
+        {/*
+          Only while a search is active. The unfiltered total is already stated
+          by the pagination summary below, and printing it here as well gave
+          the card three separate counts of the same six projects. The node
+          stays mounted so the live region can announce into it.
+        */}
         <p aria-live="polite" className="pb-2 text-xs text-text-muted">
-          {filteredProjects.length} project{filteredProjects.length === 1 ? '' : 's'} found
+          {search.trim()
+            ? `${filteredProjects.length} project${filteredProjects.length === 1 ? '' : 's'} found`
+            : ''}
         </p>
       </div>
 
@@ -86,16 +132,15 @@ export function OngoingProjectsTable({ projects }: { projects: readonly OngoingP
                 <td className="px-3 py-3">
                   <Link
                     to={`/programs/projects/${project.id}`}
-                    className="font-semibold text-[#175cd3] underline decoration-[#84adff] underline-offset-4 transition-colors hover:text-[#004eeb] hover:decoration-[#004eeb]"
+                    className="font-semibold text-link underline decoration-chart-blue-light underline-offset-4 transition-colors hover:text-chart-blue-darkest hover:decoration-chart-blue-darkest"
                   >
                     {project.name}
                   </Link>
-                  <p className="mt-0.5 text-xs text-text-muted">{project.id}</p>
                 </td>
                 <td className="px-3 py-3 text-sm">
                   <Link
                     to={`/programs/${project.programmeId}`}
-                    className="font-medium text-[#175cd3] underline decoration-[#84adff] underline-offset-4 transition-colors hover:text-[#004eeb] hover:decoration-[#004eeb]"
+                    className="font-medium text-link underline decoration-chart-blue-light underline-offset-4 transition-colors hover:text-chart-blue-darkest hover:decoration-chart-blue-darkest"
                   >
                     {project.programmeName}
                   </Link>
@@ -105,6 +150,21 @@ export function OngoingProjectsTable({ projects }: { projects: readonly OngoingP
                 <td className="px-3 py-3 text-sm text-text-muted">{project.location}</td>
                 <td className="px-3 py-3 text-sm whitespace-nowrap text-text-muted">
                   {dateFormatter.format(new Date(project.endDate))}
+                  {/*
+                    An absolute date alone makes the reader do the arithmetic.
+                    For a row already flagged delayed, the overdue span is the
+                    number that matters, so it is tinted to match the badge.
+                  */}
+                  <span
+                    className={cn(
+                      'mt-0.5 block text-xs',
+                      new Date(project.endDate).getTime() < now.getTime()
+                        ? 'font-medium text-status-at-risk'
+                        : 'text-text-subtle',
+                    )}
+                  >
+                    {formatDeadline(project.endDate, now)}
+                  </span>
                 </td>
                 <td className="px-3 py-3">
                   <ExecutionStatusBadge status={project.currentStatus} />

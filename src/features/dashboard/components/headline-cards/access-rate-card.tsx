@@ -10,7 +10,6 @@ export function AccessRateCard({ data }: { data: AccessRateCardData }) {
   return (
     <MetricCardFrame
       title={data.title}
-      icon={data.icon}
       source={data.source}
       provenance={data.provenance}
       hideSource

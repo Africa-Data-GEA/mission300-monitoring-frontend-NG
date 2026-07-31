@@ -30,7 +30,6 @@ export function buildProjectColumns(
           >
             {row.name}
           </button>
-          <p className="font-mono text-xs text-text-muted">{row.id}</p>
         </div>
       ),
     },
