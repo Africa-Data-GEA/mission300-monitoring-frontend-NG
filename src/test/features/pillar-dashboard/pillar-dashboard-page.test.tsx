@@ -4,7 +4,7 @@ import { PillarDashboardPage } from '@/features/pillar-dashboard/pillar-dashboar
 import { renderRoutesWithProviders } from '@/test/render'
 
 describe('PillarDashboardPage', () => {
-  it('renders the headline cards, KPI table and bottlenecks for a pillar', async () => {
+  it('renders the headline cards and KPI table for a pillar', async () => {
     renderRoutesWithProviders(
       [{ path: 'pillars/:pillar', element: <PillarDashboardPage /> }],
       { route: '/pillars/generation-network' },
@@ -25,17 +25,10 @@ describe('PillarDashboardPage', () => {
     })
     expect(within(kpis).getByText('Available (Dispatched) Generation Capacity')).toBeInTheDocument()
 
-    const bottlenecks = screen.getByRole('table', {
-      name: 'Priority bottlenecks, most severe first',
-    })
+    // Priority bottlenecks is no longer part of the pillar dashboard.
     expect(
-      within(bottlenecks).getByText(
-        'Transmission evacuation constraint limiting dispatch, North East',
-      ),
-    ).toBeInTheDocument()
-    // The record identifier is deliberately absent from list tables — it
-    // belongs on the bottleneck's own detail view.
-    expect(within(bottlenecks).queryByText('BTN-2025-022')).not.toBeInTheDocument()
+      screen.queryByRole('table', { name: 'Priority bottlenecks, most severe first' }),
+    ).not.toBeInTheDocument()
   })
 
   it('shows an error state for an unknown pillar', async () => {

@@ -1,7 +1,6 @@
 import { useParams } from 'react-router'
 import { Breadcrumb } from '@/components/ui/breadcrumb'
 import { ErrorState } from '@/components/ui/error-state'
-import { BottleneckPanel } from './components/bottleneck-panel'
 import { CoreIndicatorsSection } from './components/core-indicators-section'
 import { HeadlineCardsSection } from './components/headline-cards-section'
 import { PillarDashboardSkeleton } from './components/pillar-dashboard-skeleton'
@@ -12,15 +11,10 @@ import { usePillarDashboardPage } from './use-pillar-dashboard-page'
  * A Compact pillar dashboard.
  *
  * Per docs/database-structure.md, this page has no data of its own: the
- * headline cards are real KPI Explorer profiles selected for this pillar,
- * and the delivery/bottleneck panel is Programs and Bottlenecks records
- * filtered by the same `pillar` field they already carry. Reads as an
- * analysis rather than a bare list — headline cards carry their own
- * progress-to-target bar, a chart compares current value against target
- * across the four headline KPIs, delivery status and bottleneck severity
- * render as charts, and the full KPI catalogue gets a readiness/validation
- * distribution above the table — the same treatment Executive Overview
- * gives its own sections.
+ * headline cards and KPI table are real KPI Explorer profiles selected for
+ * this pillar, filtered by the same `pillar` field they already carry.
+ * Headline cards carry their own progress-to-target bar, and the full KPI
+ * catalogue gets a readiness/validation distribution above the table.
  */
 export function PillarDashboardPage() {
   const pillarParam = useParams().pillar ?? ''
@@ -62,7 +56,6 @@ export function PillarDashboardPage() {
       <CoreIndicatorsSection indicators={data.coreIndicators} pillar={data.pillar} />
 
       <PillarKpiList rows={data.kpis} />
-      <BottleneckPanel records={data.bottlenecks} />
     </div>
   )
 }
