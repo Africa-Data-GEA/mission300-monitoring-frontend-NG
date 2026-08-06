@@ -1,11 +1,8 @@
 import { formatDate } from '@/lib/format'
 import { usePublicOverview } from './api'
-import { DeliveryChannels } from './components/delivery-channels'
-import { DeliveryStatus } from './components/delivery-status'
 import { Institutions } from './components/institutions'
 import { NationalStatement } from './components/national-statement'
 import { NationalStatementSkeleton } from './components/national-statement-skeleton'
-import { PerformanceIndicators } from './components/performance-indicators'
 import { Pillars } from './components/pillars'
 import { PublicFooter } from './components/public-footer'
 import { PublicHeader } from './components/public-header'
@@ -13,12 +10,8 @@ import { PublicHeader } from './components/public-header'
 /**
  * Public gateway — the front door at `/`, seen before anyone signs in.
  *
- * Sections, per docs/public-gateway-home.md and docs/public-gateway-copy.md:
+ * Sections:
  *   §02  National statement and latest figures
- *   §04  How access is being delivered
- *   §05  National performance indicators (copy.md) — the biggest gain
- *        available on this page; triples the published record at no data cost
- *   §06  Programme and project delivery status (copy.md)
  *   §05  The six pillars (home.md)
  *   §08  Who reports these figures
  *   §09  Footer, carrying the data-confidence key
@@ -61,9 +54,6 @@ export function PublicGatewayPage() {
             <NationalStatement cards={data.headlineCards} />
 
             <div className="mx-auto max-w-5xl px-4 pb-4 sm:px-6">
-              <DeliveryChannels channels={data.accessDelivery} />
-              <PerformanceIndicators indicators={data.nationalPerformance} />
-              <DeliveryStatus panel={data.deliveryStatus} />
               <Pillars />
               <Institutions />
             </div>

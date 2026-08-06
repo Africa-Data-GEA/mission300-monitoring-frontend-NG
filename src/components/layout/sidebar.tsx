@@ -1,3 +1,4 @@
+import { Link } from 'react-router'
 import { NAVIGATION } from '@/config/navigation'
 import { readAuthSession } from '@/features/auth/auth-session'
 import { canRoleReachModule } from '@/features/auth/role-access'
@@ -47,7 +48,9 @@ export function Sidebar({
       )}
     >
       <div className="shrink-0 px-4 pt-5 pb-4">
-        <img alt="gEApp" src="/Logos/geapp.png" className="h-11 w-auto max-w-full object-contain" />
+        <Link to="/" aria-label="Go to the public landing page" className="inline-block">
+          <img alt="gEApp" src="/Logos/geapp.png" className="h-11 w-auto max-w-full object-contain" />
+        </Link>
       </div>
 
       <nav aria-label="Primary" className="min-h-0 flex-1 overflow-y-auto px-2.5 pb-4">
