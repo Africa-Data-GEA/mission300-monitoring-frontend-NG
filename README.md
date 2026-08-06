@@ -9,7 +9,7 @@ by deterministic browser mocks.
 
 - Node.js 24.14.1 (see `.node-version`)
 - pnpm 10.33.0
-
+e
 ## Local development
 
 ```bash
