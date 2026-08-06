@@ -51,9 +51,12 @@ export function AccessDeliveryChart({ channels }: { channels: readonly AccessCha
         series={[
           {
             name: 'Current',
-            // 0 rather than null: Apex drops null points entirely, taking the
-            // row's background track with them and reopening the same gap.
-            data: channels.map((c) => c.percentComplete ?? 0),
+            // A tiny non-zero value rather than 0 or null: Apex drops the
+            // background track for a bar whose value is exactly 0 just as it
+            // does for null, which left the "no approved target" row as a
+            // bare white cell instead of a track. 0.3 paints a track with no
+            // visible dark bar.
+            data: channels.map((c) => c.percentComplete ?? 0.3),
           },
         ]}
         options={{

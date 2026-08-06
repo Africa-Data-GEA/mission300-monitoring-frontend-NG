@@ -6,6 +6,7 @@ import { SeverityBadge } from '@/components/ui/status-badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { TrendIndicator } from '@/components/ui/trend-indicator'
 import type { DeliveryStatusPanel } from '../types'
+import { ExceptionSeverityChart } from './exception-severity-chart'
 import { OngoingProjectsTable } from './ongoing-projects-table'
 import { ProjectStatusChart } from './project-status-chart'
 
@@ -92,42 +93,57 @@ export function DeliveryStatusSection({ panel }: { panel: DeliveryStatusPanel })
             </Link>
           </div>
 
-          <ul
-            aria-label="Priority exceptions"
-            className="mt-3 divide-y divide-border-default"
-          >
-            {visible.map((exception) => (
-              <li key={exception.id} className="flex items-start gap-3 py-2.5">
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium text-text-default">
-                    {exception.title}
-                  </p>
-                  <p className="mt-0.5 text-xs text-text-muted">
-                    {exception.category} • {exception.institution}
-                  </p>
-                </div>
-                <div className="flex shrink-0 items-center gap-1.5">
-                  <SeverityBadge severity={exception.severity} />
-                  <InfoPopover
-                    provenance={exception.provenance}
-                    label={exception.title}
-                    details={[
-                      { label: 'Reference', value: exception.reference },
-                      {
-                        label: 'Time unresolved',
-                        value: `${exception.daysUnresolved} days`,
-                      },
-                    ]}
-                  />
-                </div>
-              </li>
-            ))}
-          </ul>
-
-          {visible.length === 0 && (
+          {visible.length === 0 ? (
             <p className="mt-3 text-sm text-status-on-track">
               No unresolved priority exceptions.
             </p>
+          ) : (
+            /*
+              Chart beside the list rather than above it, same split as Section
+              B's channel chart: the shape of the whole exception load reads at
+              a glance on the left, while the right still names the specific
+              records leadership would click into. The chart counts every
+              exception, not just the five-row slice beside it.
+            */
+            <div className="mt-3 grid gap-4 xl:grid-cols-[1fr_1.2fr]">
+              <Card className="flex flex-col justify-center p-4">
+                <h4 className="text-xs font-medium tracking-wide text-text-subtle uppercase">
+                  By severity
+                </h4>
+                <div className="mt-2">
+                  <ExceptionSeverityChart exceptions={panel.exceptions} />
+                </div>
+              </Card>
+
+              <ul aria-label="Priority exceptions" className="divide-y divide-border-default">
+                {visible.map((exception) => (
+                  <li key={exception.id} className="flex items-start gap-3 py-2.5">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium text-text-default">
+                        {exception.title}
+                      </p>
+                      <p className="mt-0.5 text-xs text-text-muted">
+                        {exception.category} • {exception.institution}
+                      </p>
+                    </div>
+                    <div className="flex shrink-0 items-center gap-1.5">
+                      <SeverityBadge severity={exception.severity} />
+                      <InfoPopover
+                        provenance={exception.provenance}
+                        label={exception.title}
+                        details={[
+                          { label: 'Reference', value: exception.reference },
+                          {
+                            label: 'Time unresolved',
+                            value: `${exception.daysUnresolved} days`,
+                          },
+                        ]}
+                      />
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
           )}
         </Card>
       </div>

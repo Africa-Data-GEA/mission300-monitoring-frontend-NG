@@ -16,12 +16,16 @@ import { PILLARS, PILLAR_LABELS } from '@/types/domain'
 /**
  * Which Compact pillar dashboards are ready to show, shared between the
  * sidebar dropdown and the pillar picker page so the two never disagree.
- * Generation & network and Last-mile access are built out with real
- * analysis; the remaining four are disabled until the same treatment lands.
+ * All six pillars are now built out with real analysis per their page
+ * specifications (`docs/specs/*.md`).
  */
 export const READY_PILLARS: ReadonlySet<PillarId> = new Set<PillarId>([
   'generation-network',
   'last-mile-access',
+  'financially-viable-utilities',
+  'private-sector-participation',
+  'regional-integration',
+  'clean-cooking',
 ])
 
 /**

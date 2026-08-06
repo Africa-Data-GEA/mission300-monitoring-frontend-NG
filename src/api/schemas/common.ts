@@ -133,7 +133,7 @@ export const PILLARS = pillarIdSchema.options
 export const PILLAR_LABELS: Record<PillarId, string> = {
   'generation-network': 'Generation & network',
   'last-mile-access': 'Last-mile access',
-  'financially-viable-utilities': 'Viable utilities',
+  'financially-viable-utilities': 'Financially Viable Utilities',
   'private-sector-participation': 'Private sector',
   'regional-integration': 'Regional integration',
   'clean-cooking': 'Clean cooking',

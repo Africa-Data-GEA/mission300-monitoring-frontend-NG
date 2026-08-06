@@ -18,6 +18,10 @@ export function ProgressBar({
   barClassName?: string
 }) {
   const clamped = Math.min(100, Math.max(0, value))
+  // A genuinely nonzero value should never render as an invisible hairline —
+  // that reads as a broken/empty bar rather than "very early progress".
+  // aria-valuenow still reports the real, unrounded percentage.
+  const displayWidth = clamped > 0 ? Math.max(clamped, 2) : 0
 
   return (
     <div
@@ -36,7 +40,7 @@ export function ProgressBar({
           'h-full rounded-pill bg-brand-500 transition-[width] duration-500 ease-out motion-reduce:transition-none',
           barClassName,
         )}
-        style={{ width: `${clamped}%` }}
+        style={{ width: `${displayWidth}%` }}
       />
     </div>
   )

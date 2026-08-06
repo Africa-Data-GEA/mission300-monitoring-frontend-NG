@@ -35,6 +35,29 @@ export const pillarHeadlineCardSchema = z.object({
   provenance: metricProvenanceSchema,
 })
 
+/**
+ * One Core/Tier 1 KPI Matrix indicator for this pillar beyond the four
+ * headline cards — real current/target values from the same KpiProfile the
+ * KPI Directory reads, grouped for a clean analytics layout rather than
+ * dumped as one long list. `group` is curated per pillar (e.g. "Metering
+ * coverage", "Tariffs") rather than derived from the catalogue's generic
+ * `category` field, which doesn't align with how these read well together.
+ */
+export const pillarCoreIndicatorSchema = z.object({
+  kpiId: z.string().min(1),
+  name: z.string().min(1),
+  group: z.string().min(1),
+  unit: z.string().min(1),
+  current: z.number().nullable(),
+  target: z.number().nullable(),
+  direction: z.enum(['higher-is-better', 'lower-is-better']),
+  /** Ordered oldest-to-newest reading values, for a sparkline. Empty where
+   * no historical series is available yet (e.g. a pending milestone metric). */
+  history: z.array(z.number()),
+  validationStatus: validationStatusSchema,
+  provenance: metricProvenanceSchema,
+})
+
 /** Delivery status of this pillar's programmes and projects. */
 export const pillarDeliveryStatusSchema = z.object({
   counts: z.array(
@@ -52,6 +75,9 @@ export const pillarDashboardOverviewSchema = z.object({
   label: z.string().min(1),
   lastUpdated: z.iso.datetime(),
   headlineCards: z.array(pillarHeadlineCardSchema).length(4),
+  /** Core/Tier 1 indicators beyond the four headline cards. Empty for
+   * pillars that don't yet have this expanded coverage. */
+  coreIndicators: z.array(pillarCoreIndicatorSchema),
   deliveryStatus: pillarDeliveryStatusSchema,
   /** Ranked top-5 open bottlenecks for this pillar. */
   bottlenecks: z.array(bottleneckRecordSchema).max(5),
@@ -61,5 +87,6 @@ export const pillarDashboardOverviewSchema = z.object({
 })
 
 export type PillarHeadlineCard = z.infer<typeof pillarHeadlineCardSchema>
+export type PillarCoreIndicator = z.infer<typeof pillarCoreIndicatorSchema>
 export type PillarDeliveryStatus = z.infer<typeof pillarDeliveryStatusSchema>
 export type PillarDashboardOverview = z.infer<typeof pillarDashboardOverviewSchema>

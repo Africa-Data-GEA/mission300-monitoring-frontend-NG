@@ -4,7 +4,7 @@ import { PillarDashboardPage } from '@/features/pillar-dashboard/pillar-dashboar
 import { renderRoutesWithProviders } from '@/test/render'
 
 describe('PillarDashboardPage', () => {
-  it('renders the headline cards, delivery status and bottlenecks for a pillar', async () => {
+  it('renders the headline cards, KPI table and bottlenecks for a pillar', async () => {
     renderRoutesWithProviders(
       [{ path: 'pillars/:pillar', element: <PillarDashboardPage /> }],
       { route: '/pillars/generation-network' },
@@ -19,10 +19,6 @@ describe('PillarDashboardPage', () => {
     // The indicator identifier is deliberately absent from headline cards — it
     // belongs on the indicator's KPI Explorer profile.
     expect(within(headlineCards).queryByText('M300-P1-003')).not.toBeInTheDocument()
-
-    expect(
-      screen.getByRole('heading', { name: 'Programme and project delivery' }),
-    ).toBeInTheDocument()
 
     const kpis = screen.getByRole('table', {
       name: 'Indicators tracked for this pillar',

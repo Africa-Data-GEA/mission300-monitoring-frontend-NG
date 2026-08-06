@@ -40,12 +40,14 @@ export function AccessDeliverySection({
             Progress to target
           </h3>
           {/*
-            Centred in whatever height the row ends up at. The chart is a fixed
-            pixel height, so when this card is stretched to match the taller
-            card column beside it the leftover space would otherwise all pool
-            beneath the plot and read as a rendering gap.
+            Anchored to the top rather than centred: the chart is a fixed pixel
+            height, so when this card is stretched to match the taller card
+            column beside it, centring pushed the plot toward the middle and
+            left a large dead gap between the heading and the first bar. Top
+            anchoring keeps the heading and bars reading as one block; any
+            leftover height falls below the plot instead.
           */}
-          <div className="mt-2 flex flex-1 flex-col justify-center">
+          <div className="mt-2 flex flex-1 flex-col justify-start">
             <AccessDeliveryChart channels={channels} />
           </div>
         </Card>

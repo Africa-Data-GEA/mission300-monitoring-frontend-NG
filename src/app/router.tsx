@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react'
-import { createBrowserRouter, Navigate } from 'react-router'
+import { createBrowserRouter } from 'react-router'
 import { AppShell } from '@/components/layout/app-shell'
 import { RouteFallback } from '@/components/layout/route-fallback'
 import { dataSubmissionRoutes } from '@/features/data-submissions/routes'
@@ -12,6 +12,18 @@ import { stateDiscoRoutes } from '@/features/state-disco/routes'
 const DashboardPage = lazy(() =>
   import('@/features/dashboard/dashboard-page').then((module) => ({
     default: module.DashboardPage,
+  })),
+)
+
+const PublicGatewayPage = lazy(() =>
+  import('@/features/public-gateway/public-gateway-page').then((module) => ({
+    default: module.PublicGatewayPage,
+  })),
+)
+
+const ProgressPage = lazy(() =>
+  import('@/features/public-gateway/progress-page').then((module) => ({
+    default: module.ProgressPage,
   })),
 )
 
@@ -127,18 +139,33 @@ export const router = createBrowserRouter([
     path: '/account/forgot-password',
     element: lazyRoute(<ForgotPasswordPage />),
   },
+  /*
+   * `/` is the public gateway, not a redirect into the dashboard.
+   *
+   * It sits OUTSIDE AppShell — the landing page has no sidebar, no global
+   * filter bar and no authenticated chrome. The authenticated modules keep
+   * their relative paths by nesting under a pathless layout route, so
+   * /dashboard, /kpis and the rest are untouched.
+   */
   {
     path: '/',
+    children: [
+      {
+        index: true,
+        element: lazyRoute(<PublicGatewayPage />),
+      },
+      {
+        // Public, outside AppShell — no sidebar, no authenticated chrome.
+        path: 'progress',
+        element: lazyRoute(<ProgressPage />),
+      },
+      {
     element: <AppShell />,
     children: [
       {
         path: 'dashboard',
         element: lazyRoute(<DashboardPage />),
         handle: { globalFilters: true } satisfies RouteHandle,
-      },
-      {
-        index: true,
-        element: <Navigate to="/dashboard" replace />,
       },
       {
         path: 'kpis',
@@ -199,6 +226,8 @@ export const router = createBrowserRouter([
         path: '*',
         element: lazyRoute(<NotFoundPage />),
         handle: { globalFilters: false } satisfies RouteHandle,
+      },
+        ],
       },
     ],
   },

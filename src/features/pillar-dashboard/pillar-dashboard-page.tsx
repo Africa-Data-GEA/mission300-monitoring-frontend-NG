@@ -1,11 +1,9 @@
 import { useParams } from 'react-router'
 import { Breadcrumb } from '@/components/ui/breadcrumb'
-import { Card } from '@/components/ui/card'
 import { ErrorState } from '@/components/ui/error-state'
 import { BottleneckPanel } from './components/bottleneck-panel'
-import { DeliveryStatusPanel } from './components/delivery-status-panel'
+import { CoreIndicatorsSection } from './components/core-indicators-section'
 import { HeadlineCardsSection } from './components/headline-cards-section'
-import { KpiPerformanceChart } from './components/kpi-performance-chart'
 import { PillarDashboardSkeleton } from './components/pillar-dashboard-skeleton'
 import { PillarKpiList } from './components/pillar-kpi-list'
 import { usePillarDashboardPage } from './use-pillar-dashboard-page'
@@ -61,18 +59,7 @@ export function PillarDashboardPage() {
 
       <HeadlineCardsSection cards={data.headlineCards} />
 
-      <div className="grid items-start gap-4 xl:grid-cols-2">
-        <Card variant="well" className="p-4">
-          <h2 className="text-lg font-semibold text-text-default">
-            Progress against target
-          </h2>
-          <div className="mt-3">
-            <KpiPerformanceChart cards={data.headlineCards} />
-          </div>
-        </Card>
-
-        <DeliveryStatusPanel status={data.deliveryStatus} />
-      </div>
+      <CoreIndicatorsSection indicators={data.coreIndicators} pillar={data.pillar} />
 
       <PillarKpiList rows={data.kpis} />
       <BottleneckPanel records={data.bottlenecks} />
