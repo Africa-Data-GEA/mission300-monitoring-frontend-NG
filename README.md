@@ -5,7 +5,7 @@ Compact. The application is currently a demonstration system: completed API
 modules can use the NestJS demo backend while unfinished modules remain backed
 by deterministic browser mocks.
 
-## Requirementsld
+## Requirement
 
 - Node.js 24.14.1 (see `.node-version`)
 - pnpm 10.33.0
