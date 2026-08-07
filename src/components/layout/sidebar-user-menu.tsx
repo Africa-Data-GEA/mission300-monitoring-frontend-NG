@@ -6,14 +6,16 @@ import {
   ExternalLink,
   LogOut,
   Mail,
+  Settings,
   UserRound,
 } from 'lucide-react'
-import { useNavigate } from 'react-router'
+import { Link, useNavigate } from 'react-router'
 import { Button } from '@/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { SideDialog } from '@/components/ui/side-dialog'
+import { ADMIN_MENU_ITEMS } from '@/config/navigation'
 import { clearAuthSession, readAuthSession } from '@/features/auth/auth-session'
-import { findAccountById, getRoleLabel } from '@/features/auth/role-access'
+import { canRoleReachModule, findAccountById, getRoleLabel } from '@/features/auth/role-access'
 
 interface SidebarUser {
   name: string
@@ -54,6 +56,15 @@ export function SidebarUserMenu() {
   const [helpOpen, setHelpOpen] = useState(false)
   const [guideOpen, setGuideOpen] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
+
+  // Same role gate the sidebar itself used to apply to these as nav items —
+  // see the comment on ADMIN_MENU_ITEMS in config/navigation.ts. No session
+  // (e.g. a dev workflow that skipped /account/login) shows both rather than
+  // neither, matching Sidebar's own fallback.
+  const roleSlug = readAuthSession()?.user.role
+  const adminMenuItems = ADMIN_MENU_ITEMS.filter(
+    (item) => !roleSlug || canRoleReachModule(roleSlug, item.moduleKey),
+  )
 
   function openProfile() {
     setDraft(user)
@@ -111,6 +122,22 @@ export function SidebarUserMenu() {
               Help centre
             </button>
           </div>
+
+          {adminMenuItems.length > 0 && (
+            <div className="border-t border-border-default py-1">
+              {adminMenuItems.map((item) => (
+                <Link
+                  key={item.to}
+                  to={item.to}
+                  className="flex w-full items-center gap-2.5 rounded-md px-2 py-2 text-sm text-text-default hover:bg-surface-sunken"
+                >
+                  <Settings aria-hidden="true" className="size-4 text-text-muted" />
+                  {item.label}
+                </Link>
+              ))}
+            </div>
+          )}
+
           <div className="border-t border-border-default pt-1">
             <button
               type="button"

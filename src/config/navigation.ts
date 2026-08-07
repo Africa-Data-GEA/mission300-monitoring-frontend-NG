@@ -1,13 +1,11 @@
 import {
   BarChart3,
-  Building2,
   ClipboardList,
   Database,
   FileBarChart,
   Home,
   LayoutGrid,
   MapPin,
-  ShieldCheck,
   type LucideIcon,
 } from 'lucide-react'
 import type { PillarId } from '@/api/schemas/common'
@@ -118,23 +116,17 @@ export const NAVIGATION: readonly NavGroup[] = [
       { label: 'KPI Directory', to: '/kpis', icon: LayoutGrid, ready: true, moduleKey: 'kpi-directory' },
     ],
   },
-  {
-    label: 'Administration',
-    items: [
-      {
-        label: 'Stakeholders',
-        to: '/stakeholders',
-        icon: Building2,
-        ready: true,
-        moduleKey: 'stakeholders',
-      },
-      {
-        label: 'User access',
-        to: '/administration',
-        icon: ShieldCheck,
-        ready: true,
-        moduleKey: 'administration',
-      },
-    ],
-  },
+]
+
+/**
+ * Stakeholders and the admin console (User access) used to be their own
+ * "Administration" sidebar group. Moved into the profile popover
+ * (SidebarUserMenu) instead — they're account/institution-management
+ * concerns an admin reaches occasionally, not primary navigation that
+ * deserves permanent space in the main sidebar. Still gated by the same
+ * moduleKey role check as before, just checked where the menu renders.
+ */
+export const ADMIN_MENU_ITEMS: readonly { readonly label: string; readonly to: string; readonly moduleKey: string }[] = [
+  { label: 'Stakeholders', to: '/stakeholders', moduleKey: 'stakeholders' },
+  { label: 'Administration', to: '/administration', moduleKey: 'administration' },
 ]
