@@ -89,7 +89,11 @@ export function TabsList({
       onKeyDown={moveFocus}
       className={cn(
         orientation === 'vertical'
-          ? 'flex flex-col gap-0.5'
+          ? // Below md there's no room for a permanent side column (see
+            // administration-page.tsx) — the list becomes a horizontally
+            // scrolling row, the same pattern the horizontal variant already
+            // uses, and reverts to a vertical stack at md and up.
+            'flex gap-0.5 overflow-x-auto border-b border-border-default pb-2 md:flex-col md:overflow-visible md:border-b-0 md:pb-0'
           : 'flex gap-1 overflow-x-auto border-b border-border-default px-1',
         className,
       )}
@@ -123,7 +127,7 @@ export function TabsTrigger({
       className={cn(
         orientation === 'vertical'
           ? cn(
-              'relative flex w-full items-center rounded-control px-3 py-2.5 text-left text-sm font-medium text-text-muted transition-colors',
+              'relative flex min-w-max items-center rounded-control px-3 py-2.5 text-left text-sm font-medium whitespace-nowrap text-text-muted transition-colors md:w-full md:whitespace-normal',
               'hover:bg-surface-sunken hover:text-text-default',
               selected && 'bg-brand-50 text-brand-700',
             )

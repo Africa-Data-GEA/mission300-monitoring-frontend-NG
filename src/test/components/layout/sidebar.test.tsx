@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { describe, expect, it } from 'vitest'
 import { Sidebar } from '@/components/layout/sidebar'
 import { NAVIGATION } from '@/config/navigation'
-import { renderWithRouter } from '@/test/render'
+import { renderWithProviders as renderWithRouter } from '@/test/render'
 
 describe('Sidebar', () => {
   it('is exposed as the primary navigation landmark', () => {
