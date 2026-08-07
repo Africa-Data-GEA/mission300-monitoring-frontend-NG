@@ -1,6 +1,30 @@
 import { Link } from 'react-router'
-import { TrendIndicator } from '@/components/ui/trend-indicator'
+import { resolveTrend } from '@/lib/trend'
 import type { HeadlineCards } from '@/features/dashboard/types'
+import type { Trend } from '@/types/domain'
+
+/**
+ * Plain-text trend, not a badge. The Figma drew this as a bright green
+ * rounded pill, but that is the one piece of "SaaS product" colour language
+ * on a page that otherwise deliberately avoids it (see the "SQUARE CORNERS"
+ * note in public-header.tsx) — a coloured arrow and sentence carries the same
+ * information without introducing a shape nothing else on the page uses.
+ */
+function FigureTrend({ trend }: { trend: Trend }) {
+  const { isFlat, isImproving, Icon } = resolveTrend(trend)
+
+  return (
+    <p
+      className={
+        'mt-6 flex items-center gap-1.5 text-[1rem] leading-5 font-medium ' +
+        (isFlat ? 'text-text-muted' : isImproving ? 'text-trend-up' : 'text-trend-down')
+      }
+    >
+      <Icon aria-hidden="true" className="size-4 shrink-0" />
+      {trend.label}
+    </p>
+  )
+}
 
 /**
  * The opening of the public gateway, per the approved Figma draft
@@ -146,19 +170,7 @@ export function NationalStatement({ cards }: { cards: HeadlineCards }) {
                   {figure.value}
                 </p>
               </div>
-              {figure.trend && (
-                // The Figma splits the pill ("+50.7M") from a separate grey
-                // "vs prior published year" caption, but `trend.label` already
-                // carries that full sentence as one string — adding a second
-                // copy of the caption would duplicate it, so it all lives in
-                // the one pill.
-                <div className="mt-6">
-                  <TrendIndicator
-                    trend={figure.trend}
-                    className="px-3 py-1.5 text-[1rem] leading-5"
-                  />
-                </div>
-              )}
+              {figure.trend && <FigureTrend trend={figure.trend} />}
             </div>
           ))}
         </div>
