@@ -111,6 +111,17 @@
   --font-sans: 'Google Sans', ui-sans-serif, system-ui, sans-serif;
   --font-mono: ui-monospace, 'Cascadia Code', 'Source Code Pro', monospace;
 
+  /* Per-role heading/body typefaces — overridden at runtime by an admin's
+   * Customization > Typography choices (see BrandProvider); default to the
+   * base sans stack above so nothing changes until an admin picks a font. */
+  --font-heading-1: var(--font-sans);
+  --font-heading-2: var(--font-sans);
+  --font-heading-3: var(--font-sans);
+  --font-heading-4: var(--font-sans);
+  --font-heading-5: var(--font-sans);
+  --font-heading-6: var(--font-sans);
+  --font-body: var(--font-sans);
+
   --text-2xs: 0.625rem; /* 10px — badge counters */
   --text-2xs--line-height: 0.875rem;
   --text-xs: 0.6875rem; /* 11px — captions, table meta */

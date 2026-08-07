@@ -1,30 +1,6 @@
 import { Link } from 'react-router'
-import { resolveTrend } from '@/lib/trend'
 import type { HeadlineCards } from '@/features/dashboard/types'
-import type { Trend } from '@/types/domain'
-
-/**
- * Plain-text trend, not a badge. The Figma drew this as a bright green
- * rounded pill, but that is the one piece of "SaaS product" colour language
- * on a page that otherwise deliberately avoids it (see the "SQUARE CORNERS"
- * note in public-header.tsx) — a coloured arrow and sentence carries the same
- * information without introducing a shape nothing else on the page uses.
- */
-function FigureTrend({ trend }: { trend: Trend }) {
-  const { isFlat, isImproving, Icon } = resolveTrend(trend)
-
-  return (
-    <p
-      className={
-        'mt-6 flex items-center gap-1.5 text-[1rem] leading-5 font-medium ' +
-        (isFlat ? 'text-text-muted' : isImproving ? 'text-trend-up' : 'text-trend-down')
-      }
-    >
-      <Icon aria-hidden="true" className="size-4 shrink-0" />
-      {trend.label}
-    </p>
-  )
-}
+import { FigureTrend } from './figure-trend'
 
 /**
  * The opening of the public gateway, per the approved Figma draft
@@ -79,14 +55,17 @@ export function NationalStatement({ cards }: { cards: HeadlineCards }) {
     },
   ]
 
-  // Same four categories the "Related Content" list names in the Figma, each
-  // pointed at an on-page anchor rather than a route that doesn't exist yet —
-  // docs/public-gateway-home.md §10 bans a link to a page that isn't built.
+  // Same four categories the "Related Content" list names in the Figma. Three
+  // point at their specific pillar card below (see the `id` on each card in
+  // Pillars); "Delivery" has no on-page section of its own since delivery
+  // status isn't part of this payload, so it goes to /progress instead — a
+  // route that exists — rather than an anchor to nowhere
+  // (docs/public-gateway-home.md §10 bans exactly that).
   const relatedContent = [
-    { label: 'Access and connections', to: '#delivery-channels' },
-    { label: 'Generation and network', to: '#performance-indicators' },
-    { label: 'Delivery', to: '#delivery-status' },
-    { label: 'Clean Cooking', to: '#pillars' },
+    { label: 'Access and connections', to: '#pillar-last-mile-access' },
+    { label: 'Generation and network', to: '#pillar-generation-network' },
+    { label: 'Delivery', to: '/progress' },
+    { label: 'Clean Cooking', to: '#pillar-clean-cooking' },
   ]
 
   return (
@@ -124,26 +103,31 @@ export function NationalStatement({ cards }: { cards: HeadlineCards }) {
             Related Content
           </h2>
           <ul className="mt-4 flex flex-col gap-3">
-            {relatedContent.map((item) => (
-              <li key={item.label}>
-                <a
-                  href={item.to}
-                  className="text-[1.0625rem] leading-6 font-medium text-link underline underline-offset-4 hover:no-underline"
-                >
-                  {item.label}
-                </a>
-              </li>
-            ))}
+            {relatedContent.map((item) => {
+              const linkClassName =
+                'text-[1.0625rem] leading-6 font-medium text-link underline underline-offset-4 hover:no-underline'
+              return (
+                <li key={item.label}>
+                  {item.to.startsWith('#') ? (
+                    <a href={item.to} className={linkClassName}>
+                      {item.label}
+                    </a>
+                  ) : (
+                    <Link to={item.to} className={linkClassName}>
+                      {item.label}
+                    </Link>
+                  )}
+                </li>
+              )
+            })}
           </ul>
         </nav>
       </div>
 
       {/*
-        Bordered boxes rather than the dashboard's card component — still
-        square-cornered (no border-radius on the box itself, matching the
-        "square corners throughout" rule in public-header.tsx), the one
-        rounded element is the trend pill, which reuses TrendIndicator's own
-        rounded-pill token rather than inventing a new colour.
+        Bordered boxes rather than the dashboard's card component — square
+        corners throughout (see public-header.tsx), including the trend line
+        below each figure, which is plain coloured text rather than a pill.
       */}
       <section aria-labelledby="latest-figures" className="mt-14">
         <h2

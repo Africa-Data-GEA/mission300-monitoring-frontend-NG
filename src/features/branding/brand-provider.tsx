@@ -1,9 +1,35 @@
 import { useEffect, type ReactNode } from 'react'
 import { CHART_BLUE, setChartAccent } from '@/config/chart-colors'
+import type { BrandFonts } from '@/api/schemas/branding'
 import { useBrandConfig } from './api'
 import { buildChartScale, buildColorRamp } from './color-ramp'
+import { loadGoogleFonts } from './font-loader'
 
 const STYLE_TAG_ID = 'brand-overrides'
+const FONT_STYLE_TAG_ID = 'brand-font-overrides'
+
+function applyFontOverrides(fonts: BrandFonts) {
+  loadGoogleFonts(Object.values(fonts))
+
+  const wrap = (family: string) => `'${family}', var(--font-sans)`
+  const declarations = [
+    `--font-heading-1: ${wrap(fonts.h1)};`,
+    `--font-heading-2: ${wrap(fonts.h2)};`,
+    `--font-heading-3: ${wrap(fonts.h3)};`,
+    `--font-heading-4: ${wrap(fonts.h4)};`,
+    `--font-heading-5: ${wrap(fonts.h5)};`,
+    `--font-heading-6: ${wrap(fonts.h6)};`,
+    `--font-body: ${wrap(fonts.body)};`,
+  ].join('\n    ')
+
+  let styleTag = document.getElementById(FONT_STYLE_TAG_ID) as HTMLStyleElement | null
+  if (!styleTag) {
+    styleTag = document.createElement('style')
+    styleTag.id = FONT_STYLE_TAG_ID
+    document.head.appendChild(styleTag)
+  }
+  styleTag.textContent = `:root, .dark {\n    ${declarations}\n  }`
+}
 
 function applyCssOverrides(primaryColor: string, secondaryColor: string, textColor: string) {
   const ramp = buildColorRamp(primaryColor)
@@ -62,6 +88,7 @@ export function BrandProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!data) return
     applyCssOverrides(data.primaryColor, data.secondaryColor, data.textColor)
+    applyFontOverrides(data.fonts)
   }, [data])
 
   return children

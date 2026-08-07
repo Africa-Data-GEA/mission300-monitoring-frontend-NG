@@ -13,13 +13,21 @@
     margin: 0;
     background-color: var(--surface-page);
     color: var(--text-default);
-    font-family: var(--font-sans);
+    font-family: var(--font-body);
     font-size: var(--text-base);
     line-height: var(--text-base--line-height);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
   }
+
+  /* Per-level heading typefaces — see --font-heading-* in theme.css. */
+  h1 { font-family: var(--font-heading-1); }
+  h2 { font-family: var(--font-heading-2); }
+  h3 { font-family: var(--font-heading-3); }
+  h4 { font-family: var(--font-heading-4); }
+  h5 { font-family: var(--font-heading-5); }
+  h6 { font-family: var(--font-heading-6); }
 
   /*
    * Tightening headings keeps big KPI figures from looking airy in a dense

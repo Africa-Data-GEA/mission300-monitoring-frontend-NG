@@ -11,12 +11,23 @@ import type { BrandConfig } from '@/api/schemas/branding'
  */
 const STORAGE_KEY = 'm300-brand-config'
 
+const DEFAULT_FONT = 'Google Sans'
+
 const DEFAULT_BRAND_CONFIG: BrandConfig = {
   countryName: 'Nigeria',
   primaryColor: '#008751',
   secondaryColor: '#e08214',
   textColor: '#101828',
   logoUrl: '/Logos/geapp.png',
+  fonts: {
+    h1: DEFAULT_FONT,
+    h2: DEFAULT_FONT,
+    h3: DEFAULT_FONT,
+    h4: DEFAULT_FONT,
+    h5: DEFAULT_FONT,
+    h6: DEFAULT_FONT,
+    body: DEFAULT_FONT,
+  },
   updatedAt: new Date().toISOString(),
 }
 
@@ -24,7 +35,11 @@ function readStoredConfig(): BrandConfig | null {
   if (typeof localStorage === 'undefined') return null
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
-    return raw ? (JSON.parse(raw) as BrandConfig) : null
+    if (!raw) return null
+    const parsed = JSON.parse(raw) as Partial<BrandConfig>
+    // A config saved before font roles existed won't have `fonts` — fall
+    // back to the default rather than failing `brandConfigSchema` on GET.
+    return { ...DEFAULT_BRAND_CONFIG, ...parsed, fonts: parsed.fonts ?? DEFAULT_BRAND_CONFIG.fonts }
   } catch {
     return null
   }

@@ -54,7 +54,10 @@ export function PublicGatewayPage() {
             <NationalStatement cards={data.headlineCards} />
 
             <div className="mx-auto max-w-5xl px-4 pb-4 sm:px-6">
-              <Pillars />
+              <Pillars
+                headlineCards={data.headlineCards}
+                nationalPerformance={data.nationalPerformance}
+              />
               <Institutions />
             </div>
           </>

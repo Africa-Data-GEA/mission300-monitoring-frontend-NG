@@ -1,9 +1,19 @@
 import { useRef, useState } from 'react'
-import type { BrandConfig } from '@/api/schemas/branding'
+import type { BrandConfig, BrandFonts } from '@/api/schemas/branding'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { useBrandConfig, useUpdateBrandColors, useUploadBrandLogo } from '@/features/branding/api'
+import { useBrandConfig, useUpdateBrandColors, useUpdateBrandFonts, useUploadBrandLogo } from '@/features/branding/api'
 import { ApiError } from '@/lib/api-client'
+import { FontPicker } from './font-picker'
+
+const HEADING_LEVELS = [
+  { role: 'h1', label: 'H1 — page titles' },
+  { role: 'h2', label: 'H2' },
+  { role: 'h3', label: 'H3' },
+  { role: 'h4', label: 'H4' },
+  { role: 'h5', label: 'H5' },
+  { role: 'h6', label: 'H6' },
+] as const
 
 const inputClass =
   'h-10 w-full rounded-control border border-border-strong bg-surface px-3 text-sm text-text-default placeholder:text-text-subtle'
@@ -62,6 +72,7 @@ export function CustomizationPanel() {
 
 function CustomizationForm({ brand }: { brand: BrandConfig }) {
   const updateColors = useUpdateBrandColors()
+  const updateFonts = useUpdateBrandFonts()
   const uploadLogo = useUploadBrandLogo()
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -71,6 +82,25 @@ function CustomizationForm({ brand }: { brand: BrandConfig }) {
   const [textColor, setTextColor] = useState(brand.textColor)
   const [saveMessage, setSaveMessage] = useState('')
   const [logoError, setLogoError] = useState('')
+
+  const [fonts, setFonts] = useState<BrandFonts>(brand.fonts)
+  const [fontSaveMessage, setFontSaveMessage] = useState('')
+
+  function setFontRole(role: keyof BrandFonts, family: string) {
+    setFonts((prev) => ({ ...prev, [role]: family }))
+  }
+
+  async function handleSaveFonts() {
+    setFontSaveMessage('')
+    try {
+      await updateFonts.mutateAsync(fonts)
+      setFontSaveMessage('Saved. The new typefaces are applied across the dashboard now.')
+    } catch (error) {
+      setFontSaveMessage(
+        error instanceof ApiError ? error.message : 'Could not save the typography changes. Please try again.',
+      )
+    }
+  }
 
   const isValidHex = (value: string) => /^#[0-9a-fA-F]{6}$/.test(value)
   const canSave =
@@ -143,6 +173,38 @@ function CustomizationForm({ brand }: { brand: BrandConfig }) {
             disabled={!canSave || updateColors.isPending}
           >
             {updateColors.isPending ? 'Saving…' : 'Save colours'}
+          </Button>
+        </div>
+      </Card>
+
+      <Card className="p-5">
+        <h3 className="text-base font-semibold text-text-default">Typography</h3>
+        <p className="mt-1 text-sm text-text-muted">
+          Assign a Google Fonts family to each heading level and to body text. Applies across the whole
+          dashboard immediately, the same as colours above.
+        </p>
+
+        <div className="mt-5 grid gap-5 sm:grid-cols-2">
+          {HEADING_LEVELS.map(({ role, label }) => (
+            <FontPicker
+              key={role}
+              label={label}
+              value={fonts[role]}
+              onChange={(family) => setFontRole(role, family)}
+            />
+          ))}
+          <FontPicker label="Body text" value={fonts.body} onChange={(family) => setFontRole('body', family)} />
+        </div>
+
+        {fontSaveMessage && (
+          <p className="mt-4 text-sm text-text-muted" role="status">
+            {fontSaveMessage}
+          </p>
+        )}
+
+        <div className="mt-5 flex justify-end border-t border-border-default pt-5">
+          <Button type="button" onClick={handleSaveFonts} disabled={updateFonts.isPending}>
+            {updateFonts.isPending ? 'Saving…' : 'Save typography'}
           </Button>
         </div>
       </Card>

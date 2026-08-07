@@ -1,5 +1,5 @@
 import { delay, http, HttpResponse } from 'msw'
-import { updateBrandColorsRequestSchema } from '@/api/schemas/branding'
+import { updateBrandColorsRequestSchema, updateBrandFontsRequestSchema } from '@/api/schemas/branding'
 import { getBrandConfig, setBrandConfig } from '../data/branding'
 
 /** Reads a File into a `data:` URL — stands in for uploading to real object storage. */
@@ -34,6 +34,25 @@ export const brandingHandlers = [
     const updated = setBrandConfig({
       ...getBrandConfig(),
       ...result.data,
+      updatedAt: new Date().toISOString(),
+    })
+    return HttpResponse.json(updated)
+  }),
+
+  /** PUT /api/branding/fonts — updates the h1-h6 + body Google Fonts family assignments. */
+  http.put('/api/branding/fonts', async ({ request }) => {
+    await delay(150)
+    const body = await request.json()
+    const result = updateBrandFontsRequestSchema.safeParse(body)
+    if (!result.success) {
+      return HttpResponse.json(
+        { message: result.error.issues[0]?.message ?? 'Invalid font configuration.' },
+        { status: 400 },
+      )
+    }
+    const updated = setBrandConfig({
+      ...getBrandConfig(),
+      fonts: result.data.fonts,
       updatedAt: new Date().toISOString(),
     })
     return HttpResponse.json(updated)

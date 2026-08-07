@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   brandConfigSchema,
   type BrandConfig,
+  type BrandFonts,
   type UpdateBrandColorsRequest,
 } from '@/api/schemas/branding'
 import { api } from '@/lib/api-client'
@@ -26,6 +27,15 @@ export function useUpdateBrandColors() {
   return useMutation({
     mutationFn: (input: UpdateBrandColorsRequest) =>
       api.put<BrandConfig>('/branding', input, brandConfigSchema),
+    onSuccess: (updated) => client.setQueryData(brandingKeys.config(), updated),
+  })
+}
+
+/** Updates the h1-h6 + body Google Fonts family assignments. */
+export function useUpdateBrandFonts() {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (fonts: BrandFonts) => api.put<BrandConfig>('/branding/fonts', { fonts }, brandConfigSchema),
     onSuccess: (updated) => client.setQueryData(brandingKeys.config(), updated),
   })
 }
