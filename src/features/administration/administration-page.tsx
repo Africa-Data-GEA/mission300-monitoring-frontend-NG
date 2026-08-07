@@ -75,7 +75,7 @@ export function AdministrationPage() {
         onValueChange={page.changeTab}
         className="flex min-w-0 flex-col gap-4 md:flex-row"
       >
-        <Card className="min-w-0 shrink-0 self-start p-2 md:w-56">
+        <Card className="w-full min-w-0 self-start p-2 md:w-56 md:shrink-0">
           <TabsList orientation="vertical" aria-label="Administration sections">
             <TabsTrigger orientation="vertical" value="users">
               <span className="flex-1">Users</span>

@@ -91,7 +91,14 @@ export function DataTable<T>({
   }
 
   return (
-    <div className={cn('w-full max-w-full overflow-x-auto', className)}>
+    // `relative` matters here, not just cosmetically: the sr-only <caption>
+    // below is `position: absolute` with no other positioned ancestor, so
+    // without this its containing block falls back to the viewport root —
+    // it then escapes this div's overflow-x-auto clipping entirely (an
+    // absolutely-positioned descendant is clipped by the nearest *positioned*
+    // ancestor, not just the nearest overflow:auto one) and inflates
+    // document.documentElement.scrollWidth on any page with a wide table.
+    <div className={cn('relative w-full max-w-full overflow-x-auto', className)}>
       <table className="w-full border-collapse text-left">
         <caption className="sr-only">{caption}</caption>
 
