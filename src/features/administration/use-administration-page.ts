@@ -19,7 +19,7 @@ const DEFAULT_QUERY: Required<AdministrationQuery> = {
   auditPeriod: 'last-30-days',
 }
 
-export type AdministrationTab = 'users' | 'roles' | 'scope' | 'audit'
+export type AdministrationTab = 'users' | 'roles' | 'scope' | 'audit' | 'branding'
 
 export function useAdministrationPage() {
   const [query, setQuery] =

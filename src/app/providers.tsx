@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useState, type ReactNode } from 'react'
+import { BrandProvider } from '@/features/branding/brand-provider'
 
 /**
  * Creates the QueryClient with defaults suited to an M&E dashboard: indicator
@@ -24,5 +25,9 @@ export function AppProviders({ children }: { children: ReactNode }) {
   // tests or SSR requests.
   const [queryClient] = useState(createQueryClient)
 
-  return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  return (
+    <QueryClientProvider client={queryClient}>
+      <BrandProvider>{children}</BrandProvider>
+    </QueryClientProvider>
+  )
 }

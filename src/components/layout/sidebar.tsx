@@ -2,6 +2,7 @@ import { Link } from 'react-router'
 import { NAVIGATION } from '@/config/navigation'
 import { readAuthSession } from '@/features/auth/auth-session'
 import { canRoleReachModule } from '@/features/auth/role-access'
+import { useBrandConfig } from '@/features/branding/api'
 import { cn } from '@/lib/utils'
 import { NavDropdownItem } from './nav-dropdown-item'
 import { NavItem } from './nav-item'
@@ -29,6 +30,7 @@ export function Sidebar({
 }) {
   const session = readAuthSession()
   const roleSlug = session?.user.role
+  const { data: brand } = useBrandConfig()
 
   // No session (e.g. a dev workflow that never went through /account/login)
   // shows the full nav rather than nothing — restriction only applies once a
@@ -49,7 +51,11 @@ export function Sidebar({
     >
       <div className="shrink-0 px-4 pt-5 pb-4">
         <Link to="/" aria-label="Go to the public landing page" className="inline-block">
-          <img alt="gEApp" src="/Logos/geapp.png" className="h-11 w-auto max-w-full object-contain" />
+          <img
+            alt={brand?.countryName ?? 'gEApp'}
+            src={brand?.logoUrl ?? '/Logos/geapp.png'}
+            className="h-11 w-auto max-w-full object-contain"
+          />
         </Link>
       </div>
 

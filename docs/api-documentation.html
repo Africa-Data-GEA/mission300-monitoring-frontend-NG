@@ -1,0 +1,1328 @@
+<title>M300 Monitoring Dashboard — API Contract</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --ink: #000000;
+    --ink-2: #3a3a3a;
+    --ink-3: #6b6b6b;
+    --line: #cccccc;
+    --line-2: #999999;
+    --panel: #f4f4f4;
+    --code-bg: #f0f0f0;
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+    line-height: 1.55;
+    font-size: 15px;
+  }
+  a { color: var(--ink); text-decoration-color: var(--line-2); }
+  a:hover { text-decoration-color: var(--ink); }
+  a:focus-visible, button:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+
+  code, pre, kbd {
+    font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  }
+  code {
+    background: var(--code-bg);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    padding: 0.05em 0.35em;
+    font-size: 0.86em;
+  }
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 12px 14px;
+    overflow-x: auto;
+    font-size: 0.82rem;
+    line-height: 1.5;
+  }
+  pre code { background: none; border: none; padding: 0; }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 250px minmax(0, 1fr);
+    gap: 0;
+    max-width: 1240px;
+    margin: 0 auto;
+  }
+  @media (max-width: 880px) {
+    .layout { grid-template-columns: 1fr; }
+    nav.toc { position: static; max-height: none; border-right: none; border-bottom: 1px solid var(--line); }
+  }
+
+  nav.toc {
+    position: sticky;
+    top: 0;
+    align-self: start;
+    max-height: 100vh;
+    overflow-y: auto;
+    padding: 28px 18px 40px 24px;
+    border-right: 1px solid var(--line);
+    font-size: 0.85rem;
+  }
+  nav.toc .toc-title {
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    margin: 0 0 10px;
+    font-weight: 600;
+  }
+  nav.toc ol { list-style: none; margin: 0; padding: 0; }
+  nav.toc li { margin: 0 0 3px; }
+  nav.toc a { display: block; padding: 3px 0; text-decoration: none; color: var(--ink-2); }
+  nav.toc a:hover { color: var(--ink); text-decoration: underline; }
+  nav.toc .n { display: inline-block; width: 1.4em; color: var(--ink-3); }
+
+  main { min-width: 0; padding: 40px 40px 100px; }
+
+  header.doc-head { margin-bottom: 36px; padding-bottom: 24px; border-bottom: 2px solid var(--ink); }
+  header.doc-head .eyebrow {
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    margin: 0 0 8px;
+  }
+  header.doc-head h1 { font-size: 1.7rem; margin: 0 0 10px; letter-spacing: -0.01em; text-wrap: balance; }
+  header.doc-head p { color: var(--ink-2); max-width: 68ch; margin: 6px 0 0; }
+  header.doc-head .meta { margin-top: 16px; font-size: 0.82rem; color: var(--ink-3); }
+  header.doc-head .meta strong { color: var(--ink); font-weight: 600; }
+
+  h2.module-title {
+    font-size: 1.3rem;
+    margin: 56px 0 4px;
+    padding-top: 20px;
+    border-top: 1px solid var(--line);
+    letter-spacing: -0.005em;
+  }
+  h2.module-title:first-of-type { border-top: none; margin-top: 0; }
+  p.module-desc { color: var(--ink-2); max-width: 70ch; margin: 0 0 22px; font-size: 0.94rem; }
+
+  article.endpoint {
+    margin: 26px 0;
+    padding: 18px 20px 20px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+  }
+  .endpoint-head {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+  }
+  .method {
+    display: inline-block;
+    border: 1px solid var(--ink);
+    border-radius: 3px;
+    padding: 1px 8px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    font-family: ui-monospace, monospace;
+  }
+  .path { font-family: ui-monospace, monospace; font-size: 0.98rem; font-weight: 600; }
+  .status-tag {
+    font-size: 0.72rem;
+    color: var(--ink-3);
+    border: 1px dashed var(--line-2);
+    border-radius: 3px;
+    padding: 1px 7px;
+  }
+  .endpoint p.summary { margin: 6px 0 14px; color: var(--ink-2); font-size: 0.92rem; }
+  .endpoint h4 {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink-3);
+    margin: 16px 0 6px;
+    font-weight: 600;
+  }
+  .endpoint h4:first-of-type { margin-top: 4px; }
+
+  table.params, table.enum {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+    margin: 4px 0 4px;
+  }
+  table.params th, table.params td,
+  table.enum th, table.enum td {
+    text-align: left;
+    padding: 6px 10px 6px 0;
+    border-bottom: 1px solid var(--line);
+    vertical-align: top;
+  }
+  table.params th, table.enum th {
+    color: var(--ink-3);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    font-weight: 600;
+  }
+  .tablewrap { overflow-x: auto; }
+
+  ul.notes { margin: 4px 0 4px; padding-left: 20px; font-size: 0.88rem; color: var(--ink-2); }
+  ul.notes li { margin: 4px 0; }
+  ul.notes code { font-size: 0.84em; }
+
+  .callout {
+    border-left: 3px solid var(--ink);
+    padding: 8px 14px;
+    margin: 14px 0;
+    font-size: 0.88rem;
+    color: var(--ink-2);
+    background: var(--panel);
+  }
+
+  section.reference { margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--line); }
+  ol.open-questions { padding-left: 22px; }
+  ol.open-questions li { margin: 10px 0; font-size: 0.92rem; color: var(--ink-2); }
+  ol.open-questions li strong { color: var(--ink); }
+
+  footer.doc-foot {
+    margin-top: 60px;
+    padding-top: 20px;
+    border-top: 1px solid var(--line);
+    font-size: 0.8rem;
+    color: var(--ink-3);
+  }
+  hr.rule { border: none; border-top: 1px solid var(--line); margin: 40px 0; }
+</style>
+
+<div class="layout">
+  <nav class="toc" aria-label="Table of contents">
+    <p class="toc-title">Contents</p>
+    <ol>
+      <li><a href="#conventions"><span class="n">00</span>Conventions</a></li>
+      <li><a href="#data-modes"><span class="n">00</span>Data modes</a></li>
+      <li><a href="#auth"><span class="n">01</span>Authentication</a></li>
+      <li><a href="#filters"><span class="n">02</span>Global filters</a></li>
+      <li><a href="#exec"><span class="n">03</span>Executive Overview</a></li>
+      <li><a href="#public"><span class="n">04</span>Public Gateway</a></li>
+      <li><a href="#kpi"><span class="n">05</span>KPI Directory</a></li>
+      <li><a href="#pillars"><span class="n">06</span>Pillar Dashboards</a></li>
+      <li><a href="#programs"><span class="n">07</span>Programs</a></li>
+      <li><a href="#bottlenecks"><span class="n">08</span>Bottlenecks &amp; Exceptions</a></li>
+      <li><a href="#submissions"><span class="n">09</span>Data Submissions</a></li>
+      <li><a href="#statedisco"><span class="n">10</span>State &amp; DisCo</a></li>
+      <li><a href="#reports"><span class="n">11</span>Reports &amp; Exports</a></li>
+      <li><a href="#admin"><span class="n">12</span>Administration</a></li>
+      <li><a href="#stakeholders"><span class="n">13</span>Stakeholders</a></li>
+      <li><a href="#enums"><span class="n">14</span>Shared enumerations</a></li>
+      <li><a href="#open"><span class="n">15</span>Open questions</a></li>
+    </ol>
+  </nav>
+
+  <main>
+    <header class="doc-head">
+      <p class="eyebrow">Mission 300 Monitoring Dashboard</p>
+      <h1>API Contract — endpoints required from the backend</h1>
+      <p>
+        Every endpoint below is derived directly from the Zod schemas in <code>src/api/schemas/</code>
+        and is already implemented as a mock, consumed by a working frontend — the shapes here are
+        exercised, not theoretical. If a shape needs to change, change the schema and this document
+        together and flag it: a field <strong>added</strong> is harmless, a field <strong>removed or
+        retyped</strong> is a breaking change.
+      </p>
+      <p class="meta">
+        <strong>Base URL:</strong> everything under <code>/api</code> &nbsp;·&nbsp;
+        <strong>Content type:</strong> <code>application/json</code> both ways, except two file-upload
+        endpoints (<code>multipart/form-data</code>) and two report-export endpoints (binary download)
+        &nbsp;·&nbsp;
+        <strong>Timestamps:</strong> ISO 8601 with timezone, e.g. <code>2025-10-14T09:12:00Z</code>
+        &nbsp;·&nbsp;
+        <strong>Errors:</strong> non-2xx with <code>{ "message": "human readable" }</code> —
+        <code>404</code> not found, <code>400</code> failed validation/business rule,
+        <code>401</code> bad credentials.
+      </p>
+    </header>
+
+    <section id="conventions">
+      <h2 class="module-title">Conventions</h2>
+      <p class="module-desc">Rules that apply across every module below, not repeated per endpoint.</p>
+
+      <ul class="notes">
+        <li><strong>Empty vs. zero</strong> — <code>0</code> is a real value and is rendered as
+          <code>0</code>. <code>null</code> is used only where the schema allows it, and always means
+          "not applicable / not yet approved" — never "zero".</li>
+        <li><strong>Enums are closed sets</strong> — a value outside an enum's allowed options fails
+          validation on the frontend. See the <a href="#enums">shared enumerations</a> table and each
+          module's own enums.</li>
+        <li><strong><code>lastUpdated</code></strong> appears on nearly every overview payload — it is
+          when the underlying data was last refreshed, not when the response was generated. Shown to
+          the user as "as of …".</li>
+      </ul>
+
+      <h4>Nullability carries meaning</h4>
+      <p class="summary" style="margin-top:0">Several fields are nullable on purpose — the distinction
+        is a specification requirement, not a convenience:</p>
+      <ul class="notes">
+        <li><code>AccessChannel.target</code> / <code>.percentComplete</code> — <code>null</code> means
+          no approved target exists. Never send <code>0</code> here.</li>
+        <li><code>BulletMetric.target</code> — <code>null</code> means no Compact target is currently
+          stated. <code>.expected</code> — <code>null</code> means no approved trajectory exists.</li>
+        <li><code>PillarHeadlineCard.rawValue</code> / <code>.target</code> — same rule: no value
+          collected yet, or no approved target yet.</li>
+        <li><code>KpiProfile.baseline</code> / <code>.current</code> / <code>.target</code> —
+          <code>null</code> means that figure isn't available yet (<code>validationStatus</code> will
+          be <code>future</code> when <code>current</code> is null).</li>
+        <li><code>ProjectRecord.fundingSource</code> / <code>.evidenceUrl</code>,
+          <code>MilestoneRecord.actualDate</code> / <code>.evidenceUrl</code> — not yet secured / not
+          yet reached / no document attached. Never send an empty string.</li>
+        <li><code>SubmissionDetail.fileName</code> — <code>null</code> for manual-entry (no uploaded
+          file).</li>
+        <li><code>EscalationRecord.resolution</code> / <code>.evidenceUrl</code> — <code>null</code>
+          until resolved / until a document is attached.</li>
+      </ul>
+
+      <h4>Pagination envelope</h4>
+      <p class="summary" style="margin-top:0">Shared by every paginated list in the product:</p>
+<pre><code>{
+  "items": [ /* the current page only */ ],
+  "page": 1,        // 1-based
+  "pageSize": 25,
+  "total": 312      // total matching records across ALL pages, not items.length
+}</code></pre>
+      <p class="summary">Query params: <code>?page=1&amp;pageSize=25</code>. <code>pageSize</code> has a
+        per-module maximum (see each module's query table). Sorting is currently client-side over the
+        returned page only — see <a href="#open">open question 6</a>.</p>
+
+      <h4><code>provenance</code> — required on every metric</h4>
+      <p class="summary" style="margin-top:0">All four fields are required, non-empty strings:</p>
+<pre><code>{
+  "definition":  "What this metric is, and what it is not.",
+  "methodology": "How it is calculated, including exclusions.",
+  "source":      "Which publication or register it comes from.",
+  "lastUpdated": "2025-09-30T00:00:00Z"
+}</code></pre>
+
+      <h4>Pre-formatted display values — a decision the backend should confirm</h4>
+      <p class="summary" style="margin-top:0">Several fields are sent pre-formatted as display strings
+        alongside a raw number:</p>
+<pre><code>{ "value": "₦2.2tn", "current": 2.2 }
+{ "value": "$0.0B",  "current": 0 }
+{ "value": "5.4 GW", "availableMw": 5400 }</code></pre>
+      <div class="callout">
+        On reflection this is probably the wrong boundary — it makes the backend own currency/unit
+        formatting and blocks locale or compact-number changes on the frontend without a release. If
+        you'd rather send structured values
+        (<code>{ value, unit, scale, precision }</code>) and let the frontend format them, say so
+        before building against this — cheaper to change now than later.
+      </div>
+    </section>
+
+    <section id="data-modes">
+      <h2 class="module-title">Data modes</h2>
+      <p class="module-desc">Controlled by build-time environment variables (<code>src/config/environment.ts</code>).</p>
+      <div class="tablewrap">
+        <table class="params">
+          <thead><tr><th><code>VITE_DATA_MODE</code></th><th>Behaviour</th></tr></thead>
+          <tbody>
+            <tr><td><code>mock</code></td><td>Every <code>/api</code> request is intercepted and answered by MSW in the browser. No backend needed — the default in local development.</td></tr>
+            <tr><td><code>hybrid</code></td><td>MSW answers requests for modules without a real backend yet, and proxies requests for finished modules to <code>VITE_SUBMISSIONS_BACKEND_URL</code>. Used for staged one-module-at-a-time rollout.</td></tr>
+            <tr><td><code>backend</code></td><td>MSW is disabled entirely. Every request goes to <code>VITE_API_BASE_URL</code> for real. <strong>This is what production should run once the API implements everything below.</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="summary">For integration testing: point the API at <code>VITE_API_BASE_URL</code> and set
+        <code>VITE_DATA_MODE=backend</code>. No MSW or mock code needs to change.</p>
+    </section>
+
+    <hr class="rule" />
+
+    <section id="auth">
+      <h2 class="module-title">1. Authentication</h2>
+      <p class="module-desc">Not yet specified by the product spec in detail, but the frontend
+        implements and depends on a specific two-step login flow — this is the one thing here that is
+        genuinely load-bearing UX, not just a data shape.</p>
+
+      <article class="endpoint" id="auth-identify">
+        <div class="endpoint-head"><span class="method">POST</span><span class="path">/api/auth/identify</span></div>
+        <p class="summary">Step 1 — user enters only their email. Confirms an account exists and
+          returns the display identity used on the password screen, without revealing whether the
+          password is right yet.</p>
+        <h4>Request</h4>
+<pre><code>{ "email": "a.bello@finance.gov.ng" }</code></pre>
+        <h4>Response <span class="status-tag">200</span></h4>
+<pre><code>{
+  "email": "a.bello@finance.gov.ng",
+  "displayName": "Aisha Bello",
+  "institution": "Federal Ministry of Finance"
+}</code></pre>
+        <h4>Response <span class="status-tag">404</span></h4>
+        <p class="summary">If no active account matches:
+          <code>{ "message": "We could not find an active account for that email." }</code>. An
+          account with <code>status !== 'active'</code> must be treated the same as no account — do
+          not confirm suspended/pending accounts exist.</p>
+      </article>
+
+      <article class="endpoint" id="auth-login">
+        <div class="endpoint-head"><span class="method">POST</span><span class="path">/api/auth/login</span></div>
+        <p class="summary">Step 2, shown only after identify succeeds. Full credential check.</p>
+        <h4>Request</h4>
+<pre><code>{ "email": "a.bello@finance.gov.ng", "password": "…" }</code></pre>
+        <h4>Response <span class="status-tag">200</span></h4>
+<pre><code>{
+  "accessToken": "…",
+  "user": {
+    "id": "usr-006",
+    "name": "Aisha Bello",
+    "email": "a.bello@finance.gov.ng",
+    "role": "oversight-user"
+  }
+}</code></pre>
+        <p class="summary"><code>role</code> must be one of the <code>SystemRole</code> enum values —
+          the frontend uses it directly to decide which sidebar sections and routes this user can
+          reach.</p>
+        <h4>Response <span class="status-tag">401</span></h4>
+        <p class="summary">Wrong password or inactive account:
+          <code>{ "message": "The password you entered is incorrect." }</code>. Use one generic
+          message — don't distinguish "wrong password" from "account inactive", to avoid leaking
+          account state.</p>
+        <p class="summary">The frontend stores <code>accessToken</code> and attaches it as a bearer
+          token on every subsequent request once the API expects one (not yet enforced by any schema —
+          see <a href="#open">open question 4</a>).</p>
+      </article>
+
+      <article class="endpoint" id="auth-forgot">
+        <div class="endpoint-head"><span class="method">POST</span><span class="path">/api/auth/forgot-password</span></div>
+        <h4>Request</h4>
+        <pre><code>{ "email": "…" }</code></pre>
+        <h4>Response <span class="status-tag">200</span></h4>
+        <p class="summary">Always the same body regardless of whether the email matches an account
+          (prevents account enumeration):</p>
+<pre><code>{ "message": "If an active account exists for that email, reset instructions have been sent." }</code></pre>
+      </article>
+    </section>
+
+    <section id="filters">
+      <h2 class="module-title">2. Global filters</h2>
+      <article class="endpoint" id="filters-get">
+        <div class="endpoint-head"><span class="method">GET</span><span class="path">/api/filters</span></div>
+        <p class="summary">Option lists for the application-wide filter bar — used by Executive
+          Overview only; every other module has its own, larger filter set (documented in that
+          module's section). Cacheable for the session.</p>
+        <h4>Response</h4>
+<pre><code>{
+  "reportingPeriods":      [{ "value": "q3-2025", "label": "Q3 2025" }],
+  "pillars":               [{ "value": "all", "label": "All pillars" }],
+  "institutions":          [{ "value": "nerc", "label": "NERC" }],
+  "priorities":            [{ "value": "priority", "label": "Priority" }],
+  "geographicScopes":      [{ "value": "national", "label": "National" }],
+  "distributionCompanies": [{ "value": "all", "label": "All DisCos" }],
+  "technologies":          [{ "value": "all", "label": "All technologies" }]
+}</code></pre>
+        <p class="summary"><code>pillars</code> values must match the six <code>PillarId</code> values,
+          plus <code>all</code>. Options are server-driven so adding a period or institution needs no
+          frontend release.</p>
+      </article>
+    </section>
+
+    <section id="exec">
+      <h2 class="module-title">3. Executive Overview</h2>
+      <p class="module-desc">The Compact leadership view. Schema: <code>src/api/schemas/executive-overview.ts</code>.</p>
+
+      <article class="endpoint" id="exec-get">
+        <div class="endpoint-head"><span class="method">GET</span><span class="path">/api/executive-overview</span></div>
+        <h4>Query parameters — all optional</h4>
+        <div class="tablewrap">
+          <table class="params">
+            <thead><tr><th>Parameter</th><th>Example</th></tr></thead>
+            <tbody>
+              <tr><td><code>period</code></td><td><code>q3-2025</code></td></tr>
+              <tr><td><code>pillar</code></td><td><code>last-mile-access</code> or <code>all</code></td></tr>
+              <tr><td><code>institution</code></td><td><code>nerc</code> or <code>all</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="summary">The backend must apply every supplied parameter before returning the
+          payload — the frontend does not calculate KPI values, project totals or progress, it only
+          renders the response. When a filter has no matching records, return empty arrays for the
+          affected sections rather than reusing the unfiltered data.</p>
+
+        <h4>Response shape (abbreviated)</h4>
+<pre><code>{
+  "lastUpdated": "2025-10-14T09:12:00Z",
+  "appliedPillar": "all",
+  "headlineCards": { /* Section A — exactly four named cards */ },
+  "accessDelivery": [ /* Section B — three channels */ ],
+  "nationalPerformance": [ /* Section C — six bullet metrics */ ],
+  "deliveryStatus": { /* Section D — projects, chart counts, exceptions */ }
+}</code></pre>
+        <p class="summary"><code>appliedPillar</code> — echo the pillar the payload was actually
+          calculated for (<code>all</code> for All Pillars), so the frontend can confirm the server
+          applied what was asked.</p>
+
+        <h4>Section A — <code>headlineCards</code> (exactly four, named fields, not an array)</h4>
+        <div class="tablewrap">
+          <table class="params">
+            <thead><tr><th>Field</th><th>Card</th><th>Notable requirements</th></tr></thead>
+            <tbody>
+              <tr><td><code>peopleWithElectricityAccess</code></td><td>People with electricity access</td><td>baseline, current, 2030 target on a shared scale (<code>scaleMax &gt; scaleMin</code>, enforced)</td></tr>
+              <tr><td><code>accessRate</code></td><td>Electricity access rate</td><td><code>sourceYear</code> required — an annual official publication, must never read as current-period data. <code>sparkline[]</code>, oldest→newest</td></tr>
+              <tr><td><code>generationCapacity</code></td><td>Available generation capacity</td><td><code>availableMw</code>, <code>installedMw</code>, <code>availabilityRatio</code> (0–100), <code>sparkline[]</code> (≥2 points to render a line)</td></tr>
+              <tr><td><code>cleanCookingAccess</code></td><td>Clean cooking access</td><td>same shape as <code>peopleWithElectricityAccess</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="summary">Every headline card carries an optional
+          <code>trend: { change, label, direction }</code> — when present, rendered as a
+          period-on-period pill. Headline outcomes remain national even when a pillar filter is
+          applied — only Sections C and D narrow to the selected pillar.</p>
+
+        <h4>Section B — <code>accessDelivery</code></h4>
+        <p class="summary" style="margin-top:0">Three channels, in this order:
+          <code>grid-connections</code>, <code>mini-grid-connections</code>,
+          <code>solar-home-systems</code>. Known targets: 750,000 mini-grid household connections by
+          2030 (DARES); 2.75 million Solar Home Systems by 2030. Grid connections have no approved
+          target — send <code>target: null</code>, <code>percentComplete: null</code>.</p>
+
+        <h4>Section C — <code>nationalPerformance</code></h4>
+        <p class="summary" style="margin-top:0">Six bullet metrics, ids: <code>renewable-share</code>,
+          <code>metering-rate</code>, <code>atcc-losses</code>, <code>market-remittance</code>,
+          <code>tariff-shortfall</code>, <code>private-capital</code>. Each carries its own scale
+          (<code>scaleMin</code>/<code>scaleMax</code>, <code>scaleMax &gt; scaleMin</code> enforced) —
+          the metrics aren't comparable. <code>direction</code> must be <code>lower-is-better</code>
+          for <code>atcc-losses</code> and <code>tariff-shortfall</code> — a falling value is an
+          improvement there and renders as such.</p>
+
+        <h4>Section D — <code>deliveryStatus</code></h4>
+        <ul class="notes">
+          <li><code>ongoingProjects[]</code> — rows shared by the searchable table and map views.
+            Exclude <code>completed</code> records. Each row carries id/name, pillar + label, owner,
+            location, <code>latitude</code>/<code>longitude</code>, <code>currentStatus</code>,
+            <code>startDate</code>/<code>endDate</code>. The frontend does not geocode location
+            strings.</li>
+          <li><code>statusSummary[]</code> — backend-calculated overall counts for
+            <code>on-track</code>, <code>at-risk</code>, <code>delayed</code>, <code>blocked</code>
+            (excludes <code>completed</code>). The donut chart renders these directly.</li>
+          <li><code>exceptions[]</code> — ranked by severity, delivery impact and days unresolved. The
+            UI displays at most five; sending more is allowed and harmless.</li>
+        </ul>
+        <div class="callout">The specification is explicit: count records by status, never average
+          unrelated performance percentages.</div>
+      </article>
+    </section>
+
+    <section id="public">
+      <h2 class="module-title">4. Public Gateway</h2>
+      <p class="module-desc">The unauthenticated landing page and its "National Progress" drill-down.</p>
+
+      <div class="callout">
+        <strong>This is the one genuinely new endpoint the backend needs to build — it does not exist
+        yet.</strong> The frontend today temporarily reads <code>GET /api/executive-overview</code> as
+        a stopgap. Do not treat that as the real contract; anything shown on the public pages today is
+        unreviewed for public release.
+      </div>
+
+      <article class="endpoint" id="public-overview">
+        <div class="endpoint-head">
+          <span class="method">GET</span><span class="path">/api/public/overview</span>
+          <span class="status-tag">not yet implemented</span>
+        </div>
+        <ul class="notes">
+          <li>No authentication.</li>
+          <li>Serves the headline strip, delivery channels and pillar indicators shown on the public
+            home and progress pages.</li>
+          <li>Every figure still carries <code>validationStatus</code> and <code>provenance</code> —
+            the public version does not get to skip disclosure; if anything it matters more here.</li>
+          <li>Send display labels, not filter slugs, for anything shown as text (e.g.
+            <code>"Q3 2025"</code>, not <code>"q3-2025"</code>).</li>
+          <li>Cacheable — this is read-only public data and will take the highest traffic volume of
+            anything in the platform. Design for that (e.g. CDN cache with short TTL, or
+            <code>Cache-Control</code> headers).</li>
+          <li>Recommended (not yet locked in — see <a href="#open">open question 7</a>): hold back
+            anything not <code>confirmed</code> or <code>public-source</code> validation status from
+            this endpoint specifically, even though the authenticated Executive Overview shows every
+            status.</li>
+        </ul>
+      </article>
+    </section>
+
+    <section id="kpi">
+      <h2 class="module-title">5. KPI Directory (KPI Explorer)</h2>
+      <p class="module-desc">The authoritative indicator catalogue and technical drill-down. Schema:
+        <code>src/api/schemas/kpi-explorer.ts</code>. The KPI identifier (e.g. <code>M300-P1-003</code>)
+        is first-class here for traceability, but must not appear on executive or pillar cards.</p>
+
+      <article class="endpoint" id="kpi-list">
+        <div class="endpoint-head"><span class="method">GET</span><span class="path">/api/kpi-explorer</span></div>
+        <h4>Query (all optional)</h4>
+        <p class="summary" style="margin-top:0"><code>search</code>, <code>pillar</code>,
+          <code>category</code>, <code>readiness</code>, <code>validationStatus</code>,
+          <code>sourceInstitution</code>, <code>reportingPeriod</code>, <code>geography</code>,
+          <code>page</code>, <code>pageSize</code> (max 200).</p>
+        <h4>Response</h4>
+<pre><code>{
+  "lastUpdated": "2025-10-14T09:12:00Z",
+  "summary": [ /* Section A — catalogue/readiness counts */ ],
+  "catalogue": { "items": [ /* … */ ], "page": 1, "pageSize": 25, "total": 17 },
+  "pillarDistribution": [ /* Section D — value coverage by pillar */ ],
+  "readinessDistribution": [ /* Section D — Core / Supporting / Future */ ]
+}</code></pre>
+        <ul class="notes">
+          <li><code>summary</code> and both <code>*Distribution</code> arrays describe the full
+            catalogue, not the filtered slice. Only <code>catalogue</code> is filtered/paginated by
+            the query.</li>
+          <li><code>validationStatus</code> (per row): <code>confirmed</code>, <code>public-source</code>,
+            <code>requires-validation</code>, <code>provisional</code>, <code>future</code> —
+            <code>future</code> means no value exists yet, a catalogue fact, never presented as
+            confirmed.</li>
+          <li><code>readiness</code> is <code>core</code>, <code>supporting</code> or <code>future</code>.</li>
+          <li>Each <code>pillarDistribution[].byStatus</code> must sum to that pillar's <code>total</code>.</li>
+        </ul>
+      </article>
+
+      <article class="endpoint" id="kpi-detail">
+        <div class="endpoint-head"><span class="method">GET</span><span class="path">/api/kpi-explorer/kpis/:id</span></div>
+        <p class="summary">Full profile for one indicator, fetched on demand so the heavy payload
+          isn't loaded for every catalogue row. <span class="status-tag">404</span> with
+          <code>{ "message": … }</code> for an unknown id.</p>
+        <h4>Four panels' worth of data in one response</h4>
+        <ul class="notes">
+          <li><strong>Metadata</strong> — <code>definition</code>, <code>formula</code>, <code>unit</code>,
+            <code>aggregation</code>, <code>frequency</code>, <code>disaggregation</code>,
+            <code>limitations</code> — shown exactly as configured.</li>
+          <li><strong>Values</strong> — <code>baseline</code>, <code>current</code>, <code>target</code>
+            (all nullable), matching <code>*Label</code> display strings, <code>varianceLabel</code>
+            (signed, follows <code>direction</code>), <code>history[]</code> (each point:
+            <code>period</code>, <code>value</code>, <code>validationStatus</code>,
+            <code>submissionId</code> nullable — points seeded before submission-tracing existed).</li>
+          <li><strong>Traceability</strong> — <code>sourceInstitution</code>, <code>sourceDataset</code>,
+            <code>sourceReference</code>, <code>reportingPeriod</code>, <code>validationStatus</code>,
+            <code>validationDecision</code>, <code>version</code>, <code>confidence</code>,
+            <code>provenance</code>.</li>
+          <li><strong><code>linkedRecords[]</code></strong> — delivery records (programme/project/
+            milestone/action) joined through the indicator identifier: <code>type</code>,
+            <code>title</code>, <code>institution</code>, <code>status</code>.</li>
+        </ul>
+      </article>
+
+      <article class="endpoint" id="kpi-filters">
+        <div class="endpoint-head"><span class="method">GET</span><span class="path">/api/kpi-explorer/filters</span></div>
+        <p class="summary">This module's own eight filter option lists: <code>pillars</code>,
+          <code>categories</code>, <code>readinessTiers</code>, <code>validationStatuses</code>,
+          <code>sourceInstitutions</code>, <code>reportingPeriods</code>, <code>geographies</code>
+          (same <code>{ value, label }[]</code> shape as global filters, but this module does not use
+          the global dashboard filter bar).</p>
+      </article>
+    </section>
+
+    <section id="pillars">
+      <h2 class="module-title">6. Pillar Dashboards</h2>
+      <p class="module-desc">Deliberately has no entities of its own — a pillar dashboard is a
+        filtered view over data that exists elsewhere. Schema:
+        <code>src/api/schemas/pillar-dashboard.ts</code>.</p>
+
+      <article class="endpoint" id="pillar-get">
+        <div class="endpoint-head"><span class="method">GET</span><span class="path">/api/pillars/:pillar</span></div>
+        <p class="summary"><code>:pillar</code> is one of the six <code>PillarId</code> values.</p>
+        <h4>Response</h4>
+<pre><code>{
+  "pillar": "generation-network",
+  "label": "Generation & Network",
+  "lastUpdated": "2025-10-14T09:12:00Z",
+  "headlineCards": [ /* exactly 4 — real KpiProfile-sourced cards for this pillar */ ],
+  "deliveryStatus": { "counts": [ /* by ExecutionStatus */ ], "total": 6 },
+  "bottlenecks": [ /* ranked top-5 open bottlenecks for this pillar */ ],
+  "kpis": [ /* every KPI Directory catalogue row tagged to this pillar */ ]
+}</code></pre>
+        <ul class="notes">
+          <li><code>headlineCards</code> — exactly 4. Each carries <code>kpiId</code> (join key back
+            to KPI Directory, not displayed on the card itself, only used for linking),
+            <code>rawValue</code>/<code>target</code> nullable per the usual rule,
+            <code>validationStatus</code>, <code>provenance</code>.</li>
+          <li><code>bottlenecks</code> — max 5, using the lighter <code>bottleneckRecordSchema</code>
+            shape from the Bottlenecks module.</li>
+          <li><code>kpis</code> — every catalogue row tagged to this pillar, not just the four headline
+            ones.</li>
+        </ul>
+        <p class="summary">The endpoint contract is identical for all six pillars — which ones are
+          enabled in the frontend sidebar is a rollout sequencing decision, not a backend one.</p>
+      </article>
+    </section>
+
+    <section id="programs">
+      <h2 class="module-title">7. Programs</h2>
+      <p class="module-desc">The consolidated Programmes → Projects → (Milestones, Bottlenecks)
+        drill-down. Schema: <code>src/api/schemas/programs.ts</code>. Deliberately no Actions tracker
+        and no bulk import/export.</p>
+
+      <article class="endpoint" id="programs-list">
+        <div class="endpoint-head"><span class="method">GET</span><span class="path">/api/programs</span></div>
+        <h4>Query (all optional)</h4>
+        <p class="summary" style="margin-top:0"><code>search</code>, <code>pillar</code>,
+          <code>institution</code>, <code>status</code>, <code>page</code>, <code>pageSize</code>
+          (max 200).</p>
+        <h4>Response</h4>
+<pre><code>{
+  "lastUpdated": "2025-10-14T09:12:00Z",
+  "headlineCards": { "summary": {…}, "milestoneOnTime": {…}, "delayedOrBlocked": {…}, "evidenceOverdue": {…} },
+  "programmes": { "items": [ /* … */ ], "page": 1, "pageSize": 25, "total": 40 }
+}</code></pre>
+        <div class="tablewrap">
+          <table class="params">
+            <thead><tr><th>Field</th><th>Notable fields</th></tr></thead>
+            <tbody>
+              <tr><td><code>summary</code></td><td><code>activeProgrammes</code>, <code>activeProjects</code>, <code>newThisCycle</code>, <code>closedThisCycle</code></td></tr>
+              <tr><td><code>milestoneOnTime</code></td><td><code>percentOnTime</code> (0–100), <code>dueCount</code>, <code>completedCount</code>, <code>delayedCount</code>, <code>blockedCount</code></td></tr>
+              <tr><td><code>delayedOrBlocked</code></td><td><code>count</code>, <code>supportingLabel</code> (free text), <code>trend</code> required</td></tr>
+              <tr><td><code>evidenceOverdue</code></td><td><code>count</code>, <code>supportingLabel</code>, <code>trend</code> required</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="summary"><code>programmes</code> is the paginated register — each row:
+          <code>leadInstitution</code>, <code>supportingInstitutions[]</code>, <code>pillar</code>,
+          <code>objectives</code>, <code>financing</code> (nullable), <code>status</code>
+          (<code>ExecutionStatus</code>), <code>priority</code> (<code>priority</code>/<code>standard</code>),
+          <code>startDate</code>/<code>endDate</code>, <code>bottlenecks[]</code> (ids),
+          <code>bottleneckCategory</code> (nullable), <code>validationStatus</code>, <code>lastUpdate</code>.</p>
+      </article>
+
+      <article class="endpoint" id="programs-filters">
+        <div class="endpoint-head"><span class="method">GET</span><span class="path">/api/programs/filters</span></div>
+        <p class="summary"><code>{ pillars, institutions, statuses }</code>, each <code>{ value, label }[]</code>.</p>
+      </article>
+
+      <article class="endpoint" id="programs-detail">
+        <div class="endpoint-head"><span class="method">GET</span><span class="path">/api/programs/:programmeId</span></div>
+        <p class="summary">Single programme record. <span class="status-tag">404</span> if not found.</p>
+      </article>
+
+      <article class="endpoint" id="programs-projects-list">
+        <div class="endpoint-head"><span class="method">GET</span><span class="path">/api/programs/:programmeId/projects</span></div>
+        <p class="summary">Query (optional): <code>search</code>, <code>status</code>. Returns
+          <code>ProjectRecord[]</code> for this programme — not paginated (a programme's project list
+          is expected to stay small).</p>
+      </article>
+
+      <article class="endpoint" id="programs-project-detail">
+        <div class="endpoint-head"><span class="method">GET</span><span class="path">/api/programs/projects/:projectId</span></div>
+        <p class="summary">Single project, aligned to the Programme &amp; Project tracking workbook's
+          column set.</p>
+        <ul class="notes">
+          <li><code>pillar</code> — the workbook's "M300 Pillar Alignment"; a project can align to a
+            different pillar than its parent programme's primary pillar.</li>
+          <li><code>lifecycleStage</code>, <code>programType</code>, <code>fundingSource</code>
+            (nullable — not yet secured), <code>fundingStructure</code>, <code>fundingStatus</code>.</li>
+          <li><code>projectedStatus</code> vs <code>currentStatus</code> — both
+            <code>ExecutionStatus</code>, shown side by side so a gap between plan and reality is
+            visible at a glance.</li>
+          <li><code>evidenceUrl</code> (nullable), <code>bottlenecks[]</code>,
+            <code>bottleneckCategory</code> (nullable), <code>comment</code>, <code>suggestion</code>.</li>
+          <li><code>profile</code> — nested: <code>description</code>, <code>budgetUsd</code>,
+            <code>disbursedUsd</code>, <code>contractor</code> (nullable), <code>contactName</code>,
+            <code>contactEmail</code>, <code>documents[]</code> (<code>{label, url}</code>),
+            <code>updates[]</code> (<code>{date, note}</code>).</li>
+        </ul>
+      </article>
+
+      <article class="endpoint" id="programs-milestones">
+        <div class="endpoint-head"><span class="method">GET</span><span class="path">/api/programs/projects/:projectId/milestones</span></div>
+        <p class="summary">Returns <code>MilestoneRecord[]</code> for this project — not paginated.
+          Each: <code>priority</code>, <code>expectedDate</code>, <code>actualDate</code> (nullable),
+          <code>status</code>, <code>leadInstitution</code>, <code>evidenceUrl</code> (nullable),
+          <code>risk</code>, <code>nextAction</code>, <code>bottleneckCategory</code> (nullable),
+          <code>validationStatus</code>.</p>
+      </article>
+    </section>
+
+    <section id="bottlenecks">
+      <h2 class="module-title">8. Bottlenecks &amp; Exceptions</h2>
+      <p class="module-desc">The full delivery-constraint register — richer than the lightweight shapes
+        shown elsewhere. Schema: <code>src/api/schemas/bottlenecks.ts</code>.</p>
+      <div class="callout">
+        This module's <code>RegisterSeverity</code> (<code>critical</code>/<code>high</code>/
+        <code>medium</code>/<code>low</code>) is a different enum from Executive Overview's
+        <code>BottleneckSeverity</code> (<code>critical</code>/<code>regulatory</code>/
+        <code>delayed</code>/<code>blocked</code>) — they answer different questions for different
+        audiences. Do not conflate them.
+      </div>
+
+      <article class="endpoint" id="bottlenecks-list">
+        <div class="endpoint-head"><span class="method">GET</span><span class="path">/api/bottlenecks</span></div>
+        <h4>Query (all optional)</h4>
+        <p class="summary" style="margin-top:0"><code>search</code>, <code>severity</code>,
+          <code>category</code>, <code>institution</code>, <code>pillar</code>,
+          <code>linkedRecord</code>, <code>lifecycleStage</code>, <code>escalationStatus</code>,
+          <code>validationStatus</code>, <code>reportingPeriod</code>, plus <code>page</code>,
+          <code>pageSize</code> (max 200), and <code>escalationPage</code> — the register and the
+          escalation tracker paginate independently even though both come back in the same payload.</p>
+        <h4>Response</h4>
+<pre><code>{
+  "lastUpdated": "2025-10-14T09:12:00Z",
+  "alerts": [ /* exactly 4 headline alert cards */ ],
+  "register": { "items": [ /* … */ ], "page": 1, "pageSize": 25, "total": 90 },
+  "byCategory": [ /* Section C */ ],
+  "byLifecycleStage": [ /* Section C */ ],
+  "byInstitution": [ /* Section D */ ],
+  "escalations": { "items": [ /* … */ ], "page": 1, "pageSize": 25, "total": 12 }
+}</code></pre>
+        <ul class="notes">
+          <li><code>alerts</code> — exactly 4. Every one targets zero and compares against the previous
+            reporting cycle. None are performance KPIs — no progress bar. <code>trend</code> required.</li>
+          <li><code>register</code> — <code>issue</code>, <code>category</code>, <code>severity</code>,
+            <code>pillar</code>, <code>linkedRecord</code> (free text), <code>institution</code>,
+            <code>dateRaised</code>, <code>ageDays</code>, <code>followUp</code>,
+            <code>escalationStatus</code>, <code>status</code> (<code>open</code>/<code>in-progress</code>/
+            <code>blocked</code>/<code>escalated</code>/<code>resolved</code>), <code>lifecycleStage</code>.</li>
+          <li><code>byCategory</code> / <code>byLifecycleStage</code> / <code>byInstitution</code> —
+            aggregate counts over the full register, not the filtered/paginated page.</li>
+          <li><code>escalations</code> — <code>bottleneckId</code> (join key),
+            <code>decisionRequired</code>, <code>level</code> (<code>programme-management</code>/
+            <code>institution-leadership</code>/<code>steering-committee</code>/<code>ministerial</code>),
+            <code>owner</code>, <code>dueDate</code>, <code>daysOverdue</code>, <code>status</code>,
+            <code>resolution</code> (nullable), <code>evidenceUrl</code> (nullable).</li>
+        </ul>
+      </article>
+
+      <article class="endpoint" id="bottlenecks-create">
+        <div class="endpoint-head"><span class="method">POST</span><span class="path">/api/bottlenecks</span></div>
+        <p class="summary">Creates a new register entry.</p>
+        <h4>Request</h4>
+<pre><code>{
+  "issue": "Transmission evacuation constraint limiting dispatch, North East",
+  "category": "technical-constraint",
+  "severity": "critical",
+  "pillar": "generation-network",
+  "linkedRecord": "IMP-2025-0055",       // optional
+  "institution": "Transmission Company of Nigeria",
+  "lifecycleStage": "implementation",
+  "followUp": "…"                        // optional, max 1000 chars
+}</code></pre>
+        <h4>Response <span class="status-tag">201</span></h4>
+<pre><code>{ "record": { /* full record, server-assigned id, dateRaised, etc. */ }, "message": "…" }</code></pre>
+      </article>
+
+      <article class="endpoint" id="bottlenecks-filters">
+        <div class="endpoint-head"><span class="method">GET</span><span class="path">/api/bottlenecks/filters</span></div>
+        <p class="summary">Nine option groups: <code>severities</code>, <code>categories</code>,
+          <code>institutions</code>, <code>pillars</code>, <code>linkedRecords</code>,
+          <code>lifecycleStages</code>, <code>escalationStatuses</code>, <code>validationStatuses</code>,
+          <code>reportingPeriods</code>.</p>
+      </article>
+
+      <article class="endpoint" id="bottlenecks-by-project">
+        <div class="endpoint-head"><span class="method">GET</span><span class="path">/api/bottlenecks/by-project/:projectId</span></div>
+        <p class="summary">Bottleneck records linked to a specific project (used by the Programs
+          project drill-down). Not paginated.</p>
+      </article>
+    </section>
+
+    <section id="submissions">
+      <h2 class="module-title">9. Data Submissions</h2>
+      <p class="module-desc">The full submission → validation → calculation → approval → KPI-publish
+        pipeline. The module with the most operational business logic in the product — read it
+        carefully. Schemas: <code>src/api/schemas/data-submissions/</code> (split across
+        <code>common.ts</code>, <code>obligations.ts</code>, <code>submissions.ts</code>,
+        <code>compliance.ts</code>, <code>filters.ts</code>).</p>
+
+      <h4>Shared workflow vocabulary</h4>
+      <p class="summary" style="margin-top:0">Every list item across this module carries a
+        <code>status: WorkflowStatus</code> object, not a bare string:</p>
+<pre><code>{ "code": "pending-review", "label": "Pending review", "tone": "warning" }</code></pre>
+      <p class="summary"><code>code</code> is one of: <code>due</code>, <code>draft</code>,
+        <code>validation-failed</code>, <code>ready</code>, <code>pending-review</code>,
+        <code>returned</code>, <code>rejected</code>, <code>provisional</code>, <code>approved</code>,
+        <code>overdue</code>, <code>missing</code>, <code>open</code>, <code>in-progress</code>,
+        <code>resolved</code>. <code>tone</code> is one of <code>neutral</code>/<code>info</code>/
+        <code>warning</code>/<code>danger</code>/<code>success</code> — the frontend colours the
+        status pill from <code>tone</code>, not by re-deriving meaning from <code>code</code>, so send
+        the tone matching the severity intended.</p>
+      <p class="summary">Every list item also carries <code>availableActions: WorkflowAction[]</code> —
+        <code>enter-data</code>, <code>upload-template</code>, <code>view</code>, <code>review</code>,
+        <code>download-template</code>, <code>correct</code>, <code>submit</code>,
+        <code>contact-owner</code>. <strong>The backend decides which actions are available for a
+        given row's current state</strong> — the frontend renders exactly the buttons this array
+        lists, it does not compute availability itself.</p>
+
+      <article class="endpoint" id="submissions-filters">
+        <div class="endpoint-head"><span class="method">GET</span><span class="path">/api/data-submissions/filters</span></div>
+        <p class="summary">Eight groups: <code>institutions</code>, <code>datasets</code>,
+          <code>reportingPeriods</code>, <code>submissionStatuses</code>, <code>validationStatuses</code>,
+          <code>reviewers</code>, <code>readinessTiers</code>, <code>overdueStatuses</code>.</p>
+      </article>
+
+      <article class="endpoint" id="submissions-obligations-list">
+        <div class="endpoint-head"><span class="method">GET</span><span class="path">/api/data-submissions/obligations</span></div>
+        <p class="summary">The reporting-obligation register — what each institution owes, by when.</p>
+        <h4>Query</h4>
+        <p class="summary" style="margin-top:0"><code>search</code>, <code>institution</code>,
+          <code>dataset</code>, <code>reportingPeriod</code>, <code>submissionStatus</code>,
+          <code>validationStatus</code>, <code>reviewer</code>, <code>readinessTier</code>,
+          <code>overdueStatus</code>, <code>page</code>, <code>pageSize</code> (max 100).</p>
+        <h4>Response</h4>
+        <p class="summary" style="margin-top:0">Paginated <code>Obligation[]</code> —
+          <code>institution</code>, <code>dataset</code>, <code>reportingPeriod</code>,
+          <code>frequency</code>, <code>dueDate</code>, <code>dueLabel</code> (e.g. "Due in 5 days"),
+          <code>status</code>, <code>template: { id, version, fileName, downloadUrl }</code>,
+          <code>acceptedSubmissionId</code> (nullable — the submission currently fulfilling this
+          obligation, once approved/provisional), <code>availableActions</code>.</p>
+      </article>
+
+      <article class="endpoint" id="submissions-entry-form">
+        <div class="endpoint-head"><span class="method">GET</span><span class="path">/api/data-submissions/obligations/:id/entry</span></div>
+        <p class="summary">Returns the manual-entry form definition for this obligation —
+          <code>title</code>, <code>institution</code>, <code>dataset</code>,
+          <code>reportingPeriod</code>, <code>sections[]</code>, each with <code>fields[]</code>
+          (<code>id</code>, <code>label</code>, <code>helpText</code>, <code>type</code>
+          (<code>text</code>/<code>number</code>/<code>date</code>/<code>select</code>/<code>textarea</code>),
+          <code>required</code>, <code>unit</code> (nullable), <code>placeholder</code>,
+          <code>options</code> for <code>select</code> fields). The form is entirely server-driven —
+          the frontend renders whatever fields are sent.</p>
+      </article>
+
+      <article class="endpoint" id="submissions-entry-post">
+        <div class="endpoint-head"><span class="method">POST</span><span class="path">/api/data-submissions/obligations/:id/entry</span></div>
+        <p class="summary">Submits manual entry.</p>
+        <h4>Request</h4>
+<pre><code>{ "values": { "&lt;fieldId&gt;": "&lt;string&gt;", ... }, "sourceReference": "…", "notes": "…" }</code></pre>
+        <p class="summary">All values are sent as strings regardless of the field's <code>type</code>
+          — the backend parses/validates by type.</p>
+        <h4>Response <span class="status-tag">201</span></h4>
+<pre><code>{ "submissionId": "…", "version": 1, "status": { "code": "pending-review", … }, "message": "…", "nextUrl": "/data-submissions/validation/…" }</code></pre>
+      </article>
+
+      <article class="endpoint" id="submissions-upload-form">
+        <div class="endpoint-head"><span class="method">GET</span><span class="path">/api/data-submissions/obligations/:id/upload</span></div>
+        <p class="summary">Returns the upload definition — <code>institution</code>,
+          <code>dataset</code>, <code>reportingPeriod</code>, <code>template</code> (same shape as
+          above), <code>acceptedFileTypes[]</code> (e.g. <code>['.xlsx']</code>),
+          <code>acceptedFileTypesLabel</code>, <code>maxFileSizeMb</code>.</p>
+      </article>
+
+      <article class="endpoint" id="submissions-upload-post">
+        <div class="endpoint-head">
+          <span class="method">POST</span><span class="path">/api/data-submissions/obligations/:id/upload</span>
+          <span class="status-tag">multipart/form-data</span>
+        </div>
+        <h4>Form fields</h4>
+        <div class="tablewrap">
+          <table class="params">
+            <thead><tr><th>Field</th><th>Required</th><th>Notes</th></tr></thead>
+            <tbody>
+              <tr><td><code>file</code></td><td>yes</td><td>The completed template. <code>400</code> if missing.</td></tr>
+              <tr><td><code>sourceReference</code></td><td>yes</td><td><code>400</code> if blank.</td></tr>
+              <tr><td><code>notes</code></td><td>no</td><td>Defaults to empty string.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <h4>Response <span class="status-tag">201</span></h4>
+        <p class="summary" style="margin-top:0">Same shape as the manual-entry response above
+          (<code>submissionId</code>, <code>version</code>, <code>status</code>, <code>message</code>,
+          <code>nextUrl</code>).</p>
+        <div class="callout">Backend responsibility, not the frontend's: parsing the uploaded file,
+          validating every row against the dataset's field definitions, running the dataset's
+          calculation formula, and producing the <code>extractedValues</code> shown on the review
+          screen. The frontend does not calculate KPI values from an upload — it only uploads the
+          file and displays what the backend computed.</div>
+      </article>
+
+      <article class="endpoint" id="submissions-template">
+        <div class="endpoint-head"><span class="method">GET</span><span class="path">/api/data-submissions/templates/:fileName</span></div>
+        <p class="summary">Downloads the current template workbook for a dataset, generated fresh from
+          the dataset's current field configuration (so adding a field changes the downloadable
+          template with no separate release). Returns
+          <code>Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet</code>.</p>
+      </article>
+
+      <article class="endpoint" id="submissions-list">
+        <div class="endpoint-head"><span class="method">GET</span><span class="path">/api/data-submissions/submissions</span></div>
+        <h4>Query</h4>
+        <p class="summary" style="margin-top:0"><code>search</code>, <code>institution</code>,
+          <code>dataset</code>, <code>reportingPeriod</code>, <code>submissionStatus</code>,
+          <code>page</code>, <code>pageSize</code>.</p>
+        <h4>Response</h4>
+        <p class="summary" style="margin-top:0">Paginated <code>SubmissionListItem[]</code> —
+          <code>method</code> (<code>manual-entry</code>/<code>template-upload</code>/<code>api</code>),
+          <code>methodLabel</code>, <code>version</code>, <code>submittedBy</code>,
+          <code>submittedAt</code> (nullable — null for a draft never submitted),
+          <code>submittedAtLabel</code>, <code>status</code>, <code>validationSummary</code> (free
+          text), plus <code>institution</code>/<code>dataset</code>/<code>reportingPeriod</code>/
+          <code>availableActions</code>.</p>
+      </article>
+
+      <article class="endpoint" id="submissions-validation-list">
+        <div class="endpoint-head"><span class="method">GET</span><span class="path">/api/data-submissions/validation</span></div>
+        <p class="summary">The review queue. Query: same as <code>/submissions</code>, plus
+          (implicitly) only rows awaiting a decision.</p>
+        <h4>Response</h4>
+        <p class="summary" style="margin-top:0">Paginated <code>ValidationQueueItem[]</code> — extends
+          <code>SubmissionListItem</code> with <code>reviewer</code>, <code>ageLabel</code>,
+          <code>automatedCheck</code> (a <code>WorkflowStatus</code> — pass/fail of the backend's
+          automated validation pass), <code>issueCount</code>.</p>
+      </article>
+
+      <article class="endpoint" id="submissions-validation-detail">
+        <div class="endpoint-head"><span class="method">GET</span><span class="path">/api/data-submissions/validation/:id</span></div>
+        <p class="summary">Full review detail — extends <code>ValidationQueueItem</code> with:</p>
+        <ul class="notes">
+          <li><code>fileName</code> (nullable — null for manual entry).</li>
+          <li><code>issues[]</code> — <code>type</code>, <code>location</code>, <code>field</code>,
+            <code>message</code>, <code>requiredCorrection</code> — every failed validation rule the
+            backend found, specific enough that a reviewer or submitter can act on it without
+            guessing.</li>
+          <li><code>history[]</code> — every status transition, with <code>actor</code>,
+            <code>occurredAt</code>, <code>comment</code>.</li>
+          <li><code>permittedDecisions[]</code> — subset of <code>['approved', 'provisional', 'returned',
+            'rejected']</code>. The backend decides which decisions are legal from the current state
+            (e.g. unresolved critical issues should not permit <code>approved</code>) — the frontend
+            only shows buttons for what's in this array.</li>
+          <li><code>extractedValues[]</code> — <code>kpiId</code>, <code>kpiName</code>,
+            <code>reportingPeriod</code>, <code>value</code> — what publishing this submission would
+            write to which KPI, shown to the reviewer before they decide, and echoed back in the
+            decision response below.</li>
+        </ul>
+      </article>
+
+      <article class="endpoint" id="submissions-decision">
+        <div class="endpoint-head"><span class="method">POST</span><span class="path">/api/data-submissions/validation/:id/decisions</span></div>
+        <p class="summary">Records a reviewer's decision.</p>
+        <h4>Request</h4>
+<pre><code>{ "decision": "approved" | "provisional" | "returned" | "rejected", "comments": "…" }</code></pre>
+        <p class="summary"><code>comments</code> min 3 chars — <code>400</code> if shorter, and reject
+          if <code>decision</code> is not in this submission's current <code>permittedDecisions</code>.</p>
+        <h4>Response <span class="status-tag">200</span></h4>
+<pre><code>{
+  "submissionId": "…",
+  "status": { "code": "approved", … },
+  "message": "Decision recorded: Approved. Published to Metering Rate.",
+  "nextUrl": "…",
+  "published": [ /* empty for 'returned'/'rejected', or if nothing was extracted */ ]
+}</code></pre>
+        <div class="callout"><strong>This is the point where a KPI's current value and history
+          actually change.</strong> <code>approved</code> and <code>provisional</code> decisions
+          publish every entry in <code>extractedValues</code> to its KPI (updates
+          <code>KpiProfile.current</code>, appends a <code>KpiHistoryPoint</code> with
+          <code>submissionId</code> set to this submission, and should also update the obligation's
+          <code>acceptedSubmissionId</code>). <code>returned</code> and <code>rejected</code> publish
+          nothing. The <code>published</code> array in the response should reflect exactly what was
+          written.</div>
+      </article>
+
+      <article class="endpoint" id="submissions-overdue">
+        <div class="endpoint-head"><span class="method">GET</span><span class="path">/api/data-submissions/overdue</span></div>
+        <p class="summary">Paginated <code>OverdueItem[]</code> — obligations past their
+          <code>dueDate</code> with no accepted submission. <code>overdueLabel</code> (e.g. "12 days
+          overdue"), <code>owner</code>, <code>status</code>, <code>availableActions</code>.</p>
+      </article>
+
+      <article class="endpoint" id="submissions-gaps">
+        <div class="endpoint-head"><span class="method">GET</span><span class="path">/api/data-submissions/gaps</span></div>
+        <p class="summary">Paginated <code>DataGap[]</code> — KPIs with no submission ever received
+          for the current period. <code>kpiId</code>, <code>kpiName</code>, <code>pillar</code>,
+          <code>category</code>, <code>readinessTier</code>, <code>owner</code>, <code>nextAction</code>.</p>
+      </article>
+    </section>
+
+    <section id="statedisco">
+      <h2 class="module-title">10. State &amp; DisCo</h2>
+      <p class="module-desc">Six separate endpoints rather than one parameterised view. Schemas split
+        across <code>src/api/schemas/state-disco/</code>. Every response wraps its rows in a shared
+        <code>meta</code> block (<code>title</code>, <code>description</code>,
+        <code>lastUpdatedLabel</code>, <code>sourceLabel</code>) so each view can carry its own
+        framing text even though the page shell is shared.</p>
+
+      <article class="endpoint" id="statedisco-filters">
+        <div class="endpoint-head"><span class="method">GET</span><span class="path">/api/state-disco/filters</span></div>
+        <p class="summary">Eight groups: <code>reportingPeriods</code>, <code>views</code>,
+          <code>distributionCompanies</code>, <code>states</code>, <code>utilityMetrics</code>,
+          <code>serviceBands</code>, <code>validationStatuses</code>, <code>sources</code>.</p>
+      </article>
+
+      <article class="endpoint" id="statedisco-overview">
+        <div class="endpoint-head"><span class="method">GET</span><span class="path">/api/state-disco/overview</span></div>
+<pre><code>{ "meta": { … }, "selectedUtility": "…", "metrics": [ /* exactly 4 */ ] }</code></pre>
+        <p class="summary">Each metric: <code>value</code>, <code>supportingLabel</code>,
+          <code>benchmarkLabel</code>, <code>varianceLabel</code>, <code>progressPercent</code>
+          (0–100), <code>trend</code> (required), <code>provenance</code>.</p>
+      </article>
+
+      <article class="endpoint" id="statedisco-comparison">
+        <div class="endpoint-head"><span class="method">GET</span><span class="path">/api/state-disco/comparison</span></div>
+        <p class="summary">Query: <code>distributionCompany</code> — a DisCo id, or
+          <code>national</code> (the sentinel for "all DisCos", <strong>not</strong> <code>all</code>
+          — this one endpoint's convention differs from every other module, match it exactly). Rows
+          carry pre-computed display strings for active/metered/unmetered customers, metering rate,
+          energy received/billed + billing efficiency, revenue billed/collected + collection
+          efficiency, remittance performance, plus paired bar-percent fields
+          (<code>energyReceivedBarPercent</code>, <code>energyBilledBarPercent</code>,
+          <code>revenueBilledBarPercent</code>, <code>revenueCollectedBarPercent</code>, each 0–100)
+          driving the comparison bars.</p>
+      </article>
+
+      <article class="endpoint" id="statedisco-supply-tariff">
+        <div class="endpoint-head"><span class="method">GET</span><span class="path">/api/state-disco/supply-tariff</span></div>
+        <p class="summary">Query: <code>distributionCompany</code> (same convention as
+          <code>/comparison</code>). Rows: <code>utility</code>, <code>effectiveOrder</code>, and
+          exactly 5 <code>bands</code> (<code>band</code> A–E plus <code>supplyHours</code>,
+          <code>tariff</code>, <code>intensityPercent</code>). No unweighted tariff average across
+          bands.</p>
+      </article>
+
+      <article class="endpoint" id="statedisco-delivery">
+        <div class="endpoint-head"><span class="method">GET</span><span class="path">/api/state-disco/delivery</span></div>
+        <p class="summary">Query: <code>distributionCompany</code> (same convention as above). Rows:
+          <code>milestone</code>, <code>dueDateLabel</code>, <code>executionStatus</code>,
+          <code>achievedLabel</code>, <code>evidenceLabel</code>, <code>reportingCompliance</code>,
+          <code>bottleneck</code> (free text, may be empty).</p>
+      </article>
+
+      <article class="endpoint" id="statedisco-states">
+        <div class="endpoint-head"><span class="method">GET</span><span class="path">/api/state-disco/states</span></div>
+        <p class="summary">Query: <code>state</code> (a state id, or <code>all</code>/omitted for
+          every state). Rows: <code>state</code>, <code>zone</code>, <code>miniGridConnections</code>,
+          <code>solarHomeSystems</code>, <code>activeProgrammes</code>, <code>activeProjects</code>,
+          <code>openBottlenecks</code>, <code>validationLabel</code>, <code>coverageBarPercent</code>
+          (0–100). Also carries a <code>notice</code> string — connection counts must not be converted
+          into an inferred state electricity-access rate.</p>
+      </article>
+
+      <article class="endpoint" id="statedisco-state-detail">
+        <div class="endpoint-head"><span class="method">GET</span><span class="path">/api/state-disco/states/:id</span></div>
+        <p class="summary">Single-state detail — the matching coverage row plus <code>records[]</code>
+          (<code>type</code> — <code>programme</code>/<code>project</code>/<code>bottleneck</code> —
+          <code>name</code>, <code>owner</code>, <code>status</code>, <code>deliveryLabel</code>,
+          <code>sourceLabel</code>). <span class="status-tag">404</span> if the state id doesn't exist.</p>
+      </article>
+    </section>
+
+    <section id="reports">
+      <h2 class="module-title">11. Reports &amp; Exports</h2>
+      <p class="module-desc">Schema: <code>src/api/schemas/reports.ts</code>. The spec groups reports
+        into four categories (<code>compact</code>, <code>performance</code>, <code>delivery</code>,
+        <code>data-governance</code>), each containing one or more report types — a report type, not a
+        category, is what a user actually generates or finds in Saved Reports.</p>
+
+      <article class="endpoint" id="reports-filters">
+        <div class="endpoint-head"><span class="method">GET</span><span class="path">/api/reports/filters</span></div>
+        <p class="summary">Ten groups, including <code>exportFormats</code> (<code>pdf</code>/<code>xlsx</code>).</p>
+      </article>
+
+      <article class="endpoint" id="reports-list">
+        <div class="endpoint-head"><span class="method">GET</span><span class="path">/api/reports</span></div>
+        <p class="summary">Query: <code>search</code>, <code>category</code>, <code>page</code>,
+          <code>pageSize</code> (max 50) — applies only to the Saved Reports list. The catalogue and
+          Compact-export cards describe the fixed set of available report types, not filtered
+          results.</p>
+        <h4>Response</h4>
+<pre><code>{
+  "lastUpdated": "…",
+  "catalogue": [ /* every report type, with definition/methodology/dataSource */ ],
+  "compactExports": [ /* 'compact-progress-report' and 'implementation-register' */ ],
+  "savedReports": { "items": [ /* … */ ], "page": 1, "pageSize": 10, "total": … }
+}</code></pre>
+      </article>
+
+      <article class="endpoint" id="reports-preview">
+        <div class="endpoint-head"><span class="method">POST</span><span class="path">/api/reports/preview</span></div>
+        <h4>Request</h4>
+        <p class="summary" style="margin-top:0"><code>reportType</code>, <code>period</code>,
+          <code>pillar</code>, <code>kpiCategory</code>, <code>state</code>,
+          <code>distributionCompany</code>, <code>programmeOrAgency</code>,
+          <code>validationStatus</code>, <code>readinessTier</code>, <code>format</code>.
+          <code>400</code> on a schema mismatch.</p>
+        <h4>Response</h4>
+        <p class="summary" style="margin-top:0"><code>metadata</code> (<code>title</code>,
+          <code>reportingPeriod</code>, <code>appliedFilters[]</code> as <code>{label, value}</code>
+          pairs, <code>generatedAt</code>, <code>dataVersion</code>, <code>sourceNotes</code>,
+          <code>validationStatus</code>, <code>units</code>, <code>limitations</code> — all required)
+          and <code>sections[]</code> (generic <code>{title, columns[], rows[][]}</code> tables). The
+          same shape backs both the on-screen preview and the generated file — build one renderer, not
+          two.</p>
+      </article>
+
+      <article class="endpoint" id="reports-generate">
+        <div class="endpoint-head"><span class="method">POST</span><span class="path">/api/reports/generate</span></div>
+        <p class="summary">Same request as <code>/preview</code>. Response:
+          <code>{ preview, savedReport }</code> — generates the actual downloadable file (per
+          <code>config.format</code>) and persists a saved-report row (id, owner,
+          <code>fileReference</code>, <code>createdAt</code>, <code>lastGeneratedAt</code>, the
+          <code>config</code> that produced it) so it appears in Saved Reports afterward.</p>
+      </article>
+
+      <article class="endpoint" id="reports-delete">
+        <div class="endpoint-head"><span class="method">DELETE</span><span class="path">/api/reports/saved/:id</span></div>
+        <p class="summary"><span class="status-tag">204</span> on success.
+          <span class="status-tag">404</span> with <code>{ message }</code> if the id doesn't exist.</p>
+      </article>
+    </section>
+
+    <section id="admin">
+      <h2 class="module-title">12. Administration (User Access)</h2>
+      <p class="module-desc">Schema: <code>src/api/schemas/administration.ts</code>. This module is
+        account/permission administration, not performance measurement.</p>
+
+      <article class="endpoint" id="admin-get">
+        <div class="endpoint-head"><span class="method">GET</span><span class="path">/api/administration</span></div>
+        <h4>Query</h4>
+        <p class="summary" style="margin-top:0"><code>search</code> (name/email/institution),
+          <code>institution</code>, <code>role</code>, <code>accountStatus</code>,
+          <code>permission</code>, <code>accessScope</code>, <code>module</code>,
+          <code>auditPeriod</code>.</p>
+        <h4>Response</h4>
+<pre><code>{
+  "lastUpdated": "…",
+  "summary": [ /* accessSummaryCardSchema[] */ ],
+  "users": { "items": [ /* userAccountSchema[] */ ], … },
+  "roles": [ /* roleDefinitionSchema[] — all 7, not paginated */ ],
+  "scopeAssignments": { "items": [ /* … */ ], … },
+  "auditLog": { "items": [ /* … */ ], … }
+}</code></pre>
+        <ul class="notes">
+          <li><code>summary[]</code> — each carries <code>breakdown[]</code> (label/count pairs) and
+            <code>elevated: boolean</code> — true marks the one card needing visual emphasis.</li>
+          <li><code>users[]</code> — <code>role</code> is one of the seven <code>SystemRole</code>
+            values, <code>status</code> one of <code>active</code>/<code>pending</code>/
+            <code>inactive</code>/<code>suspended</code>, <code>lastLogin</code> nullable.</li>
+          <li><code>roles[]</code> — the role × permission matrix: <code>permissions[]</code> (subset
+            of the seven <code>Permission</code> values), <code>modules[]</code> (free-text module
+            names this role can reach), <code>assignedUsers</code> (live count, not static).</li>
+          <li><code>scopeAssignments[]</code> — a user's responsibility pinned to a
+            <code>scopeLevel</code> (<code>national</code>/<code>state</code>/
+            <code>distribution-company</code>/<code>institution</code>/<code>programme</code>/
+            <code>project</code>/<code>dataset</code>/<code>indicator</code>) and a specific
+            <code>scope</code> string. <code>effectiveTo</code> nullable.</li>
+          <li><code>auditLog[]</code> — <code>recordId</code>/<code>priorValue</code>/<code>newValue</code>
+            all nullable, <code>result</code> one of <code>success</code>/<code>failure</code>/
+            <code>rejected</code>.</li>
+        </ul>
+      </article>
+
+      <article class="endpoint" id="admin-filters">
+        <div class="endpoint-head"><span class="method">GET</span><span class="path">/api/administration/filters</span></div>
+        <p class="summary">Seven groups: <code>institutions</code>, <code>roles</code>,
+          <code>accountStatuses</code>, <code>permissions</code>, <code>accessScopes</code>,
+          <code>modules</code>, <code>auditPeriods</code>. This module has its own filters — the
+          global filter bar does not apply here.</p>
+      </article>
+
+      <article class="endpoint" id="admin-invite">
+        <div class="endpoint-head"><span class="method">POST</span><span class="path">/api/administration/users/invite</span></div>
+        <h4>Request</h4>
+        <p class="summary" style="margin-top:0"><code>name</code>, <code>email</code>,
+          <code>institution</code>, <code>designation</code>, <code>role</code>,
+          <code>accessScope</code> (a <code>ScopeLevel</code>), <code>invitationMessage</code>
+          (optional, max 500 chars).</p>
+        <h4>Response <span class="status-tag">201</span></h4>
+<pre><code>{ "user": { /* userAccountSchema */ }, "message": "…" }</code></pre>
+        <p class="summary">The new account, status <code>pending</code> until the invitee accepts.</p>
+      </article>
+    </section>
+
+    <section id="stakeholders">
+      <h2 class="module-title">13. Stakeholders &amp; Institutions</h2>
+      <p class="module-desc">Schema: <code>src/api/schemas/stakeholders.ts</code>.</p>
+
+      <article class="endpoint" id="stakeholders-get">
+        <div class="endpoint-head"><span class="method">GET</span><span class="path">/api/stakeholders</span></div>
+        <h4>Query</h4>
+        <p class="summary" style="margin-top:0"><code>search</code>, <code>institutionType</code>,
+          <code>role</code>, <code>status</code>, <code>dataset</code>, <code>kpi</code>,
+          <code>programme</code>, <code>coverage</code> — all optional, all applied server-side (not
+          paginated; the full filtered list returns every time).</p>
+        <h4>Response</h4>
+<pre><code>{
+  "lastUpdated": "…",
+  "summary": { "activeInstitutions": 24, "dataCustodians": 11, "pendingOnboarding": 2 },
+  "institutions": [ /* institutionSchema[] */ ],
+  "custodians": [ /* custodianAssignmentSchema[] */ ],
+  "filters": { /* the same 7 groups the query above filters by */ }
+}</code></pre>
+        <ul class="notes">
+          <li><code>institutions[]</code> — <code>type</code> one of <code>ministry</code>/
+            <code>agency</code>/<code>regulator</code>/<code>utility</code>/<code>disco</code>/
+            <code>programme-team</code>/<code>partner</code>; <code>status</code> one of
+            <code>active</code>/<code>pending-onboarding</code>/<code>inactive</code>;
+            <code>roles[]</code>/<code>datasets[]</code>/<code>programmes[]</code> free-text arrays.</li>
+          <li><code>custodians[]</code> — who owns which dataset: <code>dataset</code>,
+            <code>custodian</code>, <code>focalPerson</code>, <code>frequency</code>,
+            <code>template</code>, <code>reviewer</code>, <code>validator</code>, <code>status</code>
+            (<code>active</code>/<code>pending</code>).</li>
+        </ul>
+      </article>
+    </section>
+
+    <section id="enums" class="reference">
+      <h2 class="module-title" style="margin-top:0; padding-top:0; border-top:none;">14. Shared enumerations reference</h2>
+      <p class="module-desc">Closed sets used across multiple modules. A value outside these fails
+        frontend validation. Module-specific enums (Data Submissions' <code>WorkflowStatus</code>,
+        Bottlenecks' <code>RegisterSeverity</code>, Administration's <code>SystemRole</code>) are
+        documented in their own section above — this table is just the cross-cutting ones from
+        <code>common.ts</code>.</p>
+      <div class="tablewrap">
+        <table class="enum">
+          <thead><tr><th>Enum</th><th>Values</th></tr></thead>
+          <tbody>
+            <tr><td><code>PillarId</code></td><td><code>generation-network</code>, <code>last-mile-access</code>, <code>financially-viable-utilities</code>, <code>private-sector-participation</code>, <code>regional-integration</code>, <code>clean-cooking</code></td></tr>
+            <tr><td><code>DeliveryStatus</code></td><td><code>completed</code>, <code>on-track</code>, <code>at-risk</code>, <code>lagging</code>, <code>delayed</code>, <code>blocked</code>, <code>limited-data</code>, <code>provisional</code></td></tr>
+            <tr><td><code>DataConfidence</code></td><td><code>confirmed</code>, <code>requires-validation</code>, <code>future-gap</code></td></tr>
+            <tr><td><code>SourceTag</code></td><td><code>live</code>, <code>live-cpr</code>, <code>public-source</code>, <code>indicative</code>, <code>requires-validation</code></td></tr>
+            <tr><td><code>ImprovementDirection</code></td><td><code>higher-is-better</code>, <code>lower-is-better</code></td></tr>
+            <tr><td><code>MetricIconName</code></td><td><code>access</code>, <code>metering</code>, <code>losses</code>, <code>capital</code>, <code>generation</code>, <code>cooking</code>, <code>milestones</code>, <code>pillars</code>, <code>kpis</code>, <code>escalations</code>, <code>institutions</code>, <code>generic</code></td></tr>
+            <tr><td><code>ExecutionStatus</code></td><td><code>on-track</code>, <code>at-risk</code>, <code>delayed</code>, <code>blocked</code>, <code>completed</code></td></tr>
+            <tr><td><code>ValidationStatus</code></td><td><code>confirmed</code>, <code>public-source</code>, <code>requires-validation</code>, <code>provisional</code>, <code>future</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="summary"><code>limited-data</code> and <code>provisional</code>
+        (<code>DeliveryStatus</code>) are not performance judgements — they mean the dashboard cannot
+        yet assert how something is performing. A pillar with no KPIs assigned must not be presented
+        as failing.</p>
+      <p class="summary"><code>MetricIconName</code> is a semantic name, not an icon — the frontend
+        maps it to a glyph internally, so the backend never needs to know about the icon library.</p>
+    </section>
+
+    <section id="open" class="reference">
+      <h2 class="module-title" style="margin-top:0; padding-top:0; border-top:none;">15. Open questions for the backend team</h2>
+      <ol class="open-questions">
+        <li><strong>Pillar-specific headline cards</strong> — which two metrics should replace the
+          middle cards for each of the six pillars? Blocks full dynamic pillar-headline behaviour;
+          today all four are the same generic shape for every pillar.</li>
+        <li><strong>Pre-formatted values</strong> — keep the display-string convention, or move to
+          structured values (<code>{ value, unit, scale, precision }</code>) with formatting owned by
+          the frontend?</li>
+        <li><strong>Filter reach</strong> — resolved for Executive Overview: only reporting period,
+          Compact pillar and institution are accepted there. Every other module has its own separate
+          filter set, documented in that module's section — confirm you're building against each
+          module's own list.</li>
+        <li><strong>Auth scheme</strong> — the two-step identify/login flow is settled UX. Not yet
+          settled: whether <code>accessToken</code> is a JWT, how long it lives, whether there's a
+          refresh flow, and the exact header (<code>Authorization: Bearer &lt;token&gt;</code> is
+          assumed but not yet confirmed).</li>
+        <li><strong>Pagination</strong> — resolved. <code>?page=1&amp;pageSize=25</code> →
+          <code>{ items, page, pageSize, total }</code>, used identically everywhere paginated. Please
+          implement exactly as specified, including <code>total</code> being the full matching count,
+          not <code>items.length</code>.</li>
+        <li><strong>Sorting</strong> — currently client-side over the returned page only, so sorting
+          page 1 of a paginated table sorts 25 rows, not the full result set. To sort properly, server
+          side sorting is needed — proposal: <code>?sort=&lt;column&gt;&amp;order=asc|desc</code>, with
+          <code>&lt;column&gt;</code> matching the response field name exactly. Confirm which columns
+          will be accepted per module.</li>
+        <li><strong>Public Gateway data threshold</strong> — should <code>GET /api/public/overview</code>
+          return every KPI regardless of validation status, or hold back anything not
+          <code>confirmed</code>/<code>public-source</code>? Recommended default is the latter, not
+          yet locked in.</li>
+        <li><strong><code>GET /api/public/overview</code></strong> — the one wholly new endpoint this
+          contract requires that doesn't exist as a mock yet.</li>
+      </ol>
+    </section>
+
+    <footer class="doc-foot">
+      Authoritative source: Zod schemas in <code>src/api/schemas/</code>. Mock handlers (the executable
+      form of this document) live in <code>src/mocks/handlers.ts</code> and <code>src/mocks/handlers/</code>
+      — when in doubt about an edge case, the handler is the tie-breaker over prose here.
+      Full source: <code>docs/API.md</code>.
+    </footer>
+  </main>
+</div>

@@ -54,10 +54,13 @@ export function Tabs({
 
 export function TabsList({
   className,
+  orientation = 'horizontal',
   ...props
-}: ComponentPropsWithoutRef<'div'>) {
+}: ComponentPropsWithoutRef<'div'> & { orientation?: 'horizontal' | 'vertical' }) {
   function moveFocus(event: KeyboardEvent<HTMLDivElement>) {
-    if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return
+    const forwardKey = orientation === 'vertical' ? 'ArrowDown' : 'ArrowRight'
+    const backKey = orientation === 'vertical' ? 'ArrowUp' : 'ArrowLeft'
+    if (![forwardKey, backKey, 'Home', 'End'].includes(event.key)) return
 
     const tabs = Array.from(
       event.currentTarget.querySelectorAll<HTMLButtonElement>(
@@ -73,7 +76,7 @@ export function TabsList({
         ? 0
         : event.key === 'End'
           ? tabs.length - 1
-          : (current + (event.key === 'ArrowRight' ? 1 : -1) + tabs.length) %
+          : (current + (event.key === forwardKey ? 1 : -1) + tabs.length) %
             tabs.length
     tabs[next]?.focus()
     tabs[next]?.click()
@@ -82,9 +85,12 @@ export function TabsList({
   return (
     <div
       role={'tablist'}
+      aria-orientation={orientation}
       onKeyDown={moveFocus}
       className={cn(
-        'flex gap-1 overflow-x-auto border-b border-border-default px-1',
+        orientation === 'vertical'
+          ? 'flex flex-col gap-0.5'
+          : 'flex gap-1 overflow-x-auto border-b border-border-default px-1',
         className,
       )}
       {...props}
@@ -96,9 +102,11 @@ export function TabsTrigger({
   value,
   className,
   children,
+  orientation = 'horizontal',
   ...props
 }: Omit<ComponentPropsWithoutRef<'button'>, 'value'> & {
   value: string
+  orientation?: 'horizontal' | 'vertical'
 }) {
   const tabs = useTabsContext()
   const selected = tabs.value === value
@@ -113,10 +121,18 @@ export function TabsTrigger({
       tabIndex={selected ? 0 : -1}
       onClick={() => tabs.setValue(value)}
       className={cn(
-        'relative min-w-max px-4 py-3 text-sm font-medium text-text-muted transition-colors',
-        'hover:text-text-default',
-        selected &&
-          'text-brand-700 after:absolute after:inset-x-2 after:bottom-0 after:h-0.5 after:rounded-pill after:bg-brand-700',
+        orientation === 'vertical'
+          ? cn(
+              'relative flex w-full items-center rounded-control px-3 py-2.5 text-left text-sm font-medium text-text-muted transition-colors',
+              'hover:bg-surface-sunken hover:text-text-default',
+              selected && 'bg-brand-50 text-brand-700',
+            )
+          : cn(
+              'relative min-w-max px-4 py-3 text-sm font-medium text-text-muted transition-colors',
+              'hover:text-text-default',
+              selected &&
+                'text-brand-700 after:absolute after:inset-x-2 after:bottom-0 after:h-0.5 after:rounded-pill after:bg-brand-700',
+            ),
         className,
       )}
       {...props}

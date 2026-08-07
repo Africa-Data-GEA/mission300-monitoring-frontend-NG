@@ -57,6 +57,7 @@ import type {
 } from '@/api/schemas/administration'
 import type { ExecutiveOverview, OngoingProject } from '@/features/dashboard/types'
 import { bottlenecksHandlers } from './handlers/bottlenecks'
+import { brandingHandlers } from './handlers/branding'
 import { dataSubmissionHandlers } from './handlers/data-submissions'
 import { pillarDashboardHandlers } from './handlers/pillar-dashboard'
 import { programsHandlers } from './handlers/programs'
@@ -380,6 +381,7 @@ const invitedUsers: UserAccount[] = []
 
 export const handlers = [
   ...bottlenecksHandlers,
+  ...brandingHandlers,
   ...dataSubmissionHandlers,
   ...pillarDashboardHandlers,
   ...programsHandlers,

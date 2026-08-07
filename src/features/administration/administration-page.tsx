@@ -2,10 +2,13 @@ import { Breadcrumb } from '@/components/ui/breadcrumb'
 import { Card } from '@/components/ui/card'
 import { ErrorState } from '@/components/ui/error-state'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { readAuthSession } from '@/features/auth/auth-session'
+import { canRoleReachModule } from '@/features/auth/role-access'
 import { useAdministrationPage } from './use-administration-page'
 import { AdministrationFilters } from './components/administration-filters'
 import { AdministrationSkeleton } from './components/administration-skeleton'
 import { AuditLog } from './components/audit-log'
+import { CustomizationPanel } from './components/customization-panel'
 import { InviteUserDialog } from './components/invite-user-dialog'
 import { RolesAndPermissions } from './components/roles-matrix'
 import { ScopeTable } from './components/scope-table'
@@ -13,19 +16,28 @@ import { TabCount } from './components/tab-count'
 import { UsersTable } from './components/users-table'
 
 /**
- * User Access and Administration.
+ * User Access and Administration — an admin console, not a single flat page.
  * Specification: docs/specs/user-access-administration.md
  *
- * Unlike the monitoring modules this is account and permission administration,
- * not performance measurement — the specification says so explicitly. It uses
- * its own eight filters rather than the global dashboard filters, so the route
- * opts out of the global filter bar (see src/app/router.tsx).
+ * Structured as a lightweight console shell: a vertical sub-nav on the left
+ * (Users / Roles / Access scope / Audit log / Customization) and the active
+ * panel on the right — still one route, one page, just laid out like a
+ * console rather than a horizontal-tab document. Reuses `Tabs` in its
+ * vertical orientation rather than a new nav component, so the same
+ * value/onValueChange state wiring in use-administration-page.ts still
+ * drives which panel is active.
  *
- * All state and data-fetching lives in use-administration-page.ts — this
- * component only reads that hook and renders.
+ * Customization (site branding) is gated to system-administrator only — the
+ * one panel here with dashboard-wide blast radius, changing colours and the
+ * logo for every user, not just this admin's own view.
+ *
+ * All other state and data-fetching lives in use-administration-page.ts —
+ * this component only reads that hook and renders.
  */
 export function AdministrationPage() {
   const page = useAdministrationPage()
+  const session = readAuthSession()
+  const canCustomize = !session || canRoleReachModule(session.user.role, 'branding')
 
   if (page.isPending) return <AdministrationSkeleton />
 
@@ -57,32 +69,35 @@ export function AdministrationPage() {
         </h1>
       </div>
 
-      <Card className="min-w-0 overflow-hidden p-0">
-        <Tabs
-          value={page.activeTab}
-          defaultValue="users"
-          onValueChange={page.changeTab}
-        >
-          <TabsList>
-            <TabsTrigger value="users">
-              Users
+      <Tabs value={page.activeTab} defaultValue="users" onValueChange={page.changeTab} className="flex min-w-0 gap-4">
+        <Card className="w-56 shrink-0 self-start p-2">
+          <TabsList orientation="vertical" aria-label="Administration sections">
+            <TabsTrigger orientation="vertical" value="users">
+              <span className="flex-1">Users</span>
               <TabCount value={data.users.total} />
             </TabsTrigger>
-            <TabsTrigger value="roles">
-              Roles &amp; permissions
+            <TabsTrigger orientation="vertical" value="roles">
+              <span className="flex-1">Roles &amp; permissions</span>
               <TabCount value={data.roles.length} />
             </TabsTrigger>
-            <TabsTrigger value="scope">
-              Access scope
+            <TabsTrigger orientation="vertical" value="scope">
+              <span className="flex-1">Access scope</span>
               <TabCount value={data.scopeAssignments.total} />
             </TabsTrigger>
-            <TabsTrigger value="audit">
-              Audit log
+            <TabsTrigger orientation="vertical" value="audit">
+              <span className="flex-1">Audit log</span>
               <TabCount value={data.auditLog.total} />
             </TabsTrigger>
+            {canCustomize && (
+              <TabsTrigger orientation="vertical" value="branding">
+                <span className="flex-1">Customization</span>
+              </TabsTrigger>
+            )}
           </TabsList>
+        </Card>
 
-          {page.filters && (
+        <Card className="min-w-0 flex-1 overflow-hidden p-0">
+          {page.activeTab !== 'branding' && page.filters && (
             <div className="px-2 pt-3 sm:px-4">
               <AdministrationFilters
                 options={page.filters}
@@ -136,9 +151,16 @@ export function AdministrationPage() {
                 onViewUser={page.viewAuditUser}
               />
             </TabsContent>
+
+            {canCustomize && (
+              <TabsContent value="branding" className="pt-4">
+                <CustomizationPanel />
+              </TabsContent>
+            )}
           </div>
-        </Tabs>
-      </Card>
+        </Card>
+      </Tabs>
+
       <InviteUserDialog
         onClose={page.closeInvite}
         onInvited={page.refreshAfterInvite}

@@ -1,18 +1,20 @@
 import Chart from 'react-apexcharts'
 import { EXECUTION_STATUS_LABELS, type ExecutionStatus } from '@/api/schemas/programs'
-import { CHART_ACCENT, CHART_BLUE } from '@/config/chart-colors'
+import { CHART_BLUE, getChartAccent } from '@/config/chart-colors'
 import type { ProjectStatusSummary } from '../types'
 
 const FONT_FAMILY = 'Google Sans, ui-sans-serif, system-ui, sans-serif'
-const STATUS_COLORS: Record<Exclude<ExecutionStatus, 'completed'>, string> = {
-  'on-track': CHART_BLUE.darkest,
-  'at-risk': CHART_BLUE.base,
-  delayed: CHART_BLUE.light,
-  blocked: CHART_ACCENT,
-}
 
 export function ProjectStatusChart({ summary }: { summary: readonly ProjectStatusSummary[] }) {
   const total = summary.reduce((sum, entry) => sum + entry.count, 0)
+  // Read inside the render body, not as a module-level constant, so a
+  // brand-colour change (see BrandProvider) is picked up on the next render.
+  const STATUS_COLORS: Record<Exclude<ExecutionStatus, 'completed'>, string> = {
+    'on-track': CHART_BLUE.darkest,
+    'at-risk': CHART_BLUE.base,
+    delayed: CHART_BLUE.light,
+    blocked: getChartAccent(),
+  }
 
   if (total === 0) {
     return <p className="py-10 text-center text-sm text-text-muted">No ongoing projects to chart.</p>

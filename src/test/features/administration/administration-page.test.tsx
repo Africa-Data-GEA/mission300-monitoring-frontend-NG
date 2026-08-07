@@ -16,7 +16,11 @@ describe('AdministrationPage', () => {
     ).toBeInTheDocument()
 
     expect(screen.queryByText('Active users')).not.toBeInTheDocument()
-    expect(screen.getAllByRole('tab')).toHaveLength(4)
+    // 5, not 4: Users, Roles & permissions, Access scope, Audit log, and
+    // Customization — the last one shows because no session is set up in
+    // this test, and "no session" shows every section, same convention as
+    // the main Sidebar (see role-access.ts).
+    expect(screen.getAllByRole('tab')).toHaveLength(5)
     expect(screen.getByRole('tab', { name: /Users/ })).toHaveAttribute(
       'aria-selected',
       'true',
