@@ -16,7 +16,6 @@ export function TraceabilityPanel({ profile }: { profile: KpiProfile }) {
       <dl className="mt-3 grid grid-cols-2 gap-3 text-sm">
         <ProfileField label="Source institution" value={profile.sourceInstitution} />
         <ProfileField label="Source dataset" value={profile.sourceDataset} />
-        <ProfileField label="Source reference" value={profile.sourceReference} />
         <ProfileField label="Reporting period" value={profile.reportingPeriod} />
         <ProfileField label="Version" value={profile.version} />
         <ProfileField

@@ -197,6 +197,22 @@
     color: var(--ink-3);
   }
   hr.rule { border: none; border-top: 1px solid var(--line); margin: 40px 0; }
+
+  figure.screenshot {
+    margin: 18px 0 24px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    overflow: hidden;
+    background: var(--panel);
+  }
+  figure.screenshot img { display: block; width: 100%; height: auto; }
+  figure.screenshot figcaption {
+    padding: 8px 14px;
+    font-size: 0.78rem;
+    color: var(--ink-3);
+    border-top: 1px solid var(--line);
+    background: var(--bg);
+  }
 </style>
 
 <div class="layout">
@@ -209,17 +225,18 @@
       <li><a href="#filters"><span class="n">02</span>Global filters</a></li>
       <li><a href="#exec"><span class="n">03</span>Executive Overview</a></li>
       <li><a href="#public"><span class="n">04</span>Public Gateway</a></li>
-      <li><a href="#kpi"><span class="n">05</span>KPI Directory</a></li>
-      <li><a href="#pillars"><span class="n">06</span>Pillar Dashboards</a></li>
-      <li><a href="#programs"><span class="n">07</span>Programs</a></li>
-      <li><a href="#bottlenecks"><span class="n">08</span>Bottlenecks &amp; Exceptions</a></li>
-      <li><a href="#submissions"><span class="n">09</span>Data Submissions</a></li>
-      <li><a href="#statedisco"><span class="n">10</span>State &amp; DisCo</a></li>
-      <li><a href="#reports"><span class="n">11</span>Reports &amp; Exports</a></li>
-      <li><a href="#admin"><span class="n">12</span>Administration</a></li>
-      <li><a href="#stakeholders"><span class="n">13</span>Stakeholders</a></li>
-      <li><a href="#enums"><span class="n">14</span>Shared enumerations</a></li>
-      <li><a href="#open"><span class="n">15</span>Open questions</a></li>
+      <li><a href="#branding"><span class="n">05</span>Branding</a></li>
+      <li><a href="#kpi"><span class="n">06</span>KPI Directory</a></li>
+      <li><a href="#pillars"><span class="n">07</span>Pillar Dashboards</a></li>
+      <li><a href="#programs"><span class="n">08</span>Programs</a></li>
+      <li><a href="#bottlenecks"><span class="n">09</span>Bottlenecks &amp; Exceptions</a></li>
+      <li><a href="#submissions"><span class="n">10</span>Data Submissions</a></li>
+      <li><a href="#statedisco"><span class="n">11</span>State &amp; DisCo</a></li>
+      <li><a href="#reports"><span class="n">12</span>Reports &amp; Exports</a></li>
+      <li><a href="#admin"><span class="n">13</span>Administration</a></li>
+      <li><a href="#stakeholders"><span class="n">14</span>Stakeholders</a></li>
+      <li><a href="#enums"><span class="n">15</span>Shared enumerations</a></li>
+      <li><a href="#open"><span class="n">16</span>Open questions</a></li>
     </ol>
   </nav>
 
@@ -237,7 +254,10 @@
       <p class="meta">
         <strong>Base URL:</strong> everything under <code>/api</code> &nbsp;·&nbsp;
         <strong>Content type:</strong> <code>application/json</code> both ways, except two file-upload
-        endpoints (<code>multipart/form-data</code>) and two report-export endpoints (binary download)
+        endpoints (<code>multipart/form-data</code>: data-submissions upload and the branding logo) and
+        one binary-download endpoint (the data-submissions template file — see §10). Reports & Exports
+        (§12) does <strong>not</strong> return a binary — see the note on that section; the frontend
+        builds the downloadable PDF/XLSX client-side from JSON.
         &nbsp;·&nbsp;
         <strong>Timestamps:</strong> ISO 8601 with timezone, e.g. <code>2025-10-14T09:12:00Z</code>
         &nbsp;·&nbsp;
@@ -245,11 +265,23 @@
         <code>404</code> not found, <code>400</code> failed validation/business rule,
         <code>401</code> bad credentials.
       </p>
+      <p class="meta">
+        <strong>Last synced with the codebase:</strong> 2026-08-08, against every file under
+        <code>src/api/schemas/</code> and <code>src/mocks/handlers/</code>. This is a hand-maintained
+        document, not generated — if a schema file changes after this date and this stamp hasn't moved,
+        treat the schema as the source of truth and flag the drift.
+      </p>
     </header>
 
     <section id="conventions">
-      <h2 class="module-title">Conventions</h2>
-      <p class="module-desc">Rules that apply across every module below, not repeated per endpoint.</p>
+      <h2 class="module-title">Global data format — read this first</h2>
+      <p class="module-desc">This section is the actual contract: the shapes and rules every response
+        from every module must follow, regardless of what that module's data is about. The
+        module-by-module sections after this one (3 onward) describe <em>what</em> each endpoint returns;
+        this section describes the <em>format</em> that response has to be in to be usable by the
+        frontend — the envelope, the required metadata block, the meaning of <code>null</code>, and so
+        on. Get this section right and every module below is just filling in fields; get it wrong and no
+        module will parse.</p>
 
       <ul class="notes">
         <li><strong>Empty vs. zero</strong> — <code>0</code> is a real value and is rendered as
@@ -431,6 +463,10 @@
     <section id="exec">
       <h2 class="module-title">3. Executive Overview</h2>
       <p class="module-desc">The Compact leadership view. Schema: <code>src/api/schemas/executive-overview.ts</code>.</p>
+      <figure class="screenshot">
+        <img src="screenshots/executive-overview.png" alt="Executive Overview page showing headline cards, access delivery, national performance and delivery status" loading="lazy">
+        <figcaption>/dashboard — captured from the running frontend against the mock data.</figcaption>
+      </figure>
 
       <article class="endpoint" id="exec-get">
         <div class="endpoint-head"><span class="method">GET</span><span class="path">/api/executive-overview</span></div>
@@ -450,14 +486,265 @@
           renders the response. When a filter has no matching records, return empty arrays for the
           affected sections rather than reusing the unfiltered data.</p>
 
-        <h4>Response shape (abbreviated)</h4>
+        <h4>Full response shape — every field, real values</h4>
+        <p class="summary" style="margin-top:0"><code>accessDelivery</code> shown with all 3 rows (the
+          full set); <code>nationalPerformance</code> and <code>deliveryStatus.ongoingProjects</code>
+          show 2 of their rows with a comment marking the rest — same fields repeated, not a different
+          shape. Every field below is real; nothing is a placeholder.</p>
 <pre><code>{
   "lastUpdated": "2025-10-14T09:12:00Z",
   "appliedPillar": "all",
-  "headlineCards": { /* Section A — exactly four named cards */ },
-  "accessDelivery": [ /* Section B — three channels */ ],
-  "nationalPerformance": [ /* Section C — six bullet metrics */ ],
-  "deliveryStatus": { /* Section D — projects, chart counts, exceptions */ }
+
+  "headlineCards": {
+    "peopleWithElectricityAccess": {
+      "title": "People with electricity access",
+      "icon": "access",
+      "value": "137.3M",
+      "current": 137300000,
+      "baseline": 86600000,
+      "target": 236700000,
+      "scaleMin": 0,
+      "scaleMax": 236700000,
+      "reportingPeriod": "Q3 2025",
+      "baselineLabel": "86.6M in 2024",
+      "targetLabel": "236.7M by 2030",
+      "direction": "higher-is-better",
+      "trend": { "change": 50700000, "label": "+50.7M vs prior published year", "direction": "higher-is-better" },
+      "source": "public-source",
+      "confidence": "confirmed",
+      "provenance": {
+        "definition": "Nigerians with an active electricity connection, grid or off-grid.",
+        "methodology": "National access rate multiplied by mid-year population estimate.",
+        "source": "World Bank / SDG7 tracking publication",
+        "lastUpdated": "2025-09-30T00:00:00Z"
+      }
+    },
+    "accessRate": {
+      "title": "Electricity access rate",
+      "icon": "access",
+      "value": "70.0%",
+      "rawValue": 70.0,
+      "sourceYear": "2024",
+      "previousPublication": "61.0% (2023)",
+      "targetLabel": "Approved 9% annual improvement commitment",
+      "trend": { "change": 9, "label": "+9pts vs prior published year", "direction": "higher-is-better" },
+      "source": "public-source",
+      "confidence": "confirmed",
+      "provenance": {
+        "definition": "Share of the national population with electricity access.",
+        "methodology": "Official SDG7 tracking figure, not extrapolated between publications.",
+        "source": "World Bank / SDG7 tracking publication",
+        "lastUpdated": "2025-06-01T00:00:00Z"
+      },
+      "sparkline": [52.0, 55.0, 58.5, 61.0, 70.0]
+    },
+    "generationCapacity": {
+      "title": "Available generation capacity",
+      "icon": "generation",
+      "availableMw": 5400,
+      "installedMw": 13600,
+      "value": "5.4 GW",
+      "availabilityRatio": 39.7,
+      "sparkline": [4800, 5000, 5100, 5250, 5400],
+      "benchmarkLabel": "Integrated Resource Plan target not yet approved",
+      "reportingPeriod": "Q3 2025",
+      "trend": { "change": 150, "label": "+150MW vs prior period", "direction": "higher-is-better" },
+      "source": "live",
+      "confidence": "confirmed",
+      "provenance": {
+        "definition": "Average daily available/dispatched capacity for the reporting period.",
+        "methodology": "Available capacity ÷ installed nameplate capacity × 100 for the ratio.",
+        "source": "Nigerian Independent System Operator / Transmission Company of Nigeria",
+        "lastUpdated": "2025-10-01T00:00:00Z"
+      }
+    },
+    "cleanCookingAccess": {
+      "title": "Clean cooking access",
+      "icon": "cooking",
+      "value": "26.0%",
+      "current": 26,
+      "baseline": 22,
+      "target": 100,
+      "scaleMin": 0,
+      "scaleMax": 100,
+      "reportingPeriod": "Q3 2025",
+      "baselineLabel": "22% in 2024",
+      "targetLabel": "100% by 2030",
+      "direction": "higher-is-better",
+      "trend": { "change": 4, "label": "+4 pts vs prior published year", "direction": "higher-is-better" },
+      "source": "requires-validation",
+      "confidence": "requires-validation",
+      "provenance": {
+        "definition": "Households using a clean or improved cooking fuel/technology as primary method.",
+        "methodology": "Sampled household survey, weighted to national population.",
+        "source": "Federal Ministry of Power household energy survey",
+        "lastUpdated": "2025-08-15T00:00:00Z"
+      }
+    }
+  },
+
+  "accessDelivery": [
+    {
+      "id": "grid-connections",
+      "title": "New grid connections",
+      "value": "412,000",
+      "rawValue": 412000,
+      "target": null,
+      "targetLabel": "Annual target to be confirmed",
+      "percentComplete": null,
+      "trend": { "change": 38000, "label": "+38,000 vs prior period", "direction": "higher-is-better" },
+      "source": "live",
+      "confidence": "confirmed",
+      "provenance": {
+        "definition": "Active registered grid customers this period minus the comparable prior period.",
+        "methodology": "Current active registered customers minus prior-period active registered customers.",
+        "source": "NERC Quarterly Reports and Monthly Metering Factsheet",
+        "lastUpdated": "2025-10-01T00:00:00Z"
+      }
+    },
+    {
+      "id": "mini-grid-connections",
+      "title": "Mini-grid household connections",
+      "value": "184,200",
+      "rawValue": 184200,
+      "target": 750000,
+      "targetLabel": "750,000 by 2030",
+      "percentComplete": 24.6,
+      "trend": { "change": 9100, "label": "+9,100 vs prior quarter", "direction": "higher-is-better" },
+      "source": "live",
+      "confidence": "confirmed",
+      "provenance": {
+        "definition": "Cumulative active household connections served by operational mini-grids.",
+        "methodology": "Cumulative active household connections; business connections reported separately.",
+        "source": "Rural Electrification Agency programme records",
+        "lastUpdated": "2025-10-01T00:00:00Z"
+      }
+    },
+    {
+      "id": "solar-home-systems",
+      "title": "Solar Home Systems deployed",
+      "value": "612,900",
+      "rawValue": 612900,
+      "target": 2750000,
+      "targetLabel": "2.75 million by 2030",
+      "percentComplete": 22.3,
+      "trend": { "change": 24500, "label": "+24,500 vs prior quarter", "direction": "higher-is-better" },
+      "source": "live",
+      "confidence": "confirmed",
+      "provenance": {
+        "definition": "Cumulative eligible Solar Home Systems deployed through approved programmes.",
+        "methodology": "Cumulative eligible deployment since the approved baseline.",
+        "source": "Rural Electrification Agency programme records",
+        "lastUpdated": "2025-10-01T00:00:00Z"
+      }
+    }
+  ],
+
+  "nationalPerformance": [
+    {
+      "id": "renewable-share",
+      "title": "Renewable Energy Share in Generation Mix",
+      "pillar": "generation-network",
+      "scaleMin": 0,
+      "scaleMax": 100,
+      "baseline": 18,
+      "current": 27.4,
+      "expected": 30,
+      "target": 50,
+      "direction": "higher-is-better",
+      "value": "27.4%",
+      "targetLabel": "50% by 2030",
+      "caption": "Seasonal — retains the reporting period",
+      "trend": { "change": 2.1, "label": "+2.1pts vs prior period", "direction": "higher-is-better" },
+      "source": "live",
+      "confidence": "confirmed",
+      "provenance": {
+        "definition": "Renewable electricity generated ÷ total electricity generated × 100. Includes hydro, solar, wind.",
+        "methodology": "Calculated from generation-mix records for the reporting period.",
+        "source": "NISO / TCN / NERC generation records",
+        "lastUpdated": "2025-10-01T00:00:00Z"
+      }
+    },
+    {
+      "id": "atcc-losses",
+      "title": "Aggregate Technical, Commercial and Collection Loss Rate",
+      "pillar": "financially-viable-utilities",
+      "scaleMin": 0,
+      "scaleMax": 60,
+      "baseline": 45,
+      "current": 31.2,
+      "expected": 28,
+      "target": null,
+      "direction": "lower-is-better",
+      "value": "31.2%",
+      "targetLabel": "Compare against MYTO / DisCo Performance Improvement Plan benchmarks",
+      "trend": { "change": -1.4, "label": "-1.4pts vs prior period", "direction": "lower-is-better" },
+      "source": "public-source",
+      "confidence": "confirmed",
+      "provenance": {
+        "definition": "Official NERC weighted national ATC&C loss rate.",
+        "methodology": "Reported as published; system recalculation supports quality checks only.",
+        "source": "NERC Quarterly Reports",
+        "lastUpdated": "2025-10-01T00:00:00Z"
+      }
+    }
+    // + metering-rate, market-remittance, tariff-shortfall, private-capital —
+    // same BulletMetric shape, six rows total.
+  ],
+
+  "deliveryStatus": {
+    "ongoingProjects": [
+      {
+        "id": "PRJ-2025-0142",
+        "name": "Kaduna 132kV Feeder Reinforcement",
+        "programmeId": "PRG-0031",
+        "programmeName": "Northern Grid Reinforcement Programme",
+        "pillar": "generation-network",
+        "pillarLabel": "Generation & Network",
+        "owner": "Transmission Company of Nigeria",
+        "location": "Kaduna State",
+        "latitude": 10.5222,
+        "longitude": 7.4383,
+        "currentStatus": "at-risk",
+        "startDate": "2025-02-01T00:00:00Z",
+        "endDate": "2025-12-15T00:00:00Z"
+      }
+      // + every other ongoing (non-completed) project, same shape.
+    ],
+    "statusSummary": [
+      { "status": "on-track", "count": 34 },
+      { "status": "at-risk", "count": 9 },
+      { "status": "delayed", "count": 5 },
+      { "status": "blocked", "count": 2 }
+    ],
+    "exceptions": [
+      {
+        "id": "BTL-2025-0088",
+        "title": "Transmission evacuation constraint limiting dispatch, North East",
+        "category": "technical-constraint",
+        "institution": "Transmission Company of Nigeria",
+        "reference": "IMP-2025-0055",
+        "severity": "critical",
+        "daysUnresolved": 46,
+        "provenance": {
+          "definition": "A delivery constraint blocking progress on a priority action.",
+          "methodology": "Logged by the responsible institution, verified by the Bottleneck Register owner.",
+          "source": "Implementation Register and Bottleneck Register",
+          "lastUpdated": "2025-10-10T00:00:00Z"
+        }
+      }
+      // + up to however many are open; the UI only ever displays the
+      // worst 5, but sending the full ranked list is fine — see the table
+      // above for the ranking rule.
+    ],
+    "trend": { "change": -3, "label": "-3 exceptions vs prior period", "direction": "lower-is-better" },
+    "provenance": {
+      "definition": "Consolidated priority delivery status linked to unresolved bottlenecks and overdue decisions.",
+      "methodology": "Counts by status; exceptions ranked by severity, delivery impact and days unresolved.",
+      "source": "Compact Progress Report, Implementation Register and Bottleneck Register",
+      "lastUpdated": "2025-10-10T00:00:00Z"
+    }
+  }
 }</code></pre>
         <p class="summary"><code>appliedPillar</code> — echo the pillar the payload was actually
           calculated for (<code>all</code> for All Pillars), so the frontend can confirm the server
@@ -549,11 +836,104 @@
       </article>
     </section>
 
+    <section id="branding">
+      <h2 class="module-title">5. Branding</h2>
+      <p class="module-desc">One active site-wide brand configuration — country name, three colours and a
+        logo, plus a Google Fonts family per heading level and body text. Not a list of switchable
+        presets: redeploying this dashboard for another Compact country means editing this one record.
+        Schema: <code>src/api/schemas/branding.ts</code>. System-administrator only — see the role gate
+        on the Administration page.</p>
+
+      <article class="endpoint" id="branding-get">
+        <div class="endpoint-head"><span class="method">GET</span><span class="path">/api/branding</span></div>
+        <p class="summary">The single active configuration. No query parameters.</p>
+        <h4>Response <span class="status-tag">200</span></h4>
+<pre><code>{
+  "countryName": "Nigeria",
+  "primaryColor": "#008751",
+  "secondaryColor": "#e08214",
+  "textColor": "#101828",
+  "logoUrl": "/Logos/geapp.png",
+  "fonts": {
+    "h1": "Inter", "h2": "Inter", "h3": "Inter", "h4": "Inter",
+    "h5": "Inter", "h6": "Inter", "body": "Inter"
+  },
+  "updatedAt": "2025-10-14T09:12:00Z"
+}</code></pre>
+        <p class="summary">Colours are always 6-digit hex with a leading <code>#</code> — matches what an
+          <code>&lt;input type="color"&gt;</code> produces, so the frontend never has to normalise. Every
+          <code>fonts</code> field is a Google Fonts family name (e.g. <code>"Inter"</code>,
+          <code>"Noto Sans"</code>); the frontend does not validate that the family actually exists on
+          Google Fonts, so the backend should.</p>
+      </article>
+
+      <article class="endpoint" id="branding-update-colors">
+        <div class="endpoint-head"><span class="method">PUT</span><span class="path">/api/branding</span></div>
+        <p class="summary">Updates country name and the three colours. Applied across the whole dashboard
+          immediately on save — no rebuild or redeploy. Logo and fonts are separate endpoints; this one
+          does not touch them.</p>
+        <h4>Request</h4>
+<pre><code>{
+  "countryName": "Nigeria",
+  "primaryColor": "#008751",
+  "secondaryColor": "#e08214",
+  "textColor": "#101828"
+}</code></pre>
+        <h4>Response <span class="status-tag">200</span></h4>
+        <p class="summary" style="margin-top:0">The full updated <code>BrandConfig</code> (same shape as
+          the GET above, with a fresh <code>updatedAt</code>).</p>
+        <h4>Response <span class="status-tag">400</span></h4>
+        <p class="summary">On a blank <code>countryName</code> or a colour that fails the hex pattern:
+          <code>{ "message": "…" }</code>.</p>
+      </article>
+
+      <article class="endpoint" id="branding-update-fonts">
+        <div class="endpoint-head"><span class="method">PUT</span><span class="path">/api/branding/fonts</span></div>
+        <p class="summary">Updates the seven Google Fonts assignments (h1–h6 plus body). Separate from
+          the colour endpoint above because the admin panel saves them independently — deliberately
+          per-level rather than one shared "heading font", so h1 can carry a display face while h2–h6
+          stay on the body face.</p>
+        <h4>Request</h4>
+<pre><code>{ "fonts": { "h1": "…", "h2": "…", "h3": "…", "h4": "…", "h5": "…", "h6": "…", "body": "…" } }</code></pre>
+        <h4>Response <span class="status-tag">200</span></h4>
+        <p class="summary" style="margin-top:0">The full updated <code>BrandConfig</code>.</p>
+      </article>
+
+      <article class="endpoint" id="branding-logo">
+        <div class="endpoint-head">
+          <span class="method">POST</span><span class="path">/api/branding/logo</span>
+          <span class="status-tag">multipart/form-data</span>
+        </div>
+        <p class="summary">Replaces the logo shown in the sidebar and on the public landing page.</p>
+        <h4>Form fields</h4>
+        <div class="tablewrap">
+          <table class="params">
+            <thead><tr><th>Field</th><th>Required</th><th>Notes</th></tr></thead>
+            <tbody>
+              <tr><td><code>file</code></td><td>yes</td><td>Image file. <code>400</code> if missing or not an image type.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <h4>Response <span class="status-tag">200</span></h4>
+        <p class="summary" style="margin-top:0">The full updated <code>BrandConfig</code>, with
+          <code>logoUrl</code> pointing at the stored image (the mock returns a base64 <code>data:</code>
+          URL as a stand-in for real object storage — the real backend should return a permanent
+          CDN/storage URL instead).</p>
+        <h4>Response <span class="status-tag">400</span></h4>
+        <p class="summary">No file, or a file whose type doesn't start with <code>image/</code>:
+          <code>{ "message": "…" }</code>.</p>
+      </article>
+    </section>
+
     <section id="kpi">
-      <h2 class="module-title">5. KPI Directory (KPI Explorer)</h2>
+      <h2 class="module-title">6. KPI Directory (KPI Explorer)</h2>
       <p class="module-desc">The authoritative indicator catalogue and technical drill-down. Schema:
         <code>src/api/schemas/kpi-explorer.ts</code>. The KPI identifier (e.g. <code>M300-P1-003</code>)
         is first-class here for traceability, but must not appear on executive or pillar cards.</p>
+      <figure class="screenshot">
+        <img src="screenshots/kpi-directory.png" alt="KPI Directory catalogue table with summary cards and pillar/readiness distribution" loading="lazy">
+        <figcaption>/kpis</figcaption>
+      </figure>
 
       <article class="endpoint" id="kpi-list">
         <div class="endpoint-head"><span class="method">GET</span><span class="path">/api/kpi-explorer</span></div>
@@ -565,10 +945,67 @@
         <h4>Response</h4>
 <pre><code>{
   "lastUpdated": "2025-10-14T09:12:00Z",
-  "summary": [ /* Section A — catalogue/readiness counts */ ],
-  "catalogue": { "items": [ /* … */ ], "page": 1, "pageSize": 25, "total": 17 },
-  "pillarDistribution": [ /* Section D — value coverage by pillar */ ],
-  "readinessDistribution": [ /* Section D — Core / Supporting / Future */ ]
+  "summary": [
+    {
+      "id": "core-indicators",
+      "title": "Core indicators",
+      "count": 42,
+      "breakdown": [
+        { "label": "Confirmed", "count": 30 },
+        { "label": "Public source", "count": 6 },
+        { "label": "Requires validation", "count": 4 },
+        { "label": "Future", "count": 2 }
+      ],
+      "provenance": {
+        "definition": "Indicators designated Core / Tier 1 in the M300 KPI Matrix.",
+        "methodology": "Count of catalogue rows with readiness = core.",
+        "source": "M300 KPI Matrix v2.0",
+        "lastUpdated": "2025-10-01T00:00:00Z"
+      }
+    }
+    // + one card per catalogue/readiness count the spec calls for — same shape.
+  ],
+  "catalogue": {
+    "items": [
+      {
+        "id": "M300-P3-004",
+        "name": "Metering Rate",
+        "pillar": "financially-viable-utilities",
+        "category": "Utility Performance",
+        "unit": "%",
+        "sourceInstitution": "Nigerian Electricity Regulatory Commission",
+        "sourceDataset": "Metering performance",
+        "frequency": "Quarterly",
+        "readiness": "core",
+        "validationStatus": "confirmed",
+        "lastUpdated": "2025-10-01T00:00:00Z"
+      }
+      // + every other row matching the query, up to pageSize.
+    ],
+    "page": 1,
+    "pageSize": 25,
+    "total": 17
+  },
+  "pillarDistribution": [
+    {
+      "pillar": "financially-viable-utilities",
+      "label": "Financially Viable Utilities",
+      "total": 9,
+      "byStatus": [
+        { "status": "confirmed", "count": 6 },
+        { "status": "public-source", "count": 1 },
+        { "status": "requires-validation", "count": 1 },
+        { "status": "provisional", "count": 0 },
+        { "status": "future", "count": 1 }
+      ]
+    }
+    // + one row per pillar, six total.
+  ],
+  "readinessDistribution": [
+    { "tier": "core", "label": "Core / Tier 1", "count": 42 },
+    { "tier": "supporting", "label": "Supporting / Tier 2", "count": 61 },
+    { "tier": "future", "label": "Future / Tier 3", "count": 14 }
+  ]
 }</code></pre>
         <ul class="notes">
           <li><code>summary</code> and both <code>*Distribution</code> arrays describe the full
@@ -606,6 +1043,64 @@
             milestone/action) joined through the indicator identifier: <code>type</code>,
             <code>title</code>, <code>institution</code>, <code>status</code>.</li>
         </ul>
+        <h4>Response</h4>
+<pre><code>{
+  "id": "M300-P3-004",
+  "name": "Metering Rate",
+  "pillar": "financially-viable-utilities",
+
+  "definition": "Metered active customers as a share of total active registered customers.",
+  "formula": "Metered active customers ÷ total active registered customers × 100",
+  "unit": "%",
+  "aggregation": "National weighted average across DisCos",
+  "frequency": "Quarterly",
+  "disaggregation": "By DisCo, by state",
+  "limitations": "Excludes captive/embedded generation customers not billed through a DisCo.",
+
+  "baseline": 42.0,
+  "baselineLabel": "42.0% in 2023",
+  "current": 57.4,
+  "currentLabel": "57.4%",
+  "target": 100,
+  "targetLabel": "100% by 2027",
+  "varianceLabel": "-42.6pts vs target",
+  "direction": "higher-is-better",
+  "trend": { "change": 2.4, "label": "+2.4pts vs prior period", "direction": "higher-is-better" },
+  "history": [
+    { "period": "Q1 2025", "value": 53.1, "validationStatus": "confirmed", "submissionId": null },
+    { "period": "Q2 2025", "value": 55.0, "validationStatus": "confirmed", "submissionId": null },
+    { "period": "Q3 2025", "value": 57.4, "validationStatus": "confirmed", "submissionId": "SUB-2026-0021" }
+  ],
+
+  "sourceInstitution": "Nigerian Electricity Regulatory Commission",
+  "sourceDataset": "Metering performance",
+  "sourceReference": "NERC Monthly Metering Factsheet, September 2025",
+  "reportingPeriod": "Q3 2025",
+  "validationStatus": "confirmed",
+  "validationDecision": "Approved by Grace Etim, 2025-10-01",
+  "version": "3",
+  "confidence": "confirmed",
+  "provenance": {
+    "definition": "Metered active customers as a share of total active registered customers.",
+    "methodology": "As reported by the DisCo, cross-checked against NERC's Monthly Metering Factsheet.",
+    "source": "NERC Monthly Metering Factsheet",
+    "lastUpdated": "2025-10-01T00:00:00Z"
+  },
+
+  "linkedRecords": [
+    {
+      "id": "PRG-0031",
+      "type": "programme",
+      "title": "Northern Grid Reinforcement Programme",
+      "institution": "Transmission Company of Nigeria",
+      "status": "at-risk"
+    }
+  ]
+}</code></pre>
+        <p class="summary"><code>baseline</code>/<code>current</code>/<code>target</code> are nullable —
+          null means that figure isn't available yet, and <code>validationStatus</code> is
+          <code>future</code> on any history point where that's the case. <code>history[].submissionId</code>
+          is null for points seeded before submission-tracing existed, not for every point.</p>
       </article>
 
       <article class="endpoint" id="kpi-filters">
@@ -616,10 +1111,49 @@
           (same <code>{ value, label }[]</code> shape as global filters, but this module does not use
           the global dashboard filter bar).</p>
       </article>
+
+      <article class="endpoint" id="kpi-update-metadata">
+        <div class="endpoint-head"><span class="method">PATCH</span><span class="path">/api/kpi-explorer/kpis/:id</span></div>
+        <p class="summary">Updates a KPI's <em>definition</em> metadata — methodology, baseline, target
+          and source-reference fields, set once when the indicator is configured and changed rarely and
+          deliberately (e.g. a target renegotiated with NERC). This is a genuinely separate concern from
+          <code>current</code>/<code>history</code>, which only ever change via a data submission being
+          approved and published (§10) — this endpoint must never touch those two fields.
+          System-administrator only on the frontend; the backend should enforce the same restriction
+          independently rather than relying on the UI to gate it.</p>
+        <h4>Request</h4>
+<pre><code>{
+  "definition": "Metered active customers as a share of total active registered customers.",
+  "formula": "Metered active customers ÷ total active registered customers × 100",
+  "unit": "%",
+  "aggregation": "National weighted average across DisCos",
+  "frequency": "Quarterly",
+  "disaggregation": "By DisCo, by state",
+  "limitations": "Excludes captive/embedded generation customers not billed through a DisCo.",
+  "baseline": 42.0,
+  "baselineLabel": "42.0% in 2023",
+  "target": 100,
+  "targetLabel": "100% by 2027",
+  "sourceInstitution": "Nigerian Electricity Regulatory Commission",
+  "sourceDataset": "Metering performance",
+  "sourceReference": "NERC Monthly Metering Factsheet, September 2025"
+}</code></pre>
+        <p class="summary"><code>baseline</code> and <code>target</code> are nullable, matching the
+          usual rule. Every other field is a required string (empty string allowed where the schema
+          doesn't enforce <code>min(1)</code>, e.g. <code>aggregation</code>, <code>frequency</code>).</p>
+        <h4>Response <span class="status-tag">200</span></h4>
+        <p class="summary" style="margin-top:0">The full updated <code>KpiProfile</code> — identical
+          shape to <code>GET /kpi-explorer/kpis/:id</code>'s response above, with the edited fields
+          applied and <code>current</code>/<code>history</code> unchanged. The frontend sets this
+          response directly as the profile's cached data rather than refetching, so the response must be
+          the complete profile, not just the changed fields.</p>
+        <h4>Response <span class="status-tag">404</span></h4>
+        <p class="summary">Unknown id: <code>{ "message": "…" }</code>.</p>
+      </article>
     </section>
 
     <section id="pillars">
-      <h2 class="module-title">6. Pillar Dashboards</h2>
+      <h2 class="module-title">7. Pillar Dashboards</h2>
       <p class="module-desc">Deliberately has no entities of its own — a pillar dashboard is a
         filtered view over data that exists elsewhere. Schema:
         <code>src/api/schemas/pillar-dashboard.ts</code>.</p>
@@ -632,18 +1166,107 @@
   "pillar": "generation-network",
   "label": "Generation & Network",
   "lastUpdated": "2025-10-14T09:12:00Z",
-  "headlineCards": [ /* exactly 4 — real KpiProfile-sourced cards for this pillar */ ],
-  "deliveryStatus": { "counts": [ /* by ExecutionStatus */ ], "total": 6 },
-  "bottlenecks": [ /* ranked top-5 open bottlenecks for this pillar */ ],
-  "kpis": [ /* every KPI Directory catalogue row tagged to this pillar */ ]
+  "headlineCards": [
+    {
+      "kpiId": "M300-P1-004",
+      "title": "Renewable Energy Share in Generation Mix",
+      "value": "27.4%",
+      "rawValue": 27.4,
+      "targetLabel": "50% by 2030",
+      "target": 50,
+      "trend": { "change": 2.1, "label": "+2.1pts vs prior period", "direction": "higher-is-better" },
+      "validationStatus": "confirmed",
+      "provenance": {
+        "definition": "Renewable electricity generated ÷ total electricity generated × 100.",
+        "methodology": "Calculated from generation-mix records for the reporting period.",
+        "source": "NISO / TCN / NERC generation records",
+        "lastUpdated": "2025-10-01T00:00:00Z"
+      }
+    }
+    // + 3 more — exactly 4 headline cards, always.
+  ],
+  "coreIndicators": [
+    {
+      "kpiId": "M300-P1-011",
+      "name": "Transmission Losses",
+      "group": "Network performance",
+      "unit": "%",
+      "current": 7.8,
+      "target": 5,
+      "direction": "lower-is-better",
+      "history": [9.4, 8.9, 8.3, 7.8],
+      "validationStatus": "confirmed",
+      "provenance": {
+        "definition": "Energy lost in transmission as a share of energy sent out.",
+        "methodology": "Energy sent out minus energy received, divided by energy sent out.",
+        "source": "Transmission Company of Nigeria",
+        "lastUpdated": "2025-10-01T00:00:00Z"
+      }
+    }
+    // + every other Core/Tier 1 indicator for this pillar beyond the 4
+    // headline cards; empty array for a pillar with no expanded coverage yet.
+  ],
+  "deliveryStatus": {
+    "counts": [
+      { "status": "on-track", "count": 4 },
+      { "status": "at-risk", "count": 1 },
+      { "status": "delayed", "count": 1 },
+      { "status": "blocked", "count": 0 },
+      { "status": "completed", "count": 2 }
+    ],
+    "total": 6
+  },
+  "bottlenecks": [
+    {
+      "id": "BTL-2025-0088",
+      "issue": "Transmission evacuation constraint limiting dispatch, North East",
+      "category": "technical-constraint",
+      "severity": "critical",
+      "pillar": "generation-network",
+      "linkedRecord": "IMP-2025-0055",
+      "institution": "Transmission Company of Nigeria",
+      "dateRaised": "2025-08-25T00:00:00Z",
+      "ageDays": 46,
+      "followUp": "Escalated to steering committee for right-of-way approval.",
+      "escalationStatus": "escalated",
+      "status": "blocked",
+      "lifecycleStage": "implementation"
+    }
+    // + up to 4 more — ranked top-5 open bottlenecks for this pillar only.
+  ],
+  "kpis": [
+    {
+      "id": "M300-P1-004",
+      "name": "Renewable Energy Share in Generation Mix",
+      "pillar": "generation-network",
+      "category": "Generation Mix",
+      "unit": "%",
+      "sourceInstitution": "Nigerian Independent System Operator",
+      "sourceDataset": "Generation mix records",
+      "frequency": "Quarterly",
+      "readiness": "core",
+      "validationStatus": "confirmed",
+      "lastUpdated": "2025-10-01T00:00:00Z"
+    }
+    // + every other KPI Directory catalogue row tagged to this pillar,
+    // not just the four headline ones.
+  ]
 }</code></pre>
         <ul class="notes">
           <li><code>headlineCards</code> — exactly 4. Each carries <code>kpiId</code> (join key back
             to KPI Directory, not displayed on the card itself, only used for linking),
             <code>rawValue</code>/<code>target</code> nullable per the usual rule,
             <code>validationStatus</code>, <code>provenance</code>.</li>
-          <li><code>bottlenecks</code> — max 5, using the lighter <code>bottleneckRecordSchema</code>
-            shape from the Bottlenecks module.</li>
+          <li><code>coreIndicators</code> — Core/Tier 1 KPI Matrix indicators for this pillar beyond
+            the four headline cards, grouped by a curated <code>group</code> label (e.g. "Metering
+            coverage"), each with its own <code>history[]</code> for a sparkline. Empty array — not
+            omitted — for a pillar that doesn't have this expanded coverage yet.</li>
+          <li><code>bottlenecks</code> — max 5, using <code>bottleneckRecordSchema</code>, the full
+            register shape from the Bottlenecks module (§9) — <strong>not</strong> the lighter
+            <code>Bottleneck</code> summary Executive Overview's Section D uses, which is a different,
+            smaller type with fewer fields. Getting this backwards produces a response missing
+            <code>category</code>/<code>lifecycleStage</code>/<code>escalationStatus</code>/etc. that
+            the frontend expects here.</li>
           <li><code>kpis</code> — every catalogue row tagged to this pillar, not just the four headline
             ones.</li>
         </ul>
@@ -653,7 +1276,7 @@
     </section>
 
     <section id="programs">
-      <h2 class="module-title">7. Programs</h2>
+      <h2 class="module-title">8. Programs</h2>
       <p class="module-desc">The consolidated Programmes → Projects → (Milestones, Bottlenecks)
         drill-down. Schema: <code>src/api/schemas/programs.ts</code>. Deliberately no Actions tracker
         and no bulk import/export.</p>
@@ -667,8 +1290,93 @@
         <h4>Response</h4>
 <pre><code>{
   "lastUpdated": "2025-10-14T09:12:00Z",
-  "headlineCards": { "summary": {…}, "milestoneOnTime": {…}, "delayedOrBlocked": {…}, "evidenceOverdue": {…} },
-  "programmes": { "items": [ /* … */ ], "page": 1, "pageSize": 25, "total": 40 }
+  "headlineCards": {
+    "summary": {
+      "title": "Programmes and projects",
+      "icon": "pillars",
+      "activeProgrammes": 40,
+      "activeProjects": 118,
+      "newThisCycle": 6,
+      "closedThisCycle": 2,
+      "trend": { "change": 4, "label": "+4 new this cycle", "direction": "higher-is-better" },
+      "provenance": {
+        "definition": "Active programmes and projects tracked in the Programme & Project register.",
+        "methodology": "Count of records with status other than closed/cancelled.",
+        "source": "Programme & Project tracking workbook",
+        "lastUpdated": "2025-10-01T00:00:00Z"
+      }
+    },
+    "milestoneOnTime": {
+      "title": "Priority milestones delivered on time",
+      "icon": "milestones",
+      "percentOnTime": 78.5,
+      "dueCount": 65,
+      "completedCount": 51,
+      "delayedCount": 9,
+      "blockedCount": 5,
+      "targetLabel": "100% of due priority milestones completed on time",
+      "trend": { "change": -2.1, "label": "-2.1pts vs prior period", "direction": "higher-is-better" },
+      "provenance": {
+        "definition": "Priority milestones completed by their due date, as a share of those due.",
+        "methodology": "Completed-on-time ÷ due, × 100, for the selected reporting date.",
+        "source": "Implementation Register",
+        "lastUpdated": "2025-10-01T00:00:00Z"
+      }
+    },
+    "delayedOrBlocked": {
+      "title": "Delayed or blocked priority records",
+      "icon": "escalations",
+      "count": 14,
+      "targetLabel": "Zero delayed or blocked priority records",
+      "supportingLabel": "median 22 days delayed",
+      "trend": { "change": 3, "label": "+3 vs prior period", "direction": "lower-is-better" },
+      "provenance": {
+        "definition": "Priority programmes, projects or milestones currently delayed or blocked.",
+        "methodology": "Count of priority records with status delayed or blocked.",
+        "source": "Implementation Register",
+        "lastUpdated": "2025-10-01T00:00:00Z"
+      }
+    },
+    "evidenceOverdue": {
+      "title": "Priority records missing current evidence",
+      "icon": "escalations",
+      "count": 7,
+      "targetLabel": "Zero priority records without current evidence",
+      "supportingLabel": "median 61 days since last update",
+      "trend": { "change": -1, "label": "-1 vs prior period", "direction": "lower-is-better" },
+      "provenance": {
+        "definition": "Priority records with no evidence document or no update within the expected cadence.",
+        "methodology": "Count of priority records where evidenceUrl is null or lastUpdate exceeds the cadence.",
+        "source": "Implementation Register",
+        "lastUpdated": "2025-10-01T00:00:00Z"
+      }
+    }
+  },
+  "programmes": {
+    "items": [
+      {
+        "id": "PRG-0031",
+        "name": "Northern Grid Reinforcement Programme",
+        "leadInstitution": "Transmission Company of Nigeria",
+        "supportingInstitutions": ["Nigerian Independent System Operator"],
+        "pillar": "generation-network",
+        "objectives": "Reinforce the 132kV backbone serving the North West and North East load centres.",
+        "financing": "World Bank DARES facility, USD 180M",
+        "status": "at-risk",
+        "priority": "priority",
+        "startDate": "2024-03-01T00:00:00Z",
+        "endDate": "2027-06-30T00:00:00Z",
+        "bottlenecks": ["BTL-2025-0088"],
+        "bottleneckCategory": "technical-constraint",
+        "validationStatus": "confirmed",
+        "lastUpdate": "2025-10-01T00:00:00Z"
+      }
+      // + every other row matching the query, up to pageSize.
+    ],
+    "page": 1,
+    "pageSize": 25,
+    "total": 40
+  }
 }</code></pre>
         <div class="tablewrap">
           <table class="params">
@@ -701,44 +1409,106 @@
 
       <article class="endpoint" id="programs-projects-list">
         <div class="endpoint-head"><span class="method">GET</span><span class="path">/api/programs/:programmeId/projects</span></div>
-        <p class="summary">Query (optional): <code>search</code>, <code>status</code>. Returns
-          <code>ProjectRecord[]</code> for this programme — not paginated (a programme's project list
-          is expected to stay small).</p>
+        <p class="summary">Query: <code>search</code>, <code>status</code> (both optional), plus
+          <code>page</code>/<code>pageSize</code> — this list <strong>is paginated</strong>
+          (<code>pageSize</code> defaults to 10 on the frontend). Returns the standard pagination
+          envelope wrapping <code>ProjectRecord[]</code>, same shape as every other paginated list in
+          this document — see the global data-format section.</p>
       </article>
 
       <article class="endpoint" id="programs-project-detail">
         <div class="endpoint-head"><span class="method">GET</span><span class="path">/api/programs/projects/:projectId</span></div>
         <p class="summary">Single project, aligned to the Programme &amp; Project tracking workbook's
           column set.</p>
+        <h4>Response</h4>
+<pre><code>{
+  "id": "PRJ-2025-0142",
+  "name": "Kaduna 132kV Feeder Reinforcement",
+  "programmeId": "PRG-0031",
+  "programmeName": "Northern Grid Reinforcement Programme",
+  "owner": "Transmission Company of Nigeria",
+  "location": "Kaduna State",
+  "coverage": "Kaduna metro and 6 surrounding LGAs",
+  "pillar": "generation-network",
+  "lifecycleStage": "implementation",
+  "programType": "concessional-loan",
+  "fundingSource": "World Bank DARES facility",
+  "fundingStructure": "Concessional loan with government counterpart funding",
+  "fundingStatus": "disbursing",
+  "projectedStatus": "on-track",
+  "currentStatus": "at-risk",
+  "startDate": "2025-02-01T00:00:00Z",
+  "endDate": "2025-12-15T00:00:00Z",
+  "evidenceUrl": "https://example.gov.ng/evidence/prj-2025-0142.pdf",
+  "bottlenecks": ["BTL-2025-0088"],
+  "bottleneckCategory": "technical-constraint",
+  "comment": "Right-of-way approval for the new feeder route is pending state government sign-off.",
+  "suggestion": "Escalate right-of-way approval through the steering committee.",
+  "validationStatus": "confirmed",
+  "profile": {
+    "description": "Reinforces the 132kV feeder serving Kaduna metro to relieve overload during peak demand.",
+    "budgetUsd": 12500000,
+    "disbursedUsd": 4100000,
+    "contractor": "Northline Power Engineering Ltd",
+    "contactName": "Ibrahim Sule",
+    "contactEmail": "i.sule@tcn.gov.ng",
+    "documents": [
+      { "label": "Environmental impact assessment", "url": "https://example.gov.ng/docs/prj-2025-0142-eia.pdf" }
+    ],
+    "updates": [
+      { "date": "2025-09-15T00:00:00Z", "note": "Substation civil works 60% complete." }
+    ]
+  }
+}</code></pre>
         <ul class="notes">
           <li><code>pillar</code> — the workbook's "M300 Pillar Alignment"; a project can align to a
             different pillar than its parent programme's primary pillar.</li>
-          <li><code>lifecycleStage</code>, <code>programType</code>, <code>fundingSource</code>
-            (nullable — not yet secured), <code>fundingStructure</code>, <code>fundingStatus</code>.</li>
+          <li><code>coverage</code> — free text describing the geographic extent served (distinct from
+            <code>location</code>, the project's base location). Present on the schema but previously
+            missing from this document entirely.</li>
+          <li><code>fundingSource</code> is nullable — not yet secured.</li>
           <li><code>projectedStatus</code> vs <code>currentStatus</code> — both
             <code>ExecutionStatus</code>, shown side by side so a gap between plan and reality is
             visible at a glance.</li>
-          <li><code>evidenceUrl</code> (nullable), <code>bottlenecks[]</code>,
-            <code>bottleneckCategory</code> (nullable), <code>comment</code>, <code>suggestion</code>.</li>
-          <li><code>profile</code> — nested: <code>description</code>, <code>budgetUsd</code>,
-            <code>disbursedUsd</code>, <code>contractor</code> (nullable), <code>contactName</code>,
-            <code>contactEmail</code>, <code>documents[]</code> (<code>{label, url}</code>),
-            <code>updates[]</code> (<code>{date, note}</code>).</li>
+          <li><code>evidenceUrl</code> and <code>bottleneckCategory</code> are nullable.</li>
         </ul>
       </article>
 
       <article class="endpoint" id="programs-milestones">
         <div class="endpoint-head"><span class="method">GET</span><span class="path">/api/programs/projects/:projectId/milestones</span></div>
-        <p class="summary">Returns <code>MilestoneRecord[]</code> for this project — not paginated.
-          Each: <code>priority</code>, <code>expectedDate</code>, <code>actualDate</code> (nullable),
-          <code>status</code>, <code>leadInstitution</code>, <code>evidenceUrl</code> (nullable),
-          <code>risk</code>, <code>nextAction</code>, <code>bottleneckCategory</code> (nullable),
-          <code>validationStatus</code>.</p>
+        <p class="summary">Query: <code>page</code>/<code>pageSize</code> — this list
+          <strong>is paginated</strong> (<code>pageSize</code> defaults to 10 on the frontend).</p>
+<pre><code>{
+  "items": [
+    {
+      "id": "MST-2025-0311",
+      "name": "Substation civil works complete",
+      "projectId": "PRJ-2025-0142",
+      "projectName": "Kaduna 132kV Feeder Reinforcement",
+      "priority": "priority",
+      "expectedDate": "2025-09-30T00:00:00Z",
+      "actualDate": null,
+      "status": "at-risk",
+      "leadInstitution": "Transmission Company of Nigeria",
+      "evidenceUrl": null,
+      "risk": "Right-of-way approval delay may push completion by 6 weeks.",
+      "nextAction": "Escalate right-of-way approval through the steering committee.",
+      "bottleneckCategory": "regulatory-approval",
+      "validationStatus": "confirmed"
+    }
+    // + every other milestone for this project, up to pageSize.
+  ],
+  "page": 1,
+  "pageSize": 10,
+  "total": 6
+}</code></pre>
+        <p class="summary"><code>actualDate</code> is null until the milestone is actually completed;
+          <code>evidenceUrl</code> and <code>bottleneckCategory</code> are nullable the same way.</p>
       </article>
     </section>
 
     <section id="bottlenecks">
-      <h2 class="module-title">8. Bottlenecks &amp; Exceptions</h2>
+      <h2 class="module-title">9. Bottlenecks &amp; Exceptions</h2>
       <p class="module-desc">The full delivery-constraint register — richer than the lightweight shapes
         shown elsewhere. Schema: <code>src/api/schemas/bottlenecks.ts</code>.</p>
       <div class="callout">
@@ -761,12 +1531,89 @@
         <h4>Response</h4>
 <pre><code>{
   "lastUpdated": "2025-10-14T09:12:00Z",
-  "alerts": [ /* exactly 4 headline alert cards */ ],
-  "register": { "items": [ /* … */ ], "page": 1, "pageSize": 25, "total": 90 },
-  "byCategory": [ /* Section C */ ],
-  "byLifecycleStage": [ /* Section C */ ],
-  "byInstitution": [ /* Section D */ ],
-  "escalations": { "items": [ /* … */ ], "page": 1, "pageSize": 25, "total": 12 }
+  "alerts": [
+    {
+      "id": "unresolved-critical",
+      "title": "Unresolved critical bottlenecks",
+      "count": 6,
+      "targetLabel": "Zero unresolved critical bottlenecks",
+      "supportingLabel": "oldest: 118 days",
+      "trend": { "change": -2, "label": "-2 vs prior period", "direction": "lower-is-better" },
+      "provenance": {
+        "definition": "Open or in-progress register entries with severity critical.",
+        "methodology": "Count of register rows where severity = critical and status is not resolved.",
+        "source": "Bottleneck Register",
+        "lastUpdated": "2025-10-01T00:00:00Z"
+      }
+    }
+    // + 3 more — exactly 4 headline alert cards, always.
+  ],
+  "register": {
+    "items": [
+      {
+        "id": "BTL-2025-0088",
+        "issue": "Transmission evacuation constraint limiting dispatch, North East",
+        "category": "technical-constraint",
+        "severity": "critical",
+        "pillar": "generation-network",
+        "linkedRecord": "IMP-2025-0055",
+        "institution": "Transmission Company of Nigeria",
+        "dateRaised": "2025-08-25T00:00:00Z",
+        "ageDays": 46,
+        "followUp": "Escalated to steering committee for right-of-way approval.",
+        "escalationStatus": "escalated",
+        "status": "blocked",
+        "lifecycleStage": "implementation"
+      }
+      // + every other row matching the query, up to pageSize.
+    ],
+    "page": 1,
+    "pageSize": 25,
+    "total": 90
+  },
+  "byCategory": [
+    { "category": "technical-constraint", "label": "Technical constraint", "count": 22 },
+    { "category": "regulatory-approval", "label": "Regulatory approval", "count": 18 }
+    // + one row per BottleneckCategory value that has at least one record.
+  ],
+  "byLifecycleStage": [
+    {
+      "stage": "implementation",
+      "label": "Implementation",
+      "bySeverity": [
+        { "severity": "critical", "count": 6 },
+        { "severity": "high", "count": 11 },
+        { "severity": "medium", "count": 14 },
+        { "severity": "low", "count": 3 }
+      ],
+      "total": 34
+    }
+    // + one row per LifecycleStage value.
+  ],
+  "byInstitution": [
+    { "institution": "Transmission Company of Nigeria", "openCount": 12, "criticalOrHighCount": 5 }
+    // + one row per institution with at least one open record.
+  ],
+  "escalations": {
+    "items": [
+      {
+        "id": "ESC-2025-0019",
+        "bottleneckId": "BTL-2025-0088",
+        "decisionRequired": "Approve emergency right-of-way acquisition for the new feeder route.",
+        "level": "steering-committee",
+        "owner": "Federal Ministry of Power",
+        "dueDate": "2025-10-20T00:00:00Z",
+        "daysOverdue": 5,
+        "status": "overdue",
+        "resolution": null,
+        "evidenceUrl": null
+      }
+      // + every other row matching the query, up to pageSize.
+    ],
+    "page": 1,
+    "pageSize": 25,
+    "total": 12
+  }
 }</code></pre>
         <ul class="notes">
           <li><code>alerts</code> — exactly 4. Every one targets zero and compares against the previous
@@ -801,7 +1648,29 @@
   "followUp": "…"                        // optional, max 1000 chars
 }</code></pre>
         <h4>Response <span class="status-tag">201</span></h4>
-<pre><code>{ "record": { /* full record, server-assigned id, dateRaised, etc. */ }, "message": "…" }</code></pre>
+<pre><code>{
+  "record": {
+    "id": "BTL-2025-0142",
+    "issue": "Transmission evacuation constraint limiting dispatch, North East",
+    "category": "technical-constraint",
+    "severity": "critical",
+    "pillar": "generation-network",
+    "linkedRecord": "IMP-2025-0055",
+    "institution": "Transmission Company of Nigeria",
+    "dateRaised": "2025-10-14T09:12:00Z",
+    "ageDays": 0,
+    "followUp": "…",
+    "escalationStatus": "not-escalated",
+    "status": "open",
+    "lifecycleStage": "implementation"
+  },
+  "message": "Bottleneck BTL-2025-0142 created."
+}</code></pre>
+        <p class="summary"><code>id</code>, <code>dateRaised</code> and <code>ageDays</code> (0 on
+          creation) are server-assigned — do not accept them in the request. <code>escalationStatus</code>
+          and <code>status</code> both start at their "nothing has happened yet" value
+          (<code>not-escalated</code>, <code>open</code>) regardless of what the request sent, since
+          neither is a request field.</p>
       </article>
 
       <article class="endpoint" id="bottlenecks-filters">
@@ -815,12 +1684,14 @@
       <article class="endpoint" id="bottlenecks-by-project">
         <div class="endpoint-head"><span class="method">GET</span><span class="path">/api/bottlenecks/by-project/:projectId</span></div>
         <p class="summary">Bottleneck records linked to a specific project (used by the Programs
-          project drill-down). Not paginated.</p>
+          project drill-down). Query: <code>page</code>/<code>pageSize</code> — this list
+          <strong>is paginated</strong> (<code>pageSize</code> defaults to 10 on the frontend). Returns
+          the standard pagination envelope wrapping <code>BottleneckRecord[]</code>.</p>
       </article>
     </section>
 
     <section id="submissions">
-      <h2 class="module-title">9. Data Submissions</h2>
+      <h2 class="module-title">10. Data Submissions</h2>
       <p class="module-desc">The full submission → validation → calculation → approval → KPI-publish
         pipeline. The module with the most operational business logic in the product — read it
         carefully. Schemas: <code>src/api/schemas/data-submissions/</code> (split across
@@ -890,7 +1761,18 @@
         <p class="summary">All values are sent as strings regardless of the field's <code>type</code>
           — the backend parses/validates by type.</p>
         <h4>Response <span class="status-tag">201</span></h4>
-<pre><code>{ "submissionId": "…", "version": 1, "status": { "code": "pending-review", … }, "message": "…", "nextUrl": "/data-submissions/validation/…" }</code></pre>
+<pre><code>{ "submissionId": "…", "version": 1, "status": { "code": "draft", … }, "message": "Draft saved. Server validation is ready to run.", "nextUrl": "/data-submissions/submissions" }</code></pre>
+        <div class="callout">
+          <strong>This differs from the upload response below, and it's not a typo:</strong> a manual
+          entry only ever creates a <code>draft</code> — server-side validation of the entered values
+          runs asynchronously, so the frontend cannot send the submitter straight to the review queue,
+          because the queue is exactly what shows once that validation has produced a result. Route the
+          user back to <code>/data-submissions/submissions</code>, where they'll see the row transition
+          out of <code>draft</code> once validation completes. Do not return
+          <code>status: "pending-review"</code> or a <code>/validation/:id</code> <code>nextUrl</code>
+          here — that combination belongs only to the upload endpoint, where validation has already run
+          synchronously by the time the response is sent.
+        </div>
       </article>
 
       <article class="endpoint" id="submissions-upload-form">
@@ -918,9 +1800,15 @@
           </table>
         </div>
         <h4>Response <span class="status-tag">201</span></h4>
-        <p class="summary" style="margin-top:0">Same shape as the manual-entry response above
+<pre><code>{ "submissionId": "…", "version": 1, "status": { "code": "pending-review", … }, "message": "Upload received. Backend validation passed and the submission is ready for review.", "nextUrl": "/data-submissions/validation/…" }</code></pre>
+        <p class="summary" style="margin-top:0">Same four fields as the manual-entry response above
           (<code>submissionId</code>, <code>version</code>, <code>status</code>, <code>message</code>,
-          <code>nextUrl</code>).</p>
+          <code>nextUrl</code>) — but not the same <em>values</em>. Because template structure and
+          business-rule validation run synchronously as part of handling this upload, the submission is
+          already validated by the time this response is sent, so it goes straight to
+          <code>pending-review</code> and <code>nextUrl</code> points at
+          <code>/data-submissions/validation/:id</code> — the review screen for this exact submission,
+          not the general queue.</p>
         <div class="callout">Backend responsibility, not the frontend's: parsing the uploaded file,
           validating every row against the dataset's field definitions, running the dataset's
           calculation formula, and producing the <code>extractedValues</code> shown on the review
@@ -994,12 +1882,17 @@
           if <code>decision</code> is not in this submission's current <code>permittedDecisions</code>.</p>
         <h4>Response <span class="status-tag">200</span></h4>
 <pre><code>{
-  "submissionId": "…",
-  "status": { "code": "approved", … },
+  "submissionId": "SUB-2026-0021",
+  "status": { "code": "approved", "label": "Approved", "tone": "success" },
   "message": "Decision recorded: Approved. Published to Metering Rate.",
-  "nextUrl": "…",
-  "published": [ /* empty for 'returned'/'rejected', or if nothing was extracted */ ]
+  "nextUrl": "/data-submissions/validation",
+  "published": [
+    { "kpiId": "M300-P3-004", "kpiName": "Metering Rate", "reportingPeriod": "Q3 2026", "value": 57.4 }
+  ]
 }</code></pre>
+        <p class="summary"><code>published</code> is an empty array for <code>returned</code>/
+          <code>rejected</code> decisions, or if the submission had nothing in
+          <code>extractedValues</code> to publish — never omitted.</p>
         <div class="callout"><strong>This is the point where a KPI's current value and history
           actually change.</strong> <code>approved</code> and <code>provisional</code> decisions
           publish every entry in <code>extractedValues</code> to its KPI (updates
@@ -1026,12 +1919,16 @@
     </section>
 
     <section id="statedisco">
-      <h2 class="module-title">10. State &amp; DisCo</h2>
+      <h2 class="module-title">11. State &amp; DisCo</h2>
       <p class="module-desc">Six separate endpoints rather than one parameterised view. Schemas split
         across <code>src/api/schemas/state-disco/</code>. Every response wraps its rows in a shared
         <code>meta</code> block (<code>title</code>, <code>description</code>,
         <code>lastUpdatedLabel</code>, <code>sourceLabel</code>) so each view can carry its own
         framing text even though the page shell is shared.</p>
+      <figure class="screenshot">
+        <img src="screenshots/state-disco.png" alt="State & DisCo performance overview with the four national weighted-value metric cards" loading="lazy">
+        <figcaption>/state-disco — Performance overview tab.</figcaption>
+      </figure>
 
       <article class="endpoint" id="statedisco-filters">
         <div class="endpoint-head"><span class="method">GET</span><span class="path">/api/state-disco/filters</span></div>
@@ -1042,67 +1939,224 @@
 
       <article class="endpoint" id="statedisco-overview">
         <div class="endpoint-head"><span class="method">GET</span><span class="path">/api/state-disco/overview</span></div>
-<pre><code>{ "meta": { … }, "selectedUtility": "…", "metrics": [ /* exactly 4 */ ] }</code></pre>
-        <p class="summary">Each metric: <code>value</code>, <code>supportingLabel</code>,
-          <code>benchmarkLabel</code>, <code>varianceLabel</code>, <code>progressPercent</code>
-          (0–100), <code>trend</code> (required), <code>provenance</code>.</p>
+<pre><code>{
+  "meta": {
+    "title": "State & DisCo overview",
+    "description": "Distribution company performance against approved benchmarks.",
+    "lastUpdatedLabel": "Updated 1 October 2025",
+    "sourceLabel": "NERC Quarterly Reports"
+  },
+  "selectedUtility": "Kaduna Electric",
+  "metrics": [
+    {
+      "id": "metering-rate",
+      "title": "Metering rate",
+      "value": "61.4%",
+      "supportingLabel": "812,400 of 1,323,000 active customers metered",
+      "benchmarkLabel": "100% by 2027",
+      "varianceLabel": "-38.6pts vs target",
+      "progressPercent": 61.4,
+      "trend": { "change": 3.1, "label": "+3.1pts vs prior period", "direction": "higher-is-better" },
+      "provenance": {
+        "definition": "Metered active customers ÷ total active registered customers × 100.",
+        "methodology": "As reported by the DisCo, cross-checked against NERC's Monthly Metering Factsheet.",
+        "source": "NERC Monthly Metering Factsheet",
+        "lastUpdated": "2025-10-01T00:00:00Z"
+      }
+    }
+    // + 3 more — exactly 4 metrics, always.
+  ]
+}</code></pre>
       </article>
 
       <article class="endpoint" id="statedisco-comparison">
         <div class="endpoint-head"><span class="method">GET</span><span class="path">/api/state-disco/comparison</span></div>
         <p class="summary">Query: <code>distributionCompany</code> — a DisCo id, or
           <code>national</code> (the sentinel for "all DisCos", <strong>not</strong> <code>all</code>
-          — this one endpoint's convention differs from every other module, match it exactly). Rows
-          carry pre-computed display strings for active/metered/unmetered customers, metering rate,
-          energy received/billed + billing efficiency, revenue billed/collected + collection
-          efficiency, remittance performance, plus paired bar-percent fields
-          (<code>energyReceivedBarPercent</code>, <code>energyBilledBarPercent</code>,
-          <code>revenueBilledBarPercent</code>, <code>revenueCollectedBarPercent</code>, each 0–100)
-          driving the comparison bars.</p>
+          — this one endpoint's convention differs from every other module, match it exactly).</p>
+<pre><code>{
+  "meta": {
+    "title": "DisCo comparison",
+    "description": "Distribution companies ranked by billing and collection performance.",
+    "lastUpdatedLabel": "Updated 1 October 2025",
+    "sourceLabel": "NERC Quarterly Reports"
+  },
+  "rows": [
+    {
+      "id": "kaduna-electric",
+      "name": "Kaduna Electric",
+      "rankLabel": "3 of 11",
+      "activeCustomers": "1,323,000",
+      "meteredCustomers": "812,400",
+      "unmeteredCustomers": "510,600",
+      "meteringRate": "61.4%",
+      "energyReceived": "612 GWh",
+      "energyBilled": "489 GWh",
+      "billingEfficiency": "79.9%",
+      "energyReceivedBarPercent": 100,
+      "energyBilledBarPercent": 79.9,
+      "revenueBilled": "₦48.2bn",
+      "revenueCollected": "₦39.1bn",
+      "collectionEfficiency": "81.1%",
+      "revenueBilledBarPercent": 100,
+      "revenueCollectedBarPercent": 81.1,
+      "remittancePerformance": "76.4%",
+      "validationLabel": "Confirmed"
+    }
+    // + one row per DisCo (11 total), or the single matching row when a
+    // specific distributionCompany is requested.
+  ]
+}</code></pre>
+        <p class="summary">Every string field here is pre-formatted for direct display (see the
+          "Pre-formatted display values" callout in the global data-format section) — the
+          <code>*BarPercent</code> fields are the only raw numbers, and they drive the comparison bars
+          directly; do not derive them from the display strings on the frontend.</p>
       </article>
 
       <article class="endpoint" id="statedisco-supply-tariff">
         <div class="endpoint-head"><span class="method">GET</span><span class="path">/api/state-disco/supply-tariff</span></div>
         <p class="summary">Query: <code>distributionCompany</code> (same convention as
-          <code>/comparison</code>). Rows: <code>utility</code>, <code>effectiveOrder</code>, and
-          exactly 5 <code>bands</code> (<code>band</code> A–E plus <code>supplyHours</code>,
-          <code>tariff</code>, <code>intensityPercent</code>). No unweighted tariff average across
-          bands.</p>
+          <code>/comparison</code>).</p>
+<pre><code>{
+  "meta": {
+    "title": "Supply hours and tariff bands",
+    "description": "Service band commitments and effective tariffs by DisCo.",
+    "lastUpdatedLabel": "Updated 1 October 2025",
+    "sourceLabel": "NERC Multi-Year Tariff Order"
+  },
+  "rows": [
+    {
+      "id": "kaduna-electric",
+      "utility": "Kaduna Electric",
+      "effectiveOrder": "MYTO-2024 Minor Review",
+      "bands": [
+        { "band": "A", "supplyHours": "20+ hrs/day", "tariff": "₦225.83/kWh", "intensityPercent": 8 },
+        { "band": "B", "supplyHours": "16-20 hrs/day", "tariff": "₦150.35/kWh", "intensityPercent": 15 },
+        { "band": "C", "supplyHours": "12-16 hrs/day", "tariff": "₦109.34/kWh", "intensityPercent": 32 },
+        { "band": "D", "supplyHours": "8-12 hrs/day", "tariff": "₦75.12/kWh", "intensityPercent": 28 },
+        { "band": "E", "supplyHours": "&lt;8 hrs/day", "tariff": "₦58.90/kWh", "intensityPercent": 17 }
+      ]
+    }
+    // + one row per DisCo, or the single matching row when a specific
+    // distributionCompany is requested. bands is always exactly 5 (A-E).
+  ]
+}</code></pre>
+        <p class="summary">No unweighted tariff average across bands — each band's
+          <code>intensityPercent</code> is the share of customers on it, for a weighted view instead.</p>
       </article>
 
       <article class="endpoint" id="statedisco-delivery">
         <div class="endpoint-head"><span class="method">GET</span><span class="path">/api/state-disco/delivery</span></div>
-        <p class="summary">Query: <code>distributionCompany</code> (same convention as above). Rows:
-          <code>milestone</code>, <code>dueDateLabel</code>, <code>executionStatus</code>,
-          <code>achievedLabel</code>, <code>evidenceLabel</code>, <code>reportingCompliance</code>,
-          <code>bottleneck</code> (free text, may be empty).</p>
+        <p class="summary">Query: <code>distributionCompany</code> (same convention as above).</p>
+<pre><code>{
+  "meta": {
+    "title": "DisCo delivery commitments",
+    "description": "Milestones each DisCo has committed to under its Performance Improvement Plan.",
+    "lastUpdatedLabel": "Updated 1 October 2025",
+    "sourceLabel": "DisCo Performance Improvement Plans"
+  },
+  "rows": [
+    {
+      "id": "kaduna-electric-meter-rollout",
+      "utility": "Kaduna Electric",
+      "milestone": "Deploy 150,000 prepaid meters under the National Mass Metering Programme",
+      "dueDateLabel": "Due 31 December 2025",
+      "executionStatus": "at-risk",
+      "achievedLabel": "94,200 of 150,000 deployed",
+      "evidenceLabel": "Q3 2025 metering report attached",
+      "reportingCompliance": "On time",
+      "bottleneck": "Meter import delays at port of Lagos"
+    }
+    // + every other committed milestone for the requested DisCo(s).
+    // "bottleneck" may be an empty string when nothing currently blocks it.
+  ]
+}</code></pre>
       </article>
 
       <article class="endpoint" id="statedisco-states">
         <div class="endpoint-head"><span class="method">GET</span><span class="path">/api/state-disco/states</span></div>
         <p class="summary">Query: <code>state</code> (a state id, or <code>all</code>/omitted for
-          every state). Rows: <code>state</code>, <code>zone</code>, <code>miniGridConnections</code>,
-          <code>solarHomeSystems</code>, <code>activeProgrammes</code>, <code>activeProjects</code>,
-          <code>openBottlenecks</code>, <code>validationLabel</code>, <code>coverageBarPercent</code>
-          (0–100). Also carries a <code>notice</code> string — connection counts must not be converted
-          into an inferred state electricity-access rate.</p>
+          every state).</p>
+<pre><code>{
+  "meta": {
+    "title": "State coverage",
+    "description": "Last-mile delivery activity by state.",
+    "lastUpdatedLabel": "Updated 1 October 2025",
+    "sourceLabel": "Rural Electrification Agency programme records"
+  },
+  "notice": "Connection counts are cumulative programme totals and must not be converted into an inferred state electricity-access rate.",
+  "rows": [
+    {
+      "id": "kaduna",
+      "state": "Kaduna",
+      "zone": "North West",
+      "miniGridConnections": "12,400",
+      "solarHomeSystems": "38,900",
+      "activeProgrammes": "4",
+      "activeProjects": "9",
+      "openBottlenecks": "2",
+      "validationLabel": "Confirmed",
+      "coverageBarPercent": 41.2
+    }
+    // + one row per state (37 total), or the single matching row when a
+    // specific state is requested.
+  ]
+}</code></pre>
       </article>
 
       <article class="endpoint" id="statedisco-state-detail">
         <div class="endpoint-head"><span class="method">GET</span><span class="path">/api/state-disco/states/:id</span></div>
-        <p class="summary">Single-state detail — the matching coverage row plus <code>records[]</code>
-          (<code>type</code> — <code>programme</code>/<code>project</code>/<code>bottleneck</code> —
-          <code>name</code>, <code>owner</code>, <code>status</code>, <code>deliveryLabel</code>,
-          <code>sourceLabel</code>). <span class="status-tag">404</span> if the state id doesn't exist.</p>
+        <p class="summary">Single-state detail — the matching coverage row (same shape as one
+          <code>/states</code> row) plus its linked programme/project/bottleneck records.
+          <span class="status-tag">404</span> if the state id doesn't exist.</p>
+<pre><code>{
+  "meta": {
+    "title": "Kaduna State",
+    "description": "Delivery activity in Kaduna State.",
+    "lastUpdatedLabel": "Updated 1 October 2025",
+    "sourceLabel": "Rural Electrification Agency programme records"
+  },
+  "state": {
+    "id": "kaduna",
+    "state": "Kaduna",
+    "zone": "North West",
+    "miniGridConnections": "12,400",
+    "solarHomeSystems": "38,900",
+    "activeProgrammes": "4",
+    "activeProjects": "9",
+    "openBottlenecks": "2",
+    "validationLabel": "Confirmed",
+    "coverageBarPercent": 41.2
+  },
+  "notice": "Connection counts are cumulative programme totals and must not be converted into an inferred state electricity-access rate.",
+  "records": [
+    {
+      "id": "PRJ-2025-0142",
+      "type": "project",
+      "name": "Kaduna 132kV Feeder Reinforcement",
+      "owner": "Transmission Company of Nigeria",
+      "status": "at-risk",
+      "deliveryLabel": "Projected completion 15 December 2025",
+      "sourceLabel": "Programme & Project tracking workbook"
+    }
+    // + every other programme/project/bottleneck record touching this state.
+  ]
+}</code></pre>
       </article>
     </section>
 
     <section id="reports">
-      <h2 class="module-title">11. Reports &amp; Exports</h2>
+      <h2 class="module-title">12. Reports &amp; Exports</h2>
       <p class="module-desc">Schema: <code>src/api/schemas/reports.ts</code>. The spec groups reports
         into four categories (<code>compact</code>, <code>performance</code>, <code>delivery</code>,
         <code>data-governance</code>), each containing one or more report types — a report type, not a
         category, is what a user actually generates or finds in Saved Reports.</p>
+      <figure class="screenshot">
+        <img src="screenshots/reports.png" alt="Reports & Exports page with report configuration on the left and live preview on the right" loading="lazy">
+        <figcaption>/reports — configuration panel and live preview. See the callout under
+          <code>POST /reports/generate</code> below: the PDF/Excel file shown by the "Generate" buttons
+          is built client-side from this preview data, not returned by the API.</figcaption>
+      </figure>
 
       <article class="endpoint" id="reports-filters">
         <div class="endpoint-head"><span class="method">GET</span><span class="path">/api/reports/filters</span></div>
@@ -1117,38 +2171,166 @@
           results.</p>
         <h4>Response</h4>
 <pre><code>{
-  "lastUpdated": "…",
-  "catalogue": [ /* every report type, with definition/methodology/dataSource */ ],
-  "compactExports": [ /* 'compact-progress-report' and 'implementation-register' */ ],
-  "savedReports": { "items": [ /* … */ ], "page": 1, "pageSize": 10, "total": … }
+  "lastUpdated": "2025-10-14T09:12:00Z",
+  "catalogue": [
+    {
+      "reportType": "compact-progress",
+      "category": "compact",
+      "title": "Compact Progress Report",
+      "definition": "Consolidated quarterly progress against every Compact commitment.",
+      "methodology": "Aggregates headline, pillar and delivery data as of the reporting period close.",
+      "dataSource": "Executive Overview, Pillar Dashboards, Implementation Register"
+    }
+    // + one card per ReportType value, ten total.
+  ],
+  "compactExports": [
+    {
+      "id": "compact-progress-report",
+      "title": "Compact Progress Report",
+      "definition": "The formal quarterly CPR submitted to the Compact steering committee.",
+      "methodology": "Same data as the compact-progress report type, formatted to the CPR template.",
+      "dataSource": "Executive Overview, Pillar Dashboards, Implementation Register",
+      "reportType": "compact-progress"
+    },
+    {
+      "id": "implementation-register",
+      "title": "Implementation Register export",
+      "definition": "The full priority-milestone register as of the reporting period close.",
+      "methodology": "Direct export of the Implementation Register, unfiltered.",
+      "dataSource": "Implementation Register",
+      "reportType": "implementation"
+    }
+  ],
+  "savedReports": {
+    "items": [
+      {
+        "id": "RPT-2025-0091",
+        "reportType": "pillar-performance",
+        "category": "performance",
+        "title": "Generation & Network — Q3 2025",
+        "owner": "Aisha Bello",
+        "filtersSummary": "Q3 2025 · Generation & Network · All states",
+        "format": "pdf",
+        "fileReference": "reports/RPT-2025-0091.pdf",
+        "createdAt": "2025-10-05T10:00:00Z",
+        "lastGeneratedAt": "2025-10-05T10:00:00Z",
+        "config": {
+          "reportType": "pillar-performance",
+          "period": "q3-2025",
+          "pillar": "generation-network",
+          "kpiCategory": "",
+          "state": "",
+          "distributionCompany": "",
+          "programmeOrAgency": "",
+          "validationStatus": "",
+          "readinessTier": "",
+          "format": "pdf"
+        }
+      }
+      // + every other row matching the query, up to pageSize.
+    ],
+    "page": 1,
+    "pageSize": 10,
+    "total": 23
+  }
 }</code></pre>
       </article>
 
       <article class="endpoint" id="reports-preview">
         <div class="endpoint-head"><span class="method">POST</span><span class="path">/api/reports/preview</span></div>
         <h4>Request</h4>
-        <p class="summary" style="margin-top:0"><code>reportType</code>, <code>period</code>,
-          <code>pillar</code>, <code>kpiCategory</code>, <code>state</code>,
-          <code>distributionCompany</code>, <code>programmeOrAgency</code>,
-          <code>validationStatus</code>, <code>readinessTier</code>, <code>format</code>.
-          <code>400</code> on a schema mismatch.</p>
+<pre><code>{
+  "reportType": "pillar-performance",
+  "period": "q3-2025",
+  "pillar": "generation-network",
+  "kpiCategory": "",
+  "state": "",
+  "distributionCompany": "",
+  "programmeOrAgency": "",
+  "validationStatus": "",
+  "readinessTier": "",
+  "format": "pdf"
+}</code></pre>
+        <p class="summary">Every field is required by the schema, but most are empty strings when that
+          filter doesn't apply to the selected <code>reportType</code> — send <code>""</code>, not
+          <code>null</code> and not an omitted key. <code>400</code> on a schema mismatch.</p>
         <h4>Response</h4>
-        <p class="summary" style="margin-top:0"><code>metadata</code> (<code>title</code>,
-          <code>reportingPeriod</code>, <code>appliedFilters[]</code> as <code>{label, value}</code>
-          pairs, <code>generatedAt</code>, <code>dataVersion</code>, <code>sourceNotes</code>,
-          <code>validationStatus</code>, <code>units</code>, <code>limitations</code> — all required)
-          and <code>sections[]</code> (generic <code>{title, columns[], rows[][]}</code> tables). The
-          same shape backs both the on-screen preview and the generated file — build one renderer, not
-          two.</p>
+<pre><code>{
+  "metadata": {
+    "title": "Generation & Network — Q3 2025",
+    "reportingPeriod": "Q3 2025",
+    "appliedFilters": [
+      { "label": "Pillar", "value": "Generation & Network" }
+    ],
+    "generatedAt": "2025-10-14T09:12:00Z",
+    "dataVersion": "2025-10-14T09:12:00Z",
+    "sourceNotes": "Compiled from Executive Overview and Pillar Dashboard data as of the reporting period close.",
+    "validationStatus": "Confirmed",
+    "units": "MW, %, NGN",
+    "limitations": "Renewable share is seasonal; compare only against the same quarter in prior years."
+  },
+  "sections": [
+    {
+      "title": "Headline indicators",
+      "columns": ["Indicator", "Current", "Target", "Trend"],
+      "rows": [
+        ["Renewable Energy Share in Generation Mix", "27.4%", "50% by 2030", "+2.1pts"]
+      ]
+    }
+  ]
+}</code></pre>
+        <p class="summary">The same shape backs both the on-screen preview and the generated file — build
+          one renderer, not two. <code>sections[].rows</code> is always an array of string arrays, even
+          for numeric columns — the backend formats the number, the frontend never re-formats it.</p>
       </article>
 
       <article class="endpoint" id="reports-generate">
         <div class="endpoint-head"><span class="method">POST</span><span class="path">/api/reports/generate</span></div>
-        <p class="summary">Same request as <code>/preview</code>. Response:
-          <code>{ preview, savedReport }</code> — generates the actual downloadable file (per
-          <code>config.format</code>) and persists a saved-report row (id, owner,
-          <code>fileReference</code>, <code>createdAt</code>, <code>lastGeneratedAt</code>, the
-          <code>config</code> that produced it) so it appears in Saved Reports afterward.</p>
+        <p class="summary">Same request body as <code>/preview</code>.</p>
+        <h4>Response <span class="status-tag">201</span></h4>
+<pre><code>{
+  "preview": { /* identical shape to POST /reports/preview's response, above */ },
+  "savedReport": {
+    "id": "RPT-2025-0092",
+    "reportType": "pillar-performance",
+    "category": "performance",
+    "title": "Generation & Network — Q3 2025",
+    "owner": "Aisha Bello",
+    "filtersSummary": "Q3 2025 · Generation & Network · All states",
+    "format": "pdf",
+    "fileReference": "reports/RPT-2025-0092.pdf",
+    "createdAt": "2025-10-14T09:12:00Z",
+    "lastGeneratedAt": "2025-10-14T09:12:00Z",
+    "config": {
+      "reportType": "pillar-performance",
+      "period": "q3-2025",
+      "pillar": "generation-network",
+      "kpiCategory": "",
+      "state": "",
+      "distributionCompany": "",
+      "programmeOrAgency": "",
+      "validationStatus": "",
+      "readinessTier": "",
+      "format": "pdf"
+    }
+  }
+}</code></pre>
+        <p class="summary">Persists a saved-report row so it appears in Saved Reports afterward, and
+          returns the same JSON <code>preview</code> shape as <code>/reports/preview</code> — it does
+          <strong>not</strong> return a PDF or Excel binary, and <code>fileReference</code> is a display
+          string (shown in the Saved Reports table), not a fetchable URL.</p>
+        <div class="callout">
+          <strong>The backend never generates the downloadable file.</strong> Checked directly against
+          <code>src/features/reports/use-reports-page.ts</code>: after calling this endpoint, the
+          frontend builds the actual PDF (<code>buildReportPdf</code>) or Excel workbook
+          (<code>buildReportWorkbook</code>) itself, client-side, from the <code>preview.sections</code>
+          data — both are local functions in <code>src/features/reports/lib/</code>, not network calls.
+          Re-downloading a saved report works the same way: it calls <code>POST /reports/preview</code>
+          again with the saved <code>config</code> and rebuilds the file client-side, it does not fetch
+          anything from <code>fileReference</code>. If the backend is expected to take over file
+          generation at some point, that is a new capability, not something this endpoint already
+          provides — flag it as its own piece of work rather than assuming it's covered here.
+        </div>
       </article>
 
       <article class="endpoint" id="reports-delete">
@@ -1159,9 +2341,14 @@
     </section>
 
     <section id="admin">
-      <h2 class="module-title">12. Administration (User Access)</h2>
+      <h2 class="module-title">13. Administration (User Access)</h2>
       <p class="module-desc">Schema: <code>src/api/schemas/administration.ts</code>. This module is
         account/permission administration, not performance measurement.</p>
+      <figure class="screenshot">
+        <img src="screenshots/administration.png" alt="User Access & Administration page showing the Users tab, with Roles, Access scope, Audit log and Customization as sibling tabs" loading="lazy">
+        <figcaption>/administration — Users tab. The Customization tab (left, same page) is the Branding
+          editor covered in §5.</figcaption>
+      </figure>
 
       <article class="endpoint" id="admin-get">
         <div class="endpoint-head"><span class="method">GET</span><span class="path">/api/administration</span></div>
@@ -1172,12 +2359,96 @@
           <code>auditPeriod</code>.</p>
         <h4>Response</h4>
 <pre><code>{
-  "lastUpdated": "…",
-  "summary": [ /* accessSummaryCardSchema[] */ ],
-  "users": { "items": [ /* userAccountSchema[] */ ], … },
-  "roles": [ /* roleDefinitionSchema[] — all 7, not paginated */ ],
-  "scopeAssignments": { "items": [ /* … */ ], … },
-  "auditLog": { "items": [ /* … */ ], … }
+  "lastUpdated": "2025-10-14T09:12:00Z",
+  "summary": [
+    {
+      "id": "elevated-rights",
+      "title": "Accounts with elevated rights",
+      "count": 9,
+      "breakdown": [
+        { "label": "System Administrator", "count": 2 },
+        { "label": "Dashboard Manager", "count": 7 }
+      ],
+      "elevated": true,
+      "provenance": {
+        "definition": "Accounts holding a role with administer or approve permission.",
+        "methodology": "Count of active accounts whose role's permission set includes administer or approve.",
+        "source": "Administration account registry",
+        "lastUpdated": "2025-10-01T00:00:00Z"
+      }
+    }
+    // + the rest of the summary cards — same shape, only this one has elevated: true.
+  ],
+  "users": {
+    "items": [
+      {
+        "id": "usr-006",
+        "name": "Aisha Bello",
+        "email": "a.bello@finance.gov.ng",
+        "institution": "Federal Ministry of Finance",
+        "designation": "Senior Programme Officer",
+        "role": "oversight-user",
+        "status": "active",
+        "lastLogin": "2025-10-13T08:22:00Z",
+        "createdAt": "2024-11-02T00:00:00Z"
+      }
+      // + every other row matching the query, up to pageSize.
+    ],
+    "page": 1,
+    "pageSize": 25,
+    "total": 214
+  },
+  "roles": [
+    {
+      "role": "oversight-user",
+      "label": "Oversight User",
+      "description": "Read access across every module for cross-institution oversight, no edit rights.",
+      "permissions": ["view", "export"],
+      "modules": ["Executive Overview", "Pillar Dashboards", "Programs", "Reports & Exports"],
+      "assignedUsers": 18
+    }
+    // + all 7 SystemRole values — this array is never paginated.
+  ],
+  "scopeAssignments": {
+    "items": [
+      {
+        "id": "SCP-2025-0042",
+        "userId": "usr-006",
+        "userName": "Aisha Bello",
+        "level": "programme",
+        "scope": "Northern Grid Reinforcement Programme",
+        "responsibility": "Oversight reviewer for financing and disbursement milestones.",
+        "effectiveFrom": "2024-11-02T00:00:00Z",
+        "effectiveTo": null,
+        "active": true
+      }
+      // + every other row matching the query, up to pageSize.
+    ],
+    "page": 1,
+    "pageSize": 25,
+    "total": 61
+  },
+  "auditLog": {
+    "items": [
+      {
+        "id": "evt-1043",
+        "timestamp": "2025-10-13T14:05:00Z",
+        "userId": "usr-014",
+        "userName": "Grace Etim",
+        "action": "Published KPI value",
+        "module": "KPI Explorer",
+        "recordId": "M300-P3-004",
+        "priorValue": "55.0%",
+        "newValue": "57.4%",
+        "result": "success",
+        "reference": "SUB-2026-0021"
+      }
+      // + every other row matching the query, up to pageSize.
+    ],
+    "page": 1,
+    "pageSize": 25,
+    "total": 1043
+  }
 }</code></pre>
         <ul class="notes">
           <li><code>summary[]</code> — each carries <code>breakdown[]</code> (label/count pairs) and
@@ -1188,11 +2459,12 @@
           <li><code>roles[]</code> — the role × permission matrix: <code>permissions[]</code> (subset
             of the seven <code>Permission</code> values), <code>modules[]</code> (free-text module
             names this role can reach), <code>assignedUsers</code> (live count, not static).</li>
-          <li><code>scopeAssignments[]</code> — a user's responsibility pinned to a
-            <code>scopeLevel</code> (<code>national</code>/<code>state</code>/
+          <li><code>scopeAssignments[]</code> — a user's <code>responsibility</code> (free text) pinned
+            to a <code>level</code> (<code>national</code>/<code>state</code>/
             <code>distribution-company</code>/<code>institution</code>/<code>programme</code>/
             <code>project</code>/<code>dataset</code>/<code>indicator</code>) and a specific
-            <code>scope</code> string. <code>effectiveTo</code> nullable.</li>
+            <code>scope</code> string naming which one (e.g. "Ikeja DisCo"). <code>effectiveTo</code>
+            nullable, for an open-ended assignment.</li>
           <li><code>auditLog[]</code> — <code>recordId</code>/<code>priorValue</code>/<code>newValue</code>
             all nullable, <code>result</code> one of <code>success</code>/<code>failure</code>/
             <code>rejected</code>.</li>
@@ -1210,19 +2482,47 @@
       <article class="endpoint" id="admin-invite">
         <div class="endpoint-head"><span class="method">POST</span><span class="path">/api/administration/users/invite</span></div>
         <h4>Request</h4>
-        <p class="summary" style="margin-top:0"><code>name</code>, <code>email</code>,
-          <code>institution</code>, <code>designation</code>, <code>role</code>,
-          <code>accessScope</code> (a <code>ScopeLevel</code>), <code>invitationMessage</code>
-          (optional, max 500 chars).</p>
+<pre><code>{
+  "name": "Grace Etim",
+  "email": "g.etim@nerc.gov.ng",
+  "institution": "Nigerian Electricity Regulatory Commission",
+  "designation": "Data Reviewer",
+  "role": "data-reviewer",
+  "accessScope": "institution",
+  "invitationMessage": "Welcome — you'll review submissions from NERC-linked institutions."
+}</code></pre>
+        <p class="summary"><code>invitationMessage</code> is optional, max 500 chars. <code>accessScope</code>
+          is a bare <code>ScopeLevel</code> value here (which tier of the hierarchy, e.g.
+          <code>"institution"</code>) — it does not carry the specific scope string
+          (<code>scopeAssignmentSchema.scope</code>, e.g. "NERC") the way a full scope assignment does;
+          that gets set separately once the account exists.</p>
         <h4>Response <span class="status-tag">201</span></h4>
-<pre><code>{ "user": { /* userAccountSchema */ }, "message": "…" }</code></pre>
-        <p class="summary">The new account, status <code>pending</code> until the invitee accepts.</p>
+<pre><code>{
+  "user": {
+    "id": "usr-215",
+    "name": "Grace Etim",
+    "email": "g.etim@nerc.gov.ng",
+    "institution": "Nigerian Electricity Regulatory Commission",
+    "designation": "Data Reviewer",
+    "role": "data-reviewer",
+    "status": "pending",
+    "lastLogin": null,
+    "createdAt": "2025-10-14T09:12:00Z"
+  },
+  "message": "Invitation sent to g.etim@nerc.gov.ng."
+}</code></pre>
+        <p class="summary">The new account, status <code>pending</code> until the invitee accepts.
+          <code>lastLogin</code> is null — nobody has signed in yet.</p>
       </article>
     </section>
 
     <section id="stakeholders">
-      <h2 class="module-title">13. Stakeholders &amp; Institutions</h2>
+      <h2 class="module-title">14. Stakeholders &amp; Institutions</h2>
       <p class="module-desc">Schema: <code>src/api/schemas/stakeholders.ts</code>.</p>
+      <figure class="screenshot">
+        <img src="screenshots/stakeholders.png" alt="Stakeholders & Institutions page with summary cards and the institutions table" loading="lazy">
+        <figcaption>/stakeholders — Institutions tab.</figcaption>
+      </figure>
 
       <article class="endpoint" id="stakeholders-get">
         <div class="endpoint-head"><span class="method">GET</span><span class="path">/api/stakeholders</span></div>
@@ -1233,28 +2533,67 @@
           paginated; the full filtered list returns every time).</p>
         <h4>Response</h4>
 <pre><code>{
-  "lastUpdated": "…",
+  "lastUpdated": "2025-10-14T09:12:00Z",
   "summary": { "activeInstitutions": 24, "dataCustodians": 11, "pendingOnboarding": 2 },
-  "institutions": [ /* institutionSchema[] */ ],
-  "custodians": [ /* custodianAssignmentSchema[] */ ],
-  "filters": { /* the same 7 groups the query above filters by */ }
+  "institutions": [
+    {
+      "id": "nerc",
+      "name": "Nigerian Electricity Regulatory Commission",
+      "shortName": "NERC",
+      "type": "regulator",
+      "status": "active",
+      "coverage": "National",
+      "roles": ["Regulation", "Tariff approval", "Data validation"],
+      "datasets": ["Metering performance", "ATC&C losses", "Market remittance"],
+      "programmes": ["Northern Grid Reinforcement Programme"],
+      "lastUpdated": "2025-10-01T00:00:00Z"
+    }
+    // + every other institution matching the query.
+  ],
+  "custodians": [
+    {
+      "id": "cst-004",
+      "dataset": "Metering performance",
+      "custodian": "Nigerian Electricity Regulatory Commission",
+      "focalPerson": "Grace Etim",
+      "frequency": "Quarterly",
+      "template": "metering-performance-v3.xlsx",
+      "reviewer": "Grace Etim",
+      "validator": "Aisha Bello",
+      "status": "active"
+    }
+    // + every other custodian assignment matching the query.
+  ],
+  "filters": {
+    "institutionTypes": [{ "value": "regulator", "label": "Regulator" }],
+    "roles": [{ "value": "regulation", "label": "Regulation" }],
+    "statuses": [{ "value": "active", "label": "Active" }],
+    "datasets": [{ "value": "metering-performance", "label": "Metering performance" }],
+    "kpis": [{ "value": "M300-P3-004", "label": "Metering Rate" }],
+    "programmes": [{ "value": "PRG-0031", "label": "Northern Grid Reinforcement Programme" }],
+    "coverageAreas": [{ "value": "national", "label": "National" }]
+  }
 }</code></pre>
         <ul class="notes">
           <li><code>institutions[]</code> — <code>type</code> one of <code>ministry</code>/
             <code>agency</code>/<code>regulator</code>/<code>utility</code>/<code>disco</code>/
             <code>programme-team</code>/<code>partner</code>; <code>status</code> one of
             <code>active</code>/<code>pending-onboarding</code>/<code>inactive</code>;
-            <code>roles[]</code>/<code>datasets[]</code>/<code>programmes[]</code> free-text arrays.</li>
+            <code>roles[]</code>/<code>datasets[]</code>/<code>programmes[]</code> free-text arrays.
+            <code>shortName</code> and <code>coverage</code> are both required, non-empty strings.</li>
           <li><code>custodians[]</code> — who owns which dataset: <code>dataset</code>,
             <code>custodian</code>, <code>focalPerson</code>, <code>frequency</code>,
             <code>template</code>, <code>reviewer</code>, <code>validator</code>, <code>status</code>
             (<code>active</code>/<code>pending</code>).</li>
+          <li><code>filters</code> — the same 7 groups the query above filters by, each
+            <code>{ value, label }[]</code>. Neither <code>institutions</code> nor
+            <code>custodians</code> is paginated — the full filtered list returns every time.</li>
         </ul>
       </article>
     </section>
 
     <section id="enums" class="reference">
-      <h2 class="module-title" style="margin-top:0; padding-top:0; border-top:none;">14. Shared enumerations reference</h2>
+      <h2 class="module-title" style="margin-top:0; padding-top:0; border-top:none;">15. Shared enumerations reference</h2>
       <p class="module-desc">Closed sets used across multiple modules. A value outside these fails
         frontend validation. Module-specific enums (Data Submissions' <code>WorkflowStatus</code>,
         Bottlenecks' <code>RegisterSeverity</code>, Administration's <code>SystemRole</code>) are
@@ -1284,7 +2623,7 @@
     </section>
 
     <section id="open" class="reference">
-      <h2 class="module-title" style="margin-top:0; padding-top:0; border-top:none;">15. Open questions for the backend team</h2>
+      <h2 class="module-title" style="margin-top:0; padding-top:0; border-top:none;">16. Open questions for the backend team</h2>
       <ol class="open-questions">
         <li><strong>Pillar-specific headline cards</strong> — which two metrics should replace the
           middle cards for each of the six pillars? Blocks full dynamic pillar-headline behaviour;

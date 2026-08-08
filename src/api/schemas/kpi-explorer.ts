@@ -126,6 +126,32 @@ export const linkedRecordSchema = z.object({
  * The full indicator profile. Fetched on demand for one indicator, so it is a
  * separate endpoint rather than being inlined into every catalogue row.
  */
+/**
+ * The fields on a KPI's definition an admin can edit — methodology and
+ * reference-point metadata, set once when the indicator is configured and
+ * changed rarely and deliberately (e.g. a target renegotiated with NERC),
+ * as opposed to `current`/`history`, which only ever change by a data
+ * submission being approved and published. See PATCH /kpi-explorer/kpis/:id.
+ */
+export const updateKpiMetadataRequestSchema = z.object({
+  definition: z.string().min(1),
+  formula: z.string().min(1),
+  unit: z.string().min(1),
+  aggregation: z.string(),
+  frequency: z.string(),
+  disaggregation: z.string(),
+  limitations: z.string(),
+  baseline: z.number().nullable(),
+  baselineLabel: z.string(),
+  target: z.number().nullable(),
+  targetLabel: z.string(),
+  sourceInstitution: z.string().min(1),
+  sourceDataset: z.string().min(1),
+  sourceReference: z.string(),
+})
+
+export type UpdateKpiMetadataRequest = z.infer<typeof updateKpiMetadataRequestSchema>
+
 export const kpiProfileSchema = z.object({
   id: z.string().min(1),
   name: z.string().min(1),

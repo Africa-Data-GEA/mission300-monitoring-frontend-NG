@@ -1,10 +1,11 @@
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { keepPreviousData } from '@tanstack/react-query'
 import {
   kpiExplorerFilterOptionsSchema,
   kpiExplorerOverviewSchema,
   kpiProfileSchema,
   type KpiExplorerQuery,
+  type UpdateKpiMetadataRequest,
 } from '@/api/schemas/kpi-explorer'
 import { api } from '@/lib/api-client'
 
@@ -58,5 +59,29 @@ export function useKpiProfile(id: string | null) {
     queryKey: kpiExplorerKeys.profile(id ?? ''),
     queryFn: () => api.get(`/kpi-explorer/kpis/${id}`, kpiProfileSchema),
     enabled: id !== null,
+  })
+}
+
+/**
+ * Updates a KPI's definition metadata (methodology, baseline, target,
+ * source) — never `current`/`history`, which only change via a published
+ * data submission. System-administrator only — see role-access.ts and the
+ * gate in metadata-panel.tsx/values-panel.tsx.
+ */
+export function useUpdateKpiMetadata(id: string) {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (input: UpdateKpiMetadataRequest) =>
+      api.patch(`/kpi-explorer/kpis/${id}`, input, kpiProfileSchema),
+    onSuccess: (updated) => {
+      // Only the catalogue list (name/source/unit columns) is invalidated
+      // to refetch — the profile itself is set directly from this response.
+      // Invalidating the profile query too would trigger a refetch, and for
+      // the two KPIs proxied live to the real backend (see LIVE_KPI_IDS in
+      // handlers.ts), that refetch hits the backend rather than this mock,
+      // silently reverting the edit just saved.
+      client.setQueryData(kpiExplorerKeys.profile(id), updated)
+      client.invalidateQueries({ predicate: (query) => query.queryKey[0] === 'kpi-explorer' && query.queryKey[1] === 'overview' })
+    },
   })
 }

@@ -2102,6 +2102,53 @@ export function publishKpiValue(
   return true
 }
 
+/**
+ * Updates a KPI's definition metadata in place — the admin-editable half of
+ * a profile (methodology, baseline, target, source), never `current`/
+ * `history`, which only change through publishKpiValue above. Mutates both
+ * the bespoke PROFILES entry (if one exists) and the CATALOGUE row's
+ * overlapping `name`/`baseline`/`target` fields, so a KPI without a bespoke
+ * profile (served via fallbackProfile, which derives from CATALOGUE) still
+ * reflects the edit. Returns the resulting profile, or null if the id
+ * doesn't exist.
+ */
+export function updateKpiMetadata(
+  id: string,
+  patch: {
+    definition: string
+    formula: string
+    unit: string
+    aggregation: string
+    frequency: string
+    disaggregation: string
+    limitations: string
+    baseline: number | null
+    baselineLabel: string
+    target: number | null
+    targetLabel: string
+    sourceInstitution: string
+    sourceDataset: string
+    sourceReference: string
+  },
+): KpiProfile | null {
+  const row = CATALOGUE.find((entry) => entry.id === id)
+  if (!row) return null
+
+  row.sourceInstitution = patch.sourceInstitution
+  row.sourceDataset = patch.sourceDataset
+  row.unit = patch.unit
+  row.frequency = patch.frequency
+  row.lastUpdated = new Date().toISOString()
+
+  const profile = PROFILES[id]
+  if (profile) {
+    Object.assign(profile, patch)
+    return profile
+  }
+
+  return getKpiProfile(id) ?? null
+}
+
 export const kpiExplorerCatalogue = CATALOGUE
 
 export const kpiExplorerFilterOptions: KpiExplorerFilterOptions = {

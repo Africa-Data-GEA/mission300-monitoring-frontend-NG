@@ -19,7 +19,9 @@ import {
   kpiExplorerCatalogue,
   kpiExplorerFilterOptions,
   kpiExplorerOverview,
+  updateKpiMetadata,
 } from './data/kpi-explorer'
+import { updateKpiMetadataRequestSchema } from '@/api/schemas/kpi-explorer'
 import { getLiveBackendUrl } from './live-backend'
 
 /**
@@ -425,6 +427,35 @@ export const handlers = [
     }
 
     return HttpResponse.json(profile)
+  }),
+
+  /**
+   * PATCH /api/kpi-explorer/kpis/:id
+   *
+   * Updates a KPI's definition metadata — methodology, baseline, target,
+   * source. Never touches `current`/`history`, which only change through a
+   * published data submission (see the decisions handler in
+   * data-submissions.ts). No auth/role enforcement server-side in this mock
+   * — the frontend gates the edit UI to system-administrator; see
+   * canRoleReachModule and the real backend's own auth layer, once it has
+   * one, should enforce this for real.
+   */
+  http.patch('/api/kpi-explorer/kpis/:id', async ({ request, params }) => {
+    await delay(200)
+    const id = String(params.id)
+    const body = await request.json()
+    const result = updateKpiMetadataRequestSchema.safeParse(body)
+    if (!result.success) {
+      return HttpResponse.json(
+        { message: result.error.issues[0]?.message ?? 'Invalid KPI metadata.' },
+        { status: 400 },
+      )
+    }
+    const updated = updateKpiMetadata(id, result.data)
+    if (!updated) {
+      return HttpResponse.json({ message: `No indicator found with id ${id}` }, { status: 404 })
+    }
+    return HttpResponse.json(updated)
   }),
 
   /**

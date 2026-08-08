@@ -1,6 +1,11 @@
+import { useState } from 'react'
 import type { KpiProfile } from '@/api/schemas/kpi-explorer'
+import { Button } from '@/components/ui/button'
 import { PILLAR_LABELS } from '@/types/domain'
 import { SideDialog } from '@/components/ui/side-dialog'
+import { readAuthSession } from '@/features/auth/auth-session'
+import { canRoleReachModule } from '@/features/auth/role-access'
+import { KpiMetadataEditDialog } from './kpi-metadata-edit-dialog'
 import { LinkedRecordsPanel } from './linked-records-panel'
 import { MetadataPanel } from './metadata-panel'
 import { ProfileSkeleton } from './profile-skeleton'
@@ -26,6 +31,10 @@ export function KpiProfileDialog({
   isPending: boolean
   onClose: () => void
 }) {
+  const [editOpen, setEditOpen] = useState(false)
+  const session = readAuthSession()
+  const canEditMetadata = !session || canRoleReachModule(session.user.role, 'kpi-metadata')
+
   return (
     <SideDialog
       open={open}
@@ -39,10 +48,20 @@ export function KpiProfileDialog({
         <ProfileSkeleton />
       ) : (
         <div className="flex flex-col gap-5">
+          {canEditMetadata && (
+            <div className="flex justify-end">
+              <Button type="button" variant="secondary" size="sm" onClick={() => setEditOpen(true)}>
+                Edit definition &amp; targets
+              </Button>
+            </div>
+          )}
           <ValuesPanel profile={profile} />
           <MetadataPanel profile={profile} />
           <TraceabilityPanel profile={profile} />
           <LinkedRecordsPanel profile={profile} />
+          {canEditMetadata && (
+            <KpiMetadataEditDialog open={editOpen} profile={profile} onClose={() => setEditOpen(false)} />
+          )}
         </div>
       )}
     </SideDialog>

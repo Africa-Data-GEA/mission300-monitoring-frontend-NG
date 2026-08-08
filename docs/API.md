@@ -492,6 +492,37 @@ Four panels' worth of data in one response:
   action) joined through the indicator identifier, each with `type`,
   `title`, `institution`, `status`.
 
+### `PATCH /api/kpi-explorer/kpis/:id`
+
+Updates a KPI's **definition metadata** — methodology and reference points,
+set once when the indicator is configured and changed rarely and
+deliberately (e.g. a target renegotiated with NERC). Distinct from
+`current`/`history`, which must **never** be editable here — those only
+change through a data submission being approved and published (see
+`POST /api/data-submissions/validation/:id/decisions`). **404** with
+`{ "message": … }` for an unknown id.
+
+**Request** — every field required, `baseline`/`target` nullable:
+```jsonc
+{
+  "definition": "…", "formula": "…", "unit": "%",
+  "aggregation": "…", "frequency": "Monthly", "disaggregation": "…", "limitations": "…",
+  "baseline": 42, "baselineLabel": "Approx. 42% (2024 Compact baseline)",
+  "target": 100, "targetLabel": "Metering gap closed by 2027",
+  "sourceInstitution": "NERC", "sourceDataset": "Metering performance", "sourceReference": "…"
+}
+```
+
+**Response** `200` — the full updated `KpiProfile` (same shape as
+`GET /api/kpi-explorer/kpis/:id`), so the frontend can replace its cached
+copy from this response alone without a second fetch.
+
+**Access**: system-administrator only. The frontend hides the edit UI for
+every other role (`canRoleReachModule`), but **that is not enforcement** —
+see [open question 9](#open-questions-for-the-backend-team): the real API
+must reject this call server-side for any other role once auth is wired up,
+not rely on the frontend to withhold the button.
+
 ### `GET /api/kpi-explorer/filters`
 
 This module's own eight filter option lists: `pillars`, `categories`,
@@ -1207,6 +1238,14 @@ library.
 8. **`GET /api/public/overview`** — the one wholly new endpoint this
    contract requires that doesn't exist as a mock yet. See
    [Public Gateway](#public-gateway) for its full requirements.
+9. **Role enforcement is entirely client-side today** — every
+   role-restricted UI (KPI definition editing, branding/Customization) only
+   *hides the control* for the wrong role; no endpoint currently checks the
+   caller's role at all, because there's no auth scheme wired up yet (see
+   open question 4). Once auth exists, `PATCH /api/kpi-explorer/kpis/:id`
+   and `PUT /api/branding`/`PUT /api/branding/fonts` must reject any role
+   other than `system-administrator` server-side — treat the frontend's
+   hiding of these controls as a UX nicety, not a permission boundary.
 
 ---
 

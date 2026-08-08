@@ -1,6 +1,5 @@
 import { Breadcrumb } from '@/components/ui/breadcrumb'
 import { ErrorState } from '@/components/ui/error-state'
-import { CatalogueSummary } from './components/catalogue-summary'
 import { CatalogueTable } from './components/catalogue-table'
 import { Distributions } from './components/distributions/distributions'
 import { KpiExplorerFilters } from './components/kpi-explorer-filters'
@@ -61,8 +60,6 @@ export function KpiExplorerPage() {
           onReset={page.resetFilters}
         />
       )}
-
-      <CatalogueSummary cards={data.summary} />
 
       <CatalogueTable
         rows={data.catalogue.items}
