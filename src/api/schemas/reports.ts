@@ -79,8 +79,17 @@ export const reportCatalogueCardSchema = z.object({
 
 export const reportConfigSchema = z.object({
   reportType: reportTypeSchema,
-  period: z.string().min(1),
-  pillar: z.string(),
+  /** One or more reporting periods — stakeholder feedback asked for a
+   * multi-period comparative report (e.g. Q1 vs Q2 vs Q3 in one output).
+   * Only the KPI-indicator and pillar-performance report types have real
+   * per-period source data (each KPI's own history[]) to build a genuine
+   * comparison from; other report types use the first selected period only,
+   * since fabricating variation for data that has no historical axis would
+   * misrepresent it. */
+  periods: z.array(z.string().min(1)).min(1),
+  /** One or more Compact pillars — stakeholder feedback asked for the
+   * single-select pillar filter to allow multiple selections. */
+  pillars: z.array(z.string()).min(1),
   kpiCategory: z.string(),
   state: z.string(),
   distributionCompany: z.string(),
@@ -136,6 +145,15 @@ export const savedReportSchema = z.object({
   title: z.string().min(1),
   owner: z.string().min(1),
   filtersSummary: z.string().min(1),
+  /** Shown as its own column, not buried inside `filtersSummary` — knowing
+   * whether a report includes non-validated data is essential, per
+   * stakeholder feedback, not something a reader should have to parse out
+   * of a joined filter string. */
+  validationStatusLabel: z.string().min(1),
+  /** Starts at 1; incremented (not a new row) each time this exact report
+   * configuration is regenerated with updated data — stakeholder feedback
+   * asked to avoid confusion between regenerated copies of the same report. */
+  version: z.number().int().min(1),
   format: exportFormatSchema,
   fileReference: z.string().min(1),
   createdAt: z.iso.datetime(),

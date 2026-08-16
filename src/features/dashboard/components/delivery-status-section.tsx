@@ -1,4 +1,4 @@
-import { BarChart3, Table2 } from 'lucide-react'
+import { BarChart3, History, Table2 } from 'lucide-react'
 import { Link } from 'react-router'
 import { Card } from '@/components/ui/card'
 import { InfoPopover } from '@/components/ui/info-popover'
@@ -9,6 +9,7 @@ import type { DeliveryStatusPanel } from '../types'
 import { ExceptionSeverityChart } from './exception-severity-chart'
 import { OngoingProjectsTable } from './ongoing-projects-table'
 import { ProjectStatusChart } from './project-status-chart'
+import { ProjectStatusEvolutionTable } from './project-status-evolution-table'
 
 /**
  * Section D — Delivery Status, Bottlenecks and Decisions.
@@ -20,7 +21,13 @@ import { ProjectStatusChart } from './project-status-chart'
  */
 const MAX_VISIBLE_EXCEPTIONS = 5
 
-export function DeliveryStatusSection({ panel }: { panel: DeliveryStatusPanel }) {
+export function DeliveryStatusSection({
+  panel,
+  onProjectsChanged,
+}: {
+  panel: DeliveryStatusPanel
+  onProjectsChanged: () => void
+}) {
   // Enforced here rather than trusted to the API, so an over-long response
   // cannot break the layout.
   const visible = panel.exceptions.slice(0, MAX_VISIBLE_EXCEPTIONS)
@@ -68,13 +75,20 @@ export function DeliveryStatusSection({ panel }: { panel: DeliveryStatusPanel })
                 <BarChart3 className="size-4" aria-hidden="true" />
                 Chart
               </TabsTrigger>
+              <TabsTrigger value="evolution" className="inline-flex items-center gap-2">
+                <History className="size-4" aria-hidden="true" />
+                Evolution
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="table" className="pt-0">
-              <OngoingProjectsTable projects={panel.ongoingProjects} />
+              <OngoingProjectsTable projects={panel.ongoingProjects} onChanged={onProjectsChanged} />
             </TabsContent>
             <TabsContent value="chart">
               <ProjectStatusChart summary={panel.statusSummary} />
+            </TabsContent>
+            <TabsContent value="evolution">
+              <ProjectStatusEvolutionTable projects={panel.ongoingProjects} />
             </TabsContent>
           </Tabs>
         </Card>
@@ -137,6 +151,7 @@ export function DeliveryStatusSection({ panel }: { panel: DeliveryStatusPanel })
                             label: 'Time unresolved',
                             value: `${exception.daysUnresolved} days`,
                           },
+                          { label: 'Follow-up', value: exception.followUp || null },
                         ]}
                       />
                     </div>

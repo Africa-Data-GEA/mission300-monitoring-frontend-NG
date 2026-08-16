@@ -12,7 +12,7 @@ import { bottlenecksRegister } from './bottlenecks'
 import { submissionObligations } from './data-submissions/obligations'
 import { validationQueue } from './data-submissions/submissions'
 import { filterOptions } from './filters'
-import { kpiExplorerCatalogue, kpiExplorerFilterOptions } from './kpi-explorer'
+import { getKpiProfile, kpiExplorerCatalogue, kpiExplorerFilterOptions } from './kpi-explorer'
 import { programmes, projects } from './programs'
 import { stateCoverageRows } from './state-disco/states'
 
@@ -175,8 +175,8 @@ export const reportsFilterOptions: ReportsFilterOptions = {
 
 const baseConfig: ReportConfig = {
   reportType: 'compact-progress',
-  period: 'q3-2025',
-  pillar: 'all',
+  periods: ['q3-2025'],
+  pillars: ['all'],
   kpiCategory: 'all',
   state: 'all',
   distributionCompany: 'all',
@@ -194,6 +194,8 @@ export const savedReports: SavedReport[] = [
     title: 'Compact Progress Report — Q3 2025',
     owner: 'M. Adeyemi (EMRC)',
     filtersSummary: 'Q3 2025 · All pillars',
+    validationStatusLabel: 'All (includes non-validated)',
+    version: 3,
     format: 'pdf',
     fileReference: 'compact-progress-report_q3-2025.pdf',
     createdAt: '2025-10-05T09:30:00Z',
@@ -207,11 +209,13 @@ export const savedReports: SavedReport[] = [
     title: 'Pillar performance — Generation & Network — Q3 2025',
     owner: 'F. Bello (EMRC)',
     filtersSummary: 'Q3 2025 · Generation & network',
+    validationStatusLabel: 'All (includes non-validated)',
+    version: 1,
     format: 'xlsx',
     fileReference: 'pillar-performance_generation-network_q3-2025.xlsx',
     createdAt: '2025-10-06T13:00:00Z',
     lastGeneratedAt: '2025-10-06T13:00:00Z',
-    config: { ...baseConfig, reportType: 'pillar-performance', pillar: 'generation-network', format: 'xlsx' },
+    config: { ...baseConfig, reportType: 'pillar-performance', pillars: ['generation-network'], format: 'xlsx' },
   },
   {
     id: 'RPT-2025-003',
@@ -220,6 +224,8 @@ export const savedReports: SavedReport[] = [
     title: 'Bottleneck report — Q3 2025',
     owner: 'C. Okonkwo (EMRC)',
     filtersSummary: 'Q3 2025 · All pillars',
+    validationStatusLabel: 'All (includes non-validated)',
+    version: 2,
     format: 'xlsx',
     fileReference: 'bottleneck-report_q3-2025.xlsx',
     createdAt: '2025-10-09T11:20:00Z',
@@ -233,6 +239,8 @@ export const savedReports: SavedReport[] = [
     title: 'Submission compliance — Q3 2025',
     owner: 'M. Adeyemi (EMRC)',
     filtersSummary: 'Q3 2025 · All institutions',
+    validationStatusLabel: 'All (includes non-validated)',
+    version: 1,
     format: 'pdf',
     fileReference: 'submission-compliance_q3-2025.pdf',
     createdAt: '2025-10-11T15:45:00Z',
@@ -250,11 +258,17 @@ let savedReportSequence = savedReports.length
 
 function appliedFiltersFor(config: ReportConfig) {
   const entries: { label: string; value: string }[] = [
-    { label: 'Reporting period', value: labelFor(reportsFilterOptions.reportingPeriods, config.period) },
+    {
+      label: 'Reporting period',
+      value: config.periods.map((period) => labelFor(reportsFilterOptions.reportingPeriods, period)).join(', '),
+    },
   ]
 
-  if (config.pillar !== 'all')
-    entries.push({ label: 'Compact pillar', value: labelFor(reportsFilterOptions.pillars, config.pillar) })
+  if (!config.pillars.includes('all'))
+    entries.push({
+      label: 'Compact pillar',
+      value: config.pillars.map((pillar) => labelFor(reportsFilterOptions.pillars, pillar)).join(', '),
+    })
   if (config.kpiCategory !== 'all')
     entries.push({ label: 'KPI category', value: labelFor(reportsFilterOptions.kpiCategories, config.kpiCategory) })
   if (config.state !== 'all')
@@ -269,35 +283,106 @@ function appliedFiltersFor(config: ReportConfig) {
       label: 'Programme or agency',
       value: labelFor(reportsFilterOptions.programmesOrAgencies, config.programmeOrAgency),
     })
-  if (config.validationStatus !== 'all')
-    entries.push({
-      label: 'Validation status',
-      value: labelFor(reportsFilterOptions.validationStatuses, config.validationStatus),
-    })
+  // Always included, not only when a specific status is picked — whether a
+  // report includes non-validated data is essential context either way, per
+  // stakeholder feedback, not something worth hiding behind the "all" case.
+  entries.push({
+    label: 'Validation status',
+    value:
+      config.validationStatus === 'all'
+        ? 'All (includes non-validated)'
+        : labelFor(reportsFilterOptions.validationStatuses, config.validationStatus),
+  })
   if (config.readinessTier !== 'all')
     entries.push({ label: 'Readiness tier', value: labelFor(reportsFilterOptions.readinessTiers, config.readinessTier) })
 
   return entries
 }
 
+/** The label shown in the Saved Reports "Filters" column's own dedicated
+ * validation-status text, and stored as `validationStatusLabel`. */
+function validationStatusLabelFor(config: ReportConfig): string {
+  return config.validationStatus === 'all'
+    ? 'All (includes non-validated)'
+    : labelFor(reportsFilterOptions.validationStatuses, config.validationStatus)
+}
+
 function labelFor(options: { value: string; label: string }[], value: string) {
   return options.find((option) => option.value === value)?.label ?? value
 }
 
+function matchesPillars(config: ReportConfig, pillar: string): boolean {
+  return config.pillars.includes('all') || config.pillars.includes(pillar)
+}
+
+/** Ordinal column labels counting back from "Current" — "2 periods ago",
+ * "Previous", "Current" for count 3, etc. Deliberately not calendar-quarter
+ * labels: each indicator's own history[] carries its own period labels
+ * (some real quarters, some generic sequence labels for indicators still
+ * awaiting confirmed data — see kpi-explorer.ts), which don't line up
+ * one-to-one across indicators. Claiming they all mean "Q2 2025" would
+ * misrepresent that. */
+function trailingPeriodLabels(count: number): string[] {
+  return Array.from({ length: count }, (_, index) => {
+    const stepsBack = count - 1 - index
+    if (stepsBack === 0) return 'Current'
+    if (stepsBack === 1) return 'Previous'
+    return `${stepsBack} periods ago`
+  })
+}
+
 function kpiSection(config: ReportConfig, title: string) {
-  const rows = kpiExplorerCatalogue
-    .filter(
-      (row) =>
-        (config.pillar === 'all' || row.pillar === config.pillar) &&
-        (config.kpiCategory === 'all' || row.category === config.kpiCategory) &&
-        (config.validationStatus === 'all' || row.validationStatus === config.validationStatus) &&
-        (config.readinessTier === 'all' || row.readiness === config.readinessTier),
-    )
-    .map((row) => [row.id, row.name, row.pillar, row.category, row.unit, row.validationStatus])
+  const filtered = kpiExplorerCatalogue.filter(
+    (row) =>
+      matchesPillars(config, row.pillar) &&
+      (config.kpiCategory === 'all' || row.category === config.kpiCategory) &&
+      (config.validationStatus === 'all' || row.validationStatus === config.validationStatus) &&
+      (config.readinessTier === 'all' || row.readiness === config.readinessTier),
+  )
+
+  // A genuine multi-period comparison, built from each indicator's own
+  // recorded history — only for the two report types where that history is
+  // real per-indicator data (see the schema comment on periods). Every other
+  // report type ignores extra selected periods rather than fabricate one.
+  const isComparable =
+    config.periods.length > 1 && (config.reportType === 'kpi-indicator' || config.reportType === 'pillar-performance')
+  const periodLabels = isComparable ? trailingPeriodLabels(config.periods.length) : []
+
+  const rows = filtered.map((row) => {
+    const profile = getKpiProfile(row.id)
+    const cells = [
+      row.id,
+      row.name,
+      row.pillar,
+      row.category,
+      row.unit,
+      profile && profile.baseline !== null ? String(profile.baseline) : '—',
+      profile && profile.current !== null ? String(profile.current) : '—',
+      profile && profile.target !== null ? String(profile.target) : '—',
+      row.validationStatus,
+    ]
+    if (isComparable) {
+      const trailing = (profile?.history ?? []).slice(-periodLabels.length)
+      const padding = periodLabels.length - trailing.length
+      cells.push(...Array(padding).fill('—'), ...trailing.map((point) => String(point.value)))
+    }
+    return cells
+  })
 
   return {
     title,
-    columns: ['ID', 'Indicator', 'Pillar', 'Category', 'Unit', 'Validation status'],
+    columns: [
+      'ID',
+      'Indicator',
+      'Pillar',
+      'Category',
+      'Unit',
+      'Baseline',
+      'Current',
+      'Target',
+      'Validation status',
+      ...periodLabels,
+    ],
     rows,
   }
 }
@@ -305,7 +390,7 @@ function kpiSection(config: ReportConfig, title: string) {
 function deliverySection(config: ReportConfig) {
   const filteredProgrammes = programmes.filter(
     (programme) =>
-      (config.pillar === 'all' || programme.pillar === config.pillar) &&
+      matchesPillars(config, programme.pillar) &&
       (config.programmeOrAgency === 'all' || programme.id === config.programmeOrAgency),
   )
   const programmeRows = filteredProgrammes.map((programme) => [
@@ -318,7 +403,7 @@ function deliverySection(config: ReportConfig) {
 
   const filteredProjects = projects.filter(
     (project) =>
-      (config.pillar === 'all' || project.pillar === config.pillar) &&
+      matchesPillars(config, project.pillar) &&
       (config.programmeOrAgency === 'all' || project.programmeId === config.programmeOrAgency),
   )
   const projectRows = filteredProjects.map((project) => [
@@ -336,12 +421,32 @@ function deliverySection(config: ReportConfig) {
 
 function bottleneckSection(config: ReportConfig) {
   const rows = bottlenecksRegister
-    .filter((row) => config.pillar === 'all' || row.pillar === config.pillar)
+    .filter((row) => matchesPillars(config, row.pillar))
     .map((row) => [row.id, row.issue, row.category, row.severity, row.status, String(row.ageDays)])
 
   return {
     title: 'Bottlenecks',
     columns: ['ID', 'Issue', 'Category', 'Severity', 'Status', 'Age (days)'],
+    rows,
+  }
+}
+
+/**
+ * Lessons learned / follow-up actions — stakeholder feedback asked for a
+ * lessons-learned and bottlenecks reporting framework to complement the KPI
+ * and pillar reporting. Rather than invent a separate framework and dataset,
+ * this surfaces the Bottleneck Register's own `followUp` field (already
+ * captured when a bottleneck is raised — see create-bottleneck-form.tsx),
+ * which is exactly "what's being done about it" for each constraint.
+ */
+function lessonsLearnedSection(config: ReportConfig) {
+  const rows = bottlenecksRegister
+    .filter((row) => matchesPillars(config, row.pillar) && row.followUp.trim().length > 0)
+    .map((row) => [row.id, row.issue, row.status, row.followUp])
+
+  return {
+    title: 'Lessons learned and follow-up actions',
+    columns: ['ID', 'Issue', 'Status', 'Follow-up / lesson learned'],
     rows,
   }
 }
@@ -389,7 +494,7 @@ function sectionsFor(reportType: ReportType, config: ReportConfig) {
   switch (reportType) {
     case 'compact-progress':
     case 'compact-review':
-      return [...deliverySection(config), bottleneckSection(config)]
+      return [...deliverySection(config), bottleneckSection(config), lessonsLearnedSection(config)]
     case 'pillar-performance':
     case 'kpi-indicator':
       return [kpiSection(config, 'Indicators')]
@@ -398,14 +503,14 @@ function sectionsFor(reportType: ReportType, config: ReportConfig) {
     case 'implementation':
       return deliverySection(config)
     case 'bottleneck':
-      return [bottleneckSection(config)]
+      return [bottleneckSection(config), lessonsLearnedSection(config)]
     case 'financial':
       return [
         {
           title: 'Programme financing',
           columns: ['ID', 'Name', 'Financing', 'Status'],
           rows: programmes
-            .filter((programme) => config.pillar === 'all' || programme.pillar === config.pillar)
+            .filter((programme) => matchesPillars(config, programme.pillar))
             .map((programme) => [
               programme.id,
               programme.name,
@@ -421,21 +526,22 @@ function sectionsFor(reportType: ReportType, config: ReportConfig) {
   }
 }
 
+function periodsLabel(config: ReportConfig): string {
+  return config.periods.map((period) => labelFor(reportsFilterOptions.reportingPeriods, period)).join(' vs ')
+}
+
 export function buildReportPreview(config: ReportConfig): ReportPreview {
   const catalogueEntry = reportCatalogue.find((entry) => entry.reportType === config.reportType)!
 
   return {
     metadata: {
-      title: `${catalogueEntry.title} — ${labelFor(reportsFilterOptions.reportingPeriods, config.period)}`,
-      reportingPeriod: labelFor(reportsFilterOptions.reportingPeriods, config.period),
+      title: `${catalogueEntry.title} — ${periodsLabel(config)}`,
+      reportingPeriod: periodsLabel(config),
       appliedFilters: appliedFiltersFor(config),
       generatedAt: new Date().toISOString(),
       dataVersion: 'M300 mock dataset, Q3 2025',
       sourceNotes: catalogueEntry.dataSource,
-      validationStatus:
-        config.validationStatus === 'all'
-          ? 'Mixed — see per-row validation status'
-          : labelFor(reportsFilterOptions.validationStatuses, config.validationStatus),
+      validationStatus: validationStatusLabelFor(config),
       units: 'As recorded per indicator; see indicator metadata for unit definitions.',
       limitations:
         'Generated from mock data for development and demonstration purposes; figures are not final.',
@@ -444,21 +550,54 @@ export function buildReportPreview(config: ReportConfig): ReportPreview {
   }
 }
 
+/** Same report configuration as an existing saved report, ignoring output
+ * format — switching a saved report between PDF and Excel is still "the
+ * same report regenerated", per how stakeholder feedback framed versioning. */
+function configSignature(config: ReportConfig): string {
+  const identity = {
+    reportType: config.reportType,
+    periods: [...config.periods].sort(),
+    pillars: [...config.pillars].sort(),
+    kpiCategory: config.kpiCategory,
+    state: config.state,
+    distributionCompany: config.distributionCompany,
+    programmeOrAgency: config.programmeOrAgency,
+    validationStatus: config.validationStatus,
+    readinessTier: config.readinessTier,
+  }
+  return JSON.stringify(identity)
+}
+
 export function createSavedReport(config: ReportConfig): SavedReport {
-  savedReportSequence += 1
   const catalogueEntry = reportCatalogue.find((entry) => entry.reportType === config.reportType)!
   const now = new Date().toISOString()
   const filtered = appliedFiltersFor(config)
+  const signature = configSignature(config)
 
+  const existing = savedReports.find((report) => configSignature(report.config) === signature)
+  if (existing) {
+    existing.version += 1
+    existing.format = config.format
+    existing.filtersSummary = filtered.map((entry) => entry.value).join(' · ')
+    existing.validationStatusLabel = validationStatusLabelFor(config)
+    existing.fileReference = `${config.reportType}_${config.periods.join('-')}.${config.format}`
+    existing.lastGeneratedAt = now
+    existing.config = config
+    return existing
+  }
+
+  savedReportSequence += 1
   const report: SavedReport = {
     id: `RPT-2025-${String(savedReportSequence).padStart(3, '0')}`,
     reportType: config.reportType,
     category: catalogueEntry.category,
-    title: `${catalogueEntry.title} — ${labelFor(reportsFilterOptions.reportingPeriods, config.period)}`,
+    title: `${catalogueEntry.title} — ${periodsLabel(config)}`,
     owner: 'You',
     filtersSummary: filtered.map((entry) => entry.value).join(' · '),
+    validationStatusLabel: validationStatusLabelFor(config),
+    version: 1,
     format: config.format,
-    fileReference: `${config.reportType}_${config.period}.${config.format}`,
+    fileReference: `${config.reportType}_${config.periods.join('-')}.${config.format}`,
     createdAt: now,
     lastGeneratedAt: now,
     config,
@@ -473,4 +612,49 @@ export function removeSavedReport(id: string) {
   if (index === -1) return false
   savedReports.splice(index, 1)
   return true
+}
+
+/**
+ * A standalone export of every tracked KPI's methodology — stakeholder
+ * feedback asked for a methodology export covering all KPIs, not only the
+ * per-report methodology note. Reuses the same `ReportPreview` shape the
+ * builder already generates PDF/Excel from, so it downloads through the
+ * identical export pipeline rather than a bespoke one.
+ */
+export function buildMethodologyReport(): ReportPreview {
+  const rows = kpiExplorerCatalogue
+    .map((row) => {
+      const profile = getKpiProfile(row.id)
+      return [
+        row.id,
+        row.name,
+        row.pillar,
+        profile?.definition ?? '—',
+        profile?.formula ?? '—',
+        profile?.sourceInstitution ?? row.sourceInstitution,
+      ]
+    })
+    .sort((a, b) => a[0]!.localeCompare(b[0]!))
+
+  return {
+    metadata: {
+      title: 'KPI methodology export — all tracked indicators',
+      reportingPeriod: 'Not period-specific — methodology, not values',
+      appliedFilters: [],
+      generatedAt: new Date().toISOString(),
+      dataVersion: 'M300 mock dataset, Q3 2025',
+      sourceNotes: 'Master KPI Registry — definition and calculation methodology per indicator.',
+      validationStatus: 'Not applicable — methodology text, not a validated figure.',
+      units: 'Not applicable.',
+      limitations:
+        'Generated from mock data for development and demonstration purposes; figures are not final.',
+    },
+    sections: [
+      {
+        title: 'Indicator methodologies',
+        columns: ['ID', 'Indicator', 'Pillar', 'Definition', 'Methodology', 'Source institution'],
+        rows,
+      },
+    ],
+  }
 }

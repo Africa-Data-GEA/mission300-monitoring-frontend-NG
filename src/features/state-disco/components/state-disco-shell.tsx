@@ -1,16 +1,12 @@
-import { NavLink } from 'react-router'
 import type { ReactNode } from 'react'
 import { Breadcrumb } from '@/components/ui/breadcrumb'
-import { cn } from '@/lib/utils'
 
-const links = [
-  { to: '/state-disco', label: 'Performance overview', end: true },
-  { to: '/state-disco/comparison', label: 'DisCo comparison' },
-  { to: '/state-disco/supply-tariff', label: 'Supply & tariff' },
-  { to: '/state-disco/delivery', label: 'Delivery & compliance' },
-  { to: '/state-disco/states', label: 'State view' },
-]
-
+/**
+ * Single-page layout — no internal tab navigation. State & DisCo used to
+ * split Overview / Comparison / Supply & tariff / Delivery / States across
+ * five separate routes behind tabs; all of that now lives on one scrollable
+ * page (see state-disco-page.tsx), so this shell is just the shared header.
+ */
 export function StateDiscoShell({
   title,
   description,
@@ -27,18 +23,6 @@ export function StateDiscoShell({
         <h1 className="mt-2 text-3xl font-semibold tracking-tight text-text-default">{title}</h1>
         <p className="mt-1 max-w-3xl text-sm text-text-muted">{description}</p>
       </div>
-      <nav aria-label="State and DisCo views" className="overflow-x-auto border-b border-border-default">
-        <div className="flex min-w-max gap-1">
-          {links.map((link) => (
-            <NavLink key={link.to} to={link.to} end={link.end} className={({ isActive }) => cn(
-              'border-b-2 px-3 py-2 text-sm font-medium',
-              isActive ? 'border-brand-700 text-brand-800' : 'border-transparent text-text-muted',
-            )}>
-              {link.label}
-            </NavLink>
-          ))}
-        </div>
-      </nav>
       {children}
     </div>
   )

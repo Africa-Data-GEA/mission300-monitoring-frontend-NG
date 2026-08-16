@@ -73,6 +73,16 @@ function buildPeopleWithElectricityAccessCard(): CompactOutcomeCard {
     trend: { change: 137.3 - 86.6, label: '+50.7M vs prior published year', direction: 'higher-is-better' },
     source: 'live-cpr',
     confidence: 'confirmed',
+    // Interim Compact Action Plan checkpoints between the 2024 baseline and
+    // the 2030 target, so the trajectory reads as a staircase rather than
+    // one distant jump.
+    milestones: [
+      { label: '2026 checkpoint', value: 150 },
+      { label: '2028 checkpoint', value: 190 },
+    ],
+    // A composite figure blended from grid, mini-grid and SHS connections —
+    // no single KPI Explorer profile backs it directly.
+    kpiId: null,
     provenance: {
       definition:
         'Cumulative number of people with electricity access across grid, mini-grid and solar home system solutions.',
@@ -92,6 +102,7 @@ function buildAccessRateCard(): AccessRateCard {
   return {
     title: 'Electricity access rate',
     icon: 'access',
+    kpiId: 'M300-PX-001',
     // One decimal, matching clean cooking access on the same row.
     value: `${(profile.current ?? 0).toFixed(1)}%`,
     rawValue: profile.current ?? 0,
@@ -119,6 +130,7 @@ function buildGenerationCapacityCard(): GenerationCapacityCard {
   return {
     title: 'Available generation capacity',
     icon: 'generation',
+    kpiId: 'M300-P1-003',
     availableMw,
     installedMw,
     value: `${(availableMw / 1000).toFixed(1)} GW`,
@@ -159,6 +171,13 @@ function buildCleanCookingAccessCard(): CompactOutcomeCard {
     // this is the same real trend, not an invented one.
     source: 'live-cpr',
     confidence: 'confirmed',
+    milestones: [
+      { label: '2026 checkpoint', value: 40 },
+      { label: '2028 checkpoint', value: 70 },
+    ],
+    // A composite figure blended across cooking-fuel technologies — no
+    // single KPI Explorer profile backs it directly.
+    kpiId: null,
     provenance: {
       definition:
         'Share of Nigeria’s population with access to clean fuels and technologies for cooking.',
@@ -295,6 +314,7 @@ function buildBulletMetric(config: (typeof NATIONAL_PERFORMANCE_METRICS)[number]
     source: toSourceTag(profile.validationStatus),
     confidence: toConfidence(profile.validationStatus),
     provenance: profile.provenance,
+    history: profile.history.map((point) => point.value),
   }
 }
 
@@ -321,12 +341,16 @@ function buildOngoingProjects(): OngoingProject[] {
           pillar: row.pillar,
           pillarLabel: PILLAR_LABELS[row.pillar],
           owner: row.owner,
+          leadName: row.leadName,
           location: row.location,
           latitude: PROJECT_COORDINATES[row.id]?.latitude ?? 9.0765,
           longitude: PROJECT_COORDINATES[row.id]?.longitude ?? 7.3986,
           currentStatus: row.currentStatus,
+          pipelineReadiness: row.pipelineReadiness,
           startDate: row.startDate,
           endDate: row.endDate,
+          comment: row.comment,
+          statusHistory: row.statusHistory,
         }],
   )
 }
@@ -375,6 +399,7 @@ function buildExceptions(): Bottleneck[] {
       reference: row.linkedRecord,
       severity: mapBottleneckSeverity(row),
       daysUnresolved: row.ageDays,
+      followUp: row.followUp,
       provenance: {
         definition: row.followUp,
         methodology: `Tracked as a ${row.status} ${row.category} bottleneck.`,
@@ -384,19 +409,66 @@ function buildExceptions(): Bottleneck[] {
     }))
 }
 
+/**
+ * Reframes the four headline cards as the Compact Progress Report's tracked
+ * targets — stakeholder feedback asked for the target section to be
+ * explicitly linked to CPR-target achievement.
+ */
+function buildCprTargets(cards: ExecutiveOverview['headlineCards']): ExecutiveOverview['cprTargets'] {
+  return [
+    {
+      title: cards.peopleWithElectricityAccess.title,
+      value: cards.peopleWithElectricityAccess.value,
+      baselineLabel: cards.peopleWithElectricityAccess.baselineLabel,
+      targetLabel: cards.peopleWithElectricityAccess.targetLabel,
+      kpiId: cards.peopleWithElectricityAccess.kpiId,
+    },
+    {
+      title: cards.accessRate.title,
+      value: cards.accessRate.value,
+      baselineLabel: `${cards.accessRate.sourceYear} publication`,
+      targetLabel: cards.accessRate.targetLabel,
+      kpiId: cards.accessRate.kpiId,
+    },
+    {
+      title: cards.generationCapacity.title,
+      value: cards.generationCapacity.value,
+      // Unlike the other three, this metric has no formal Compact baseline
+      // or fixed 2030 target — per docs/specs/generation-network.md, it is
+      // benchmarked against installed capacity and an approved plan
+      // projection "when available," not a single approved end-state figure.
+      // Stating that plainly avoids repeating the same benchmark on both
+      // rows, which reads as a data error rather than a deliberate framing.
+      baselineLabel: cards.generationCapacity.benchmarkLabel,
+      targetLabel: 'No fixed Compact target — tracked against an approved Integrated Resource Plan projection when available',
+      kpiId: cards.generationCapacity.kpiId,
+    },
+    {
+      title: cards.cleanCookingAccess.title,
+      value: cards.cleanCookingAccess.value,
+      baselineLabel: cards.cleanCookingAccess.baselineLabel,
+      targetLabel: cards.cleanCookingAccess.targetLabel,
+      kpiId: cards.cleanCookingAccess.kpiId,
+    },
+  ]
+}
+
 /* ---------------------------------------------------------------------- */
 
 export function buildExecutiveOverview(): ExecutiveOverview {
+  const headlineCards: ExecutiveOverview['headlineCards'] = {
+    peopleWithElectricityAccess: buildPeopleWithElectricityAccessCard(),
+    accessRate: buildAccessRateCard(),
+    generationCapacity: buildGenerationCapacityCard(),
+    cleanCookingAccess: buildCleanCookingAccessCard(),
+  }
+
   return {
     lastUpdated: LAST_UPDATED,
     appliedPillar: 'all',
 
-    headlineCards: {
-      peopleWithElectricityAccess: buildPeopleWithElectricityAccessCard(),
-      accessRate: buildAccessRateCard(),
-      generationCapacity: buildGenerationCapacityCard(),
-      cleanCookingAccess: buildCleanCookingAccessCard(),
-    },
+    headlineCards,
+    cprTargets: buildCprTargets(headlineCards),
 
     accessDelivery: Object.entries(ACCESS_CHANNEL_KPI_IDS).map(([id, kpiId]) =>
       buildAccessChannel(id, kpiId),

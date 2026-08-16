@@ -65,15 +65,26 @@ describe('Section A — headline cards', () => {
     render(<HeadlineCards cards={headlineCards} />)
 
     expect(screen.getByText('70.0%')).toBeInTheDocument()
-    expect(screen.getByText('2024')).toBeInTheDocument()
+    expect(screen.getByText('2023')).toBeInTheDocument()
   })
 
-  it('renders the generation capacity card with a sparkline', () => {
-    const { container } = render(<HeadlineCards cards={headlineCards} />)
+  it('renders the generation capacity card with a sparkline', async () => {
+    render(<HeadlineCards cards={headlineCards} />)
 
     expect(screen.getByText('5.4 GW')).toBeInTheDocument()
-    expect(screen.getByText('of 13.6 GW installed')).toBeInTheDocument()
-    expect(container.querySelector('polyline')).toBeInTheDocument()
+    // The trend chart is an ApexCharts line chart (GenerationCapacityLineChart),
+    // not the plain SVG Sparkline — it exposes itself accessibly as an img.
+    expect(
+      screen.getByRole('img', { name: 'Available generation capacity trend' }),
+    ).toBeInTheDocument()
+
+    // The installed-capacity benchmark lives behind the info popover, not on
+    // the card face — see MetricCardFrame's `details` prop.
+    fireEvent.click(
+      screen.getByRole('button', { name: /About Available generation capacity/ }),
+    )
+    const dialog = await screen.findByRole('dialog')
+    expect(dialog).toHaveTextContent('of 13.6 GW installed')
   })
 
   it('renders clean cooking access against its baseline and target', () => {
@@ -102,10 +113,13 @@ describe('Section A — headline cards', () => {
   })
 
   it('exposes the target through the information popover', async () => {
-    const user = userEvent.setup()
     render(<HeadlineCards cards={headlineCards} />)
 
-    await user.click(
+    // fireEvent.click rather than userEvent.click: the popover's container
+    // opens on hover, and userEvent's click simulates a pointer moving over
+    // the trigger first, which would open then immediately toggle it closed
+    // again before the click completes.
+    fireEvent.click(
       screen.getByRole('button', { name: /About People with electricity access/ }),
     )
 
@@ -121,11 +135,11 @@ describe('Section B — access delivery by channel', () => {
   it('renders all three delivery channels', () => {
     render(<AccessDeliverySection channels={accessDelivery} />)
 
-    expect(screen.getByText('New grid connections')).toBeInTheDocument()
+    expect(screen.getByText('New Grid Connections (Annual)')).toBeInTheDocument()
     expect(
-      screen.getByText('Mini-grid household connections'),
+      screen.getByText('Mini-Grid Customer Connections'),
     ).toBeInTheDocument()
-    expect(screen.getByText('Solar Home Systems deployed')).toBeInTheDocument()
+    expect(screen.getByText('Solar Home Systems Deployed')).toBeInTheDocument()
   })
 
   it('renders a progress bar for channels with an approved target', () => {
@@ -133,7 +147,7 @@ describe('Section B — access delivery by channel', () => {
 
     expect(
       screen.getByRole('progressbar', {
-        name: 'Mini-grid household connections',
+        name: 'Mini-Grid Customer Connections',
       }),
     ).toHaveAttribute('aria-valuenow', '17.1')
   })
@@ -255,7 +269,7 @@ describe('Section D — delivery status and exceptions', () => {
     renderWithRouter(<DeliveryStatusSection panel={deliveryStatus} />)
 
     expect(screen.getByRole('table')).toBeInTheDocument()
-    expect(screen.getByText(/Showing 1.*5 of 6 records/)).toBeInTheDocument()
+    expect(screen.getByText(/Showing 1.*5 of 8 records/)).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'North East 330kV Line Upgrade' })).toHaveAttribute(
       'href',
       '/programs/projects/PRJ-2025-011',
@@ -272,7 +286,7 @@ describe('Section D — delivery status and exceptions', () => {
 
     await user.click(screen.getByRole('button', { name: 'Next page' }))
 
-    expect(screen.getByText(/Showing 6.*6 of 6 records/)).toBeInTheDocument()
+    expect(screen.getByText(/Showing 6.*8 of 8 records/)).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Feeder Rehabilitation Lots, Lagos' })).toBeInTheDocument()
   })
 
@@ -296,7 +310,7 @@ describe('Section D — delivery status and exceptions', () => {
 
     expect(
       screen.getByRole('img', {
-        name: 'Delivery status distribution for 6 ongoing projects',
+        name: 'Delivery status distribution for 8 ongoing projects',
       }),
     ).toBeInTheDocument()
   })
@@ -314,7 +328,7 @@ describe('Section D — delivery status and exceptions', () => {
     renderWithRouter(<DeliveryStatusSection panel={deliveryStatus} />)
 
     expect(
-      screen.getByText('Tariff shortfall / cost-reflectivity'),
+      screen.getByText('Tariff shortfall / cost-reflectivity subsidy funding gap'),
     ).toBeInTheDocument()
     expect(screen.getAllByText('Critical')).not.toHaveLength(0)
     expect(screen.getByText(/118 days/)).toBeInTheDocument()

@@ -82,6 +82,12 @@ export function previewReport(config: ReportConfig): Promise<ReportPreview> {
   return api.post('/reports/preview', config, reportPreviewSchema)
 }
 
+/** Every tracked KPI's methodology, independent of the report builder's
+ * current configuration — see buildMethodologyReport in mocks/data/reports.ts. */
+export function fetchMethodologyReport(): Promise<ReportPreview> {
+  return api.get('/reports/methodology', reportPreviewSchema)
+}
+
 export function useDeleteSavedReport() {
   const queryClient = useQueryClient()
 

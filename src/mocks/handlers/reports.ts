@@ -1,6 +1,7 @@
-import { delay, http, HttpResponse } from 'msw'
+import { delay, http, HttpResponse } from '../local-router'
 import { reportConfigSchema } from '@/api/schemas/reports'
 import {
+  buildMethodologyReport,
   buildReportPreview,
   compactExportCards,
   createSavedReport,
@@ -98,6 +99,13 @@ export const reportsHandlers = [
     const savedReport = createSavedReport(result.data)
 
     return HttpResponse.json({ preview, savedReport })
+  }),
+
+  /** GET /api/reports/methodology — every tracked KPI's definition and
+   * calculation methodology, independent of any report configuration. */
+  http.get('/api/reports/methodology', async () => {
+    await delay(300)
+    return HttpResponse.json(buildMethodologyReport())
   }),
 
   /** DELETE /api/reports/saved/:id */

@@ -48,6 +48,8 @@ function buildHeadlineCard(kpiId: string): PillarHeadlineCard {
     title: profile.name,
     value: profile.currentLabel,
     rawValue: profile.current,
+    baseline: profile.baseline,
+    baselineLabel: profile.baselineLabel,
     targetLabel: profile.targetLabel,
     target: profile.target,
     trend: profile.trend,
@@ -57,52 +59,22 @@ function buildHeadlineCard(kpiId: string): PillarHeadlineCard {
 }
 
 /**
- * Core/Tier 1 indicators shown beyond the four headline cards, grouped for
- * a clean analytics layout. Curated per pillar rather than derived from every
- * `readiness: 'core'` catalogue row, so the grouping reads as an analyst
- * chose it, not as a dump of everything available.
+ * Core indicators shown beyond the four headline cards: every KPI Matrix
+ * catalogue row tagged to this pillar that isn't already one of the four
+ * headline cards, grouped by its own `sourceDataset` (the registry's own
+ * category label, e.g. "Metering coverage", "Mini-Grids") — not a curated
+ * subset. The dashboard's own request is to show every indicator the
+ * registry has for a pillar, not an analyst-picked highlight reel; the full
+ * 77-row Master KPI Registry now has a mock entry for every id (see
+ * kpi-explorer.ts), so this can safely be exhaustive instead of an allowlist
+ * that silently drops new indicators as the registry grows.
  *
- * Group labels for Private-Sector Participation, Regional Integration and
- * Clean Cooking are taken directly from their page specification's own
- * section titles (`docs/specs/*.md`) — "Enabling Environment", "Interconnectors
- * and Regional Market Reform", "Programme Delivery and Financing" — rather
- * than invented. None of these three pillars had confirmed institutional
- * current values for these indicators at the time this was written (the
- * specification itself frames this section as appearing "when institutional
- * data is available"); each KPI's `currentLabel`/`limitations` in
- * kpi-explorer.ts says explicitly that its numbers are an illustrative
- * placeholder trajectory, not a submitted or validated figure, pending real
- * data from the named source institution.
+ * Many of these are the placeholder-value rows added to reach full registry
+ * coverage — each one's own `currentLabel`/`limitations` in kpi-explorer.ts
+ * says explicitly that its number is an illustrative placeholder, not a
+ * submitted or validated figure, pending real data from the named source
+ * institution.
  */
-const PILLAR_CORE_INDICATOR_GROUPS: Partial<Record<PillarId, ReadonlyArray<readonly [string, string]>>> = {
-  'financially-viable-utilities': [
-    ['M300-P3-001', 'Metering coverage'],
-    ['M300-P3-002', 'Metering coverage'],
-    ['M300-P3-003', 'Metering coverage'],
-    ['M300-P3-007', 'Revenue & collections'],
-    ['M300-P3-008', 'Revenue & collections'],
-    ['M300-P3-011', 'Tariffs'],
-    ['M300-P3-012', 'Tariffs'],
-    ['M300-P3-020', 'Service quality'],
-    ['M300-P3-013', 'Reform & delivery milestones'],
-    ['M300-P3-014', 'Reform & delivery milestones'],
-    ['M300-P3-015', 'Reform & delivery milestones'],
-    ['M300-P3-021', 'Reform & delivery milestones'],
-  ],
-  'private-sector-participation': [
-    ['M300-P4-003', 'Enabling environment'],
-    ['M300-P4-006', 'Enabling environment'],
-  ],
-  'regional-integration': [
-    ['M300-P5-001', 'Interconnectors & regional market reform'],
-    ['M300-P5-004', 'Interconnectors & regional market reform'],
-  ],
-  'clean-cooking': [
-    ['M300-P2-010', 'Programme delivery'],
-    ['M300-P2-011', 'Programme delivery'],
-  ],
-}
-
 function buildCoreIndicator(kpiId: string, group: string): PillarCoreIndicator {
   const profile = getKpiProfile(kpiId)
   if (!profile) {
@@ -116,6 +88,10 @@ function buildCoreIndicator(kpiId: string, group: string): PillarCoreIndicator {
     unit: profile.unit,
     current: profile.current,
     target: profile.target,
+    baseline: profile.baseline,
+    baselineLabel: profile.baselineLabel,
+    currentLabel: profile.currentLabel,
+    targetLabel: profile.targetLabel,
     direction: profile.direction,
     history: profile.history.map((point) => point.value),
     validationStatus: profile.validationStatus,
@@ -152,9 +128,9 @@ export function buildPillarDashboard(pillar: PillarId): PillarDashboardOverview 
       PillarHeadlineCard,
       PillarHeadlineCard,
     ],
-    coreIndicators: (PILLAR_CORE_INDICATOR_GROUPS[pillar] ?? []).map(([kpiId, group]) =>
-      buildCoreIndicator(kpiId, group),
-    ),
+    coreIndicators: kpiExplorerCatalogue
+      .filter((row) => row.pillar === pillar && !kpiIds.includes(row.id))
+      .map((row) => buildCoreIndicator(row.id, row.sourceDataset)),
     deliveryStatus: { counts, total: statuses.length },
     bottlenecks,
     kpis: kpiExplorerCatalogue.filter((row) => row.pillar === pillar),

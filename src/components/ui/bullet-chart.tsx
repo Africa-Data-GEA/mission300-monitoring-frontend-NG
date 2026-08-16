@@ -54,6 +54,7 @@ export function BulletChart({
   showExpected = true,
   tone = 'default',
   className,
+  milestones = [],
 }: {
   current: number
   baseline: number
@@ -70,6 +71,11 @@ export function BulletChart({
   showExpected?: boolean
   tone?: 'default' | 'danger'
   className?: string
+  /** Interim checkpoints between baseline and target — a long-term goal with
+   * no nearer-term reference point is hard to judge trajectory against, so
+   * these render as small ticks along the rail. Empty by default: most
+   * metrics have no defined intermediate milestones. */
+  milestones?: ReadonlyArray<{ label: string; value: number }>
 }) {
   const [tooltipOpen, setTooltipOpen] = useState(false)
   const tooltipId = useId()
@@ -106,6 +112,9 @@ export function BulletChart({
     showBaseline ? `baseline ${baseline}` : null,
     showExpected && expected !== null ? `expected ${expected} for this period` : null,
     target === null ? null : `target ${target}`,
+    milestones.length === 0
+      ? null
+      : `checkpoints: ${milestones.map((m) => `${m.label} ${m.value}`).join(', ')}`,
     !showExpected || isBehind === null
       ? null
       : isBehind
@@ -203,6 +212,17 @@ export function BulletChart({
           style={{ left: `${expectedPercent}%` }}
         />
       )}
+
+      {/* Intermediate checkpoints between baseline and target */}
+      {milestones.map((milestone) => (
+        <div
+          key={milestone.label}
+          data-testid="bullet-milestone"
+          title={`${milestone.label}: ${milestone.value}`}
+          className="absolute top-1/2 h-2.5 w-px -translate-x-1/2 -translate-y-1/2 bg-text-subtle/70"
+          style={{ left: `${toPercent(milestone.value, scaleMin, scaleMax)}%` }}
+        />
+      ))}
 
       {/* Approved target */}
       {targetPercent !== null && (

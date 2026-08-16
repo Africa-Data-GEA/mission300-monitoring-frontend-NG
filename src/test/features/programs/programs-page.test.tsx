@@ -6,17 +6,12 @@ import { ProgrammeDetailPage } from '@/features/programs/programme-detail-page'
 import { renderRoutesWithProviders, renderWithProviders } from '@/test/render'
 
 describe('ProgramsPage', () => {
-  it('renders the headline cards and the programme table', async () => {
+  it('renders the programme table', async () => {
     renderWithProviders(<ProgramsPage />, { route: '/programs' })
 
     expect(
       await screen.findByRole('heading', { name: 'Programs' }, { timeout: 3000 }),
     ).toBeInTheDocument()
-
-    expect(
-      screen.getByRole('region', { name: 'Headline performance cards' }),
-    ).toBeInTheDocument()
-    expect(screen.getByText('Active programmes and projects')).toBeInTheDocument()
 
     const table = screen.getByRole('table', {
       name: 'Approved programmes in the Mission 300 portfolio',

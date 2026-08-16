@@ -6,6 +6,7 @@ import { Card } from '@/components/ui/card'
 import { SelectField } from '@/components/ui/select-field'
 import { cn } from '@/lib/utils'
 import type { Orientation } from '../../use-reports-page'
+import { MultiSelectField } from './multi-select-field'
 
 /** The full configuration sidebar for the Report Builder — report type,
  * every filter from Section E, page orientation, and which of the preview's
@@ -60,17 +61,24 @@ export function BuilderSidebar({
 
       {filterOptions && (
         <div className="flex flex-col gap-3">
-          <SelectField
+          {/* Multi-select, not SelectField's single dropdown — stakeholder
+              feedback asked to compare multiple periods in one output (e.g.
+              Q1 vs Q2 vs Q3) and to select more than one pillar. Only the
+              KPI-indicator and pillar-performance report types build a real
+              per-period comparison from it; see the schema comment on
+              `periods` for why other report types don't. */}
+          <MultiSelectField
             label="Reporting period"
-            value={config.period}
+            values={config.periods}
             options={filterOptions.reportingPeriods}
-            onChange={(value) => set('period', value)}
+            onChange={(values) => set('periods', values)}
           />
-          <SelectField
+          <MultiSelectField
             label="Compact pillar"
-            value={config.pillar}
+            values={config.pillars}
             options={filterOptions.pillars}
-            onChange={(value) => set('pillar', value)}
+            onChange={(values) => set('pillars', values)}
+            allValue="all"
           />
           <SelectField
             label="KPI category"

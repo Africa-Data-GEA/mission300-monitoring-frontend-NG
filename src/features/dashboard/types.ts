@@ -13,6 +13,7 @@ export type {
   Bottleneck,
   BottleneckSeverity,
   BulletMetric,
+  CprTarget,
   DeliveryStatusPanel,
   CompactOutcomeCard,
   ExecutiveOverview,
@@ -20,5 +21,6 @@ export type {
   GenerationCapacityCard,
   HeadlineCards,
   OngoingProject,
+  OutcomeMilestone,
   ProjectStatusSummary,
 } from '@/api/schemas/executive-overview'

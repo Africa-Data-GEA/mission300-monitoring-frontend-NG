@@ -52,7 +52,7 @@ describe('useExecutiveOverview', () => {
     expect(result.current.data?.headlineCards.accessRate.value).toBe('70.0%')
     expect(result.current.data?.accessDelivery).toHaveLength(3)
     expect(result.current.data?.nationalPerformance).toHaveLength(6)
-    expect(result.current.data?.deliveryStatus.ongoingProjects).toHaveLength(6)
+    expect(result.current.data?.deliveryStatus.ongoingProjects).toHaveLength(8)
   })
 
   describe('query parameters', () => {
@@ -151,7 +151,7 @@ describe('useExecutiveOverview', () => {
       await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
       expect(result.current.data?.appliedPillar).toBe('all')
-      expect(result.current.data?.deliveryStatus.ongoingProjects).toHaveLength(6)
+      expect(result.current.data?.deliveryStatus.ongoingProjects).toHaveLength(8)
     })
 
     it('narrows the payload to the selected pillar', async () => {
@@ -191,7 +191,7 @@ describe('useExecutiveOverview', () => {
 
       await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
-      expect(result.current.data?.deliveryStatus.ongoingProjects).toHaveLength(6)
+      expect(result.current.data?.deliveryStatus.ongoingProjects).toHaveLength(8)
     })
   })
 

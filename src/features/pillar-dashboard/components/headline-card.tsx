@@ -4,6 +4,7 @@ import { Card } from '@/components/ui/card'
 import { InfoPopover } from '@/components/ui/info-popover'
 import { ProgressBar } from '@/components/ui/progress-bar'
 import { TrendIndicator } from '@/components/ui/trend-indicator'
+import { PillarKpiEditButton } from './pillar-kpi-edit-button'
 
 /**
  * One headline card, rendered straight from a real KpiProfile — the title
@@ -38,11 +39,17 @@ export function HeadlineCard({ card }: { card: PillarHeadlineCard }) {
         >
           {card.title}
         </Link>
-        <InfoPopover
-          provenance={card.provenance}
-          label={card.title}
-          details={[{ label: 'Target', value: card.targetLabel }]}
-        />
+        <div className="flex shrink-0 items-center gap-1">
+          <InfoPopover
+            provenance={card.provenance}
+            label={card.title}
+            details={[
+              { label: 'Baseline', value: card.baselineLabel || null },
+              { label: 'Target', value: card.targetLabel },
+            ]}
+          />
+          <PillarKpiEditButton kpiId={card.kpiId} name={card.title} />
+        </div>
       </div>
 
       <div className="mt-1">
@@ -63,7 +70,7 @@ export function HeadlineCard({ card }: { card: PillarHeadlineCard }) {
           a real gap above the bar even in a short card, rather than relying
           solely on mt-auto (which collapses to ~0 when there's little spare
           height to distribute). */}
-      <div className="mt-3 flex flex-1 items-end">
+      <div className="mt-3 flex flex-1 flex-col justify-end gap-1">
         <ProgressBar
           barClassName="bg-chart-blue-dark"
           value={percentToTarget ?? 0}
@@ -71,6 +78,14 @@ export function HeadlineCard({ card }: { card: PillarHeadlineCard }) {
             percentToTarget !== null ? `${card.title} progress to target` : `${card.title} — no confirmed target yet`
           }
         />
+        {/* Stakeholder feedback asked for baseline/progress/%-to-target to be
+            visible on the scorecard, not only inferable from the bar's fill
+            width — this states the percentage as text. */}
+        <p className="text-2xs text-text-subtle">
+          {percentToTarget !== null
+            ? `${Math.round(percentToTarget)}% to target${card.baseline !== null ? ` · baseline ${card.baseline.toLocaleString()}` : ''}`
+            : 'No confirmed target yet'}
+        </p>
       </div>
     </Card>
   )

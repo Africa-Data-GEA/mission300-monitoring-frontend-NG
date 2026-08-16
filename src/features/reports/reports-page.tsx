@@ -1,4 +1,7 @@
+import { FileSpreadsheet, FileText } from 'lucide-react'
 import { Breadcrumb } from '@/components/ui/breadcrumb'
+import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
 import { ErrorState } from '@/components/ui/error-state'
 import { BuilderSidebar } from './components/builder/builder-sidebar'
 import { ReportDocumentPreview } from './components/builder/report-document-preview'
@@ -70,6 +73,36 @@ export function ReportsPage() {
       </div>
 
       <NigeriaProgressReportSection />
+
+      <Card variant="well" className="p-3 sm:p-4">
+        <h2 className="text-lg font-semibold text-text-default">KPI methodology export</h2>
+        <p className="mt-1 text-sm text-text-muted">
+          Every tracked indicator&apos;s definition and calculation methodology in one document —
+          independent of the report builder&apos;s current filters above.
+        </p>
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          <Button
+            type="button"
+            size="sm"
+            variant="secondary"
+            disabled={page.downloadingMethodology !== null}
+            onClick={() => void page.downloadMethodology('pdf')}
+          >
+            <FileText aria-hidden="true" />
+            {page.downloadingMethodology === 'pdf' ? 'Generating…' : 'Download PDF'}
+          </Button>
+          <Button
+            type="button"
+            size="sm"
+            variant="secondary"
+            disabled={page.downloadingMethodology !== null}
+            onClick={() => void page.downloadMethodology('xlsx')}
+          >
+            <FileSpreadsheet aria-hidden="true" />
+            {page.downloadingMethodology === 'xlsx' ? 'Generating…' : 'Download Excel'}
+          </Button>
+        </div>
+      </Card>
 
       <div className="flex flex-col gap-3">
         <SavedReportsFilters

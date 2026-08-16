@@ -62,6 +62,15 @@ export const fundingStatusSchema = z.enum([
   'unfunded',
 ])
 
+/**
+ * Readiness of a project not yet in active delivery — distinct from
+ * `lifecycleStage` (identification→operations), which only describes stages
+ * a project passes through once it IS active. Stakeholder feedback asked to
+ * be able to track projects still in the pipeline with this readiness
+ * detail, rather than only listing projects already underway.
+ */
+export const pipelineReadinessSchema = z.enum(['pipeline', 'feasibility-study', 'investment-ready'])
+
 /* ------------------------------------------------------------------ *
  * Headline performance cards
  *
@@ -183,6 +192,14 @@ export const projectProfileSchema = z.object({
  * Risk/Bottlenecks, Suggestion, Program Type, Funding Sources/Size/Structure
  * and Funding Status.
  */
+/** One reporting-cycle snapshot in a project's status trail — stakeholder
+ * feedback asked to see how a priority project's status evolved over the
+ * reporting cycle, not just its current value. */
+export const statusHistoryEntrySchema = z.object({
+  period: z.string().min(1),
+  status: executionStatusSchema,
+})
+
 export const projectRecordSchema = z.object({
   id: z.string().min(1),
   /** The workbook's "Project" column — a title, distinct from the id. */
@@ -190,6 +207,9 @@ export const projectRecordSchema = z.object({
   programmeId: z.string().min(1),
   programmeName: z.string().min(1),
   owner: z.string().min(1),
+  /** The named person leading delivery — distinct from `owner`, which is the
+   * accountable institution. Stakeholder feedback asked for both. */
+  leadName: z.string().min(1),
   location: z.string().min(1),
   coverage: z.string().min(1),
   /** The workbook's "M300 Pillar Alignment" — a project can align to a
@@ -204,6 +224,9 @@ export const projectRecordSchema = z.object({
    * government counterpart funding". */
   fundingStructure: z.string().min(1),
   fundingStatus: fundingStatusSchema,
+  /** Null once a project is active (design stage or beyond) — only tracked
+   * while a project is still in the pipeline, not yet formally underway. */
+  pipelineReadiness: pipelineReadinessSchema.nullable(),
   /** The workbook's "Projected Status" — the status expected at this point
    * in the plan, shown alongside the actual current status so a gap between
    * them is visible at a glance. */
@@ -224,6 +247,44 @@ export const projectRecordSchema = z.object({
   suggestion: z.string(),
   validationStatus: validationStatusSchema,
   profile: projectProfileSchema,
+  /** Ordered oldest-to-newest status per reporting period, so leadership can
+   * see the trajectory (e.g. on-track → at-risk → delayed) rather than only
+   * the current snapshot. */
+  statusHistory: z.array(statusHistoryEntrySchema),
+})
+
+/* ------------------------------------------------------------------ *
+ * Admin: create / update / delete a priority project
+ *
+ * Mock-only mutation, mirroring createBottleneckRequestSchema in
+ * bottlenecks.ts. Scoped to the fields shown on the Overview delivery-status
+ * table plus the essentials a new project needs to exist (budget, contractor
+ * etc. default to placeholders and are only editable from the full Programs
+ * project profile, not this quick-add form). There is no auth/role
+ * enforcement anywhere in this app yet (see administration.ts), so — like
+ * every other mutation here — this is reachable by anyone, not gated to an
+ * "admin" role.
+ * ------------------------------------------------------------------ */
+
+export const upsertProjectRequestSchema = z.object({
+  name: z.string().trim().min(3, 'Name the project'),
+  programmeId: z.string().trim().min(1, 'Select a programme'),
+  owner: z.string().trim().min(1, 'Name the accountable institution'),
+  leadName: z.string().trim().min(1, 'Name the project lead'),
+  location: z.string().trim().min(1, 'Add a location'),
+  pillar: pillarIdSchema,
+  currentStatus: executionStatusSchema,
+  endDate: z.iso.datetime(),
+  comment: z.string().trim().max(1000).optional(),
+  /** Null once a project is active — stakeholder feedback asked to be able
+   * to add a project still in the pipeline with this readiness detail from
+   * this same quick-add form, not only view it on pre-existing records. */
+  pipelineReadiness: pipelineReadinessSchema.nullable(),
+})
+
+export const upsertProjectResponseSchema = z.object({
+  record: projectRecordSchema,
+  message: z.string().min(1),
 })
 
 /* ------------------------------------------------------------------ *
@@ -288,6 +349,7 @@ export type ExecutionStatus = z.infer<typeof executionStatusSchema>
 export type RegisterPriority = z.infer<typeof registerPrioritySchema>
 export type ProgramType = z.infer<typeof programTypeSchema>
 export type FundingStatus = z.infer<typeof fundingStatusSchema>
+export type PipelineReadiness = z.infer<typeof pipelineReadinessSchema>
 export type ProgramsSummaryCard = z.infer<typeof programsSummaryCardSchema>
 export type MilestoneOnTimeCard = z.infer<typeof milestoneOnTimeCardSchema>
 export type DelayedOrBlockedCard = z.infer<typeof delayedOrBlockedCardSchema>
@@ -296,6 +358,9 @@ export type ProgramsHeadlineCards = z.infer<typeof programsHeadlineCardsSchema>
 export type ProgrammeRecord = z.infer<typeof programmeRecordSchema>
 export type ProjectProfile = z.infer<typeof projectProfileSchema>
 export type ProjectRecord = z.infer<typeof projectRecordSchema>
+export type StatusHistoryEntry = z.infer<typeof statusHistoryEntrySchema>
+export type UpsertProjectRequest = z.infer<typeof upsertProjectRequestSchema>
+export type UpsertProjectResponse = z.infer<typeof upsertProjectResponseSchema>
 export type MilestoneRecord = z.infer<typeof milestoneRecordSchema>
 export type ProgramsFilterOptions = z.infer<typeof programsFilterOptionsSchema>
 export type ProgramsQuery = z.infer<typeof programsQuerySchema>
@@ -336,6 +401,13 @@ export const FUNDING_STATUS_LABELS: Record<FundingStatus, string> = {
   unfunded: 'Unfunded',
 }
 
+export const PIPELINE_READINESS_LABELS: Record<PipelineReadiness, string> = {
+  pipeline: 'Pipeline',
+  'feasibility-study': 'Feasibility study',
+  'investment-ready': 'Investment-ready',
+}
+
 export const EXECUTION_STATUSES = executionStatusSchema.options
 export const PROGRAM_TYPES = programTypeSchema.options
 export const FUNDING_STATUSES = fundingStatusSchema.options
+export const PIPELINE_READINESS_TIERS = pipelineReadinessSchema.options

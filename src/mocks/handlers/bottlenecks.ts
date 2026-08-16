@@ -1,4 +1,4 @@
-import { delay, http, HttpResponse } from 'msw'
+import { delay, http, HttpResponse } from '../local-router'
 import type { BottleneckRecord } from '@/api/schemas/bottlenecks'
 import {
   bottlenecksEscalations,

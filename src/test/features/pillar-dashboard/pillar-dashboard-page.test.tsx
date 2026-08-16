@@ -31,6 +31,26 @@ describe('PillarDashboardPage', () => {
     ).not.toBeInTheDocument()
   })
 
+  it('shows a milestone tracker chart for a pillar whose only core indicator is a status-type KPI', async () => {
+    renderRoutesWithProviders(
+      [{ path: 'pillars/:pillar', element: <PillarDashboardPage /> }],
+      { route: '/pillars/regional-integration' },
+    )
+
+    expect(
+      await screen.findByRole('heading', { name: 'Regional Integration' }, { timeout: 3000 }),
+    ).toBeInTheDocument()
+
+    expect(screen.getByRole('heading', { name: 'Core indicators' })).toBeInTheDocument()
+    const tracker = screen.getByRole('heading', { name: 'Milestones and governance reforms' })
+      .closest('[data-slot="card"]') as HTMLElement
+    expect(tracker).toBeInTheDocument()
+    expect(
+      within(tracker).getByText('Nigeria Interconnected with Synchronised West African Grid'),
+    ).toBeInTheDocument()
+    expect(within(tracker).getByText('Not started')).toBeInTheDocument()
+  })
+
   it('shows an error state for an unknown pillar', async () => {
     renderRoutesWithProviders(
       [{ path: 'pillars/:pillar', element: <PillarDashboardPage /> }],

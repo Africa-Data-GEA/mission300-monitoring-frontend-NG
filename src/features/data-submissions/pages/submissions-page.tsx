@@ -23,6 +23,9 @@ const columns: Column<SubmissionListItem>[] = [
     sortValue: (row) => row.dataset,
   },
   { id: 'institution', header: 'Institution', cell: (row) => row.institution, sortValue: (row) => row.institution },
+  // Stakeholder feedback asked to clearly see who submitted each row —
+  // `submittedBy` already existed on the schema, just wasn't a column here.
+  { id: 'lead', header: 'Submitted by', cell: (row) => row.submittedBy, sortValue: (row) => row.submittedBy },
   { id: 'period', header: 'Period', cell: (row) => row.reportingPeriod },
   { id: 'method', header: 'Method', cell: (row) => row.methodLabel },
   { id: 'version', header: 'Version', cell: (row) => `v${row.version}`, align: 'right' },

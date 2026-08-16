@@ -22,6 +22,13 @@ export function CompactOutcomeCard({
         { label: 'Reporting period', value: data.reportingPeriod },
         { label: 'Baseline', value: data.baselineLabel },
         { label: '2030 target', value: data.targetLabel },
+        {
+          label: 'Interim checkpoints',
+          value:
+            data.milestones.length > 0
+              ? data.milestones.map((m) => `${m.label}: ${m.value}`).join('; ')
+              : null,
+        },
       ]}
     >
       {/*
@@ -60,6 +67,7 @@ export function CompactOutcomeCard({
         direction={data.direction}
         label={data.title}
         valueLabel={data.value}
+        milestones={data.milestones}
       />
 
       {data.trend && (

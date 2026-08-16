@@ -1,4 +1,4 @@
-import { delay, http, HttpResponse } from 'msw'
+import { delay, http, HttpResponse } from '../local-router'
 import { updateBrandColorsRequestSchema, updateBrandFontsRequestSchema } from '@/api/schemas/branding'
 import { getBrandConfig, setBrandConfig } from '../data/branding'
 

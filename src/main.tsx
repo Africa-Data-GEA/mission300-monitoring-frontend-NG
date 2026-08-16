@@ -7,45 +7,21 @@ import { environment } from '@/config/environment'
 import './index.css'
 
 /**
- * Mock and hybrid demo modes use MSW. Backend mode never starts the browser
- * worker; all requests go through the configured API base URL.
+ * Mock and hybrid modes no longer use a service worker. Importing
+ * mocks/handlers.ts is what actually registers every route with
+ * mocks/local-router.ts (each handler file's `http.get(...)` call has that
+ * registration as a side effect) — dispatchLocalRequest has nothing to match
+ * against until this import has run at least once, so it must complete
+ * before the app renders and starts firing queries. `backend` mode skips
+ * this entirely: it never touches mocks/* and goes straight to a real
+ * `fetch()` against `VITE_API_BASE_URL`.
  */
-/**
- * When mock handler code changes during development, MSW installs a new
- * service worker in the background — but the page you're looking at is
- * still controlled by the *old* one until you reload, so requests can miss
- * every handler that changed. Rather than requiring a manual hard reload
- * (the previous behaviour, surfaced as "No mock handler matched..." in the
- * console), reload automatically the one time control actually switches
- * over — the standard fix for this class of service-worker staleness.
- */
-function reloadOnServiceWorkerUpdate() {
-  if (!('serviceWorker' in navigator)) return
-  let hasReloaded = false
-  navigator.serviceWorker.addEventListener('controllerchange', () => {
-    if (hasReloaded) return
-    hasReloaded = true
-    window.location.reload()
-  })
-}
-
-async function enableMocking() {
+async function loadMockHandlers() {
   if (!environment.usesBrowserMocks) return
-
-  reloadOnServiceWorkerUpdate()
-
-  const { worker } = await import('@/mocks/browser')
-
-  /*
-   * `warn` rather than `bypass`: an unmatched /api call silently falls through
-   * to the dev server, which answers with the SPA shell and produces a
-   * confusing JSON parse error downstream. Warning names the offending URL in
-   * the console instead.
-   */
-  return worker.start({ onUnhandledRequest: 'warn' })
+  await import('@/mocks/handlers')
 }
 
-enableMocking().then(() => {
+loadMockHandlers().then(() => {
   createRoot(document.getElementById('root')!).render(
     <StrictMode>
       <AppProviders>

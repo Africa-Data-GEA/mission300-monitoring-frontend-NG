@@ -1,11 +1,16 @@
 import { useId, useMemo, useState } from 'react'
-import { Search } from 'lucide-react'
+import { Pencil, Plus, Search, Trash2 } from 'lucide-react'
 import { Link } from 'react-router'
+import type { UpsertProjectRequest } from '@/api/schemas/programs'
+import { Button } from '@/components/ui/button'
 import { Pagination } from '@/components/ui/pagination'
 import { ExecutionStatusBadge } from '@/features/programs/components/execution-status-badge'
+import { PipelineReadinessBadge } from '@/features/programs/components/pipeline-readiness-badge'
 import { formatDeadline } from '@/lib/format'
 import { cn } from '@/lib/utils'
+import { deleteProject } from '../lib/project-admin-api'
 import type { OngoingProject } from '../types'
+import { UpsertProjectDialog } from './project-admin/upsert-project-dialog'
 
 const PAGE_SIZE = 5
 const dateFormatter = new Intl.DateTimeFormat('en-GB', {
@@ -30,10 +35,55 @@ const STATUS_SEVERITY: Record<OngoingProject['currentStatus'], number> = {
   'on-track': 3,
 }
 
-export function OngoingProjectsTable({ projects }: { projects: readonly OngoingProject[] }) {
+function toUpsertValues(project: OngoingProject): UpsertProjectRequest {
+  return {
+    name: project.name,
+    programmeId: project.programmeId,
+    owner: project.owner,
+    leadName: project.leadName,
+    location: project.location,
+    pillar: project.pillar,
+    currentStatus: project.currentStatus,
+    endDate: project.endDate,
+    comment: project.comment,
+    pipelineReadiness: project.pipelineReadiness,
+  }
+}
+
+/**
+ * `onChanged` re-fetches the Overview payload after a project is added,
+ * edited or removed — stakeholder feedback asked to be able to add, modify
+ * and delete priority items directly from this table, not only view them.
+ */
+export function OngoingProjectsTable({
+  projects,
+  onChanged,
+}: {
+  projects: readonly OngoingProject[]
+  onChanged: () => void
+}) {
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState('')
   const searchId = useId()
+  const [dialogState, setDialogState] = useState<
+    { mode: 'closed' } | { mode: 'create' } | { mode: 'edit'; project: OngoingProject }
+  >({ mode: 'closed' })
+  const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [deleteError, setDeleteError] = useState('')
+
+  async function handleDelete(project: OngoingProject) {
+    if (!window.confirm(`Remove "${project.name}" from the priority project register?`)) return
+    setDeleteError('')
+    setDeletingId(project.id)
+    try {
+      await deleteProject(project.id)
+      onChanged()
+    } catch {
+      setDeleteError(`${project.name} could not be removed. Please try again.`)
+    } finally {
+      setDeletingId(null)
+    }
+  }
 
   // One reading of "now" for the whole table, taken once when it mounts.
   // Calling Date.now() inside the render body makes every deadline cell
@@ -65,6 +115,7 @@ export function OngoingProjectsTable({ projects }: { projects: readonly OngoingP
         project.programmeName,
         project.pillarLabel,
         project.owner,
+        project.leadName,
         project.location,
         project.currentStatus.replace('-', ' '),
       ].some((value) => value.toLocaleLowerCase().includes(query)),
@@ -111,7 +162,17 @@ export function OngoingProjectsTable({ projects }: { projects: readonly OngoingP
             ? `${filteredProjects.length} project${filteredProjects.length === 1 ? '' : 's'} found`
             : ''}
         </p>
+        <Button type="button" size="sm" onClick={() => setDialogState({ mode: 'create' })}>
+          <Plus aria-hidden="true" />
+          Add project
+        </Button>
       </div>
+
+      {deleteError && (
+        <p className="mb-3 text-sm text-status-at-risk" role="alert">
+          {deleteError}
+        </p>
+      )}
 
       <div className="overflow-x-auto rounded-lg border border-border-default">
         <table className="w-full min-w-[980px] border-collapse text-left">
@@ -121,9 +182,14 @@ export function OngoingProjectsTable({ projects }: { projects: readonly OngoingP
               <th className="px-3 py-2.5">Programme</th>
               <th className="px-3 py-2.5">Pillar</th>
               <th className="px-3 py-2.5">Owner</th>
+              <th className="px-3 py-2.5">Lead</th>
               <th className="px-3 py-2.5">Location</th>
               <th className="px-3 py-2.5">End date</th>
               <th className="px-3 py-2.5">Status</th>
+              <th className="px-3 py-2.5">Comment</th>
+              <th className="px-3 py-2.5">
+                <span className="sr-only">Actions</span>
+              </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border-default bg-surface-card">
@@ -147,6 +213,7 @@ export function OngoingProjectsTable({ projects }: { projects: readonly OngoingP
                 </td>
                 <td className="px-3 py-3 text-sm text-text-muted">{project.pillarLabel}</td>
                 <td className="px-3 py-3 text-sm text-text-muted">{project.owner}</td>
+                <td className="px-3 py-3 text-sm text-text-muted">{project.leadName}</td>
                 <td className="px-3 py-3 text-sm text-text-muted">{project.location}</td>
                 <td className="px-3 py-3 text-sm whitespace-nowrap text-text-muted">
                   {dateFormatter.format(new Date(project.endDate))}
@@ -167,7 +234,40 @@ export function OngoingProjectsTable({ projects }: { projects: readonly OngoingP
                   </span>
                 </td>
                 <td className="px-3 py-3">
-                  <ExecutionStatusBadge status={project.currentStatus} />
+                  <div className="flex flex-col items-start gap-1">
+                    <ExecutionStatusBadge status={project.currentStatus} />
+                    {project.pipelineReadiness && (
+                      <PipelineReadinessBadge readiness={project.pipelineReadiness} />
+                    )}
+                  </div>
+                </td>
+                <td className="px-3 py-3 text-sm text-text-muted">
+                  <span className="line-clamp-2 max-w-[220px]" title={project.comment || undefined}>
+                    {project.comment || '—'}
+                  </span>
+                </td>
+                <td className="px-3 py-3">
+                  <div className="flex items-center gap-1">
+                    <Button
+                      type="button"
+                      size="icon"
+                      variant="ghost"
+                      onClick={() => setDialogState({ mode: 'edit', project })}
+                      aria-label={`Edit ${project.name}`}
+                    >
+                      <Pencil aria-hidden="true" className="size-4" />
+                    </Button>
+                    <Button
+                      type="button"
+                      size="icon"
+                      variant="ghost"
+                      disabled={deletingId === project.id}
+                      onClick={() => void handleDelete(project)}
+                      aria-label={`Remove ${project.name}`}
+                    >
+                      <Trash2 aria-hidden="true" className="size-4" />
+                    </Button>
+                  </div>
                 </td>
               </tr>
             ))}
@@ -185,6 +285,30 @@ export function OngoingProjectsTable({ projects }: { projects: readonly OngoingP
           pageSize={PAGE_SIZE}
           total={filteredProjects.length}
           onPageChange={setPage}
+        />
+      )}
+
+      {/*
+        Mounted only while actually open, not just visually hidden — this
+        dialog fetches the programme picker's options via react-query, and a
+        component that has no need of that data (this table, most of the
+        time) shouldn't require a QueryClientProvider in scope just because
+        the dialog exists in the tree.
+      */}
+      {dialogState.mode !== 'closed' && (
+        <UpsertProjectDialog
+          open
+          onClose={() => setDialogState({ mode: 'closed' })}
+          onSaved={() => {
+            setDialogState({ mode: 'closed' })
+            onChanged()
+          }}
+          editingProject={
+            dialogState.mode === 'edit'
+              ? { id: dialogState.project.id, values: toUpsertValues(dialogState.project) }
+              : null
+          }
+          key={dialogState.mode === 'edit' ? dialogState.project.id : 'create'}
         />
       )}
     </div>

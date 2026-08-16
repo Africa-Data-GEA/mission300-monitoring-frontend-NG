@@ -1,13 +1,19 @@
 import type { z } from 'zod'
 import { environment } from '@/config/environment'
+import { dispatchLocalRequest } from '@/mocks/local-router'
 
 /**
  * Thin typed wrapper over fetch.
  *
  * Every network call in the app goes through here so that auth headers, error
  * shape, base URL and response validation are defined in exactly one place.
- * Hybrid demo mode keeps requests on same-origin `/api` so MSW can decide per
- * route whether to return mock data or proxy to the submissions backend.
+ *
+ * Mock and hybrid modes never touch the network or a service worker: `request`
+ * dispatches straight into the same handler functions mocks/handlers/*.ts
+ * already define, in-process (see mocks/local-router.ts) — same handler code,
+ * same data in mocks/data/*.ts, just called directly instead of intercepted.
+ * `backend` mode is untouched: a real `fetch()` to `environment.apiBaseUrl`,
+ * exactly as before.
  */
 
 const BASE_URL = environment.usesBrowserMocks
@@ -65,19 +71,34 @@ async function request<T>(
   schema: z.ZodType<T> | undefined,
   options: RequestOptions = {},
 ): Promise<T> {
-  const { body, headers, ...rest } = options
+  const { body, headers, method = 'GET', ...rest } = options
   const isFormData = typeof FormData !== 'undefined' && body instanceof FormData
+  const resolvedHeaders = {
+    ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
+    ...headers,
+  }
+  const resolvedBody = body === undefined ? undefined : isFormData ? (body as FormData) : JSON.stringify(body)
 
-  const response = await fetch(`${BASE_URL}${path}`, {
-    ...rest,
-    headers: {
-      ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
-      ...headers,
-    },
-    ...(body === undefined
-      ? {}
-      : { body: isFormData ? body : JSON.stringify(body) }),
-  })
+  const response = environment.usesLocalRouter
+    ? await dispatchLocalRequest(String(method), `${BASE_URL}${path}`, {
+        body: resolvedBody,
+        headers: resolvedHeaders,
+      })
+    : await fetch(`${BASE_URL}${path}`, {
+        ...rest,
+        method,
+        headers: resolvedHeaders,
+        ...(resolvedBody === undefined ? {} : { body: resolvedBody }),
+      })
+
+  if (!response) {
+    throw new ContractError(path, [
+      {
+        path: '(response)',
+        message: `no mock handler matched ${String(method)} ${path} — check mocks/handlers for a matching route.`,
+      },
+    ])
+  }
 
   if (!response.ok) {
     // Try to surface the server's error payload; fall back to the status text.
@@ -94,9 +115,12 @@ async function request<T>(
   if (response.status === 204) return undefined as T
 
   /*
-   * A 2xx that is not JSON almost always means the request was never handled:
-   * in development the mock worker was not running and the dev server answered
-   * with the SPA shell. Saying so beats "Unexpected token '<'".
+   * A 2xx that is not JSON almost always means the request was never handled
+   * by a real backend: in `backend` mode this is the dev server (or a
+   * misconfigured VITE_API_BASE_URL) answering with the SPA shell instead of
+   * the API. Saying so beats "Unexpected token '<'". Mock/hybrid mode can't
+   * hit this branch at all — dispatchLocalRequest either returns a real
+   * `HttpResponse.json(...)` or `null`, handled above.
    */
   const contentType = response.headers.get('content-type') ?? ''
   if (!contentType.includes('json')) {
@@ -105,8 +129,7 @@ async function request<T>(
         path: '(response)',
         message:
           `expected JSON but received "${contentType || 'no content-type'}". ` +
-          'In development this usually means the mock service worker is not ' +
-          'running — hard-reload the page to re-register it.',
+          'Check VITE_API_BASE_URL — the request may be hitting the dev server instead of a real API.',
       },
     ])
   }

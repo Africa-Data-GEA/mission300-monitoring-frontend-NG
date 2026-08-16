@@ -14,7 +14,8 @@ const template = {
 
 export const submissionObligations: Obligation[] = [
   {
-    id: 'obl-001', institution: 'NERC', dataset: 'Metering performance',
+    id: 'obl-001', institution: 'NERC', focalPerson: 'Grace Adeyemi',
+    dataset: 'Metering performance',
     reportingPeriod: 'Q3 2026', frequency: 'Quarterly',
     dueDate: '2026-10-15T17:00:00Z', dueLabel: 'Due 15 Oct 2026',
     status: statuses.due, template, acceptedSubmissionId: null,
@@ -22,6 +23,7 @@ export const submissionObligations: Obligation[] = [
   },
   {
     id: 'obl-002', institution: 'Rural Electrification Agency',
+    focalPerson: 'Fatima Suleiman',
     dataset: 'Mini-grid connections', reportingPeriod: 'September 2026',
     frequency: 'Monthly', dueDate: '2026-10-07T17:00:00Z',
     dueLabel: 'Due 7 Oct 2026', status: statuses.draft, template,
@@ -30,6 +32,7 @@ export const submissionObligations: Obligation[] = [
   },
   {
     id: 'obl-003', institution: 'Transmission Company of Nigeria',
+    focalPerson: 'Emeka Okafor',
     dataset: 'Generation availability', reportingPeriod: 'Q3 2026',
     frequency: 'Quarterly', dueDate: '2026-10-10T17:00:00Z',
     dueLabel: '8 days overdue', status: statuses.overdue, template,
@@ -37,7 +40,8 @@ export const submissionObligations: Obligation[] = [
     availableActions: ['upload-template', 'download-template'],
   },
   {
-    id: 'obl-004', institution: 'NERC', dataset: 'Metering performance',
+    id: 'obl-004', institution: 'NERC', focalPerson: 'Grace Adeyemi',
+    dataset: 'Metering performance',
     reportingPeriod: 'Q2 2026', frequency: 'Quarterly',
     dueDate: '2026-07-15T17:00:00Z', dueLabel: 'Accepted 13 Jul 2026',
     status: statuses.approved, template, acceptedSubmissionId: 'SUB-2026-0018',

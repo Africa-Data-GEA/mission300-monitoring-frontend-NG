@@ -7,6 +7,7 @@ import type {
   SavedReport,
 } from '@/api/schemas/reports'
 import {
+  fetchMethodologyReport,
   previewReport,
   useDeleteSavedReport,
   useGenerateReport,
@@ -22,8 +23,8 @@ import type { Orientation } from './lib/types'
 export type { Orientation }
 
 const DEFAULT_CONFIG_BASE = {
-  period: 'q3-2025',
-  pillar: 'all',
+  periods: ['q3-2025'],
+  pillars: ['all'],
   kpiCategory: 'all',
   state: 'all',
   distributionCompany: 'all',
@@ -56,6 +57,7 @@ export function useReportsPage() {
   const [compactExportKey, setCompactExportKey] = useState<string | null>(null)
   const [redownloadingId, setRedownloadingId] = useState<string | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [downloadingMethodology, setDownloadingMethodology] = useState<ExportFormat | null>(null)
 
   const filters = useReportsFilters()
   const preview = useReportPreview(config, true)
@@ -145,6 +147,24 @@ export function useReportsPage() {
     }
   }
 
+  /** Stakeholder feedback asked for a standalone export of every tracked
+   * KPI's methodology — independent of the builder's current filters, and
+   * not saved to Saved Reports history since it isn't a "report" in that
+   * sense. */
+  async function downloadMethodology(format: ExportFormat) {
+    setDownloadingMethodology(format)
+    try {
+      const generated = await fetchMethodologyReport()
+      const blob =
+        format === 'pdf'
+          ? await buildReportPdf(generated, { orientation: 'landscape' })
+          : await buildReportWorkbook(generated)
+      downloadBlob(blob, `kpi-methodology.${format}`)
+    } finally {
+      setDownloadingMethodology(null)
+    }
+  }
+
   async function deleteReport(report: SavedReport) {
     setDeletingId(report.id)
     try {
@@ -194,6 +214,8 @@ export function useReportsPage() {
     setSavedPage,
     compactExportKey,
     exportCompactCard,
+    downloadingMethodology,
+    downloadMethodology,
     redownloadingId,
     redownloadSavedReport,
     deletingId,

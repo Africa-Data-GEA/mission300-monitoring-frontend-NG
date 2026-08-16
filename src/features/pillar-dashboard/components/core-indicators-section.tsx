@@ -8,6 +8,7 @@ import { InfoPopover } from '@/components/ui/info-popover'
 import { TrendIndicator } from '@/components/ui/trend-indicator'
 import { CHART_BLUE } from '@/config/chart-colors'
 import { getDiscoBreakdown } from '../lib/disco-weights'
+import { PillarKpiEditButton } from './pillar-kpi-edit-button'
 
 const FONT_FAMILY = 'Google Sans, ui-sans-serif, system-ui, sans-serif'
 
@@ -51,6 +52,91 @@ function formatChartLabel(value: number, unit: string): string {
   if (unit === 'NGN Billion') return `NGN ${formatted}bn`
   if (unit === 'NGN/kWh') return `NGN ${formatted}/kWh`
   return `${formatted} ${unit}`
+}
+
+type MilestoneStage = 'achieved' | 'in-progress' | 'not-started'
+
+/** Milestone KPIs (`unit: 'status'`) carry no numeric current/target — the
+ * profile's own `currentLabel` text ("Not yet achieved", "In progress", or
+ * an achieved-style phrase) is the only signal of where the milestone sits. */
+function deriveMilestoneStage(currentLabel: string): MilestoneStage {
+  const normalized = currentLabel.toLowerCase()
+  if (normalized.includes('not yet achieved') || normalized.includes('not achieved')) return 'not-started'
+  if (normalized.includes('achieved') || normalized.includes('approved') || normalized.includes('completed')) {
+    return 'achieved'
+  }
+  if (normalized.includes('progress')) return 'in-progress'
+  return 'not-started'
+}
+
+const MILESTONE_STAGE_STYLES: Record<MilestoneStage, { label: string; dot: string; text: string; track: string }> = {
+  achieved: {
+    label: 'Achieved',
+    dot: 'bg-status-on-track',
+    text: 'text-status-on-track',
+    track: 'bg-status-on-track',
+  },
+  'in-progress': {
+    label: 'In progress',
+    dot: 'bg-status-lagging',
+    text: 'text-status-lagging',
+    track: 'bg-status-lagging',
+  },
+  'not-started': {
+    label: 'Not started',
+    dot: 'bg-status-no-data',
+    text: 'text-status-no-data',
+    track: 'bg-status-no-data',
+  },
+}
+
+const MILESTONE_STAGE_ORDER: readonly MilestoneStage[] = ['not-started', 'in-progress', 'achieved']
+
+/**
+ * Reform and governance milestones — the KPI Matrix's "Milestone" indicator
+ * type (unit `status`, no numeric value ever). Per the pillar specs (e.g.
+ * "use one reform tracker rather than separate cards for each milestone"),
+ * these are consolidated into a single tracker card per pillar rather than
+ * one tiny card each, and rather than being dropped to the plain KPI table
+ * below just because they have no number to gauge or bar-chart.
+ */
+function MilestoneTrackerCard({ indicators }: { indicators: readonly PillarCoreIndicator[] }) {
+  return (
+    <Card className="flex h-full flex-col p-4 sm:col-span-2">
+      <h3 className="text-sm font-medium text-text-default">Milestones and governance reforms</h3>
+      <ul className="mt-3 flex flex-col divide-y divide-border-default">
+        {indicators.map((indicator) => {
+          const stage = deriveMilestoneStage(indicator.currentLabel)
+          const stageIndex = MILESTONE_STAGE_ORDER.indexOf(stage)
+          const styles = MILESTONE_STAGE_STYLES[stage]
+          return (
+            <li key={indicator.kpiId} className="flex flex-col gap-1.5 py-2.5 first:pt-0 last:pb-0">
+              <div className="flex items-start justify-between gap-2">
+                <CardTitleLink indicator={indicator} />
+                <InfoPopover provenance={indicator.provenance} label={indicator.name} />
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="flex flex-1 gap-1" role="img" aria-label={`${indicator.name}: ${styles.label}`}>
+                  {MILESTONE_STAGE_ORDER.map((step, index) => (
+                    <span
+                      key={step}
+                      aria-hidden="true"
+                      className={`h-1.5 flex-1 rounded-full ${index <= stageIndex ? styles.track : 'bg-surface-sunken'}`}
+                    />
+                  ))}
+                </div>
+                <span className={`flex items-center gap-1.5 text-2xs font-medium whitespace-nowrap ${styles.text}`}>
+                  <span aria-hidden="true" className={`size-1.5 rounded-full ${styles.dot}`} />
+                  {styles.label}
+                </span>
+              </div>
+              <p className="text-2xs text-text-subtle">{indicator.targetLabel}</p>
+            </li>
+          )
+        })}
+      </ul>
+    </Card>
+  )
 }
 
 /** Period-on-period movement derived from a history series, for TrendIndicator. */
@@ -173,7 +259,14 @@ function StatCard({ indicator, showDiscoBreakdown }: { indicator: PillarCoreIndi
     <Card className="flex h-full flex-col p-4">
       <div className="flex items-start justify-between gap-2">
         <CardTitleLink indicator={indicator} />
-        <InfoPopover provenance={indicator.provenance} label={indicator.name} />
+        <div className="flex shrink-0 items-center gap-1">
+          <InfoPopover
+            provenance={indicator.provenance}
+            label={indicator.name}
+            details={[{ label: 'Baseline', value: indicator.baselineLabel || null }]}
+          />
+          <PillarKpiEditButton kpiId={indicator.kpiId} name={indicator.name} />
+        </div>
       </div>
       <p className="mt-2 text-2xl leading-none font-semibold tracking-tight text-text-default">
         {indicator.current === null ? '—' : formatValue(indicator.current, indicator.unit)}
@@ -183,21 +276,22 @@ function StatCard({ indicator, showDiscoBreakdown }: { indicator: PillarCoreIndi
           <TrendIndicator trend={trend} />
         </div>
       )}
-      {/* A StatCard has far less content than its GaugeCard/ComparisonBarCard
+      {/* A StatCard has far less content than its GaugeCard/TargetBarCard
           siblings in the same grid row, so it stretches to match their
-          height and leaves a large blank gap below. A real Apex trend line
-          (not a static SVG sparkline) fills that space and actually
-          communicates something on hover — the value at each period —
-          rather than being a flat decorative squiggle. */}
+          height and leaves a large blank gap below. A filled Apex area chart
+          (not a bare line) fills that space and actually communicates
+          something on hover — the value at each period — rather than being
+          a flat decorative squiggle, and reads as visually distinct from the
+          bar and radial charts sitting next to it in the same grid. */}
       {indicator.history.length >= 2 && (
         <div className="mt-4 min-h-24 flex-1">
           <Chart
-            type="line"
+            type="area"
             height="100%"
             series={[{ name: indicator.name, data: [...indicator.history] }]}
             options={{
               chart: {
-                type: 'line',
+                type: 'area',
                 animations: { enabled: false },
                 sparkline: { enabled: true },
                 toolbar: { show: false },
@@ -205,6 +299,10 @@ function StatCard({ indicator, showDiscoBreakdown }: { indicator: PillarCoreIndi
               },
               colors: [CHART_BLUE.dark],
               stroke: { curve: 'smooth', lineCap: 'round', width: 2.5 },
+              fill: {
+                type: 'gradient',
+                gradient: { shadeIntensity: 1, opacityFrom: 0.35, opacityTo: 0.02, stops: [0, 90, 100] },
+              },
               markers: { size: 0, hover: { size: 5 } },
               tooltip: {
                 x: { show: false },
@@ -244,7 +342,14 @@ function GaugeCard({ indicator, showDiscoBreakdown }: { indicator: PillarCoreInd
     <Card className="flex h-full flex-col p-4">
       <div className="flex items-start justify-between gap-2">
         <CardTitleLink indicator={indicator} />
-        <InfoPopover provenance={indicator.provenance} label={indicator.name} />
+        <div className="flex shrink-0 items-center gap-1">
+          <InfoPopover
+            provenance={indicator.provenance}
+            label={indicator.name}
+            details={[{ label: 'Baseline', value: indicator.baselineLabel || null }]}
+          />
+          <PillarKpiEditButton kpiId={indicator.kpiId} name={indicator.name} />
+        </div>
       </div>
       <div className="relative">
         <Chart
@@ -289,6 +394,7 @@ function GaugeCard({ indicator, showDiscoBreakdown }: { indicator: PillarCoreInd
           <span aria-hidden="true" className="size-1.5 rounded-full" style={{ background: CHART_BLUE.lightest }} />
           Target
         </span>
+        <span className="ml-auto font-medium text-text-muted">{percent}% to target</span>
       </div>
       {trend && (
         <div className="mt-2">
@@ -296,6 +402,106 @@ function GaugeCard({ indicator, showDiscoBreakdown }: { indicator: PillarCoreInd
         </div>
       )}
       {showDiscoBreakdown && <DiscoBreakdownToggle indicator={indicator} />}
+    </Card>
+  )
+}
+
+/**
+ * A single indicator with a real magnitude target that isn't a 0–100 ratio
+ * (states enacted out of 36, mini-grids built toward a count target, meters
+ * installed toward a multi-million target) — a horizontal bar for the
+ * current value against a dashed target line, rather than forcing every
+ * progress-to-target metric into the same radial gauge. GaugeCard stays
+ * reserved for genuine percentage-of-100 ratios (collection efficiency,
+ * cost recovery) where a dial reads naturally; everything else with a
+ * distant numeric target reads more honestly as "how far is the bar from
+ * the line" than as a percentage fill.
+ */
+function TargetBarCard({ indicator, showDiscoBreakdown }: { indicator: PillarCoreIndicator; showDiscoBreakdown: boolean }) {
+  const current = indicator.current ?? 0
+  const target = indicator.target ?? 0
+  const percent = target > 0 ? Math.min(100, Math.round((current / target) * 1000) / 10) : null
+  const trend = deriveTrend(indicator)
+  const axisMax = Math.max(current, target) * 1.2 || 1
+
+  return (
+    <Card className="flex h-full flex-col p-4">
+      <div className="flex items-start justify-between gap-2">
+        <CardTitleLink indicator={indicator} />
+        <div className="flex shrink-0 items-center gap-1">
+          <InfoPopover
+            provenance={indicator.provenance}
+            label={indicator.name}
+            details={[{ label: 'Baseline', value: indicator.baselineLabel || null }]}
+          />
+          <PillarKpiEditButton kpiId={indicator.kpiId} name={indicator.name} />
+        </div>
+      </div>
+      <div className="mt-1 flex flex-wrap items-baseline gap-x-2">
+        <p className="text-2xl leading-none font-semibold tracking-tight text-text-default">
+          {formatValue(current, indicator.unit)}
+        </p>
+        {percent !== null && <span className="text-2xs font-medium text-text-subtle">{percent}% to target</span>}
+      </div>
+      <div className="mt-4 flex-1">
+        <Chart
+          type="bar"
+          height={100}
+          series={[{ name: indicator.name, data: [current] }]}
+          options={{
+            chart: {
+              type: 'bar',
+              toolbar: { show: false },
+              fontFamily: FONT_FAMILY,
+              animations: { enabled: false },
+            },
+            plotOptions: { bar: { horizontal: true, borderRadius: 4, barHeight: '55%' } },
+            colors: [CHART_BLUE.dark],
+            dataLabels: { enabled: false },
+            xaxis: {
+              categories: [''],
+              min: 0,
+              max: axisMax,
+              labels: { show: false },
+              axisTicks: { show: false },
+              axisBorder: { show: false },
+            },
+            yaxis: { labels: { show: false } },
+            grid: { show: false, padding: { left: 0, right: 16, top: 24, bottom: 0 } },
+            annotations: {
+              xaxis: [
+                {
+                  x: target,
+                  strokeDashArray: 4,
+                  borderColor: 'var(--color-text-subtle)',
+                  label: {
+                    text: `Target ${formatCompactValue(target, indicator.unit)}`,
+                    orientation: 'horizontal',
+                    offsetY: -8,
+                    style: {
+                      fontSize: '10px',
+                      fontFamily: FONT_FAMILY,
+                      background: 'transparent',
+                      color: 'var(--color-text-subtle)',
+                    },
+                  },
+                },
+              ],
+            },
+            tooltip: { y: { formatter: (value: number) => formatChartLabel(value, indicator.unit) } },
+          }}
+        />
+      </div>
+      {trend && (
+        <div className="mt-2">
+          <TrendIndicator trend={trend} />
+        </div>
+      )}
+      {showDiscoBreakdown && (
+        <div className="mt-auto pt-2">
+          <DiscoBreakdownToggle indicator={indicator} />
+        </div>
+      )}
     </Card>
   )
 }
@@ -388,18 +594,25 @@ export function CoreIndicatorsSection({
   // there rather than showing an arbitrary illustrative split.
   const showDiscoBreakdown = pillar === 'financially-viable-utilities'
 
+  // Milestone-type indicators (unit `status`) never carry a numeric
+  // current/target — they get one consolidated tracker card instead of
+  // being grouped and gauge/bar-charted like every other indicator.
+  const milestoneIndicators = indicators.filter((entry) => entry.unit === 'status')
+  const chartableIndicators = indicators.filter((entry) => entry.unit !== 'status')
+
   const groups = new Map<string, PillarCoreIndicator[]>()
-  for (const entry of indicators) {
+  for (const entry of chartableIndicators) {
     const list = groups.get(entry.group) ?? []
     list.push(entry)
     groups.set(entry.group, list)
   }
 
   // A group with no confirmed value doesn't earn a card — see the loop
-  // below. If that leaves every group empty, the whole section (heading
-  // included) should disappear rather than show as an empty shell.
+  // below. If that leaves every group empty, and there are no milestones
+  // either, the whole section (heading included) should disappear rather
+  // than show as an empty shell.
   const hasAnyKnownValue = [...groups.values()].some((entries) => entries.some((entry) => entry.current !== null))
-  if (!hasAnyKnownValue) return null
+  if (!hasAnyKnownValue && milestoneIndicators.length === 0) return null
 
   return (
     <Card variant="well" className="p-4">
@@ -419,17 +632,32 @@ export function CoreIndicatorsSection({
               {sameUnit ? (
                 <ComparisonBarCard title={group} indicators={known} />
               ) : (
-                known.map((entry) =>
-                  entry.target !== null && entry.target > 0 ? (
-                    <GaugeCard key={entry.kpiId} indicator={entry} showDiscoBreakdown={showDiscoBreakdown} />
-                  ) : (
-                    <StatCard key={entry.kpiId} indicator={entry} showDiscoBreakdown={showDiscoBreakdown} />
-                  ),
-                )
+                known.map((entry) => {
+                  // A radial gauge reads naturally as "percent of the way to
+                  // 100%" — reserved for genuine ratio metrics. A distant
+                  // magnitude target (states enacted, meters installed) gets
+                  // a linear bar with a target line instead; a metric with no
+                  // usable target at all falls back to its trend area chart.
+                  const isRatioTarget =
+                    entry.unit === '%' &&
+                    entry.direction === 'higher-is-better' &&
+                    entry.target !== null &&
+                    entry.target > 0 &&
+                    entry.target <= 100
+                  if (isRatioTarget) {
+                    return <GaugeCard key={entry.kpiId} indicator={entry} showDiscoBreakdown={showDiscoBreakdown} />
+                  }
+                  if (entry.target !== null && entry.target > 0) {
+                    return <TargetBarCard key={entry.kpiId} indicator={entry} showDiscoBreakdown={showDiscoBreakdown} />
+                  }
+                  return <StatCard key={entry.kpiId} indicator={entry} showDiscoBreakdown={showDiscoBreakdown} />
+                })
               )}
             </div>
           )
         })}
+
+        {milestoneIndicators.length > 0 && <MilestoneTrackerCard indicators={milestoneIndicators} />}
       </div>
     </Card>
   )

@@ -50,10 +50,27 @@ export function SavedReportsTable({
       cell: (row) => <span className="text-text-muted">{row.filtersSummary}</span>,
     },
     {
+      // Its own column, not folded into `filtersSummary` — stakeholder
+      // feedback said knowing whether a report includes non-validated data
+      // is essential, not something worth having to parse out of a joined
+      // filter string.
+      id: 'validation',
+      header: 'Validation status',
+      cell: (row) => <span className="text-text-muted">{row.validationStatusLabel}</span>,
+    },
+    {
       id: 'format',
       header: 'Format',
       cell: (row) => <span className="uppercase">{row.format}</span>,
       sortValue: (row) => row.format,
+    },
+    {
+      // Stakeholder feedback: no versioning was visible when the same report
+      // is regenerated with updated data, risking confusion between copies.
+      id: 'version',
+      header: 'Version',
+      cell: (row) => <span className="text-text-muted">v{row.version}</span>,
+      sortValue: (row) => row.version,
     },
     {
       id: 'lastGeneratedAt',

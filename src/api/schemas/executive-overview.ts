@@ -9,7 +9,7 @@ import {
   trendSchema,
 } from './common'
 import { dashboardFilterValuesSchema } from './filters'
-import { executionStatusSchema } from './programs'
+import { executionStatusSchema, pipelineReadinessSchema, statusHistoryEntrySchema } from './programs'
 
 /**
  * Contract for GET /api/executive-overview.
@@ -26,6 +26,14 @@ import { executionStatusSchema } from './programs'
  * distinct shape. Modelled as four named fields rather than an array so a
  * card cannot go missing without failing validation.
  * ------------------------------------------------------------------ */
+
+/** An interim checkpoint between baseline and the 2030 target — stakeholder
+ * feedback noted that a single distant target makes the current trajectory
+ * hard to interpret without something nearer-term to check progress against. */
+export const outcomeMilestoneSchema = z.object({
+  label: z.string().min(1),
+  value: z.number(),
+})
 
 /** Mission 300 high-level outcome shown as baseline → current → 2030 target. */
 export const compactOutcomeCardSchema = z.object({
@@ -45,6 +53,13 @@ export const compactOutcomeCardSchema = z.object({
   source: sourceTagSchema,
   confidence: dataConfidenceSchema,
   provenance: metricProvenanceSchema,
+  /** Empty where no intermediate checkpoints have been defined for this
+   * outcome — the card then plots baseline/current/target only, as before. */
+  milestones: z.array(outcomeMilestoneSchema),
+  /** The KPI Explorer profile this outcome rolls up from, where one exists,
+   * so the "four CPR targets" summary can deep-link into it. Null for a
+   * composite figure with no single backing profile. */
+  kpiId: z.string().nullable(),
 }).refine((card) => card.scaleMax > card.scaleMin, {
   message: 'scaleMax must be greater than scaleMin',
   path: ['scaleMax'],
@@ -62,6 +77,8 @@ export const accessRateCardSchema = z.object({
   icon: metricIconNameSchema,
   value: z.string().min(1),
   rawValue: z.number(),
+  /** The backing KPI Explorer profile, for the "four CPR targets" deep link. */
+  kpiId: z.string().min(1),
   sourceYear: z.string().min(1),
   previousPublication: z.string(),
   targetLabel: z.string(),
@@ -77,6 +94,8 @@ export const accessRateCardSchema = z.object({
 export const generationCapacityCardSchema = z.object({
   title: z.string().min(1),
   icon: metricIconNameSchema,
+  /** The backing KPI Explorer profile, for the "four CPR targets" deep link. */
+  kpiId: z.string().min(1),
   availableMw: z.number().min(0),
   installedMw: z.number().min(0),
   value: z.string().min(1),
@@ -158,6 +177,10 @@ export const bulletMetricSchema = z
     source: sourceTagSchema,
     confidence: dataConfidenceSchema,
     provenance: metricProvenanceSchema,
+    /** Ordered oldest-to-newest readings, for the "trend view" toggle —
+     * stakeholder feedback asked to see a target's evolution across the
+     * reporting cycle, not only its current position. */
+    history: z.array(z.number()),
   })
   // A degenerate scale would make every position zero, silently flattening the
   // chart rather than failing.
@@ -186,6 +209,9 @@ export const bottleneckSchema = z.object({
   reference: z.string(),
   severity: bottleneckSeveritySchema,
   daysUnresolved: z.number().int().min(0),
+  /** The register's free-text follow-up note — what's being done about it,
+   * not just that it's unresolved. Shown in the exception's detail popover. */
+  followUp: z.string(),
   provenance: metricProvenanceSchema,
 })
 
@@ -199,12 +225,24 @@ export const deliveryStatusPanelSchema = z.object({
       pillar: pillarIdSchema,
       pillarLabel: z.string().min(1),
       owner: z.string().min(1),
+      /** The named person leading delivery, distinct from `owner` (the
+       * accountable institution). */
+      leadName: z.string().min(1),
       location: z.string().min(1),
       latitude: z.number().min(-90).max(90),
       longitude: z.number().min(-180).max(180),
       currentStatus: executionStatusSchema.exclude(['completed']),
+      /** Null once a project is active — carried through from Programs so a
+       * project still in the pipeline (not yet active delivery) is visible
+       * here too, not only in the full Programs → Projects table. */
+      pipelineReadiness: pipelineReadinessSchema.nullable(),
       startDate: z.iso.datetime(),
       endDate: z.iso.datetime(),
+      /** The workbook's "Comment – Issues/Main Risk/Bottlenecks" narrative,
+       * surfaced here rather than requiring a click through to Programs. */
+      comment: z.string(),
+      /** Ordered oldest-to-newest status per reporting period. */
+      statusHistory: z.array(statusHistoryEntrySchema),
     }),
   ),
   statusSummary: z.array(
@@ -218,6 +256,21 @@ export const deliveryStatusPanelSchema = z.object({
   provenance: metricProvenanceSchema,
 })
 
+/**
+ * A summary strip explicitly framing the four headline cards as the
+ * Compact Progress Report's tracked targets — stakeholder feedback asked
+ * for the target section to be linked to CPR-target achievement rather than
+ * left implicit in the headline cards alone.
+ */
+export const cprTargetSchema = z.object({
+  title: z.string().min(1),
+  value: z.string().min(1),
+  baselineLabel: z.string().min(1),
+  targetLabel: z.string().min(1),
+  /** Null for a composite figure with no single backing KPI Explorer profile. */
+  kpiId: z.string().nullable(),
+})
+
 /* ------------------------------------------------------------------ */
 
 export const executiveOverviewSchema = z.object({
@@ -225,6 +278,8 @@ export const executiveOverviewSchema = z.object({
   /** Echoes the pillar the payload was calculated for; 'all' for All Pillars. */
   appliedPillar: z.string(),
   headlineCards: headlineCardsSchema,
+  /** Always the same four headline cards, reframed as CPR targets. */
+  cprTargets: z.array(cprTargetSchema).length(4),
   accessDelivery: z.array(accessChannelSchema),
   nationalPerformance: z.array(bulletMetricSchema),
   deliveryStatus: deliveryStatusPanelSchema,
@@ -239,7 +294,9 @@ export const executiveOverviewSchema = z.object({
 export const executiveOverviewQuerySchema =
   dashboardFilterValuesSchema.partial()
 
+export type OutcomeMilestone = z.infer<typeof outcomeMilestoneSchema>
 export type CompactOutcomeCard = z.infer<typeof compactOutcomeCardSchema>
+export type CprTarget = z.infer<typeof cprTargetSchema>
 export type AccessRateCard = z.infer<typeof accessRateCardSchema>
 export type GenerationCapacityCard = z.infer<typeof generationCapacityCardSchema>
 export type HeadlineCards = z.infer<typeof headlineCardsSchema>

@@ -33,11 +33,24 @@ if (dataMode === 'hybrid' && !parsed.data.VITE_SUBMISSIONS_BACKEND_URL) {
   )
 }
 
+const usesBrowserMocks = dataMode === 'mock' || dataMode === 'hybrid'
+
 export const environment = Object.freeze({
   dataMode,
   apiBaseUrl: parsed.data.VITE_API_BASE_URL ?? '/api',
   submissionsBackendUrl: parsed.data.VITE_SUBMISSIONS_BACKEND_URL,
   hybridBackendUrl:
     dataMode === 'hybrid' ? parsed.data.VITE_SUBMISSIONS_BACKEND_URL : undefined,
-  usesBrowserMocks: dataMode === 'mock' || dataMode === 'hybrid',
+  usesBrowserMocks,
+  /**
+   * `usesBrowserMocks` alone isn't enough to pick a transport: the test
+   * environment is also mock mode, but tests intercept real `fetch()` calls
+   * via `mocks/server.ts` (`msw/node`'s `setupServer`), including any
+   * per-test `server.use(...)` override — a real network call is required
+   * for that interception to see it. Only the *real browser*, in mock or
+   * hybrid mode, dispatches in-process with no network/service worker at
+   * all (see mocks/local-router.ts) — its routing table has no way to see
+   * a `server.use()` override, so it must never be used where those apply.
+   */
+  usesLocalRouter: usesBrowserMocks && import.meta.env.MODE !== 'test',
 })

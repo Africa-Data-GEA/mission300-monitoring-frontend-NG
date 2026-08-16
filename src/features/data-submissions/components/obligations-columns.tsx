@@ -16,6 +16,12 @@ export const OBLIGATIONS_COLUMNS: Column<Obligation>[] = [
     sortValue: (row) => row.dataset,
   },
   {
+    id: 'lead',
+    header: 'Lead',
+    cell: (row) => row.focalPerson,
+    sortValue: (row) => row.focalPerson,
+  },
+  {
     id: 'period',
     header: 'Reporting period',
     cell: (row) => row.reportingPeriod,

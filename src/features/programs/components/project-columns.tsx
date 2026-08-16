@@ -5,6 +5,7 @@ import { formatDate } from '@/lib/format'
 import { PILLAR_LABELS } from '@/types/domain'
 import { ExecutionStatusBadge } from './execution-status-badge'
 import { FundingStatusBadge } from './funding-status-badge'
+import { PipelineReadinessBadge } from './pipeline-readiness-badge'
 
 /**
  * Column definitions for the Projects table, aligned to the Programme &
@@ -62,6 +63,16 @@ export function buildProjectColumns(
       cell: (row) => (
         <span className="whitespace-nowrap text-text-muted">{formatDate(row.endDate)}</span>
       ),
+    },
+    {
+      // Stakeholder feedback asked to be able to see projects still in the
+      // pipeline with a readiness detail (Pipeline / Feasibility study /
+      // Investment-ready) — null for a project already active, so most rows
+      // show "—" here, same convention as the comment/suggestion columns.
+      id: 'readiness',
+      header: 'Pipeline readiness',
+      sortValue: (row) => row.pipelineReadiness ?? '',
+      cell: (row) => (row.pipelineReadiness ? <PipelineReadinessBadge readiness={row.pipelineReadiness} /> : '—'),
     },
     {
       id: 'projectedStatus',

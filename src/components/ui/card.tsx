@@ -4,11 +4,12 @@ import { cn } from '@/lib/utils'
 /**
  * Base surface for panels and metric cards.
  *
- * Cards carry no border and no shadow. Separation comes entirely from surface
- * contrast — a white card on the grey page, or a white card inside a grey
- * well. Use `variant="well"` for the grey container that groups white cards,
- * as in the Access delivery, National performance and Delivery status
- * sections.
+ * The default variant carries a very light slate border (`--border-default`)
+ * so a card reads as its own surface even against another light background,
+ * on top of the existing surface-contrast separation. `variant="well"` stays
+ * borderless — it's the grey container that groups white cards, as in the
+ * Access delivery, National performance and Delivery status sections, and
+ * doesn't need its own edge.
  */
 export function Card({
   className,
@@ -22,7 +23,7 @@ export function Card({
       data-slot="card"
       className={cn(
         'rounded-card',
-        variant === 'well' ? 'bg-surface-sunken' : 'bg-surface',
+        variant === 'well' ? 'bg-surface-sunken' : 'border border-border-default bg-surface',
         className,
       )}
       {...props}

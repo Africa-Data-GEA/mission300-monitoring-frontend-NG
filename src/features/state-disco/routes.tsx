@@ -2,22 +2,20 @@ import { lazy, Suspense } from 'react'
 import type { RouteObject } from 'react-router'
 import { RouteFallback } from '@/components/layout/route-fallback'
 
-const OverviewPage = lazy(() => import('./pages/overview-page').then((m) => ({ default: m.StateDiscoOverviewPage })))
-const ComparisonPage = lazy(() => import('./pages/comparison-page').then((m) => ({ default: m.DiscoComparisonPage })))
-const SupplyTariffPage = lazy(() => import('./pages/supply-tariff-page').then((m) => ({ default: m.SupplyTariffPage })))
-const DeliveryPage = lazy(() => import('./pages/delivery-page').then((m) => ({ default: m.DeliveryPage })))
-const StatesPage = lazy(() => import('./pages/states-page').then((m) => ({ default: m.StatesPage })))
+const StateDiscoPage = lazy(() => import('./pages/state-disco-page').then((m) => ({ default: m.StateDiscoPage })))
 const StateDetailPage = lazy(() => import('./pages/state-detail-page').then((m) => ({ default: m.StateDetailPage })))
 
 function page(element: React.ReactNode) {
   return <Suspense fallback={<RouteFallback />}>{element}</Suspense>
 }
 
+/**
+ * One consolidated page for every State & DisCo metric (see
+ * state-disco-page.tsx) — no more separate tabs/routes for Overview,
+ * Comparison, Supply & tariff, and Delivery. A single state's own detail
+ * profile stays a genuine drill-down route, not a tab.
+ */
 export const stateDiscoRoutes: RouteObject[] = [
-  { index: true, element: page(<OverviewPage />) },
-  { path: 'comparison', element: page(<ComparisonPage />) },
-  { path: 'supply-tariff', element: page(<SupplyTariffPage />) },
-  { path: 'delivery', element: page(<DeliveryPage />) },
-  { path: 'states', element: page(<StatesPage />) },
+  { index: true, element: page(<StateDiscoPage />) },
   { path: 'states/:stateId', element: page(<StateDetailPage />) },
 ]

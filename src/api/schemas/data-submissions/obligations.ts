@@ -12,6 +12,9 @@ export const submissionTemplateSchema = z.object({
 export const obligationSchema = z.object({
   id: z.string().min(1),
   institution: z.string().min(1),
+  /** The named person responsible for submitting this obligation — stakeholder
+   * feedback asked to see a lead for submitting data, not the institution alone. */
+  focalPerson: z.string().min(1),
   dataset: z.string().min(1),
   reportingPeriod: z.string().min(1),
   frequency: z.string().min(1),

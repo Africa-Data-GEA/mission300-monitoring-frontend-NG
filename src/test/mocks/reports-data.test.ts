@@ -49,8 +49,8 @@ describe('Reports & Exports mock data', () => {
     for (const reportType of REPORT_TYPES) {
       const preview = buildReportPreview({
         reportType,
-        period: 'q3-2025',
-        pillar: 'all',
+        periods: ['q3-2025'],
+        pillars: ['all'],
         kpiCategory: 'all',
         state: 'all',
         distributionCompany: 'all',
@@ -67,8 +67,8 @@ describe('Reports & Exports mock data', () => {
   it('narrows the preview when a pillar filter is applied', () => {
     const preview = buildReportPreview({
       reportType: 'pillar-performance',
-      period: 'q3-2025',
-      pillar: 'generation-network',
+      periods: ['q3-2025'],
+      pillars: ['generation-network'],
       kpiCategory: 'all',
       state: 'all',
       distributionCompany: 'all',

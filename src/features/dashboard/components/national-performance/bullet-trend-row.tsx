@@ -1,0 +1,61 @@
+import Chart from 'react-apexcharts'
+import { Card } from '@/components/ui/card'
+import { InfoPopover } from '@/components/ui/info-popover'
+import { CHART_BLUE } from '@/config/chart-colors'
+import type { BulletMetric } from '../../types'
+
+const FONT_FAMILY = 'Google Sans, ui-sans-serif, system-ui, sans-serif'
+
+/**
+ * The trend-view counterpart to BulletMetricRow — stakeholder feedback
+ * asked to see a target's evolution over the reporting cycle, not only its
+ * current position against baseline/target. Reads the same `metric.history`
+ * series the KPI Explorer's own charts are built from.
+ */
+export function BulletTrendRow({ metric }: { metric: BulletMetric }) {
+  return (
+    <Card className="flex h-full flex-col p-4">
+      <div className="flex items-start justify-between gap-3">
+        <h3 className="text-sm font-medium text-text-default">{metric.title}</h3>
+        <InfoPopover
+          provenance={metric.provenance}
+          label={metric.title}
+          details={[{ label: 'Target', value: metric.targetLabel }]}
+        />
+      </div>
+
+      {metric.history.length >= 2 ? (
+        <div className="mt-3 min-h-32 flex-1">
+          <Chart
+            type="area"
+            height="100%"
+            series={[{ name: metric.title, data: [...metric.history] }]}
+            options={{
+              chart: {
+                type: 'area',
+                animations: { enabled: false },
+                toolbar: { show: false },
+                fontFamily: FONT_FAMILY,
+              },
+              colors: [CHART_BLUE.dark],
+              stroke: { curve: 'smooth', lineCap: 'round', width: 2.5 },
+              fill: {
+                type: 'gradient',
+                gradient: { shadeIntensity: 1, opacityFrom: 0.35, opacityTo: 0.02, stops: [0, 90, 100] },
+              },
+              markers: { size: 0, hover: { size: 5 } },
+              xaxis: { labels: { show: false }, axisTicks: { show: false }, axisBorder: { show: false } },
+              yaxis: { labels: { show: false } },
+              grid: { show: false, padding: { left: 0, right: 0, top: 8, bottom: 0 } },
+              tooltip: { x: { show: false } },
+            }}
+          />
+        </div>
+      ) : (
+        <p className="mt-3 flex-1 text-xs text-text-subtle">
+          Not enough reporting periods yet to plot a trend.
+        </p>
+      )}
+    </Card>
+  )
+}

@@ -3,6 +3,7 @@ import { Breadcrumb } from '@/components/ui/breadcrumb'
 import { ErrorState } from '@/components/ui/error-state'
 import { useExecutiveOverview } from './api'
 import { AccessDeliverySection } from './components/access-delivery-section'
+import { CprTargetsPanel } from './components/cpr-targets-panel'
 import { DashboardSkeleton } from './components/dashboard-skeleton'
 import { DeliveryStatusSection } from './components/delivery-status-section'
 import { HeadlineCards } from './components/headline-cards/headline-cards'
@@ -63,11 +64,12 @@ export function DashboardPage() {
         page; the region is marked busy instead.
       */}
       <div aria-busy={isFetching} className="flex flex-col gap-4">
+        <CprTargetsPanel targets={data.cprTargets} />
         <HeadlineCards cards={data.headlineCards} />
         <AccessDeliverySection channels={data.accessDelivery} />
         <NationalPerformanceSection metrics={data.nationalPerformance} />
         <RegionalPerformanceSection />
-        <DeliveryStatusSection panel={data.deliveryStatus} />
+        <DeliveryStatusSection panel={data.deliveryStatus} onProjectsChanged={() => void refetch()} />
       </div>
     </div>
   )

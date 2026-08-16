@@ -1,6 +1,6 @@
-import { http, HttpResponse, delay } from 'msw'
+import { http, HttpResponse, delay } from './local-router'
 import { PILLARS } from '@/api/schemas/common'
-import { buildProjectStatusSummary, executiveOverview } from './data/executive-overview'
+import { buildExecutiveOverview, buildProjectStatusSummary } from './data/executive-overview'
 import { filterOptions } from './data/filters'
 import {
   administrationAuditLog,
@@ -819,7 +819,12 @@ export const handlers = [
 
     const params = new URL(request.url).searchParams
     return HttpResponse.json(
-      applyExecutiveFilters(executiveOverview, {
+      // Rebuilt fresh rather than served from a cached snapshot, so a
+      // project added/edited/deleted via the admin form (mocks/handlers/
+      // programs.ts) is reflected on the next fetch — same reasoning as
+      // buildPillarDashboard() and buildExecutiveOverview() being pure
+      // derivations over the shared in-memory registers, not copies.
+      applyExecutiveFilters(buildExecutiveOverview(), {
         period: params.get('period') ?? 'q3-2025',
         pillar: params.get('pillar') ?? 'all',
         institution: params.get('institution') ?? 'all',

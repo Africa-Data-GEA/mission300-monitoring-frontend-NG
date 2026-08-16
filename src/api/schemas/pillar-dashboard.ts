@@ -28,6 +28,9 @@ export const pillarHeadlineCardSchema = z.object({
   title: z.string().min(1),
   value: z.string().min(1),
   rawValue: z.number().nullable(),
+  /** Null where the indicator has no stated Compact baseline. */
+  baseline: z.number().nullable(),
+  baselineLabel: z.string(),
   targetLabel: z.string().min(1),
   target: z.number().nullable(),
   trend: trendSchema.optional(),
@@ -50,6 +53,14 @@ export const pillarCoreIndicatorSchema = z.object({
   unit: z.string().min(1),
   current: z.number().nullable(),
   target: z.number().nullable(),
+  /** Null where the indicator has no stated Compact baseline. */
+  baseline: z.number().nullable(),
+  baselineLabel: z.string(),
+  /** Human-readable status text for a `unit: 'status'` milestone indicator
+   * (e.g. "Not yet achieved", "In progress") — the milestone tracker reads
+   * this instead of `current`/`target`, which stay null for binary KPIs. */
+  currentLabel: z.string(),
+  targetLabel: z.string(),
   direction: z.enum(['higher-is-better', 'lower-is-better']),
   /** Ordered oldest-to-newest reading values, for a sparkline. Empty where
    * no historical series is available yet (e.g. a pending milestone metric). */

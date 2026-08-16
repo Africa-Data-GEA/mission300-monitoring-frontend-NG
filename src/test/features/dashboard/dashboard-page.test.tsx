@@ -56,7 +56,7 @@ describe('DashboardPage', () => {
 
     await screen.findByRole('heading', { name: 'Executive Overview', level: 1 })
 
-    expect(screen.getByText('15%')).toBeInTheDocument()
+    expect(screen.getByText('26.0%')).toBeInTheDocument()
     expect(screen.getByText('70.0%')).toBeInTheDocument()
     expect(screen.getByText('5.4 GW')).toBeInTheDocument()
   })
@@ -66,7 +66,7 @@ describe('DashboardPage', () => {
 
     await screen.findByRole('heading', { name: 'Executive Overview', level: 1 })
 
-    expect(screen.getByText('$0.0B')).toBeInTheDocument()
+    expect(screen.getByText('$0.2B')).toBeInTheDocument()
   })
 
   describe('dynamic pillar behaviour', () => {
@@ -87,7 +87,7 @@ describe('DashboardPage', () => {
       })
       expect(within(list).getAllByRole('listitem')).toHaveLength(1)
       expect(
-        screen.getByRole('img', { name: /Private capital mobilized/ }),
+        screen.getByRole('img', { name: /Private Capital Mobilized/ }),
       ).toBeInTheDocument()
     })
 

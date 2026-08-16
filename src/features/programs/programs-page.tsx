@@ -1,7 +1,6 @@
 import { useNavigate } from 'react-router'
 import { Breadcrumb } from '@/components/ui/breadcrumb'
 import { ErrorState } from '@/components/ui/error-state'
-import { HeadlineCardsSection } from './components/headline-cards-section'
 import { ProgramsFilters } from './components/programs-filters'
 import { ProgramsSkeleton } from './components/programs-skeleton'
 import { ProgramsTable } from './components/programs-table'
@@ -59,8 +58,6 @@ export function ProgramsPage() {
           onReset={page.resetFilters}
         />
       )}
-
-      <HeadlineCardsSection cards={data.headlineCards} />
 
       <ProgramsTable
         records={data.programmes.items}
