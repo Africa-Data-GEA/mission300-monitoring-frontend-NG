@@ -288,6 +288,31 @@ export const upsertProjectResponseSchema = z.object({
 })
 
 /* ------------------------------------------------------------------ *
+ * Admin: create a new programme
+ *
+ * Mock-only mutation, create-only (no edit/delete yet) — mirrors
+ * upsertProjectRequestSchema's scoping: the quick-add essentials a new
+ * programme needs to exist, not the full record. `supportingInstitutions`,
+ * `priority` and `bottlenecks` default on the server rather than being
+ * asked here.
+ * ------------------------------------------------------------------ */
+
+export const createProgrammeRequestSchema = z.object({
+  name: z.string().trim().min(3, 'Name the programme'),
+  leadInstitution: z.string().trim().min(1, 'Name the lead institution'),
+  pillar: pillarIdSchema,
+  objectives: z.string().trim().min(10, 'Describe the programme objectives'),
+  status: executionStatusSchema,
+  endDate: z.iso.datetime(),
+  financing: z.string().trim().max(200).optional(),
+})
+
+export const createProgrammeResponseSchema = z.object({
+  record: programmeRecordSchema,
+  message: z.string().min(1),
+})
+
+/* ------------------------------------------------------------------ *
  * Milestones (drill-down from a project)
  * ------------------------------------------------------------------ */
 
@@ -361,6 +386,8 @@ export type ProjectRecord = z.infer<typeof projectRecordSchema>
 export type StatusHistoryEntry = z.infer<typeof statusHistoryEntrySchema>
 export type UpsertProjectRequest = z.infer<typeof upsertProjectRequestSchema>
 export type UpsertProjectResponse = z.infer<typeof upsertProjectResponseSchema>
+export type CreateProgrammeRequest = z.infer<typeof createProgrammeRequestSchema>
+export type CreateProgrammeResponse = z.infer<typeof createProgrammeResponseSchema>
 export type MilestoneRecord = z.infer<typeof milestoneRecordSchema>
 export type ProgramsFilterOptions = z.infer<typeof programsFilterOptionsSchema>
 export type ProgramsQuery = z.infer<typeof programsQuerySchema>

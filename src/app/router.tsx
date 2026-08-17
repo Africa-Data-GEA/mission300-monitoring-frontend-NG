@@ -81,6 +81,24 @@ const ProjectDetailPage = lazy(() =>
   })),
 )
 
+const AddProjectPage = lazy(() =>
+  import('@/features/programs/pages/add-project-page').then((module) => ({
+    default: module.AddProjectPage,
+  })),
+)
+
+const EditProjectPage = lazy(() =>
+  import('@/features/programs/pages/edit-project-page').then((module) => ({
+    default: module.EditProjectPage,
+  })),
+)
+
+const AddProgrammePage = lazy(() =>
+  import('@/features/programs/pages/add-programme-page').then((module) => ({
+    default: module.AddProgrammePage,
+  })),
+)
+
 const LoginPage = lazy(() =>
   import('@/features/auth/login-page').then((module) => ({
     default: module.LoginPage,
@@ -188,13 +206,28 @@ export const router = createBrowserRouter([
         handle: { globalFilters: false } satisfies RouteHandle,
       },
       {
+        path: 'programs/new',
+        element: lazyRoute(<AddProgrammePage />),
+        handle: { globalFilters: false } satisfies RouteHandle,
+      },
+      {
         path: 'programs/:programmeId',
         element: lazyRoute(<ProgrammeDetailPage />),
         handle: { globalFilters: false } satisfies RouteHandle,
       },
       {
+        path: 'programs/projects/new',
+        element: lazyRoute(<AddProjectPage />),
+        handle: { globalFilters: false } satisfies RouteHandle,
+      },
+      {
         path: 'programs/projects/:projectId',
         element: lazyRoute(<ProjectDetailPage />),
+        handle: { globalFilters: false } satisfies RouteHandle,
+      },
+      {
+        path: 'programs/projects/:projectId/edit',
+        element: lazyRoute(<EditProjectPage />),
         handle: { globalFilters: false } satisfies RouteHandle,
       },
       {

@@ -1,16 +1,14 @@
 import { useId, useMemo, useState } from 'react'
 import { Pencil, Plus, Search, Trash2 } from 'lucide-react'
-import { Link } from 'react-router'
-import type { UpsertProjectRequest } from '@/api/schemas/programs'
+import { Link, useNavigate } from 'react-router'
 import { Button } from '@/components/ui/button'
 import { Pagination } from '@/components/ui/pagination'
 import { ExecutionStatusBadge } from '@/features/programs/components/execution-status-badge'
 import { PipelineReadinessBadge } from '@/features/programs/components/pipeline-readiness-badge'
+import { deleteProject } from '@/features/programs/lib/project-admin-api'
 import { formatDeadline } from '@/lib/format'
 import { cn } from '@/lib/utils'
-import { deleteProject } from '../lib/project-admin-api'
 import type { OngoingProject } from '../types'
-import { UpsertProjectDialog } from './project-admin/upsert-project-dialog'
 
 const PAGE_SIZE = 5
 const dateFormatter = new Intl.DateTimeFormat('en-GB', {
@@ -35,25 +33,12 @@ const STATUS_SEVERITY: Record<OngoingProject['currentStatus'], number> = {
   'on-track': 3,
 }
 
-function toUpsertValues(project: OngoingProject): UpsertProjectRequest {
-  return {
-    name: project.name,
-    programmeId: project.programmeId,
-    owner: project.owner,
-    leadName: project.leadName,
-    location: project.location,
-    pillar: project.pillar,
-    currentStatus: project.currentStatus,
-    endDate: project.endDate,
-    comment: project.comment,
-    pipelineReadiness: project.pipelineReadiness,
-  }
-}
-
 /**
- * `onChanged` re-fetches the Overview payload after a project is added,
- * edited or removed — stakeholder feedback asked to be able to add, modify
- * and delete priority items directly from this table, not only view them.
+ * `onChanged` re-fetches the Overview payload after a project is removed —
+ * stakeholder feedback asked to be able to add, modify and delete priority
+ * items directly from this table. Add/edit navigate to their own page
+ * (/programs/projects/new, /programs/projects/:id/edit) rather than opening
+ * a modal here, per a follow-up ask.
  */
 export function OngoingProjectsTable({
   projects,
@@ -62,12 +47,10 @@ export function OngoingProjectsTable({
   projects: readonly OngoingProject[]
   onChanged: () => void
 }) {
+  const navigate = useNavigate()
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState('')
   const searchId = useId()
-  const [dialogState, setDialogState] = useState<
-    { mode: 'closed' } | { mode: 'create' } | { mode: 'edit'; project: OngoingProject }
-  >({ mode: 'closed' })
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [deleteError, setDeleteError] = useState('')
 
@@ -162,7 +145,7 @@ export function OngoingProjectsTable({
             ? `${filteredProjects.length} project${filteredProjects.length === 1 ? '' : 's'} found`
             : ''}
         </p>
-        <Button type="button" size="sm" onClick={() => setDialogState({ mode: 'create' })}>
+        <Button type="button" size="sm" onClick={() => navigate('/programs/projects/new')}>
           <Plus aria-hidden="true" />
           Add project
         </Button>
@@ -252,7 +235,7 @@ export function OngoingProjectsTable({
                       type="button"
                       size="icon"
                       variant="ghost"
-                      onClick={() => setDialogState({ mode: 'edit', project })}
+                      onClick={() => navigate(`/programs/projects/${project.id}/edit`)}
                       aria-label={`Edit ${project.name}`}
                     >
                       <Pencil aria-hidden="true" className="size-4" />
@@ -285,30 +268,6 @@ export function OngoingProjectsTable({
           pageSize={PAGE_SIZE}
           total={filteredProjects.length}
           onPageChange={setPage}
-        />
-      )}
-
-      {/*
-        Mounted only while actually open, not just visually hidden — this
-        dialog fetches the programme picker's options via react-query, and a
-        component that has no need of that data (this table, most of the
-        time) shouldn't require a QueryClientProvider in scope just because
-        the dialog exists in the tree.
-      */}
-      {dialogState.mode !== 'closed' && (
-        <UpsertProjectDialog
-          open
-          onClose={() => setDialogState({ mode: 'closed' })}
-          onSaved={() => {
-            setDialogState({ mode: 'closed' })
-            onChanged()
-          }}
-          editingProject={
-            dialogState.mode === 'edit'
-              ? { id: dialogState.project.id, values: toUpsertValues(dialogState.project) }
-              : null
-          }
-          key={dialogState.mode === 'edit' ? dialogState.project.id : 'create'}
         />
       )}
     </div>

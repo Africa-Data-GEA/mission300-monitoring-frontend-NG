@@ -18,8 +18,10 @@ function toReportingCycle(iso: string): string {
 
 const RESULTS_FRAMEWORK_NOTE =
   'Categories (Output, Outcome, System Performance, Financial and similar) follow the Master KPI Registry’s own ' +
-  'classification for each indicator. They are not yet mapped to a separately published results framework or ' +
-  'national theory of change document — that mapping would need to be produced and referenced here once available.'
+  'classification for each indicator. Mission 300 does publish a national-level results framework — its Theory of ' +
+  'Change (see the panel above) — and this taxonomy broadly follows that same Activities/Outputs → Outcomes → ' +
+  'Impact staging. No indicator-by-indicator crosswalk to a specific ToC stage exists yet; the two are aligned in ' +
+  'spirit, not published as a one-to-one mapping.'
 
 /**
  * Every KPI Matrix indicator tagged to this pillar — the same catalogue rows
@@ -72,7 +74,7 @@ export function PillarKpiList({ rows }: { rows: readonly KpiCatalogueRow[] }) {
           <div>
             <h2 className="text-lg font-semibold text-text-default">Indicators</h2>
             <p className="mt-1 flex items-start gap-1 text-xs text-text-muted">
-              Categories follow the KPI Matrix&apos;s own classification, not a separate results framework.
+              Categories follow the KPI Matrix&apos;s own classification, aligned with Mission 300&apos;s Theory of Change.
               <InfoPopover
                 label="How indicator categories relate to a results framework"
                 provenance={{

@@ -1,5 +1,7 @@
-import { useParams } from 'react-router'
+import { Pencil } from 'lucide-react'
+import { Link, useParams } from 'react-router'
 import { Breadcrumb } from '@/components/ui/breadcrumb'
+import { Button } from '@/components/ui/button'
 import { ErrorState } from '@/components/ui/error-state'
 import { BottleneckRegister } from '@/features/bottlenecks/components/bottleneck-register'
 import { CreateBottleneckDialog } from '@/features/bottlenecks/components/create-bottleneck-dialog'
@@ -52,13 +54,21 @@ export function ProjectDetailPage() {
         ]}
       />
 
-      <div>
-        <h1 className="text-3xl font-semibold tracking-tight text-text-default">
-          {project.name}
-        </h1>
-        <p className="mt-1 text-sm text-text-muted">
-          {project.id} · {project.programmeName} · {project.owner}
-        </p>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="text-3xl font-semibold tracking-tight text-text-default">
+            {project.name}
+          </h1>
+          <p className="mt-1 text-sm text-text-muted">
+            {project.id} · {project.programmeName} · {project.owner}
+          </p>
+        </div>
+        <Button asChild size="sm" variant="outline">
+          <Link to={`/programs/projects/${project.id}/edit`}>
+            <Pencil aria-hidden="true" />
+            Edit project
+          </Link>
+        </Button>
       </div>
 
       <OverviewPanel project={project} />

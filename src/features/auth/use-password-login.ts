@@ -33,7 +33,12 @@ export function usePasswordLogin() {
     try {
       const session = await authenticate(account.email, password)
       saveAuthSession(session)
-      navigate('/dashboard', { replace: true })
+      // institutional-data-provider can't reach Executive Overview (see
+      // role-access.ts's ROLE_MODULE_KEYS) — its landing page is its own
+      // institution-scoped Data Submissions overview instead.
+      const landingPath =
+        session.user.role === 'institutional-data-provider' ? '/data-submissions' : '/dashboard'
+      navigate(landingPath, { replace: true })
     } catch (error) {
       setServerError(
         error instanceof ApiError ? error.message : 'Something went wrong. Please try again.',

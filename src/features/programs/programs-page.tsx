@@ -1,5 +1,7 @@
+import { Plus } from 'lucide-react'
 import { useNavigate } from 'react-router'
 import { Breadcrumb } from '@/components/ui/breadcrumb'
+import { Button } from '@/components/ui/button'
 import { ErrorState } from '@/components/ui/error-state'
 import { ProgramsFilters } from './components/programs-filters'
 import { ProgramsSkeleton } from './components/programs-skeleton'
@@ -42,11 +44,17 @@ export function ProgramsPage() {
 
   return (
     <div className="flex min-w-0 flex-col gap-4">
-      <div>
-        <Breadcrumb items={[{ label: 'Delivery tracking' }, { label: 'Programs' }]} />
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight text-text-default">
-          Programs
-        </h1>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <Breadcrumb items={[{ label: 'Delivery tracking' }, { label: 'Programs' }]} />
+          <h1 className="mt-2 text-3xl font-semibold tracking-tight text-text-default">
+            Programs
+          </h1>
+        </div>
+        <Button type="button" onClick={() => navigate('/programs/new')}>
+          <Plus aria-hidden="true" />
+          Add programme
+        </Button>
       </div>
 
       {page.filters && (

@@ -324,14 +324,23 @@ describe('Section D — delivery status and exceptions', () => {
     )
   })
 
-  it('renders the ranked exceptions with severity and days unresolved', () => {
+  it('renders the ranked exceptions with severity and days unresolved', async () => {
     renderWithRouter(<DeliveryStatusSection panel={deliveryStatus} />)
 
     expect(
       screen.getByText('Tariff shortfall / cost-reflectivity subsidy funding gap'),
     ).toBeInTheDocument()
     expect(screen.getAllByText('Critical')).not.toHaveLength(0)
-    expect(screen.getByText(/118 days/)).toBeInTheDocument()
+
+    // Days unresolved is stated in words in the exception's own info popover
+    // ("Time unresolved"), not printed on the row itself.
+    fireEvent.click(
+      screen.getByRole('button', {
+        name: /About Tariff shortfall \/ cost-reflectivity subsidy funding gap/,
+      }),
+    )
+    const dialog = await screen.findByRole('dialog')
+    expect(dialog).toHaveTextContent(/118 days/)
   })
 
   /*

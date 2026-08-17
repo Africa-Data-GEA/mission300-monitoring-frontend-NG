@@ -1,5 +1,10 @@
 import { delay, http, HttpResponse } from '../local-router'
-import type { ProjectRecord, UpsertProjectRequest } from '@/api/schemas/programs'
+import type {
+  CreateProgrammeRequest,
+  ProgrammeRecord,
+  ProjectRecord,
+  UpsertProjectRequest,
+} from '@/api/schemas/programs'
 import {
   milestones,
   programmes,
@@ -31,6 +36,7 @@ function notFound(message: string) {
 }
 
 let nextProjectNumber = projects.length + 1
+let nextProgrammeNumber = programmes.length + 1
 
 /** Reporting-period label a newly created/edited status entry belongs to —
  * "now" is always the current cycle in this mock's fixed 2025-10-14 clock. */
@@ -77,6 +83,57 @@ export const programsHandlers = [
       lastUpdated: programsOverview.lastUpdated,
       headlineCards: programsOverview.headlineCards,
       programmes: paginate(filtered, page, pageSize),
+    })
+  }),
+
+  /**
+   * POST /api/programs
+   *
+   * Creates a new programme from the Programs page's own quick-add form.
+   * Only the essentials are supplied by the client; everything else
+   * (supporting institutions, priority, bottlenecks) gets a placeholder the
+   * record owner can flesh out later. No auth/role check gates this — same
+   * as every other mutation here.
+   */
+  http.post('/api/programs', async ({ request }) => {
+    await delay(300)
+
+    const body = (await request.json()) as Partial<CreateProgrammeRequest>
+
+    if (!body.name || body.name.trim().length < 3) {
+      return HttpResponse.json({ message: 'Name the programme.' }, { status: 422 })
+    }
+    if (!body.leadInstitution || body.leadInstitution.trim().length < 1) {
+      return HttpResponse.json({ message: 'Name the lead institution.' }, { status: 422 })
+    }
+    if (!body.objectives || body.objectives.trim().length < 10) {
+      return HttpResponse.json({ message: 'Describe the programme objectives.' }, { status: 422 })
+    }
+
+    const record: ProgrammeRecord = {
+      id: `PRG-2025-${String(nextProgrammeNumber).padStart(3, '0')}`,
+      name: body.name.trim(),
+      leadInstitution: body.leadInstitution.trim(),
+      supportingInstitutions: [],
+      pillar: (body.pillar ?? 'generation-network') as ProgrammeRecord['pillar'],
+      objectives: body.objectives.trim(),
+      financing: body.financing?.trim() || null,
+      status: (body.status ?? 'on-track') as ProgrammeRecord['status'],
+      priority: 'standard',
+      startDate: new Date().toISOString(),
+      endDate: body.endDate ?? new Date().toISOString(),
+      bottlenecks: [],
+      bottleneckCategory: null,
+      validationStatus: 'provisional',
+      lastUpdate: new Date().toISOString(),
+    }
+
+    nextProgrammeNumber += 1
+    programmes.unshift(record)
+
+    return HttpResponse.json({
+      record,
+      message: `${record.id} has been added to the programme register.`,
     })
   }),
 

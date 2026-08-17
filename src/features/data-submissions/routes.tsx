@@ -1,7 +1,8 @@
 import { lazy, Suspense } from 'react'
-import { Navigate, type RouteObject } from 'react-router'
+import type { RouteObject } from 'react-router'
 import { RouteFallback } from '@/components/layout/route-fallback'
 
+const InstitutionDashboardPage = lazy(() => import('./pages/institution-dashboard-page').then((module) => ({ default: module.InstitutionDashboardPage })))
 const ObligationsPage = lazy(() => import('./pages/obligations-page').then((module) => ({ default: module.ObligationsPage })))
 const SubmissionsPage = lazy(() => import('./pages/submissions-page').then((module) => ({ default: module.SubmissionsPage })))
 const ManualEntryPage = lazy(() => import('./pages/manual-entry-page').then((module) => ({ default: module.ManualEntryPage })))
@@ -16,7 +17,7 @@ function page(element: React.ReactNode) {
 }
 
 export const dataSubmissionRoutes: RouteObject[] = [
-  { index: true, element: <Navigate replace to="obligations" /> },
+  { index: true, element: page(<InstitutionDashboardPage />) },
   { path: 'obligations', element: page(<ObligationsPage />) },
   { path: 'obligations/:obligationId/entry', element: page(<ManualEntryPage />) },
   { path: 'obligations/:obligationId/upload', element: page(<UploadPage />) },
