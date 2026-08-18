@@ -2,6 +2,7 @@ import { delay, http, HttpResponse } from '../local-router'
 import {
   dataGaps,
   dataSubmissionFilters,
+  datasets,
   manualEntryDefinitions,
   overdueItems,
   statuses,
@@ -11,7 +12,8 @@ import {
   uploadDefinitions,
   validationQueue,
 } from '../data/data-submissions'
-import { administrationAuditLog, administrationUsers } from '../data/administration'
+import { administrationUsers } from '../data/administration'
+import { recordAuditEvent } from '../data/audit-log'
 import { getKpiProfile, publishKpiValue } from '../data/kpi-explorer'
 import { getLiveBackendUrl, proxyToLiveBackend } from '../live-backend'
 import type {
@@ -21,7 +23,6 @@ import type {
   ValidationQueueItem,
   WorkflowStatus,
 } from '@/api/schemas/data-submissions'
-import type { AuditEvent } from '@/api/schemas/administration'
 
 function pageNumber(value: string | null, fallback: number) {
   const parsed = Number(value)
@@ -223,8 +224,6 @@ function synchronizeSubmissionDecision(
  * so the event shows up for that user like any other audited action, rather
  * than to an invented "system" identity no account matches.
  */
-let nextAuditEventNumber = 1043
-
 function publishExtractedValues(
   submissionId: string,
   extractedValues: KpiExtraction[],
@@ -241,20 +240,16 @@ function publishExtractedValues(
     if (!applied) continue
 
     published.push(extraction)
-    nextAuditEventNumber += 1
-    administrationAuditLog.unshift({
-      id: `evt-${nextAuditEventNumber}`,
-      timestamp: new Date().toISOString(),
-      userId: reviewer?.id ?? administrationUsers[0]!.id,
+    recordAuditEvent({
+      userId: reviewer?.id,
       userName: reviewer?.name ?? reviewerName,
       action: 'Published KPI value',
       module: 'KPI Explorer',
       recordId: extraction.kpiId,
       priorValue,
       newValue: String(extraction.value),
-      result: 'success',
       reference: submissionId,
-    } satisfies AuditEvent)
+    })
   }
 
   return published
@@ -274,6 +269,10 @@ export const dataSubmissionHandlers = [
     if (liveBackend) return proxyToLiveBackend(request, liveBackend)
     return HttpResponse.json(dataSubmissionFilters)
   }),
+  /** GET /api/data-submissions/datasets — the real Dataset records behind
+   * every obligation's `datasetId` (purpose, required data points, owner
+   * institution, its own submission template). */
+  http.get('/api/data-submissions/datasets', () => HttpResponse.json(datasets)),
   http.get('/api/data-submissions/obligations', async ({ request }) => {
     const liveBackend = getLiveBackendUrl()
     if (liveBackend) return proxyToLiveBackend(request, liveBackend)
@@ -300,9 +299,17 @@ export const dataSubmissionHandlers = [
     const liveBackend = getLiveBackendUrl()
     if (liveBackend) return proxyToLiveBackend(request, liveBackend)
     await delay(250)
-    if (!submissionObligations.some((item) => item.id === params.id)) {
+    const obligation = submissionObligations.find((item) => item.id === params.id)
+    if (!obligation) {
       return notFound('The reporting obligation was not found.')
     }
+    recordAuditEvent({
+      action: 'Saved manual-entry draft',
+      module: 'Data Submissions & Validation',
+      recordId: 'SUB-2026-0022',
+      newValue: `${obligation.dataset} (${obligation.reportingPeriod})`,
+      reference: obligation.id,
+    })
     return HttpResponse.json({
       submissionId: 'SUB-2026-0022', version: 1, status: statuses.draft,
       message: 'Draft saved. Server validation is ready to run.',
@@ -341,6 +348,14 @@ export const dataSubmissionHandlers = [
       String(form.get('notes') ?? ''),
     )
     if (!detail) return notFound('The reporting obligation was not found.')
+
+    recordAuditEvent({
+      action: 'Uploaded submission',
+      module: 'Data Submissions & Validation',
+      recordId: detail.id,
+      newValue: file.name,
+      reference: sourceReference,
+    })
 
     return HttpResponse.json({
       submissionId: detail.id, version: detail.version, status: detail.status,
@@ -390,6 +405,22 @@ export const dataSubmissionHandlers = [
             detail.reviewer,
           )
         : []
+
+    // publishExtractedValues already logs one event per published KPI value;
+    // a returned/rejected decision publishes nothing, so it would otherwise
+    // leave no audit trail at all — this covers every decision outcome.
+    if (published.length === 0) {
+      const reviewer = administrationUsers.find((user) => user.name === detail.reviewer)
+      recordAuditEvent({
+        userId: reviewer?.id,
+        userName: reviewer?.name ?? detail.reviewer,
+        action: `Recorded validation decision: ${status.label}`,
+        module: 'Data Submissions & Validation',
+        recordId: detail.id,
+        result: body.decision === 'rejected' ? 'rejected' : 'success',
+        reference: comments,
+      })
+    }
 
     const message =
       published.length > 0

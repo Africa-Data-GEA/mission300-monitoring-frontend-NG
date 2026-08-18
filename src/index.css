@@ -30,6 +30,25 @@
   h6 { font-family: var(--font-heading-6); }
 
   /*
+   * Inter Tight, for the public landing pages only (public gateway `/` and
+   * `/progress` — see public-gateway-page.tsx and progress-page.tsx). Loaded
+   * from Google Fonts in index.html. Scoped to a class rather than changing
+   * --font-body/--font-heading-*, which are the authenticated app's fonts
+   * (and are admin-customizable via BrandProvider) — this must not affect
+   * them. The heading selectors here need the class prefix to out-specificity
+   * the plain `h1`..`h6` rules above.
+   */
+  .font-landing,
+  .font-landing h1,
+  .font-landing h2,
+  .font-landing h3,
+  .font-landing h4,
+  .font-landing h5,
+  .font-landing h6 {
+    font-family: 'Inter Tight', var(--font-sans);
+  }
+
+  /*
    * Tightening headings keeps big KPI figures from looking airy in a dense
    * layout at large sizes.
    */

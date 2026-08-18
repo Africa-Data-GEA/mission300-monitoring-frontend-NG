@@ -266,7 +266,7 @@ describe('Section C — national performance', () => {
 
 describe('Section D — delivery status and exceptions', () => {
   it('renders ongoing projects in a paginated table with drill-down links', () => {
-    renderWithRouter(<DeliveryStatusSection panel={deliveryStatus} />)
+    renderWithRouter(<DeliveryStatusSection panel={deliveryStatus} onProjectsChanged={() => {}} />)
 
     expect(screen.getByRole('table')).toBeInTheDocument()
     expect(screen.getByText(/Showing 1.*5 of 8 records/)).toBeInTheDocument()
@@ -282,7 +282,7 @@ describe('Section D — delivery status and exceptions', () => {
 
   it('paginates the project table', async () => {
     const user = userEvent.setup()
-    renderWithRouter(<DeliveryStatusSection panel={deliveryStatus} />)
+    renderWithRouter(<DeliveryStatusSection panel={deliveryStatus} onProjectsChanged={() => {}} />)
 
     await user.click(screen.getByRole('button', { name: 'Next page' }))
 
@@ -292,7 +292,7 @@ describe('Section D — delivery status and exceptions', () => {
 
   it('searches projects and paginates the filtered results', async () => {
     const user = userEvent.setup()
-    renderWithRouter(<DeliveryStatusSection panel={deliveryStatus} />)
+    renderWithRouter(<DeliveryStatusSection panel={deliveryStatus} onProjectsChanged={() => {}} />)
 
     await user.type(screen.getByRole('searchbox', { name: 'Search projects' }), 'Lagos')
 
@@ -304,7 +304,7 @@ describe('Section D — delivery status and exceptions', () => {
 
   it('switches to an overall project-status chart', async () => {
     const user = userEvent.setup()
-    renderWithRouter(<DeliveryStatusSection panel={deliveryStatus} />)
+    renderWithRouter(<DeliveryStatusSection panel={deliveryStatus} onProjectsChanged={() => {}} />)
 
     await user.click(screen.getByRole('tab', { name: 'Chart' }))
 
@@ -316,7 +316,7 @@ describe('Section D — delivery status and exceptions', () => {
   })
 
   it('links to the full bottlenecks module', () => {
-    renderWithRouter(<DeliveryStatusSection panel={deliveryStatus} />)
+    renderWithRouter(<DeliveryStatusSection panel={deliveryStatus} onProjectsChanged={() => {}} />)
 
     expect(screen.getByRole('link', { name: 'View all' })).toHaveAttribute(
       'href',
@@ -325,7 +325,7 @@ describe('Section D — delivery status and exceptions', () => {
   })
 
   it('renders the ranked exceptions with severity and days unresolved', async () => {
-    renderWithRouter(<DeliveryStatusSection panel={deliveryStatus} />)
+    renderWithRouter(<DeliveryStatusSection panel={deliveryStatus} onProjectsChanged={() => {}} />)
 
     expect(
       screen.getByText('Tariff shortfall / cost-reflectivity subsidy funding gap'),
@@ -357,6 +357,7 @@ describe('Section D — delivery status and exceptions', () => {
     renderWithRouter(
       <DeliveryStatusSection
         panel={{ ...deliveryStatus, exceptions: many }}
+        onProjectsChanged={() => {}}
       />,
     )
 
@@ -367,7 +368,10 @@ describe('Section D — delivery status and exceptions', () => {
 
   it('reports a clear state when there are no exceptions', () => {
     renderWithRouter(
-      <DeliveryStatusSection panel={{ ...deliveryStatus, exceptions: [] }} />,
+      <DeliveryStatusSection
+        panel={{ ...deliveryStatus, exceptions: [] }}
+        onProjectsChanged={() => {}}
+      />,
     )
 
     expect(

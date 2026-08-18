@@ -55,6 +55,7 @@ export function DiscoComparisonChart({
           tooltip: {
             y: {
               formatter: (_value, opts) => {
+                if (!opts) return ''
                 const row = rows[opts.dataPointIndex]
                 if (!row) return ''
                 return opts.seriesIndex === 0 ? row[primaryValueKey] : row[secondaryValueKey]

@@ -10,15 +10,34 @@ import type { Trend } from '@/types/domain'
  * the page uses. Shared by NationalStatement's figure cards and Pillars'
  * per-pillar cards.
  */
-export function FigureTrend({ trend, className = 'mt-6' }: { trend: Trend; className?: string }) {
+export function FigureTrend({
+  trend,
+  className = 'mt-6',
+  tone = 'default',
+}: {
+  trend: Trend
+  className?: string
+  /** 'inverted' for the vibrant blue figure cards — plain white/70% white
+   * rather than green/red, matching that block's single-hue treatment
+   * (see NationalStatement) instead of introducing a second colour onto it. */
+  tone?: 'default' | 'inverted'
+}) {
   const { isFlat, isImproving, Icon } = resolveTrend(trend)
+
+  const toneClassName =
+    tone === 'inverted'
+      ? isFlat
+        ? 'text-white/70'
+        : 'text-white'
+      : isFlat
+        ? 'text-text-muted'
+        : isImproving
+          ? 'text-trend-up'
+          : 'text-trend-down'
 
   return (
     <p
-      className={
-        `${className} flex items-center gap-1.5 text-[1rem] leading-5 font-medium ` +
-        (isFlat ? 'text-text-muted' : isImproving ? 'text-trend-up' : 'text-trend-down')
-      }
+      className={`${className} flex items-center gap-1.5 text-[1rem] leading-5 font-medium ${toneClassName}`}
     >
       <Icon aria-hidden="true" className="size-4 shrink-0" />
       {trend.label}

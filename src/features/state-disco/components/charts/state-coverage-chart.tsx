@@ -41,7 +41,7 @@ export function StateCoverageChart({ rows }: { rows: readonly StateCoverageRow[]
           grid: { borderColor: 'var(--border-default)' },
           tooltip: {
             y: {
-              formatter: (value, opts) => `${value}% — ${rows[opts.dataPointIndex]?.validationLabel}`,
+              formatter: (value, opts) => `${value}% — ${opts ? rows[opts.dataPointIndex]?.validationLabel : ''}`,
             },
           },
         }}

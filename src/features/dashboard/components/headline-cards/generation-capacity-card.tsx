@@ -33,7 +33,7 @@ export function GenerationCapacityCard({
         <ReportingPeriodPill period={data.reportingPeriod} />
       </div>
 
-      <GenerationCapacityLineChart points={data.sparkline} />
+      <GenerationCapacityLineChart points={data.sparkline.map((point) => point.value)} />
 
       {data.trend && (
         <div className="mt-auto pt-3">

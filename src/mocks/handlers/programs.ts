@@ -12,6 +12,7 @@ import {
   programsOverview,
   projects,
 } from '../data/programs'
+import { recordAuditEvent } from '../data/audit-log'
 
 function positiveInteger(value: string | null, fallback: number) {
   const parsed = Number(value)
@@ -130,6 +131,13 @@ export const programsHandlers = [
 
     nextProgrammeNumber += 1
     programmes.unshift(record)
+
+    recordAuditEvent({
+      action: 'Added programme',
+      module: 'Programs',
+      recordId: record.id,
+      newValue: record.name,
+    })
 
     return HttpResponse.json({
       record,
@@ -269,6 +277,13 @@ export const programsHandlers = [
     nextProjectNumber += 1
     projects.unshift(record)
 
+    recordAuditEvent({
+      action: 'Added project',
+      module: 'Programs',
+      recordId: record.id,
+      newValue: record.name,
+    })
+
     return HttpResponse.json({
       record,
       message: `${record.id} has been added to the project register.`,
@@ -289,6 +304,7 @@ export const programsHandlers = [
     if (!project) return notFound('The project was not found.')
 
     const body = (await request.json()) as Partial<UpsertProjectRequest>
+    const priorStatus = project.currentStatus
 
     if (body.name) project.name = body.name.trim()
     if (body.owner) project.owner = body.owner.trim()
@@ -313,6 +329,14 @@ export const programsHandlers = [
       ]
     }
 
+    recordAuditEvent({
+      action: 'Updated project',
+      module: 'Programs',
+      recordId: project.id,
+      priorValue: priorStatus,
+      newValue: project.currentStatus,
+    })
+
     return HttpResponse.json({
       record: project,
       message: `${project.id} has been updated.`,
@@ -327,6 +351,13 @@ export const programsHandlers = [
     if (index === -1) return notFound('The project was not found.')
 
     const [removed] = projects.splice(index, 1)
+
+    recordAuditEvent({
+      action: 'Removed project',
+      module: 'Programs',
+      recordId: removed!.id,
+      priorValue: removed!.name,
+    })
 
     return HttpResponse.json({ message: `${removed!.id} has been removed from the project register.` })
   }),

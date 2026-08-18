@@ -19,7 +19,9 @@ import { FigureTrend } from './figure-trend'
  * TYPE SCALE. This page sets its own, larger than the dashboard's 13px base:
  * GOV.UK runs 19px body and 48px headings because a public page is read once,
  * by anyone, often on a phone. The arbitrary values here are that scale and
- * are intentional — do not "fix" them back to the app tokens.
+ * are intentional — do not "fix" them back to the app tokens. The one
+ * deliberate exception is the opening sentence under the H1, set to 16px on
+ * request rather than the larger scale the rest of the page uses.
  */
 export function NationalStatement({ cards }: { cards: HeadlineCards }) {
   const headline = cards.peopleWithElectricityAccess
@@ -55,28 +57,29 @@ export function NationalStatement({ cards }: { cards: HeadlineCards }) {
     },
   ]
 
-  // Same four categories the "Related Content" list names in the Figma. Three
-  // point at their specific pillar card below (see the `id` on each card in
-  // Pillars); "Delivery" has no on-page section of its own since delivery
-  // status isn't part of this payload, so it goes to /progress instead — a
-  // route that exists — rather than an anchor to nowhere
-  // (docs/public-gateway-home.md §10 bans exactly that).
+  // Same four categories the "Related Content" list names in the Figma.
+  // Two point at the sections that actually carry that content now (the
+  // Pillars card grid these originally anchored into was removed on
+  // request); "Delivery" and "Clean Cooking" have no on-page section of
+  // their own, so they go to /progress instead — a route that exists —
+  // rather than an anchor to nowhere (docs/public-gateway-home.md §10 bans
+  // exactly that).
   const relatedContent = [
-    { label: 'Access and connections', to: '#pillar-last-mile-access' },
-    { label: 'Generation and network', to: '#pillar-generation-network' },
+    { label: 'Access and connections', to: '#access-channels' },
+    { label: 'Generation and network', to: '#performance-evolution' },
     { label: 'Delivery', to: '/progress' },
-    { label: 'Clean Cooking', to: '#pillar-clean-cooking' },
+    { label: 'Clean Cooking', to: '/progress' },
   ]
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6 sm:py-16">
+    <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16">
       <div className="flex flex-col gap-10 lg:flex-row lg:gap-16">
         <div className="max-w-[36rem]">
           <h1 className="text-[2.25rem] leading-[2.625rem] font-bold tracking-tight text-text-default sm:text-[3rem] sm:leading-[3.25rem]">
             National electrification record
           </h1>
 
-          <p className="mt-6 text-[1.5rem] leading-[2rem] text-text-default">
+          <p className="mt-6 text-base leading-6 text-text-default">
             <span className="font-bold">{headline.value}</span> people in
             Nigeria have electricity access, against a national target of{' '}
             <span className="font-bold">{headline.targetLabel}</span>.
@@ -125,36 +128,51 @@ export function NationalStatement({ cards }: { cards: HeadlineCards }) {
       </div>
 
       {/*
-        Bordered boxes rather than the dashboard's card component — square
-        corners throughout (see public-header.tsx), including the trend line
-        below each figure, which is plain coloured text rather than a pill.
+        One continuous panel, modelled on the IEA electricity data explorer's
+        "Key figures" block — not four separate floating cards. A title bar
+        (matching IEA's "Key figures for May 2026, OECD Total") sits above a
+        grid of stat cells separated by hairline dividers rather than gaps,
+        so the whole thing reads as a single dense report card. Still
+        square-cornered (see public-header.tsx's "SQUARE CORNERS" note) —
+        the departure from this page's GOV.UK restraint is the fill, not the
+        shape.
+        Two nested divide-y/divide-x grids, not one 2-column grid with
+        divide-y: Tailwind's `divide-*` puts a border on every child but the
+        first in DOM order, which only produces a correct crosshair on a true
+        2D grid if each row is its own divide-x group and the rows themselves
+        are stacked in a divide-y wrapper — a single grid-cols-2 + divide-y
+        would wrongly put a top border on the top-right cell too.
       */}
-      <section aria-labelledby="latest-figures" className="mt-14">
+      <section aria-labelledby="latest-figures" className="mt-14 bg-brand-700">
         <h2
           id="latest-figures"
-          className="text-[1.5rem] leading-8 font-bold tracking-tight text-text-default"
+          className="border-b border-white/15 px-6 py-5 text-[1.5rem] leading-8 font-bold tracking-tight text-white"
         >
           Latest published figures
         </h2>
 
-        <div className="mt-4 grid gap-4 sm:grid-cols-2">
-          {figures.map((figure) => (
+        <div className="divide-y divide-white/15">
+          {[figures.slice(0, 2), figures.slice(2, 4)].map((row, rowIndex) => (
             <div
-              key={figure.id}
-              className="border border-border-strong p-5"
+              key={rowIndex}
+              className="grid grid-cols-1 divide-y divide-white/15 sm:grid-cols-2 sm:divide-x sm:divide-y-0"
             >
-              <p className="text-[1.125rem] leading-6 font-bold tracking-tight text-link">
-                {figure.label}
-              </p>
-              <div className="mt-6">
-                <p className="text-[1rem] leading-5 text-text-muted">
-                  {figure.period}
-                </p>
-                <p className="mt-1.5 text-[2.5rem] leading-none font-bold tracking-tight text-text-default">
-                  {figure.value}
-                </p>
-              </div>
-              {figure.trend && <FigureTrend trend={figure.trend} />}
+              {row.map((figure) => (
+                <div key={figure.id} className="p-6">
+                  <p className="text-[1.125rem] leading-6 font-bold tracking-tight text-white">
+                    {figure.label}
+                  </p>
+                  <div className="mt-6">
+                    <p className="text-[1rem] leading-5 text-white/70">
+                      {figure.period}
+                    </p>
+                    <p className="mt-1.5 text-[2.75rem] leading-none font-bold tracking-tight text-white">
+                      {figure.value}
+                    </p>
+                  </div>
+                  {figure.trend && <FigureTrend trend={figure.trend} tone="inverted" />}
+                </div>
+              ))}
             </div>
           ))}
         </div>

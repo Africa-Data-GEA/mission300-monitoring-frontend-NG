@@ -3,48 +3,48 @@ import type {
   Obligation,
   UploadDefinition,
 } from '@/api/schemas/data-submissions'
+import { datasets } from './datasets'
 import { statuses } from './statuses'
 
-const template = {
-  id: 'tpl-metering-v3',
-  version: '3.0',
-  fileName: 'metering-performance-v3.csv',
-  downloadUrl: '/templates/metering-performance-v3.csv',
-}
+const meteringPerformance = datasets.find((entry) => entry.id === 'ds-metering-performance')!
+const miniGridConnections = datasets.find((entry) => entry.id === 'ds-mini-grid-connections')!
+const generationAvailability = datasets.find((entry) => entry.id === 'ds-generation-availability')!
 
 export const submissionObligations: Obligation[] = [
   {
     id: 'obl-001', institution: 'NERC', focalPerson: 'Grace Adeyemi',
-    dataset: 'Metering performance',
+    datasetId: meteringPerformance.id, dataset: meteringPerformance.name,
     reportingPeriod: 'Q3 2026', frequency: 'Quarterly',
     dueDate: '2026-10-15T17:00:00Z', dueLabel: 'Due 15 Oct 2026',
-    status: statuses.due, template, acceptedSubmissionId: null,
+    status: statuses.due, template: meteringPerformance.template, acceptedSubmissionId: null,
     availableActions: ['enter-data', 'upload-template', 'download-template'],
   },
   {
     id: 'obl-002', institution: 'Rural Electrification Agency',
     focalPerson: 'Fatima Suleiman',
-    dataset: 'Mini-grid connections', reportingPeriod: 'September 2026',
+    datasetId: miniGridConnections.id, dataset: miniGridConnections.name,
+    reportingPeriod: 'September 2026',
     frequency: 'Monthly', dueDate: '2026-10-07T17:00:00Z',
-    dueLabel: 'Due 7 Oct 2026', status: statuses.draft, template,
+    dueLabel: 'Due 7 Oct 2026', status: statuses.draft, template: miniGridConnections.template,
     acceptedSubmissionId: null,
     availableActions: ['enter-data', 'upload-template', 'view'],
   },
   {
     id: 'obl-003', institution: 'Transmission Company of Nigeria',
     focalPerson: 'Emeka Okafor',
-    dataset: 'Generation availability', reportingPeriod: 'Q3 2026',
+    datasetId: generationAvailability.id, dataset: generationAvailability.name,
+    reportingPeriod: 'Q3 2026',
     frequency: 'Quarterly', dueDate: '2026-10-10T17:00:00Z',
-    dueLabel: '8 days overdue', status: statuses.overdue, template,
+    dueLabel: '8 days overdue', status: statuses.overdue, template: generationAvailability.template,
     acceptedSubmissionId: null,
     availableActions: ['upload-template', 'download-template'],
   },
   {
     id: 'obl-004', institution: 'NERC', focalPerson: 'Grace Adeyemi',
-    dataset: 'Metering performance',
+    datasetId: meteringPerformance.id, dataset: meteringPerformance.name,
     reportingPeriod: 'Q2 2026', frequency: 'Quarterly',
     dueDate: '2026-07-15T17:00:00Z', dueLabel: 'Accepted 13 Jul 2026',
-    status: statuses.approved, template, acceptedSubmissionId: 'SUB-2026-0018',
+    status: statuses.approved, template: meteringPerformance.template, acceptedSubmissionId: 'SUB-2026-0018',
     availableActions: ['view'],
   },
 ]

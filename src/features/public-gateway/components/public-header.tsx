@@ -6,21 +6,17 @@ import { useBrandConfig } from '@/features/branding/api'
 /**
  * Public gateway header — one bar, not three.
  *
- * Modelled on how GOV.UK, Eurostat and the French DSFR open a state page: a
- * single dark identity band carrying the crest and the service name, and
- * nothing else competing with it. The earlier version stacked a dark strip on
- * top of a white header on top of a nav, which is three bars of chrome before
- * a reader reaches a single word of content.
+ * White, not the earlier dark identity band, on request — a plain hairline
+ * border marks the edge instead of a shadow (deliberately no box-shadow
+ * anywhere on this bar). Still one bar carrying the crest and service name
+ * and nothing else competing with it: the earlier version stacked a dark
+ * strip on top of a white header on top of a nav, which is three bars of
+ * chrome before a reader reaches a single word of content.
  *
  * SQUARE CORNERS, throughout this page. GOV.UK uses no border radius anywhere,
  * and that single decision does more to separate a state service from a
  * commercial template than any amount of colour — rounded cards are the
  * default output of every UI kit.
- *
- * The green rule beneath the bar is the one national note. Nigeria's flag
- * green (#008751) sits within a few degrees of GOV.UK's own #0f7a52, so the
- * page reads as an international government service that happens to be
- * Nigerian, rather than as a themed template.
  *
  * The Figma draft also showed a second nav row beneath the rule (Home / About
  * / Data Access). Cut: About and Data Access have no page to link to yet, and
@@ -63,7 +59,7 @@ export function PublicHeader() {
 
   return (
     <header>
-      <div className="bg-surface-inverse text-text-inverse">
+      <div className="border-b border-border-default bg-surface text-text-default">
         <div className="mx-auto flex flex-wrap items-center gap-4 px-4 py-3 sm:px-6">
           <Link to="/" className="flex min-w-0 items-center gap-3">
             <img
@@ -74,10 +70,10 @@ export function PublicHeader() {
               className="size-9 shrink-0 object-contain"
             />
             <span className="min-w-0">
-              <span className="block text-[1.125rem] leading-6 font-bold tracking-tight">
+              <span className="block text-[1.125rem] leading-6 font-bold tracking-tight text-text-default">
                 Mission 300 {brand?.countryName ?? 'Nigeria'}
               </span>
-              <span className="block text-[0.8125rem] leading-4 opacity-70">
+              <span className="block text-[0.8125rem] leading-4 text-text-muted">
                 Federal Ministry of Power
               </span>
             </span>
@@ -91,7 +87,7 @@ export function PublicHeader() {
             <label htmlFor={searchId} className="sr-only">
               Search this page
             </label>
-            <div className="flex items-center gap-2 bg-surface px-3 py-2">
+            <div className="flex items-center gap-2 border border-border-default bg-surface-sunken px-3 py-2">
               <Search aria-hidden="true" className="size-4 shrink-0 text-text-subtle" />
               <input
                 id={searchId}
@@ -106,14 +102,12 @@ export function PublicHeader() {
 
           <Link
             to="/account/login"
-            className="order-2 shrink-0 text-[1rem] leading-6 font-medium underline underline-offset-4 hover:no-underline sm:order-3"
+            className="order-2 shrink-0 text-[1rem] leading-6 font-medium text-link underline underline-offset-4 hover:no-underline sm:order-3"
           >
             Sign in
           </Link>
         </div>
       </div>
-
-      <div aria-hidden="true" className="h-1 bg-brand-600" />
     </header>
   )
 }

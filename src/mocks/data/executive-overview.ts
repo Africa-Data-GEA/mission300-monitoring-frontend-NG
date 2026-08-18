@@ -115,7 +115,7 @@ function buildAccessRateCard(): AccessRateCard {
     source: toSourceTag(profile.validationStatus),
     confidence: toConfidence(profile.validationStatus),
     provenance: profile.provenance,
-    sparkline: history.map((point) => point.value),
+    sparkline: history.map((point) => ({ period: point.period, value: point.value })),
   }
 }
 
@@ -135,7 +135,7 @@ function buildGenerationCapacityCard(): GenerationCapacityCard {
     installedMw,
     value: `${(availableMw / 1000).toFixed(1)} GW`,
     availabilityRatio: Math.round((availableMw / installedMw) * 1000) / 10,
-    sparkline: profile.history.map((point) => point.value),
+    sparkline: profile.history.map((point) => ({ period: point.period, value: point.value })),
     benchmarkLabel: `of ${(installedMw / 1000).toFixed(1)} GW installed`,
     reportingPeriod: profile.reportingPeriod,
     trend: profile.trend,
@@ -314,7 +314,7 @@ function buildBulletMetric(config: (typeof NATIONAL_PERFORMANCE_METRICS)[number]
     source: toSourceTag(profile.validationStatus),
     confidence: toConfidence(profile.validationStatus),
     provenance: profile.provenance,
-    history: profile.history.map((point) => point.value),
+    history: profile.history.map((point) => ({ period: point.period, value: point.value })),
   }
 }
 

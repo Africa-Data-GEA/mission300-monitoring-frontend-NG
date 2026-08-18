@@ -86,8 +86,10 @@ export const accessRateCardSchema = z.object({
   source: sourceTagSchema,
   confidence: dataConfidenceSchema,
   provenance: metricProvenanceSchema,
-  /** Ordered oldest-to-newest readings, one per prior publication. */
-  sparkline: z.array(z.number()),
+  /** Ordered oldest-to-newest readings, one per prior publication. Carries
+   * the KPI profile's own period label per point (see BulletMetric.history's
+   * comment) so a real time axis can be drawn, not just an unlabelled line. */
+  sparkline: z.array(z.object({ period: z.string().min(1), value: z.number() })),
 })
 
 /** A3. Available generation capacity, with a trend sparkline. */
@@ -101,8 +103,9 @@ export const generationCapacityCardSchema = z.object({
   value: z.string().min(1),
   /** Available divided by installed, as a percentage. */
   availabilityRatio: z.number().min(0).max(100),
-  /** Ordered oldest-to-newest readings. Two points minimum to draw a line. */
-  sparkline: z.array(z.number()),
+  /** Ordered oldest-to-newest readings. Two points minimum to draw a line.
+   * Period-labelled, same reasoning as AccessRateCard.sparkline above. */
+  sparkline: z.array(z.object({ period: z.string().min(1), value: z.number() })),
   benchmarkLabel: z.string(),
   reportingPeriod: z.string().min(1),
   trend: trendSchema.optional(),
@@ -179,8 +182,11 @@ export const bulletMetricSchema = z
     provenance: metricProvenanceSchema,
     /** Ordered oldest-to-newest readings, for the "trend view" toggle —
      * stakeholder feedback asked to see a target's evolution across the
-     * reporting cycle, not only its current position. */
-    history: z.array(z.number()),
+     * reporting cycle, not only its current position. Carries the KPI
+     * profile's own period label per point (not just the bare value) so a
+     * consumer can plot a real time axis, e.g. the public gateway's
+     * evolution charts — not just an unlabelled sparkline. */
+    history: z.array(z.object({ period: z.string().min(1), value: z.number() })),
   })
   // A degenerate scale would make every position zero, silently flattening the
   // chart rather than failing.

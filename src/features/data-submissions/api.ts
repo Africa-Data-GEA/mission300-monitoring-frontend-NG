@@ -1,6 +1,7 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   dataGapListSchema,
+  datasetListSchema,
   dataSubmissionFiltersSchema,
   draftSavedSchema,
   manualEntryDefinitionSchema,
@@ -55,6 +56,16 @@ export function useSubmissionFilters() {
   return useQuery({
     queryKey: submissionKeys.filters(),
     queryFn: () => api.get('/data-submissions/filters', dataSubmissionFiltersSchema),
+    staleTime: Infinity,
+  })
+}
+
+/** The real Dataset records behind every obligation's `datasetId` — purpose,
+ * required data points, owner institution and each dataset's own template. */
+export function useDatasets() {
+  return useQuery({
+    queryKey: [...submissionKeys.all, 'datasets'],
+    queryFn: () => api.get('/data-submissions/datasets', datasetListSchema),
     staleTime: Infinity,
   })
 }

@@ -1,5 +1,6 @@
 import { delay, http, HttpResponse } from '../local-router'
 import type { BottleneckRecord } from '@/api/schemas/bottlenecks'
+import { recordAuditEvent } from '../data/audit-log'
 import {
   bottlenecksEscalations,
   bottlenecksFilterOptions,
@@ -133,6 +134,14 @@ export const bottlenecksHandlers = [
     // `bottlenecks` list in sync so the new record shows up there immediately.
     const project = projects.find((entry) => entry.id === record.linkedRecord)
     project?.bottlenecks.unshift(record.id)
+
+    recordAuditEvent({
+      action: 'Raised bottleneck',
+      module: 'Bottlenecks & Exceptions',
+      recordId: record.id,
+      newValue: record.issue,
+      reference: record.linkedRecord || null,
+    })
 
     return HttpResponse.json({
       record,

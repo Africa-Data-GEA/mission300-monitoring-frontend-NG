@@ -29,7 +29,7 @@ export function BulletTrendRow({ metric }: { metric: BulletMetric }) {
           <Chart
             type="area"
             height="100%"
-            series={[{ name: metric.title, data: [...metric.history] }]}
+            series={[{ name: metric.title, data: metric.history.map((point) => point.value) }]}
             options={{
               chart: {
                 type: 'area',

@@ -43,6 +43,7 @@ export function SupplyHoursChart({ rows }: { rows: readonly UtilityOperationsRow
           tooltip: {
             y: {
               formatter: (value, opts) => {
+                if (!opts) return `${value} h/day`
                 const row = rows[opts.seriesIndex]
                 const band = BANDS[opts.dataPointIndex]
                 const cell = row?.bands.find((entry) => entry.band === band)

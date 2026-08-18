@@ -15,6 +15,10 @@ export const obligationSchema = z.object({
   /** The named person responsible for submitting this obligation — stakeholder
    * feedback asked to see a lead for submitting data, not the institution alone. */
   focalPerson: z.string().min(1),
+  /** FK → Dataset.id (see datasets.ts). `dataset` below stays as the
+   * display label (mirrors Dataset.name) so every existing column/screen
+   * reading it is unaffected — this is the real link that was missing. */
+  datasetId: z.string().min(1),
   dataset: z.string().min(1),
   reportingPeriod: z.string().min(1),
   frequency: z.string().min(1),
