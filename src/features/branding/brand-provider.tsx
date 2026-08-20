@@ -40,9 +40,11 @@ function applyCssOverrides(
   const ramp = buildColorRamp(primaryColor)
   const chartScale = buildChartScale(secondaryColor)
 
-  const declarations = [
+  // Shared between :root and .dark — the brand ramp and chart palette are
+  // meant to read the same everywhere, including inside the sidebar's dark
+  // scope (e.g. the active nav item's gold fill).
+  const sharedDeclarations = [
     ...Object.entries(ramp).map(([step, hex]) => `--color-brand-${step}: ${hex};`),
-    `--text-default: ${textColor};`,
     `--color-chart-accent: ${secondaryColor};`,
     `--color-chart-blue-darkest: ${chartScale.darkest};`,
     `--color-chart-blue-dark: ${chartScale.dark};`,
@@ -61,8 +63,16 @@ function applyCssOverrides(
   // sidebar is currently the only element carrying the `.dark` class (see
   // Sidebar.tsx), so this only ever touches the sidebar, never the rest of
   // the app's light-mode surfaces.
+  //
+  // `--text-default` is deliberately `:root`-only, NOT applied to `.dark`:
+  // the admin's chosen text colour is a light-mode body-text concept, and
+  // the sidebar's `.dark` scope needs its own always-light text regardless
+  // of that choice (theme.css sets `.dark { --text-default: #f9fafb }` for
+  // exactly this reason) — applying it to `.dark` too previously rendered
+  // near-black sidebar nav text on the navy background.
   styleTag.textContent =
-    `:root, .dark {\n    ${declarations}\n  }\n` +
+    `:root, .dark {\n    ${sharedDeclarations}\n  }\n` +
+    `:root {\n    --text-default: ${textColor};\n  }\n` +
     `.dark {\n    --surface: ${sidebarColor};\n  }`
 
   // ApexCharts reads plain JS values, not CSS custom properties, so the

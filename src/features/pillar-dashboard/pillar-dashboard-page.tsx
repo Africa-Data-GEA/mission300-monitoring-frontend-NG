@@ -5,7 +5,6 @@ import { CoreIndicatorsSection } from './components/core-indicators-section'
 import { HeadlineCardsSection } from './components/headline-cards-section'
 import { PillarDashboardSkeleton } from './components/pillar-dashboard-skeleton'
 import { PillarKpiList } from './components/pillar-kpi-list'
-import { TheoryOfChangePanel } from './components/theory-of-change-panel'
 import { usePillarDashboardPage } from './use-pillar-dashboard-page'
 
 /**
@@ -53,8 +52,6 @@ export function PillarDashboardPage() {
       </div>
 
       <HeadlineCardsSection cards={data.headlineCards} />
-
-      <TheoryOfChangePanel pillar={data.pillar} />
 
       <CoreIndicatorsSection indicators={data.coreIndicators} pillar={data.pillar} />
 
