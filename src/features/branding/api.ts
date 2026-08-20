@@ -40,6 +40,15 @@ export function useUpdateBrandFonts() {
   })
 }
 
+/** Discards any saved customization and returns to the shipped default. */
+export function useResetBrandConfig() {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: () => api.post<BrandConfig>('/branding/reset', undefined, brandConfigSchema),
+    onSuccess: (updated) => client.setQueryData(brandingKeys.config(), updated),
+  })
+}
+
 /** Uploads a new logo image, replacing the current one. */
 export function useUploadBrandLogo() {
   const client = useQueryClient()

@@ -3,13 +3,12 @@ import { TopbarNotifications } from './topbar-notifications'
 import { TopbarSearch } from './topbar-search'
 
 /**
- * Mobile/tablet (below `lg`) top bar: drawer toggle, brand mark, global
- * search and notifications. TopNav is its lg+ sibling and covers the same
- * ground (plus primary navigation and the account menu) for desktop — see
- * AppShell, which renders exactly one of the two per breakpoint.
+ * Application top bar: mobile brand mark, global search and notifications.
  *
- * Account identity is reached via the drawer's Sidebar (see Sidebar) rather
- * than from this bar directly.
+ * Account identity now lives at the bottom of the sidebar rather than here —
+ * see Sidebar — so this bar only carries what the sidebar can't show when
+ * collapsed below `lg`: the drawer toggle, the brand mark, search and
+ * notifications.
  *
  * Search is left aligned with the page content; notifications stay on the
  * right so the two controls remain spatially predictable.

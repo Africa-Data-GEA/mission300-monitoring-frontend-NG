@@ -4,16 +4,13 @@ import { GlobalFiltersProvider } from '@/app/global-filters'
 import { GlobalFilterBar } from './global-filter-bar'
 import { Sidebar } from './sidebar'
 import { Topbar } from './topbar'
-import { TopNav } from './top-nav'
 
 /**
- * Application chrome: top navigation and routed content.
+ * Application chrome: persistent sidebar, top bar and routed content.
  *
- * TopNav is the persistent horizontal nav from `lg` upward. Below `lg`,
- * Topbar takes over as the top bar and primary navigation becomes a
- * slide-over drawer (Sidebar) opened from its hamburger, so the full
- * navigation stays reachable on a tablet or phone rather than being hidden
- * with no alternative.
+ * Below the `lg` breakpoint the sidebar becomes a slide-over drawer opened
+ * from the top bar, so the full navigation stays reachable on a tablet or
+ * phone rather than being hidden with no alternative.
  */
 export function AppShell() {
   const [isNavOpen, setNavOpen] = useState(false)
@@ -44,23 +41,9 @@ export function AppShell() {
 
   return (
     <GlobalFiltersProvider>
-    <div className="flex min-h-svh flex-col bg-surface-page">
-      {/* Desktop primary nav, lg upward. */}
-      <TopNav
-        className="sticky top-0 z-40 hidden lg:flex"
-        filtersOpen={filtersOpen}
-        onToggleFilters={showGlobalFilters ? () => setFiltersOpen((open) => !open) : undefined}
-      />
-
-      {/* Mobile/tablet top bar, below lg. */}
-      <div className="sticky top-0 z-40 lg:hidden">
-        <Topbar
-          isNavOpen={isNavOpen}
-          filtersOpen={filtersOpen}
-          onToggleNav={() => setNavOpen((previous) => !previous)}
-          onToggleFilters={showGlobalFilters ? () => setFiltersOpen((open) => !open) : undefined}
-        />
-      </div>
+    <div className="flex min-h-svh bg-surface-page">
+      {/* Persistent sidebar from lg upward. */}
+      <Sidebar className="sticky top-0 hidden h-svh lg:flex" />
 
       {/* Slide-over drawer below lg. */}
       {isNavOpen && (
@@ -89,9 +72,17 @@ export function AppShell() {
       )}
 
       <div className="mx-auto flex w-full max-w-[1440px] min-w-0 flex-1 flex-col gap-3 p-3 sm:gap-4 sm:p-4">
-        {showGlobalFilters && filtersOpen && (
-          <GlobalFilterBar onClose={() => setFiltersOpen(false)} />
-        )}
+        <div className="sticky top-3 z-40 space-y-3">
+          <Topbar
+            isNavOpen={isNavOpen}
+            filtersOpen={filtersOpen}
+            onToggleNav={() => setNavOpen((previous) => !previous)}
+            onToggleFilters={showGlobalFilters ? () => setFiltersOpen((open) => !open) : undefined}
+          />
+          {showGlobalFilters && filtersOpen && (
+            <GlobalFilterBar onClose={() => setFiltersOpen(false)} />
+          )}
+        </div>
         <main className="min-w-0 flex-1">
           <Outlet />
         </main>

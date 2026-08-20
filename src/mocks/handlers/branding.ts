@@ -1,6 +1,6 @@
 import { delay, http, HttpResponse } from '../local-router'
 import { updateBrandColorsRequestSchema, updateBrandFontsRequestSchema } from '@/api/schemas/branding'
-import { getBrandConfig, setBrandConfig } from '../data/branding'
+import { getBrandConfig, resetBrandConfig, setBrandConfig } from '../data/branding'
 
 /** Reads a File into a `data:` URL — stands in for uploading to real object storage. */
 async function fileToDataUrl(file: File): Promise<string> {
@@ -56,6 +56,12 @@ export const brandingHandlers = [
       updatedAt: new Date().toISOString(),
     })
     return HttpResponse.json(updated)
+  }),
+
+  /** POST /api/branding/reset — discards any saved customization, back to the shipped default. */
+  http.post('/api/branding/reset', async () => {
+    await delay(150)
+    return HttpResponse.json(resetBrandConfig())
   }),
 
   /** POST /api/branding/logo — multipart upload, field `file`. */

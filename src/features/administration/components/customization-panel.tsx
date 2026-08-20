@@ -2,7 +2,13 @@ import { useRef, useState } from 'react'
 import type { BrandConfig, BrandFonts } from '@/api/schemas/branding'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { useBrandConfig, useUpdateBrandColors, useUpdateBrandFonts, useUploadBrandLogo } from '@/features/branding/api'
+import {
+  useBrandConfig,
+  useResetBrandConfig,
+  useUpdateBrandColors,
+  useUpdateBrandFonts,
+  useUploadBrandLogo,
+} from '@/features/branding/api'
 import { ApiError } from '@/lib/api-client'
 import { FontPicker } from './font-picker'
 
@@ -67,6 +73,7 @@ function CustomizationForm({ brand }: { brand: BrandConfig }) {
   const updateColors = useUpdateBrandColors()
   const updateFonts = useUpdateBrandFonts()
   const uploadLogo = useUploadBrandLogo()
+  const resetBrand = useResetBrandConfig()
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const [countryName, setCountryName] = useState(brand.countryName)
@@ -136,6 +143,24 @@ function CustomizationForm({ brand }: { brand: BrandConfig }) {
     }
   }
 
+  async function handleReset() {
+    setSaveMessage('')
+    try {
+      const defaults = await resetBrand.mutateAsync()
+      setCountryName(defaults.countryName)
+      setPrimaryColor(defaults.primaryColor)
+      setSecondaryColor(defaults.secondaryColor)
+      setTextColor(defaults.textColor)
+      setSidebarColor(defaults.sidebarColor)
+      setFonts(defaults.fonts)
+      setSaveMessage('Reset. The shipped default branding is applied across the dashboard now.')
+    } catch (error) {
+      setSaveMessage(
+        error instanceof ApiError ? error.message : 'Could not reset branding. Please try again.',
+      )
+    }
+  }
+
   async function handleLogoChange(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0]
     if (!file) return
@@ -182,7 +207,15 @@ function CustomizationForm({ brand }: { brand: BrandConfig }) {
           </p>
         )}
 
-        <div className="mt-5 flex justify-end border-t border-border-default pt-5">
+        <div className="mt-5 flex items-center justify-between border-t border-border-default pt-5">
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={handleReset}
+            disabled={resetBrand.isPending}
+          >
+            {resetBrand.isPending ? 'Resetting…' : 'Reset to default'}
+          </Button>
           <Button
             type="button"
             onClick={handleSave}
