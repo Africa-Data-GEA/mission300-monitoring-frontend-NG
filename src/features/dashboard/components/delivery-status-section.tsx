@@ -1,11 +1,12 @@
 import { BarChart3, History, Table2 } from 'lucide-react'
+import { useState } from 'react'
 import { Link } from 'react-router'
 import { Card } from '@/components/ui/card'
 import { InfoPopover } from '@/components/ui/info-popover'
 import { SeverityBadge } from '@/components/ui/status-badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { TrendIndicator } from '@/components/ui/trend-indicator'
-import type { DeliveryStatusPanel } from '../types'
+import type { BottleneckSeverity, DeliveryStatusPanel, OngoingProject } from '../types'
 import { ExceptionSeverityChart } from './exception-severity-chart'
 import { OngoingProjectsTable } from './ongoing-projects-table'
 import { ProjectStatusChart } from './project-status-chart'
@@ -28,9 +29,18 @@ export function DeliveryStatusSection({
   panel: DeliveryStatusPanel
   onProjectsChanged: () => void
 }) {
+  const [severityFilter, setSeverityFilter] = useState<BottleneckSeverity | null>(null)
+  const [deliveryTab, setDeliveryTab] = useState('table')
+  const [statusFilter, setStatusFilter] = useState<OngoingProject['currentStatus'] | null>(null)
+
   // Enforced here rather than trusted to the API, so an over-long response
-  // cannot break the layout.
-  const visible = panel.exceptions.slice(0, MAX_VISIBLE_EXCEPTIONS)
+  // cannot break the layout. Clicking a bar on the severity chart filters to
+  // that severity instead — once filtered, the cap lifts, since a single
+  // severity is rarely more than a handful of records and the whole point
+  // of clicking through is to see all of them, not another five-row sample.
+  const visible = severityFilter
+    ? panel.exceptions.filter((exception) => exception.severity === severityFilter)
+    : panel.exceptions.slice(0, MAX_VISIBLE_EXCEPTIONS)
 
   return (
     <Card variant="well" className="p-4">
@@ -65,7 +75,12 @@ export function DeliveryStatusSection({
             </div>
           </div>
 
-          <Tabs defaultValue="table" className="mt-3">
+          <Tabs
+            value={deliveryTab}
+            onValueChange={setDeliveryTab}
+            defaultValue="table"
+            className="mt-3"
+          >
             <TabsList aria-label="Project delivery views">
               <TabsTrigger value="table" className="inline-flex items-center gap-2">
                 <Table2 className="size-4" aria-hidden="true" />
@@ -82,10 +97,21 @@ export function DeliveryStatusSection({
             </TabsList>
 
             <TabsContent value="table" className="pt-0">
-              <OngoingProjectsTable projects={panel.ongoingProjects} onChanged={onProjectsChanged} />
+              <OngoingProjectsTable
+                projects={panel.ongoingProjects}
+                onChanged={onProjectsChanged}
+                statusFilter={statusFilter}
+                onClearStatusFilter={() => setStatusFilter(null)}
+              />
             </TabsContent>
             <TabsContent value="chart">
-              <ProjectStatusChart summary={panel.statusSummary} />
+              <ProjectStatusChart
+                summary={panel.statusSummary}
+                onStatusClick={(status) => {
+                  setStatusFilter(status)
+                  setDeliveryTab('table')
+                }}
+              />
             </TabsContent>
             <TabsContent value="evolution">
               <ProjectStatusEvolutionTable projects={panel.ongoingProjects} />
@@ -98,13 +124,29 @@ export function DeliveryStatusSection({
           <div className="flex flex-wrap items-baseline justify-between gap-2">
             <h3 className="text-sm font-semibold text-text-default">
               Priority exceptions
+              {severityFilter && (
+                <span className="ml-2 text-xs font-normal text-text-muted">
+                  — filtered to {visible.length} {severityFilter}
+                </span>
+              )}
             </h3>
-            <Link
-              to="/bottlenecks"
-              className="text-xs font-medium text-link underline underline-offset-4"
-            >
-              View all
-            </Link>
+            <div className="flex items-center gap-3">
+              {severityFilter && (
+                <button
+                  type="button"
+                  onClick={() => setSeverityFilter(null)}
+                  className="text-xs font-medium text-link underline underline-offset-4"
+                >
+                  Clear filter
+                </button>
+              )}
+              <Link
+                to="/bottlenecks"
+                className="text-xs font-medium text-link underline underline-offset-4"
+              >
+                View all
+              </Link>
+            </div>
           </div>
 
           {visible.length === 0 ? (
@@ -125,7 +167,11 @@ export function DeliveryStatusSection({
                   By severity
                 </h4>
                 <div className="mt-2">
-                  <ExceptionSeverityChart exceptions={panel.exceptions} />
+                  <ExceptionSeverityChart
+                    exceptions={panel.exceptions}
+                    selectedSeverity={severityFilter}
+                    onSeverityClick={setSeverityFilter}
+                  />
                 </div>
               </Card>
 

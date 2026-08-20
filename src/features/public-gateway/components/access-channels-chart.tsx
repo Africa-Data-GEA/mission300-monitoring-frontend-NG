@@ -1,4 +1,5 @@
 import Chart from 'react-apexcharts'
+import { InfoPopover } from '@/components/ui/info-popover'
 import type { AccessChannel } from '@/features/dashboard/types'
 import {
   LANDING_CHART_TITLE_CLASSES,
@@ -59,6 +60,25 @@ export function AccessChannelsChart({ channels }: { channels: readonly AccessCha
             }}
           />
         </div>
+
+        {/*
+          Each channel's own source and validation status, per
+          docs/public-gateway-home.md §01 — every number on this page must
+          carry its provenance. One combined popover on the chart title
+          would be dishonest here: the three channels don't necessarily
+          share a source or a validation status.
+        */}
+        <ul aria-label="Sources for the figures above" className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5">
+          {channels.map((channel) => (
+            <li key={channel.id} className="flex items-center gap-1 text-xs text-text-muted">
+              {channel.title}
+              <InfoPopover
+                label={`About ${channel.title}`}
+                provenance={channel.provenance}
+              />
+            </li>
+          ))}
+        </ul>
       </div>
     </section>
   )

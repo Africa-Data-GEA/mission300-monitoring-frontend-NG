@@ -1,6 +1,7 @@
 import { formatDate } from '@/lib/format'
-import { usePublicOverview } from './api'
+import { usePublicOverview, usePublicStateCoverage } from './api'
 import { AccessChannelsChart } from './components/access-channels-chart'
+import { DeliveryInMotion } from './components/delivery-in-motion'
 import { Institutions } from './components/institutions'
 import { NationalStatement } from './components/national-statement'
 import { NationalStatementSkeleton } from './components/national-statement-skeleton'
@@ -13,18 +14,21 @@ import { buildEvolutionSeries } from './lib/evolution-series'
  * Public gateway — the front door at `/`, seen before anyone signs in.
  *
  * Sections:
- *   §02  National statement and latest figures
+ *   §02  National statement and latest figures (+ data-confidence key)
+ *   §04  Evolution over time / access connections by channel
+ *   §06  Delivery in motion, by state — a ranked list, not a map (see
+ *        DeliveryInMotion's own comment for why)
  *   §08  Who reports these figures
- *   §09  Footer, carrying the data-confidence key
+ *   §09  Footer
  *
  * §05 (the six-pillars cards) was removed on request — the same pillar
  * figures now live in the Evolution and Access-channels charts below
  * instead of a separate card grid.
  *
- * Not built: home.md §06 delivery-in-motion, which needs either a Nigeria map
- * or a ranked list of states, and §07 the human story, which is blocked on a
- * real named account from the comms team — a placeholder testimonial is the
- * most generated-looking thing that could appear on this page.
+ * Not built: §07 the human story, which is blocked on a real named account
+ * from the comms team — a placeholder testimonial is the most
+ * generated-looking thing that could appear on this page, and the spec is
+ * explicit that this section must not ship without one.
  *
  * FAILURE BEHAVIOUR: if the figures cannot be loaded the page still renders its
  * header, framing and footer, and says plainly that the numbers are
@@ -34,6 +38,7 @@ import { buildEvolutionSeries } from './lib/evolution-series'
  */
 export function PublicGatewayPage() {
   const { data, isPending, isError } = usePublicOverview()
+  const stateCoverage = usePublicStateCoverage()
 
   return (
     <div className="font-landing flex min-h-screen flex-col bg-surface">
@@ -61,6 +66,12 @@ export function PublicGatewayPage() {
             <div className="mx-auto max-w-7xl px-4 pb-4 sm:px-6">
               <PerformanceEvolution series={buildEvolutionSeries(data)} />
               <AccessChannelsChart channels={data.accessDelivery} />
+              {stateCoverage.data && (
+                <DeliveryInMotion
+                  rows={stateCoverage.data.rows}
+                  asOf={data.headlineCards.peopleWithElectricityAccess.provenance.lastUpdated}
+                />
+              )}
               <Institutions />
             </div>
           </>

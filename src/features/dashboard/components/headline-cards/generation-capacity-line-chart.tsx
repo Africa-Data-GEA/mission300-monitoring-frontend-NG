@@ -9,23 +9,22 @@ const MW_FORMATTER = new Intl.NumberFormat('en-US', {
 export function GenerationCapacityLineChart({
   points,
 }: {
-  points: readonly number[]
+  points: readonly { period: string; value: number }[]
 }) {
   return (
     <div
       role="img"
       aria-label="Available generation capacity trend"
-      className="min-h-16"
+      className="min-h-20"
     >
       <Chart
         type="line"
-        height={72}
-        series={[{ name: 'Available capacity', data: [...points] }]}
+        height={92}
+        series={[{ name: 'Available capacity', data: points.map((point) => point.value) }]}
         options={{
           chart: {
             type: 'line',
             animations: { enabled: false },
-            sparkline: { enabled: true },
             toolbar: { show: false },
             fontFamily: FONT_FAMILY,
           },
@@ -48,10 +47,21 @@ export function GenerationCapacityLineChart({
           // opacity, no matter what `stroke.colors`/`stroke.opacity` said).
           // Omitting `fill` entirely leaves the stroke a plain, fully
           // opaque colour.
+          //
+          // A real (if compact) axis, not sparkline mode — a reader can now
+          // tell *when* available capacity dipped without hovering every
+          // point.
+          xaxis: {
+            categories: points.map((point) => point.period),
+            labels: { style: { colors: 'var(--text-subtle)', fontFamily: FONT_FAMILY, fontSize: '10px' } },
+            axisTicks: { show: false },
+            axisBorder: { show: false },
+          },
+          yaxis: { labels: { show: false } },
+          grid: { show: false, padding: { left: 0, right: 0, top: 4, bottom: 0 } },
           tooltip: {
-            x: { show: false },
             y: {
-              formatter: (value: number) => `${MW_FORMATTER.format(value)} MW`,
+              formatter: (value: number) => `<strong>${MW_FORMATTER.format(value)} MW</strong>`,
               title: { formatter: () => '' },
             },
           },

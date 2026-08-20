@@ -63,7 +63,7 @@ export function ProjectDetailPage() {
             {project.id} · {project.programmeName} · {project.owner}
           </p>
         </div>
-        <Button asChild size="sm" variant="outline">
+        <Button asChild size="sm" variant="secondary">
           <Link to={`/programs/projects/${project.id}/edit`}>
             <Pencil aria-hidden="true" />
             Edit project

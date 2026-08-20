@@ -44,10 +44,24 @@ export function BulletTrendRow({ metric }: { metric: BulletMetric }) {
                 gradient: { shadeIntensity: 1, opacityFrom: 0.35, opacityTo: 0.02, stops: [0, 90, 100] },
               },
               markers: { size: 0, hover: { size: 5 } },
-              xaxis: { labels: { show: false }, axisTicks: { show: false }, axisBorder: { show: false } },
+              // Was hidden entirely — a reader had no way to tell *when* a
+              // dip happened without hovering every point. A real, labelled
+              // axis (still light-touch: no ticks/border, small muted text)
+              // answers that at a glance.
+              xaxis: {
+                categories: metric.history.map((point) => point.period),
+                labels: { style: { colors: 'var(--text-subtle)', fontFamily: FONT_FAMILY, fontSize: '11px' } },
+                axisTicks: { show: false },
+                axisBorder: { show: false },
+              },
               yaxis: { labels: { show: false } },
               grid: { show: false, padding: { left: 0, right: 0, top: 8, bottom: 0 } },
-              tooltip: { x: { show: false } },
+              tooltip: {
+                y: {
+                  formatter: (value: number) => `<strong>${value.toLocaleString('en-US')}</strong>`,
+                  title: { formatter: (seriesName: string) => seriesName },
+                },
+              },
             }}
           />
         </div>

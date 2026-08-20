@@ -22,7 +22,7 @@ import type { Orientation } from './lib/types'
 
 export type { Orientation }
 
-const DEFAULT_CONFIG_BASE = {
+const DEFAULT_CONFIG_BASE: Omit<ReportConfig, 'reportType'> = {
   periods: ['q3-2025'],
   pillars: ['all'],
   kpiCategory: 'all',
@@ -32,7 +32,7 @@ const DEFAULT_CONFIG_BASE = {
   validationStatus: 'all',
   readinessTier: 'all',
   format: 'pdf',
-} as const
+}
 
 function defaultConfig(reportType: ReportType): ReportConfig {
   return { ...DEFAULT_CONFIG_BASE, reportType }

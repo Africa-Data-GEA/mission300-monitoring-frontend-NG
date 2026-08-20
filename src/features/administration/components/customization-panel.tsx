@@ -6,14 +6,7 @@ import { useBrandConfig, useUpdateBrandColors, useUpdateBrandFonts, useUploadBra
 import { ApiError } from '@/lib/api-client'
 import { FontPicker } from './font-picker'
 
-const HEADING_LEVELS = [
-  { role: 'h1', label: 'H1 — page titles' },
-  { role: 'h2', label: 'H2' },
-  { role: 'h3', label: 'H3' },
-  { role: 'h4', label: 'H4' },
-  { role: 'h5', label: 'H5' },
-  { role: 'h6', label: 'H6' },
-] as const
+const HEADING_ROLES = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'] as const
 
 const inputClass =
   'h-10 w-full rounded-control border border-border-strong bg-surface px-3 text-sm text-text-default placeholder:text-text-subtle'
@@ -80,14 +73,29 @@ function CustomizationForm({ brand }: { brand: BrandConfig }) {
   const [primaryColor, setPrimaryColor] = useState(brand.primaryColor)
   const [secondaryColor, setSecondaryColor] = useState(brand.secondaryColor)
   const [textColor, setTextColor] = useState(brand.textColor)
+  const [sidebarColor, setSidebarColor] = useState(brand.sidebarColor)
   const [saveMessage, setSaveMessage] = useState('')
   const [logoError, setLogoError] = useState('')
 
   const [fonts, setFonts] = useState<BrandFonts>(brand.fonts)
   const [fontSaveMessage, setFontSaveMessage] = useState('')
 
-  function setFontRole(role: keyof BrandFonts, family: string) {
-    setFonts((prev) => ({ ...prev, [role]: family }))
+  // Simplified from one picker per heading level (h1..h6) to a single
+  // "Headings" picker that sets all six at once — six independent controls
+  // for a value that's realistically never varied by level was more choice
+  // than anyone actually uses. BrandFonts still carries h1..h6 separately
+  // (BrandProvider maps each to its own --font-heading-N token), so this
+  // stays compatible — the form just no longer exposes six copies of the
+  // same picker.
+  function setHeadingFont(family: string) {
+    setFonts((prev) => ({
+      ...prev,
+      ...Object.fromEntries(HEADING_ROLES.map((role) => [role, family])),
+    }))
+  }
+
+  function setBodyFont(family: string) {
+    setFonts((prev) => ({ ...prev, body: family }))
   }
 
   async function handleSaveFonts() {
@@ -107,12 +115,19 @@ function CustomizationForm({ brand }: { brand: BrandConfig }) {
     countryName.trim().length > 0 &&
     isValidHex(primaryColor) &&
     isValidHex(secondaryColor) &&
-    isValidHex(textColor)
+    isValidHex(textColor) &&
+    isValidHex(sidebarColor)
 
   async function handleSave() {
     setSaveMessage('')
     try {
-      await updateColors.mutateAsync({ countryName: countryName.trim(), primaryColor, secondaryColor, textColor })
+      await updateColors.mutateAsync({
+        countryName: countryName.trim(),
+        primaryColor,
+        secondaryColor,
+        textColor,
+        sidebarColor,
+      })
       setSaveMessage('Saved. The new colours are applied across the dashboard now.')
     } catch (error) {
       setSaveMessage(
@@ -158,6 +173,7 @@ function CustomizationForm({ brand }: { brand: BrandConfig }) {
           <ColorField label="Primary colour" value={primaryColor} onChange={setPrimaryColor} />
           <ColorField label="Secondary colour" value={secondaryColor} onChange={setSecondaryColor} />
           <ColorField label="Text colour" value={textColor} onChange={setTextColor} />
+          <ColorField label="Sidebar colour" value={sidebarColor} onChange={setSidebarColor} />
         </div>
 
         {saveMessage && (
@@ -180,20 +196,13 @@ function CustomizationForm({ brand }: { brand: BrandConfig }) {
       <Card className="p-5">
         <h3 className="text-base font-semibold text-text-default">Typography</h3>
         <p className="mt-1 text-sm text-text-muted">
-          Assign a Google Fonts family to each heading level and to body text. Applies across the whole
+          Assign a Google Fonts family for headings and for body text. Applies across the whole
           dashboard immediately, the same as colours above.
         </p>
 
         <div className="mt-5 grid gap-5 sm:grid-cols-2">
-          {HEADING_LEVELS.map(({ role, label }) => (
-            <FontPicker
-              key={role}
-              label={label}
-              value={fonts[role]}
-              onChange={(family) => setFontRole(role, family)}
-            />
-          ))}
-          <FontPicker label="Body text" value={fonts.body} onChange={(family) => setFontRole('body', family)} />
+          <FontPicker label="Headings" value={fonts.h1} onChange={setHeadingFont} />
+          <FontPicker label="Body text" value={fonts.body} onChange={setBodyFont} />
         </div>
 
         {fontSaveMessage && (

@@ -10,9 +10,11 @@ const hexColorSchema = z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Must be a 6-digit 
 const fontFamilySchema = z.string().min(1)
 
 /**
- * One Google Fonts family per heading level plus body text — deliberately
- * per-level (not a single "heading font" shared by h1-h6) so an admin can,
- * say, give h1 a display face while h2-h6 stay on the body face.
+ * One Google Fonts family per heading level plus body text. The admin UI
+ * only exposes one "Headings" picker (applied to h1-h6 together) and one
+ * "Body text" picker — six independent per-level controls was more than
+ * anyone actually varied — but the stored shape keeps every level so a
+ * future UI could still differentiate them without a data migration.
  */
 export const brandFontsSchema = z.object({
   h1: fontFamilySchema,
@@ -35,6 +37,10 @@ export const brandConfigSchema = z.object({
   primaryColor: hexColorSchema,
   secondaryColor: hexColorSchema,
   textColor: hexColorSchema,
+  /** The sidebar's own background colour — independent of primaryColor,
+   * which drives buttons/links/accents. Applied only within the sidebar
+   * (see Sidebar.tsx's `.dark` scoping), not site-wide. */
+  sidebarColor: hexColorSchema,
   /** A `data:` URL from the mock upload, or a static asset path as the default. */
   logoUrl: z.string().min(1),
   fonts: brandFontsSchema,
@@ -46,6 +52,7 @@ export const updateBrandColorsRequestSchema = z.object({
   primaryColor: hexColorSchema,
   secondaryColor: hexColorSchema,
   textColor: hexColorSchema,
+  sidebarColor: hexColorSchema,
 })
 
 export const updateBrandFontsRequestSchema = z.object({

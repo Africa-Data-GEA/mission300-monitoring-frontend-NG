@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { executiveOverviewSchema } from '@/api/schemas/executive-overview'
+import { stateCoverageSchema } from '@/api/schemas/state-disco'
 import { api } from '@/lib/api-client'
 
 /**
@@ -30,6 +31,21 @@ export function usePublicOverview() {
     // field rather than as `undefined` inside the hero.
     queryFn: () => api.get('/executive-overview', executiveOverviewSchema),
     // Public traffic is read-heavy and the figures move quarterly at most.
+    staleTime: 5 * 60 * 1000,
+  })
+}
+
+/**
+ * State coverage, for §06 "Delivery in motion" — same temporary-endpoint
+ * situation as usePublicOverview above: reads the authenticated
+ * `/state-disco/states` payload directly rather than importing
+ * state-disco's own hook, so this feature never depends on an authenticated
+ * module. Swapping to a real public endpoint later is a one-line change.
+ */
+export function usePublicStateCoverage() {
+  return useQuery({
+    queryKey: [...publicGatewayKeys.all, 'state-coverage'] as const,
+    queryFn: () => api.get('/state-disco/states', stateCoverageSchema),
     staleTime: 5 * 60 * 1000,
   })
 }

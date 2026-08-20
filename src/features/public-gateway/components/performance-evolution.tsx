@@ -1,4 +1,6 @@
 import Chart from 'react-apexcharts'
+import type { MetricProvenance } from '@/api/schemas/common'
+import { InfoPopover } from '@/components/ui/info-popover'
 import {
   LANDING_CHART_TITLE_CLASSES,
   LANDING_CHART_UNIT_CLASSES,
@@ -10,6 +12,11 @@ export interface EvolutionSeries {
   title: string
   unit: string
   points: readonly { period: string; value: number }[]
+  /** Every number on this page must carry its provenance (source
+   * institution, reporting period, validation status) per
+   * docs/public-gateway-home.md §01 — these charts are no exception. */
+  provenance: MetricProvenance
+  sourceLabel: string
 }
 
 /**
@@ -38,7 +45,14 @@ export function PerformanceEvolution({ series }: { series: readonly EvolutionSer
       <div className="mt-4 grid gap-8 lg:grid-cols-2">
         {chartable.map((entry) => (
           <div key={entry.id}>
-            <p className={LANDING_CHART_TITLE_CLASSES}>Evolution of {entry.title.toLowerCase()}</p>
+            <div className="flex items-start gap-1">
+              <p className={LANDING_CHART_TITLE_CLASSES}>Evolution of {entry.title.toLowerCase()}</p>
+              <InfoPopover
+                label={`About ${entry.title}`}
+                provenance={entry.provenance}
+                sourceLabel={entry.sourceLabel}
+              />
+            </div>
             <p className={LANDING_CHART_UNIT_CLASSES}>{entry.unit}</p>
 
             <div className="mt-3">

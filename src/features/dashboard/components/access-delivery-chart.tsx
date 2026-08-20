@@ -108,9 +108,9 @@ export function AccessDeliveryChart({ channels }: { channels: readonly AccessCha
               formatter: (value: number, opts) => {
                 const channel = channels[opts?.dataPointIndex ?? 0]
                 if (!channel || channel.percentComplete === null) {
-                  return `${numberFormatter.format(channel?.rawValue ?? 0)} delivered — no approved target`
+                  return `<strong>${numberFormatter.format(channel?.rawValue ?? 0)}</strong> delivered — no approved target`
                 }
-                return `${value.toFixed(1)}% (${numberFormatter.format(channel.rawValue)} of ${numberFormatter.format(channel.target ?? 0)})`
+                return `<strong>${value.toFixed(1)}%</strong> (${numberFormatter.format(channel.rawValue)} of ${numberFormatter.format(channel.target ?? 0)})`
               },
             },
           },

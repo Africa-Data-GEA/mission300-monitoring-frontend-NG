@@ -30,8 +30,23 @@ const SEVERITY_COLORS: Record<BottleneckSeverity, string> = {
  * exception list rather than the five-row visible slice below it — the point
  * is to show the shape of the whole exception load at a glance, which a
  * five-row sample would understate.
+ *
+ * Clicking a bar filters the exception list beside it to that severity
+ * (`onSeverityClick`) — clicking the same bar again clears the filter. No
+ * separate legend here: the severity name already labels each bar directly
+ * on the axis, so a legend row underneath would just repeat it: the bar
+ * itself *is* the filter control, the same way the exception list's own
+ * severity badges are already the visual key.
  */
-export function ExceptionSeverityChart({ exceptions }: { exceptions: readonly Bottleneck[] }) {
+export function ExceptionSeverityChart({
+  exceptions,
+  selectedSeverity = null,
+  onSeverityClick,
+}: {
+  exceptions: readonly Bottleneck[]
+  selectedSeverity?: BottleneckSeverity | null
+  onSeverityClick?: (severity: BottleneckSeverity | null) => void
+}) {
   const counts = new Map<BottleneckSeverity, number>()
   for (const exception of exceptions) {
     counts.set(exception.severity, (counts.get(exception.severity) ?? 0) + 1)
@@ -46,7 +61,9 @@ export function ExceptionSeverityChart({ exceptions }: { exceptions: readonly Bo
   return (
     <div
       role="img"
-      aria-label={`Priority exceptions by severity, ${exceptions.length} total`}
+      aria-label={`Priority exceptions by severity, ${exceptions.length} total${
+        selectedSeverity ? ` — filtered to ${SEVERITY_LABELS[selectedSeverity]}` : ''
+      }`}
     >
       <Chart
         type="bar"
@@ -63,6 +80,15 @@ export function ExceptionSeverityChart({ exceptions }: { exceptions: readonly Bo
               dynamicAnimation: { enabled: true, speed: 500 },
             },
             fontFamily: FONT_FAMILY,
+            events: onSeverityClick
+              ? {
+                  dataPointSelection: (_event, _chartContext, opts) => {
+                    const clicked = opts && severities[opts.dataPointIndex]
+                    if (!clicked) return
+                    onSeverityClick(clicked === selectedSeverity ? null : clicked)
+                  },
+                }
+              : undefined,
           },
           plotOptions: {
             bar: {
@@ -73,7 +99,17 @@ export function ExceptionSeverityChart({ exceptions }: { exceptions: readonly Bo
               distributed: true,
             },
           },
-          colors: severities.map((severity) => SEVERITY_COLORS[severity]),
+          states: {
+            active: { filter: { type: 'none' } },
+          },
+          // Dims every bar except the selected severity, so the filter
+          // that's already applied to the list beside it is visible on the
+          // chart too, not just implied.
+          colors: severities.map((severity) =>
+            selectedSeverity && severity !== selectedSeverity
+              ? `${SEVERITY_COLORS[severity]}40`
+              : SEVERITY_COLORS[severity],
+          ),
           dataLabels: {
             enabled: true,
             offsetX: 8,
@@ -91,7 +127,7 @@ export function ExceptionSeverityChart({ exceptions }: { exceptions: readonly Bo
           legend: { show: false },
           tooltip: {
             y: {
-              formatter: (value: number) => `${value} exception${value === 1 ? '' : 's'}`,
+              formatter: (value: number) => `<strong>${value}</strong> exception${value === 1 ? '' : 's'}`,
             },
           },
           xaxis: {

@@ -64,7 +64,7 @@ export function RegionalPerformanceChart({
           colors: [CHART_BLUE.dark],
           grid: { padding: { right: 36, top: 8, bottom: 8 } },
           tooltip: {
-            y: { formatter: (value: number) => `${value.toFixed(2)}%` },
+            y: { formatter: (value: number) => `<strong>${value.toFixed(2)}%</strong>` },
           },
           xaxis: {
             min: 0,

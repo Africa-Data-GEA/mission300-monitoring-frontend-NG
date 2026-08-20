@@ -3,37 +3,28 @@ import { Link } from 'react-router'
 /**
  * §09 — footer.
  *
- * Carries the data-confidence key required by §00: because every figure is
- * published regardless of validation status, the page owes the reader a plain
- * explanation of what those statuses mean. It sits in body text rather than a
- * tooltip or a legend of coloured dots, because readers skip chrome and this is
- * the one caveat on the page that has to land.
- *
- * If a provisional figure is ever quoted as final, this paragraph is what the
- * correction points back to.
+ * The full data-confidence key required by §00 now sits right under the
+ * headline strip instead (see NationalStatement's `DataConfidenceKey`) —
+ * "immediately beneath the headline strip" per §00, not at the very bottom
+ * of the page, separated from the figures it explains by everything else
+ * on the page. This footer just points back to it rather than repeating
+ * the same paragraph twice on one page.
  */
 export function PublicFooter({ lastUpdated }: { lastUpdated: string }) {
   return (
     <footer className="mt-16 border-t-4 border-brand-600 bg-surface-sunken">
-      <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6">
+      <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
         <h2 className="text-[1.125rem] leading-6 font-bold text-text-default">
           About these figures
         </h2>
 
         <p className="mt-3 max-w-[42rem] text-[1rem] leading-6 text-text-muted">
-          Every figure on this page carries the status of the data behind it.
-          <strong className="font-bold text-text-default"> Confirmed</strong>{' '}
-          means validated by the institution responsible for it.
-          <strong className="font-bold text-text-default"> Public source</strong>{' '}
-          means published elsewhere, such as by the World Bank.
-          <strong className="font-bold text-text-default"> Provisional</strong>{' '}
-          and
-          <strong className="font-bold text-text-default">
-            {' '}
-            requires validation
-          </strong>{' '}
-          are early figures that may change as data is checked. They are shown
-          so the record is complete, not because they are final.
+          Every figure on this page carries the status of the data behind it —{' '}
+          <a href="#data-confidence" className="font-medium text-link underline underline-offset-4 hover:no-underline">
+            see the data-confidence key
+          </a>{' '}
+          at the top of the page for what Confirmed, Public source,
+          Provisional and Requires validation each mean.
         </p>
 
         <p className="mt-6 text-[0.9375rem] leading-6 text-text-muted">

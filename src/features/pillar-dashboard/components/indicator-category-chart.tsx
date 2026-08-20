@@ -34,9 +34,12 @@ export function IndicatorCategoryChart({ rows }: { rows: readonly KpiCatalogueRo
       options={{
         chart: { type: 'donut', fontFamily: FONT_FAMILY },
         labels,
-        colors: getChartBlueScale(),
+        colors: [...getChartBlueScale()],
         legend: { position: 'right', fontFamily: FONT_FAMILY, fontSize: '12px' },
-        dataLabels: { enabled: true, formatter: (_value, opts) => String(opts.w.globals.series[opts.seriesIndex]) },
+        dataLabels: {
+          enabled: true,
+          formatter: (_value, opts) => (opts ? String(opts.w.globals.series[opts.seriesIndex]) : ''),
+        },
         stroke: { width: 0 },
         plotOptions: {
           pie: {

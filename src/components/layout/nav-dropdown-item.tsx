@@ -20,9 +20,9 @@ export function NavDropdownItem({ item }: { item: NavItemData }) {
     <div>
       {/*
         A dropdown trigger is never itself the active page — one of its
-        children is — so it gets a light brand tint rather than the solid
-        fill reserved for an actually-active link. That solid fill is used
-        one level down, on the active child itself, so "a child of this
+        children is — so it gets a light gold tint rather than the solid
+        gold fill reserved for an actually-active link. That solid fill is
+        used one level down, on the active child itself, so "a child of this
         group is open" and "this is the page you're on" stay visually
         distinct instead of looking like the same state at two levels.
       */}
@@ -33,13 +33,13 @@ export function NavDropdownItem({ item }: { item: NavItemData }) {
         className={cn(
           NAV_ITEM_BASE,
           hasActiveChild
-            ? 'bg-brand-50 text-brand-800'
+            ? 'bg-chart-accent/20 text-text-default'
             : 'bg-surface-sunken/10 text-text-default hover:bg-border-default',
         )}
       >
         <item.icon
           aria-hidden="true"
-          className={cn('size-3.5 shrink-0', hasActiveChild ? 'text-brand-700' : 'text-text-muted')}
+          className={cn('size-3.5 shrink-0', hasActiveChild ? 'text-chart-accent' : 'text-text-muted')}
         />
         <span className="truncate">{item.label}</span>
         <ChevronDown
@@ -59,7 +59,7 @@ export function NavDropdownItem({ item }: { item: NavItemData }) {
                     cn(
                       'block truncate rounded-control px-2.5 py-1.5 text-sm transition-colors',
                       isActive
-                        ? 'bg-brand-100 font-semibold text-brand-800'
+                        ? 'bg-chart-accent font-semibold text-brand-900'
                         : 'text-text-muted hover:bg-border-default hover:text-text-default',
                     )
                   }

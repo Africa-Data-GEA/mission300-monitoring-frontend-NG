@@ -43,9 +43,15 @@ const STATUS_SEVERITY: Record<OngoingProject['currentStatus'], number> = {
 export function OngoingProjectsTable({
   projects,
   onChanged,
+  statusFilter = null,
+  onClearStatusFilter,
 }: {
   projects: readonly OngoingProject[]
   onChanged: () => void
+  /** Set when arriving here via the status donut's click-through — see
+   * DeliveryStatusSection. */
+  statusFilter?: OngoingProject['currentStatus'] | null
+  onClearStatusFilter?: () => void
 }) {
   const navigate = useNavigate()
   const [page, setPage] = useState(1)
@@ -88,10 +94,14 @@ export function OngoingProjectsTable({
   )
 
   const filteredProjects = useMemo(() => {
-    const query = search.trim().toLocaleLowerCase()
-    if (!query) return rankedProjects
+    const byStatus = statusFilter
+      ? rankedProjects.filter((project) => project.currentStatus === statusFilter)
+      : rankedProjects
 
-    return rankedProjects.filter((project) =>
+    const query = search.trim().toLocaleLowerCase()
+    if (!query) return byStatus
+
+    return byStatus.filter((project) =>
       [
         project.id,
         project.name,
@@ -103,7 +113,7 @@ export function OngoingProjectsTable({
         project.currentStatus.replace('-', ' '),
       ].some((value) => value.toLocaleLowerCase().includes(query)),
     )
-  }, [rankedProjects, search])
+  }, [rankedProjects, search, statusFilter])
   const pageCount = Math.max(1, Math.ceil(filteredProjects.length / PAGE_SIZE))
   const currentPage = Math.min(page, pageCount)
   const firstIndex = (currentPage - 1) * PAGE_SIZE
@@ -111,6 +121,23 @@ export function OngoingProjectsTable({
 
   return (
     <div className="mt-3">
+      {statusFilter && (
+        <div className="mb-2 flex items-center gap-2 text-xs text-text-muted">
+          <span>
+            Showing only <span className="font-medium text-text-default">{statusFilter.replace('-', ' ')}</span> projects
+          </span>
+          {onClearStatusFilter && (
+            <button
+              type="button"
+              onClick={onClearStatusFilter}
+              className="font-medium text-link underline underline-offset-4"
+            >
+              Clear
+            </button>
+          )}
+        </div>
+      )}
+
       <div className="mb-3 flex flex-wrap items-end justify-between gap-3 rounded-lg bg-surface-sunken p-3">
         <div className="min-w-0 flex-1 sm:max-w-md">
           <label htmlFor={searchId} className="mb-1.5 block text-xs font-medium text-text-muted">

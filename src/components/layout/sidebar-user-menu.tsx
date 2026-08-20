@@ -48,7 +48,7 @@ function deriveSidebarUser(): SidebarUser {
 const inputClassName =
   'mt-1.5 h-10 w-full rounded-control border border-border-default bg-surface px-3 text-sm text-text-default outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100'
 
-export function SidebarUserMenu() {
+export function SidebarUserMenu({ compact = false }: { compact?: boolean } = {}) {
   const navigate = useNavigate()
   const [user, setUser] = useState(deriveSidebarUser)
   const [draft, setDraft] = useState(user)
@@ -80,26 +80,41 @@ export function SidebarUserMenu() {
     <>
       <Popover>
         <PopoverTrigger asChild>
-          <button
-            type="button"
-            aria-label="Open user menu"
-            className="flex w-full items-center gap-2.5 rounded-lg border border-transparent bg-surface-sunken px-2.5 py-2.5 text-left transition-colors hover:border-brand-100 hover:bg-brand-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500"
-          >
-            <span
-              aria-hidden="true"
-              className="inline-flex size-9 shrink-0 items-center justify-center rounded-full bg-brand-700 text-xs font-semibold text-white"
+          {compact ? (
+            <button
+              type="button"
+              aria-label="Open user menu"
+              className="inline-flex size-9 shrink-0 items-center justify-center rounded-full bg-brand-700 text-xs font-semibold text-white transition-colors hover:bg-brand-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500"
             >
               {user.name.split(' ').map((part) => part[0]).join('').slice(0, 2)}
-            </span>
-            <span className="min-w-0 flex-1">
-              <span className="block truncate text-sm font-semibold text-text-default">{user.name}</span>
-              <span className="block truncate text-xs text-text-muted">{user.role}</span>
-            </span>
-            <ChevronUp aria-hidden="true" className="size-4 shrink-0 text-text-subtle" />
-          </button>
+            </button>
+          ) : (
+            <button
+              type="button"
+              aria-label="Open user menu"
+              className="flex w-full items-center gap-2.5 rounded-lg border border-transparent bg-surface-sunken px-2.5 py-2.5 text-left transition-colors hover:border-brand-100 hover:bg-brand-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500"
+            >
+              <span
+                aria-hidden="true"
+                className="inline-flex size-9 shrink-0 items-center justify-center rounded-full bg-brand-700 text-xs font-semibold text-white"
+              >
+                {user.name.split(' ').map((part) => part[0]).join('').slice(0, 2)}
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block truncate text-sm font-semibold text-text-default">{user.name}</span>
+                <span className="block truncate text-xs text-text-muted">{user.role}</span>
+              </span>
+              <ChevronUp aria-hidden="true" className="size-4 shrink-0 text-text-subtle" />
+            </button>
+          )}
         </PopoverTrigger>
 
-        <PopoverContent side="top" align="start" sideOffset={8} className="w-64 p-2">
+        <PopoverContent
+          side={compact ? 'bottom' : 'top'}
+          align={compact ? 'end' : 'start'}
+          sideOffset={8}
+          className="w-64 p-2"
+        >
           <div className="border-b border-border-default px-2 py-2">
             <p className="truncate text-sm font-semibold text-text-default">{user.name}</p>
             <p className="truncate text-xs text-text-muted">{user.email}</p>

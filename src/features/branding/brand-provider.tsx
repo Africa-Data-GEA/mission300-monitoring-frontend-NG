@@ -31,7 +31,12 @@ function applyFontOverrides(fonts: BrandFonts) {
   styleTag.textContent = `:root, .dark {\n    ${declarations}\n  }`
 }
 
-function applyCssOverrides(primaryColor: string, secondaryColor: string, textColor: string) {
+function applyCssOverrides(
+  primaryColor: string,
+  secondaryColor: string,
+  textColor: string,
+  sidebarColor: string,
+) {
   const ramp = buildColorRamp(primaryColor)
   const chartScale = buildChartScale(secondaryColor)
 
@@ -52,7 +57,13 @@ function applyCssOverrides(primaryColor: string, secondaryColor: string, textCol
     styleTag.id = STYLE_TAG_ID
     document.head.appendChild(styleTag)
   }
-  styleTag.textContent = `:root, .dark {\n    ${declarations}\n  }`
+  // The sidebar background is scoped to `.dark` only, not `:root` — the
+  // sidebar is currently the only element carrying the `.dark` class (see
+  // Sidebar.tsx), so this only ever touches the sidebar, never the rest of
+  // the app's light-mode surfaces.
+  styleTag.textContent =
+    `:root, .dark {\n    ${declarations}\n  }\n` +
+    `.dark {\n    --surface: ${sidebarColor};\n  }`
 
   // ApexCharts reads plain JS values, not CSS custom properties, so the
   // same admin-configured colours are mirrored onto the mutable chart
@@ -87,7 +98,7 @@ export function BrandProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!data) return
-    applyCssOverrides(data.primaryColor, data.secondaryColor, data.textColor)
+    applyCssOverrides(data.primaryColor, data.secondaryColor, data.textColor, data.sidebarColor)
     applyFontOverrides(data.fonts)
   }, [data])
 

@@ -25,9 +25,12 @@ export function DeliveryStatusChart({ rows }: { rows: readonly DeliveryRow[] }) 
         options={{
           chart: { type: 'donut', fontFamily: FONT_FAMILY },
           labels,
-          colors: getChartBlueScale(),
+          colors: [...getChartBlueScale()],
           legend: { position: 'bottom', fontFamily: FONT_FAMILY },
-          dataLabels: { enabled: true, formatter: (_value, opts) => String(opts.w.globals.series[opts.seriesIndex]) },
+          dataLabels: {
+            enabled: true,
+            formatter: (_value, opts) => (opts ? String(opts.w.globals.series[opts.seriesIndex]) : ''),
+          },
           stroke: { width: 0 },
         }}
       />

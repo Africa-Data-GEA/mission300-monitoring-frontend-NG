@@ -35,6 +35,7 @@ export function ProgrammeDetailPage() {
   }
 
   if (!page.programme || !page.projects) return null
+  const programme = page.programme
 
   return (
     <div className="flex min-w-0 flex-col gap-4">
@@ -42,11 +43,11 @@ export function ProgrammeDetailPage() {
         items={[
           { label: 'Delivery tracking' },
           { label: 'Programs', to: '/programs' },
-          { label: page.programme.name },
+          { label: programme.name },
         ]}
       />
 
-      <ProgrammeHeader programme={page.programme} />
+      <ProgrammeHeader programme={programme} />
 
       <ProjectFilters value={page.query} onChange={page.changeQuery} />
 
@@ -57,7 +58,7 @@ export function ProgrammeDetailPage() {
         total={page.projects.total}
         onPageChange={page.setPage}
         onOpenProject={(project) => navigate(`/programs/projects/${project.id}`)}
-        onAddProject={() => navigate(`/programs/projects/new?programmeId=${page.programme.id}`)}
+        onAddProject={() => navigate(`/programs/projects/new?programmeId=${programme.id}`)}
       />
     </div>
   )

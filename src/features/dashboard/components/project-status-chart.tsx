@@ -5,7 +5,16 @@ import type { ProjectStatusSummary } from '../types'
 
 const FONT_FAMILY = 'Google Sans, ui-sans-serif, system-ui, sans-serif'
 
-export function ProjectStatusChart({ summary }: { summary: readonly ProjectStatusSummary[] }) {
+export function ProjectStatusChart({
+  summary,
+  onStatusClick,
+}: {
+  summary: readonly ProjectStatusSummary[]
+  /** Fired when a donut slice is clicked — the natural "ops dashboard"
+   * upgrade over a plain data explorer: clicking a status jumps straight to
+   * that status's projects instead of just picturing the split. */
+  onStatusClick?: (status: Exclude<ExecutionStatus, 'completed'>) => void
+}) {
   const total = summary.reduce((sum, entry) => sum + entry.count, 0)
   // Read inside the render body, not as a module-level constant, so a
   // brand-colour change (see BrandProvider) is picked up on the next render.
@@ -48,6 +57,14 @@ export function ProjectStatusChart({ summary }: { summary: readonly ProjectStatu
               dynamicAnimation: { enabled: true, speed: 500 },
             },
             fontFamily: FONT_FAMILY,
+            events: onStatusClick
+              ? {
+                  dataPointSelection: (_event, _chartContext, opts) => {
+                    const entry = opts && summary[opts.dataPointIndex]
+                    if (entry) onStatusClick(entry.status)
+                  },
+                }
+              : undefined,
           },
           labels: summary.map((entry) => EXECUTION_STATUS_LABELS[entry.status]),
           colors: summary.map((entry) => STATUS_COLORS[entry.status]),
@@ -86,7 +103,7 @@ export function ProjectStatusChart({ summary }: { summary: readonly ProjectStatu
           },
           stroke: { colors: ['var(--surface-card)'], width: 3 },
           tooltip: {
-            y: { formatter: (value: number) => `${value} project${value === 1 ? '' : 's'}` },
+            y: { formatter: (value: number) => `<strong>${value}</strong> project${value === 1 ? '' : 's'}` },
           },
           responsive: [
             {

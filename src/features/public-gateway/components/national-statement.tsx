@@ -1,5 +1,6 @@
 import { Link } from 'react-router'
 import type { HeadlineCards } from '@/features/dashboard/types'
+import { DataConfidenceKey } from './data-confidence-key'
 import { FigureTrend } from './figure-trend'
 
 /**
@@ -177,6 +178,8 @@ export function NationalStatement({ cards }: { cards: HeadlineCards }) {
           ))}
         </div>
       </section>
+
+      <DataConfidenceKey />
     </div>
   )
 }

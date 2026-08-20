@@ -15,9 +15,14 @@ const DEFAULT_FONT = 'Google Sans'
 
 const DEFAULT_BRAND_CONFIG: BrandConfig = {
   countryName: 'Nigeria',
-  primaryColor: '#008751',
-  secondaryColor: '#e08214',
+  // CDMU Convening slide deck palette, per the site owner's request — a
+  // deep navy primary and a single gold accent, not the earlier Nigeria
+  // flag-green scheme. Still just the stored default: an admin can change
+  // any of these from Administration > Customization at any time.
+  primaryColor: '#004972',
+  secondaryColor: '#ffca05',
   textColor: '#101828',
+  sidebarColor: '#004972',
   logoUrl: '/Logos/geapp.png',
   fonts: {
     h1: DEFAULT_FONT,

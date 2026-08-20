@@ -31,9 +31,7 @@ export function AccessRateCard({ data }: { data: AccessRateCardData }) {
         <ReportingPeriodPill period={data.sourceYear} />
       </div>
 
-      {data.sparkline.length >= 2 && (
-        <AccessRateLineChart points={data.sparkline.map((point) => point.value)} />
-      )}
+      {data.sparkline.length >= 2 && <AccessRateLineChart points={data.sparkline} />}
 
       {data.trend && (
         <div className="mt-auto pt-3">

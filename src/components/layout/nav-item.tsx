@@ -40,8 +40,11 @@ export function NavItem({
       className={({ isActive }) =>
         cn(
           NAV_ITEM_BASE,
+          // Gold is a light fill, so the active item needs genuinely dark
+          // text/icon for contrast — text-text-default resolves to white
+          // inside this sidebar's `.dark` scope, which would be white-on-gold.
           isActive
-            ? 'bg-brand-800 text-text-inverse'
+            ? 'bg-chart-accent text-brand-900'
             : 'bg-surface-sunken/10 text-text-default hover:bg-border-default',
         )
       }
@@ -50,7 +53,7 @@ export function NavItem({
         <>
           <item.icon
             aria-hidden="true"
-            className={cn('size-3.5 shrink-0', isActive ? 'text-text-inverse' : 'text-text-muted')}
+            className={cn('size-3.5 shrink-0', isActive ? 'text-brand-900' : 'text-text-muted')}
           />
           <span className="truncate">{item.label}</span>
         </>
