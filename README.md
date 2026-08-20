@@ -4,7 +4,6 @@ Frontend for monitoring delivery of Nigeria's Mission 300 National Energy
 Compact. The application is currently a demonstration system: completed API
 modules can use the NestJS ddemo backend while unfinished modules remain backed
 by deterministic browser emocks.e
-
 ## Requirement
 
 - Node.js 24.14.1 (see `.node-version`)
