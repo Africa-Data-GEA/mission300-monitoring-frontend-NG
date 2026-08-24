@@ -3,6 +3,7 @@ import type { StateDetail, StateHistoryPoint } from '@/api/schemas/state-disco'
 import type { Column } from '@/components/ui/data-table'
 import { Card } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
+import { getLocale } from '@/lib/currency'
 import { useStateDetail } from '../api'
 import { PageState } from '../components/page-state'
 import { StateDiscoShell } from '../components/state-disco-shell'
@@ -17,7 +18,7 @@ const columns: Column<RecordRow>[] = [
   { id: 'source', header: 'Source', cell: (row) => row.sourceLabel },
 ]
 
-const numberFormatter = new Intl.NumberFormat('en-NG')
+const numberFormatter = new Intl.NumberFormat(getLocale())
 
 /** Stakeholder feedback asked for a history view of past data, not only the
  * current aggregate snapshot the coverage table shows. */

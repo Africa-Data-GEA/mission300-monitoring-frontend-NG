@@ -26,6 +26,13 @@ export const brandFontsSchema = z.object({
   body: fontFamilySchema,
 })
 
+/** Display currency: ISO 4217 code, symbol, and the locale to group digits by. */
+export const brandCurrencySchema = z.object({
+  code: z.string().length(3),
+  symbol: z.string().min(1).max(4),
+  locale: z.string().min(2),
+})
+
 /**
  * The single active site-wide brand configuration — one record, not a list
  * of switchable presets. Redeploying this dashboard for another country
@@ -44,6 +51,10 @@ export const brandConfigSchema = z.object({
   /** A `data:` URL from the mock upload, or a static asset path as the default. */
   logoUrl: z.string().min(1),
   fonts: brandFontsSchema,
+  /** Display currency for monetary values — never hardcoded at a call site,
+   * so extending the platform to another Compact country is a configuration
+   * change. Applied at runtime by BrandProvider via src/lib/currency.ts. */
+  currency: brandCurrencySchema,
   updatedAt: z.iso.datetime(),
 })
 
@@ -59,6 +70,7 @@ export const updateBrandFontsRequestSchema = z.object({
   fonts: brandFontsSchema,
 })
 
+export type BrandCurrency = z.infer<typeof brandCurrencySchema>
 export type BrandFonts = z.infer<typeof brandFontsSchema>
 export type BrandConfig = z.infer<typeof brandConfigSchema>
 export type UpdateBrandColorsRequest = z.infer<typeof updateBrandColorsRequestSchema>

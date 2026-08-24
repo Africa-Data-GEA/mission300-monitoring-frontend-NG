@@ -1,85 +1,138 @@
+import { useState } from 'react'
 import Chart from 'react-apexcharts'
-import { InfoPopover } from '@/components/ui/info-popover'
-import type { AccessChannel } from '@/features/dashboard/types'
-import {
-  LANDING_CHART_TITLE_CLASSES,
-  LANDING_CHART_UNIT_CLASSES,
-  landingChartBase,
-} from '../lib/landing-chart-theme'
+import type { AccessChannel } from '@/api/schemas/executive-overview'
+import { ChartCard } from './chart-card'
+import { FilterPills } from './filter-pills'
+import { LANDING_MUTED, compactNumber, landingChartBase } from '../lib/landing-chart-theme'
+
+const CHART_ID = 'landing-access-channels'
 
 /**
- * "Access connections by channel" — modelled on IEA's fuel-mix bar chart,
- * but grouped rather than stacked: grid, mini-grid and solar-home-system
- * connections are independent delivery routes to the same 300M target, not
- * components that sum to one whole the way a fuel mix does. Current vs.
- * target per channel, from real AccessChannel figures (rawValue/target) —
- * the channel with no approved target yet (new grid connections, per
- * NationalStatement's own note) simply has no target bar.
+ * Access connections by delivery channel — current against approved target.
+ *
+ * GROUPED, NOT STACKED. Grid, mini-grid and solar home systems are independent
+ * routes to the same target, not components that sum to one whole the way a
+ * fuel mix does. Stacking them would assert an aggregate nobody has approved.
+ *
+ * THE VIEW TOGGLE IS THE POINT OF THIS CHART. The three channels differ by an
+ * order of magnitude, so on an absolute axis the smaller two are a smear at the
+ * bottom and the chart says only "grid is biggest", which the reader already
+ * knew. Switching to share-of-target re-bases every channel on its own approved
+ * commitment and answers the question that actually matters: which delivery
+ * route is keeping its promise. Neither view is the honest one on its own —
+ * absolute hides progress, percentage hides scale — so the page offers both
+ * rather than picking for the reader.
+ *
+ * A channel with no approved target drops out of the percentage view entirely
+ * and is named in the footnote. It is not shown at 0%, and no target is inferred
+ * for it: publishing the absence of a target is itself a credibility signal.
  */
 export function AccessChannelsChart({ channels }: { channels: readonly AccessChannel[] }) {
+  const [view, setView] = useState<'absolute' | 'share'>('absolute')
+
   if (channels.length === 0) return null
 
-  const hasAnyTarget = channels.some((channel) => channel.target !== null)
+  const withTarget = channels.filter((channel) => channel.target !== null)
+  const withoutTarget = channels.filter((channel) => channel.target === null)
+  const plotted = view === 'share' ? withTarget : channels
+
+  if (plotted.length === 0) return null
+
+  const series =
+    view === 'share'
+      ? [
+          {
+            name: 'Share of approved target',
+            data: plotted.map((channel) =>
+              // percentComplete is the API's own computed figure; falling back
+              // to the ratio keeps the chart correct if only the raw pair is
+              // sent, rather than dropping a bar.
+              Number(
+                (channel.percentComplete ?? (channel.rawValue / (channel.target as number)) * 100).toFixed(1),
+              ),
+            ),
+          },
+        ]
+      : [
+          { name: 'Current', data: plotted.map((channel) => channel.rawValue) },
+          { name: 'Approved target', data: plotted.map((channel) => channel.target) },
+        ]
+
+  const base = landingChartBase(CHART_ID)
 
   return (
-    <section aria-labelledby="access-channels" className="mt-14">
-      <h2
-        id="access-channels"
-        className="text-[1.5rem] leading-8 font-bold tracking-tight text-text-default"
-      >
-        Access connections by channel
-      </h2>
-
-      <div className="mt-4">
-        <p className={LANDING_CHART_TITLE_CLASSES}>Current connections against approved targets</p>
-        <p className={LANDING_CHART_UNIT_CLASSES}>Connections</p>
-
-        <div className="mt-3">
-          <Chart
-            type="bar"
-            height={320}
-            series={
-              hasAnyTarget
-                ? [
-                    { name: 'Current', data: channels.map((channel) => channel.rawValue) },
-                    { name: 'Target', data: channels.map((channel) => channel.target) },
-                  ]
-                : [{ name: 'Current', data: channels.map((channel) => channel.rawValue) }]
-            }
-            options={{
-              ...landingChartBase(),
-              plotOptions: { bar: { columnWidth: '55%', borderRadius: 2 } },
-              xaxis: {
-                ...landingChartBase().xaxis,
-                categories: channels.map((channel) => channel.title),
-              },
-              tooltip: {
-                ...landingChartBase().tooltip,
-                y: { formatter: (value) => (value === null ? 'No approved target' : value.toLocaleString('en-US')) },
-              },
-            }}
-          />
-        </div>
-
-        {/*
-          Each channel's own source and validation status, per
-          docs/public-gateway-home.md §01 — every number on this page must
-          carry its provenance. One combined popover on the chart title
-          would be dishonest here: the three channels don't necessarily
-          share a source or a validation status.
-        */}
-        <ul aria-label="Sources for the figures above" className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5">
-          {channels.map((channel) => (
-            <li key={channel.id} className="flex items-center gap-1 text-xs text-text-muted">
-              {channel.title}
-              <InfoPopover
-                label={`About ${channel.title}`}
-                provenance={channel.provenance}
-              />
-            </li>
-          ))}
-        </ul>
-      </div>
-    </section>
+    <ChartCard
+      id="access-channels"
+      title="Connections by delivery channel"
+      description="Each channel is an independent route to the national access target, reported separately by the institution responsible for it."
+      unit={view === 'share' ? 'Per cent of approved target' : 'Connections'}
+      controls={
+        <FilterPills
+          label="Choose how connections are compared"
+          value={view}
+          onChange={(id) => setView(id as 'absolute' | 'share')}
+          options={[
+            { id: 'absolute', label: 'Absolute' },
+            { id: 'share', label: '% of target' },
+          ]}
+        />
+      }
+      source={channels.map((channel) => `${channel.title} — ${channel.provenance.source}`).join(' · ')}
+      chartId={CHART_ID}
+      dataset={{
+        headers: ['Channel', 'Current', 'Approved target', 'Share of target (%)', 'Source', 'Last updated'],
+        rows: channels.map((channel) => [
+          channel.title,
+          channel.rawValue,
+          channel.target,
+          channel.percentComplete,
+          channel.provenance.source,
+          channel.provenance.lastUpdated,
+        ]),
+      }}
+      footnote={
+        withoutTarget.length > 0
+          ? `${withoutTarget.map((channel) => channel.title).join(', ')} has no approved target yet, so it is shown by volume only and is excluded from the share-of-target view.`
+          : undefined
+      }
+    >
+      <Chart
+        type="bar"
+        height={320}
+        series={series}
+        options={{
+          ...base,
+          colors: view === 'share' ? ['#004972'] : ['#004972', LANDING_MUTED],
+          plotOptions: {
+            bar: { columnWidth: view === 'share' ? '38%' : '58%', borderRadius: 0, dataLabels: { position: 'top' } },
+          },
+          xaxis: {
+            ...base.xaxis,
+            categories: plotted.map((channel) => channel.title),
+          },
+          yaxis: {
+            ...base.yaxis,
+            max: view === 'share' ? 100 : undefined,
+            labels: {
+              ...(base.yaxis as { labels?: object }).labels,
+              formatter: (value: number) =>
+                view === 'share' ? `${value.toFixed(0)}%` : compactNumber(value),
+            },
+          },
+          legend: { ...base.legend, show: view === 'absolute' },
+          tooltip: {
+            ...base.tooltip,
+            y: {
+              formatter: (value: number | null) =>
+                value === null
+                  ? 'No approved target'
+                  : view === 'share'
+                    ? `${value.toFixed(1)}% of target`
+                    : value.toLocaleString('en-US'),
+            },
+          },
+        }}
+      />
+    </ChartCard>
   )
 }

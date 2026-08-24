@@ -1,6 +1,6 @@
 import { ArrowRight } from 'lucide-react'
 import { Link } from 'react-router'
-import type { StateCoverageRow } from '@/api/schemas/state-disco'
+import type { DeliveryRow, StateCoverageRow } from '@/api/schemas/state-disco'
 import type { Column } from '@/components/ui/data-table'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -24,23 +24,20 @@ import { StateDiscoFilterBar } from '../components/state-disco-filters'
 import { StateDiscoShell } from '../components/state-disco-shell'
 import { useStateDiscoQuery } from '../use-state-disco-query'
 
-const deliveryColumns: Column<{
-  id: string
-  utility: string
-  milestone: string
-  dueDateLabel: string
-  executionStatus: string
-  achievedLabel: string
-  evidenceLabel: string
-  reportingCompliance: string
-  bottleneck: string
-}>[] = [
+// Typed from the schema rather than a hand-copied shape, so a field added to
+// DeliveryRow (serviceBand, dueDate) is available here without a second edit.
+const deliveryColumns: Column<DeliveryRow>[] = [
   { id: 'utility', header: 'Utility', cell: (row) => row.utility, sortValue: (row) => row.utility },
-  { id: 'milestone', header: 'PIP milestone', cell: (row) => row.milestone, className: 'min-w-56' },
-  { id: 'due', header: 'Due date', cell: (row) => row.dueDateLabel },
+  { id: 'milestone', header: 'PIP milestone', cell: (row) => row.milestone, className: 'min-w-56', sortValue: (row) => row.milestone },
+  // Shown because it is filterable — a filter with no matching column left a
+  // filtered result unreadable (feedback slide 11).
+  { id: 'band', header: 'Service band', cell: (row) => `Band ${row.serviceBand}`, sortValue: (row) => row.serviceBand },
+  // Sorted on the ISO date, not the display label, so Apr does not precede Jan.
+  { id: 'due', header: 'Due date', cell: (row) => row.dueDateLabel, sortValue: (row) => row.dueDate },
   {
     id: 'status',
     header: 'Execution',
+    sortValue: (row) => row.executionStatus,
     cell: (row) => (
       <>
         <p className="font-medium">{row.executionStatus}</p>
@@ -48,9 +45,15 @@ const deliveryColumns: Column<{
       </>
     ),
   },
-  { id: 'evidence', header: 'Evidence', cell: (row) => row.evidenceLabel },
-  { id: 'compliance', header: 'Reporting', cell: (row) => row.reportingCompliance },
-  { id: 'bottleneck', header: 'Open bottleneck', cell: (row) => row.bottleneck, className: 'min-w-52' },
+  { id: 'evidence', header: 'Evidence', cell: (row) => row.evidenceLabel, sortValue: (row) => row.evidenceLabel },
+  { id: 'compliance', header: 'Reporting', cell: (row) => row.reportingCompliance, sortValue: (row) => row.reportingCompliance },
+  {
+    id: 'bottleneck',
+    header: 'Open bottleneck',
+    className: 'min-w-52',
+    sortValue: (row) => row.bottleneck,
+    cell: (row) => row.bottleneck || <span className="text-text-muted">None</span>,
+  },
 ]
 
 const stateColumns: Column<StateCoverageRow>[] = [

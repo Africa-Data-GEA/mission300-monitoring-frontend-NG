@@ -27,3 +27,7 @@ coverage
 *.njsproj
 *.sln
 *.sw?
+
+# Separate git repository, cloned in place for local API work.
+# It has its own remote and must never be committed here as a gitlink.
+mission300-monitoring-backend-NG/

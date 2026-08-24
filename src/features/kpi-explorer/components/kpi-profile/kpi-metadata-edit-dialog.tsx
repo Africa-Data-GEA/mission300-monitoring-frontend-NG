@@ -23,6 +23,7 @@ function toDraft(profile: KpiProfile): UpdateKpiMetadataRequest {
     baselineLabel: profile.baselineLabel,
     target: profile.target,
     targetLabel: profile.targetLabel,
+    targetDate: profile.targetDate,
     sourceInstitution: profile.sourceInstitution,
     sourceDataset: profile.sourceDataset,
     sourceReference: profile.sourceReference,
@@ -168,6 +169,24 @@ export function KpiMetadataEditDialog({
                 onChange={(event) => field('targetLabel', event.target.value)}
                 className={inputClass}
                 placeholder="e.g. Metering gap closed by 2027"
+              />
+            </label>
+            {/*
+              Held separately from the label so every target states a
+              deadline even when whoever wrote the label omitted one — see
+              `targetDate` in api/schemas/kpi-explorer.ts. Free text rather
+              than a date picker: Compact targets are agreed by year or
+              half-year ("2030", "end 2027"), not to a calendar day.
+            */}
+            <label className="text-sm font-medium text-text-default">
+              Target date
+              <input
+                value={draft.targetDate ?? ''}
+                onChange={(event) =>
+                  field('targetDate', event.target.value.trim() === '' ? null : event.target.value)
+                }
+                className={inputClass}
+                placeholder="e.g. 2030, or end 2027 — blank if none agreed"
               />
             </label>
           </div>

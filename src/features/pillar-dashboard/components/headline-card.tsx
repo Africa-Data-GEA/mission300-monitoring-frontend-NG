@@ -4,6 +4,7 @@ import { Card } from '@/components/ui/card'
 import { InfoPopover } from '@/components/ui/info-popover'
 import { ProgressBar } from '@/components/ui/progress-bar'
 import { TrendIndicator } from '@/components/ui/trend-indicator'
+import { getLocale } from '@/lib/currency'
 import { PillarKpiEditButton } from './pillar-kpi-edit-button'
 
 /**
@@ -16,6 +17,10 @@ export function HeadlineCard({ card }: { card: PillarHeadlineCard }) {
       ? (card.rawValue / card.target) * 100
       : null
 
+  // A commitment stated as a rate of change rather than a level in this
+  // indicator's unit — see `targetBasis` on kpiProfileSchema.
+  const isGrowthRateTarget = card.targetBasis === 'growth-rate' && Boolean(card.targetBasisLabel)
+
   // The bare figure only — `card.value` carries a full descriptive label
   // (unit, method, reporting period) meant for the KPI profile it's sourced
   // from, not for a compact headline card where that text just crowds the number.
@@ -25,7 +30,7 @@ export function HeadlineCard({ card }: { card: PillarHeadlineCard }) {
   const displayValue =
     card.rawValue !== null
       ? Math.abs(card.rawValue) >= 100_000
-        ? new Intl.NumberFormat('en-NG', { notation: 'compact', maximumFractionDigits: 1 }).format(card.rawValue)
+        ? new Intl.NumberFormat(getLocale(), { notation: 'compact', maximumFractionDigits: 1 }).format(card.rawValue)
         : card.rawValue.toLocaleString(undefined, { maximumFractionDigits: 2 })
       : card.value
 
@@ -71,21 +76,35 @@ export function HeadlineCard({ card }: { card: PillarHeadlineCard }) {
           solely on mt-auto (which collapses to ~0 when there's little spare
           height to distribute). */}
       <div className="mt-3 flex flex-1 flex-col justify-end gap-1">
-        <ProgressBar
-          barClassName="bg-chart-blue-dark"
-          value={percentToTarget ?? 0}
-          label={
-            percentToTarget !== null ? `${card.title} progress to target` : `${card.title} — no confirmed target yet`
-          }
-        />
-        {/* Stakeholder feedback asked for baseline/progress/%-to-target to be
-            visible on the scorecard, not only inferable from the bar's fill
-            width — this states the percentage as text. */}
-        <p className="text-2xs text-text-subtle">
-          {percentToTarget !== null
-            ? `${Math.round(percentToTarget)}% to target${card.baseline !== null ? ` · baseline ${card.baseline.toLocaleString()}` : ''}`
-            : 'No confirmed target yet'}
-        </p>
+        {isGrowthRateTarget ? (
+          /* A commitment exists but is expressed as a rate of change, so there
+             is no level to measure progress against and no honest bar to draw.
+             Showing the empty track here would repeat the exact confusion
+             review flagged — the card read as having no target when the target
+             was simply in another unit. The commitment is stated instead. */
+          <p className="rounded-control bg-surface-sunken px-2 py-1.5 text-2xs text-text-muted">
+            <span className="font-medium text-text-default">{card.targetBasisLabel}</span>
+            {' — a growth rate, not a level. No level target agreed.'}
+          </p>
+        ) : (
+          <>
+            <ProgressBar
+              barClassName="bg-chart-blue-dark"
+              value={percentToTarget ?? 0}
+              label={
+                percentToTarget !== null ? `${card.title} progress to target` : `${card.title} — no confirmed target yet`
+              }
+            />
+            {/* Stakeholder feedback asked for baseline/progress/%-to-target to be
+                visible on the scorecard, not only inferable from the bar's fill
+                width — this states the percentage as text. */}
+            <p className="text-2xs text-text-subtle">
+              {percentToTarget !== null
+                ? `${Math.round(percentToTarget)}% to target${card.baseline !== null ? ` · baseline ${card.baseline.toLocaleString()}` : ''}`
+                : 'No confirmed target yet'}
+            </p>
+          </>
+        )}
       </div>
     </Card>
   )

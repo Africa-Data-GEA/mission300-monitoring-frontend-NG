@@ -10,10 +10,12 @@ interface EmailFormValues {
 
 export function EmailLoginView({
   form,
+  loading,
   onSubmit,
   serverError,
 }: {
   readonly form: UseFormReturn<EmailFormValues>
+  readonly loading: boolean
   readonly onSubmit: () => void
   readonly serverError: string
 }) {
@@ -41,7 +43,7 @@ export function EmailLoginView({
                         'h-11 w-full rounded-control border bg-surface px-3.5 text-base text-text-default transition-[border-color,box-shadow] placeholder:text-text-subtle',
                         fieldState.error ? 'border-status-at-risk' : 'border-border-strong hover:border-text-subtle',
                       )}
-                      disabled={form.formState.isSubmitting}
+                      disabled={loading}
                       inputMode="email"
                       placeholder="name@organisation.gov.ng"
                       type="email"
@@ -53,7 +55,9 @@ export function EmailLoginView({
             />
             {serverError ? <p className="mt-2 text-sm text-status-at-risk" role="alert">{serverError}</p> : null}
             <div className="mt-6">
-              <AuthSubmitButton loading={form.formState.isSubmitting}>Next</AuthSubmitButton>
+              <AuthSubmitButton loading={loading} loadingLabel="Checking account…">
+                Next
+              </AuthSubmitButton>
             </div>
           </form>
         </Form>

@@ -25,7 +25,14 @@ export function readAuthSession(): LoginResponse | null {
 
   try {
     const result = loginResponseSchema.safeParse(JSON.parse(stored))
-    return result.success ? result.data : null
+    if (!result.success) return null
+
+    if (result.data.expiresAt && new Date(result.data.expiresAt).getTime() <= Date.now()) {
+      clearAuthSession()
+      return null
+    }
+
+    return result.data
   } catch {
     return null
   }

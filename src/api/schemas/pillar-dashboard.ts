@@ -1,7 +1,8 @@
 import { z } from 'zod'
 import { bottleneckRecordSchema } from './bottlenecks'
 import { metricProvenanceSchema, pillarIdSchema, trendSchema } from './common'
-import { executionStatusSchema } from './programs'
+import { discoComparisonRowSchema } from './state-disco'
+import { executionStatusSchema, programmeRecordSchema, projectRecordSchema } from './programs'
 import { kpiCatalogueRowSchema, validationStatusSchema } from './kpi-explorer'
 
 /**
@@ -15,11 +16,10 @@ import { kpiCatalogueRowSchema, validationStatusSchema } from './kpi-explorer'
  * same `pillar` field they already carry. This is what makes the dashboard
  * genuinely connected to the KPI Matrix rather than a re-typed copy of it.
  *
- * Scope for this pass: Section A (headline cards) and Section F-equivalent
- * (delivery status + ranked bottlenecks), per the six pillar specifications
- * in docs/specs/. The bespoke diagnostic sections (generation-by-fuel bars,
- * transmission corridor rankings, milestone trackers, etc.) are a distinct
- * follow-up, not attempted here.
+ * The payload also carries the programmes/projects that contribute to the
+ * pillar result and, for Financially Viable Utilities, the shared DisCo
+ * comparison rows. This lets the page show delivery evidence instead of
+ * repeating KPI metadata beneath the headline indicators.
  */
 
 /** One headline card, sourced from a real KpiProfile (kpiId is the join key). */
@@ -33,6 +33,10 @@ export const pillarHeadlineCardSchema = z.object({
   baselineLabel: z.string(),
   targetLabel: z.string().min(1),
   target: z.number().nullable(),
+  /** See `targetBasis` on kpiProfileSchema — carried through so the card can
+   * distinguish "no target agreed" from "target exists, in another unit". */
+  targetBasis: z.enum(['level', 'growth-rate', 'none']).optional(),
+  targetBasisLabel: z.string().optional(),
   trend: trendSchema.optional(),
   validationStatus: validationStatusSchema,
   provenance: metricProvenanceSchema,
@@ -92,6 +96,11 @@ export const pillarDashboardOverviewSchema = z.object({
   deliveryStatus: pillarDeliveryStatusSchema,
   /** Ranked top-5 open bottlenecks for this pillar. */
   bottlenecks: z.array(bottleneckRecordSchema).max(5),
+  /** Delivery records that contribute to this pillar's aggregate results. */
+  programmes: z.array(programmeRecordSchema),
+  projects: z.array(projectRecordSchema),
+  /** Utility-level evidence for the Financially Viable Utilities pillar. */
+  discoPerformance: z.array(discoComparisonRowSchema),
   /** Every KPI Matrix indicator tagged to this pillar, not just the four
    * headline cards — the same catalogue rows KPI Explorer reads. */
   kpis: z.array(kpiCatalogueRowSchema),

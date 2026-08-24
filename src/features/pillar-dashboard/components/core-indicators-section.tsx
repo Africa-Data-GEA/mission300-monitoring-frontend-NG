@@ -7,6 +7,7 @@ import { Card } from '@/components/ui/card'
 import { InfoPopover } from '@/components/ui/info-popover'
 import { TrendIndicator } from '@/components/ui/trend-indicator'
 import { CHART_BLUE } from '@/config/chart-colors'
+import { formatCurrency, getLocale } from '@/lib/currency'
 import { getDiscoBreakdown } from '../lib/disco-weights'
 import { PillarKpiEditButton } from './pillar-kpi-edit-button'
 
@@ -14,10 +15,10 @@ const FONT_FAMILY = 'Google Sans, ui-sans-serif, system-ui, sans-serif'
 
 function formatValue(value: number, unit: string): string {
   const rounded = Number.isInteger(value) ? value : Math.round(value * 100) / 100
-  const formatted = rounded.toLocaleString('en-NG')
+  const formatted = rounded.toLocaleString(getLocale())
   if (unit === '%') return `${formatted}%`
-  if (unit === 'NGN Billion') return `₦${formatted}bn`
-  if (unit === 'NGN/kWh') return `₦${formatted}/kWh`
+  if (unit === 'NGN Billion') return formatCurrency(`${formatted}bn`)
+  if (unit === 'NGN/kWh') return formatCurrency(`${formatted}/kWh`)
   return `${formatted} ${unit}`
 }
 
@@ -28,10 +29,10 @@ function formatValue(value: number, unit: string): string {
  * the circle for count-style units.
  */
 function formatCompactValue(value: number, unit: string): string {
-  const compact = new Intl.NumberFormat('en-NG', { notation: 'compact', maximumFractionDigits: 1 }).format(value)
+  const compact = new Intl.NumberFormat(getLocale(), { notation: 'compact', maximumFractionDigits: 1 }).format(value)
   if (unit === '%') return `${compact}%`
-  if (unit === 'NGN Billion') return `₦${compact}bn`
-  if (unit === 'NGN/kWh') return `₦${compact}/kWh`
+  if (unit === 'NGN Billion') return formatCurrency(`${compact}bn`)
+  if (unit === 'NGN/kWh') return formatCurrency(`${compact}/kWh`)
   return `${compact} ${unit}`
 }
 
@@ -44,13 +45,13 @@ function formatCompactValue(value: number, unit: string): string {
  */
 function formatChartLabel(value: number, unit: string): string {
   if (unit === 'customers') {
-    return new Intl.NumberFormat('en-NG', { notation: 'compact', maximumFractionDigits: 2 }).format(value)
+    return new Intl.NumberFormat(getLocale(), { notation: 'compact', maximumFractionDigits: 2 }).format(value)
   }
   const rounded = Number.isInteger(value) ? value : Math.round(value * 100) / 100
-  const formatted = rounded.toLocaleString('en-NG')
+  const formatted = rounded.toLocaleString(getLocale())
   if (unit === '%') return `${formatted}%`
-  if (unit === 'NGN Billion') return `NGN ${formatted}bn`
-  if (unit === 'NGN/kWh') return `NGN ${formatted}/kWh`
+  if (unit === 'NGN Billion') return formatCurrency(`${formatted}bn`, { svgSafe: true })
+  if (unit === 'NGN/kWh') return formatCurrency(`${formatted}/kWh`, { svgSafe: true })
   return `${formatted} ${unit}`
 }
 
@@ -616,9 +617,20 @@ export function CoreIndicatorsSection({
 
   return (
     <Card variant="well" className="p-4">
+      {/*
+        Titled "Supporting indicators" and captioned explicitly, because
+        review read this section as a restatement of the four headline cards
+        (docs/M300 Monitoring Platform Feedback.pptx, slides 5 and 8–10). It
+        never was — buildPillarDashboard excludes the headline KPI ids from
+        `coreIndicators` — but nothing on screen said so, so the exclusion is
+        now stated rather than left to be inferred.
+      */}
       <h2 className="text-lg font-semibold text-text-default">
-        Core indicators
+        Supporting indicators
       </h2>
+      <p className="mt-1 text-xs text-text-muted">
+        Additional indicators tracked for this pillar. The four headline cards above are not repeated here.
+      </p>
 
       <div className="mt-3 grid grid-cols-1 items-stretch gap-3 sm:grid-cols-2">
         {[...groups.entries()].map(([group, entries]) => {

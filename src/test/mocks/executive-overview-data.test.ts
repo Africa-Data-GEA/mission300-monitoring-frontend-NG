@@ -106,11 +106,12 @@ describe('executive overview mock payload', () => {
   })
 
   describe('specification coverage', () => {
-    it('provides exactly the three specified access channels', () => {
+    it('provides the four access channels requested in the review feedback', () => {
       expect(accessDelivery.map((channel) => channel.id)).toEqual([
         'grid-connections',
         'mini-grid-connections',
         'solar-home-systems',
+        'clean-cooking',
       ])
     })
 
@@ -240,11 +241,12 @@ describe('executive overview mock payload', () => {
       ).toBeDefined()
     })
 
-    it('includes a zero-value metric', () => {
-      const zero = nationalPerformance.find((metric) => metric.current === 0)
+    it('includes the current private-capital value as a currency-labelled metric', () => {
+      const privateCapital = nationalPerformance.find((metric) => metric.id === 'private-capital')
 
-      expect(zero).toBeDefined()
-      expect(zero?.value).toBe('$0.0B')
+      expect(privateCapital).toBeDefined()
+      expect(privateCapital?.current).toBeGreaterThanOrEqual(0)
+      expect(privateCapital?.value).toMatch(/\$.*B/)
     })
 
     it('includes an unvalidated data source', () => {

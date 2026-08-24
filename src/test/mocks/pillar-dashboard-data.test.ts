@@ -38,6 +38,17 @@ describe('Pillar dashboard mock data', () => {
       }
     })
 
+    it(`only includes delivery records tagged to ${pillar}`, () => {
+      const overview = buildPillarDashboard(pillar)
+      for (const programme of overview.programmes) expect(programme.pillar, programme.id).toBe(pillar)
+      for (const project of overview.projects) expect(project.pillar, project.id).toBe(pillar)
+    })
+
+    it(`only exposes DisCo performance for the utility pillar`, () => {
+      const overview = buildPillarDashboard(pillar)
+      expect(overview.discoPerformance.length > 0).toBe(pillar === 'financially-viable-utilities')
+    })
+
     it(`only includes KPIs tagged to ${pillar}, including every headline card`, () => {
       const overview = buildPillarDashboard(pillar)
       for (const kpi of overview.kpis) {

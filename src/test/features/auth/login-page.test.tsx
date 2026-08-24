@@ -1,10 +1,12 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { http, HttpResponse } from 'msw'
 import { createMemoryRouter, RouterProvider } from 'react-router'
 import { afterEach, describe, expect, it } from 'vitest'
 import { LoginPage } from '@/features/auth/login-page'
 import { PasswordPage } from '@/features/auth/password-page'
 import { ForgotPasswordPage } from '@/features/auth/forgot-password-page'
+import { server } from '@/mocks/server'
 
 function renderLogin() {
   const router = createMemoryRouter(
@@ -12,7 +14,7 @@ function renderLogin() {
       { path: '/account/login', element: <LoginPage /> },
       { path: '/account/change-password', element: <PasswordPage /> },
       { path: '/account/forgot-password', element: <ForgotPasswordPage /> },
-      { path: '/', element: <h1>Dashboard home</h1> },
+      { path: '/dashboard', element: <h1>Dashboard home</h1> },
     ],
     { initialEntries: ['/account/login'] },
   )
@@ -79,6 +81,41 @@ describe('LoginPage', () => {
         user: { email: 'g.etim@emrc.ng', role: 'system-administrator' },
       })
     })
+  })
+
+  it('shows the sign-in loader on the first click while the request is pending', async () => {
+    const user = userEvent.setup()
+    let finishLogin: (() => void) | undefined
+    renderLogin()
+
+    await user.type(screen.getByLabelText('Email address'), 'g.etim@emrc.ng')
+    await user.click(screen.getByRole('button', { name: 'Next' }))
+    await screen.findByLabelText('Password')
+
+    server.use(
+      http.post('/api/auth/login', async () => {
+        await new Promise<void>((resolve) => {
+          finishLogin = resolve
+        })
+        return HttpResponse.json({
+          accessToken: 'token-123',
+          user: {
+            id: 'user-1',
+            name: 'Grace Etim',
+            email: 'g.etim@emrc.ng',
+            role: 'system-administrator',
+          },
+        })
+      }),
+    )
+
+    await user.type(screen.getByLabelText('Password'), 'M300demo!')
+    fireEvent.click(screen.getByRole('button', { name: 'Sign in' }))
+
+    expect(await screen.findByRole('button', { name: 'Signing in…' })).toBeDisabled()
+    await waitFor(() => expect(finishLogin).toBeTypeOf('function'))
+    finishLogin?.()
+    expect(await screen.findByRole('heading', { name: 'Dashboard home' })).toBeInTheDocument()
   })
 
   it('surfaces an incorrect password without leaving the login flow', async () => {

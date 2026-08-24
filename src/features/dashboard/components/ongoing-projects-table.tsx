@@ -3,6 +3,8 @@ import { Pencil, Plus, Search, Trash2 } from 'lucide-react'
 import { Link, useNavigate } from 'react-router'
 import { Button } from '@/components/ui/button'
 import { Pagination } from '@/components/ui/pagination'
+import { SelectField } from '@/components/ui/select-field'
+import { SortableColumnHeader } from '@/components/ui/sortable-column-header'
 import { ExecutionStatusBadge } from '@/features/programs/components/execution-status-badge'
 import { PipelineReadinessBadge } from '@/features/programs/components/pipeline-readiness-badge'
 import { deleteProject } from '@/features/programs/lib/project-admin-api'
@@ -33,6 +35,19 @@ const STATUS_SEVERITY: Record<OngoingProject['currentStatus'], number> = {
   'on-track': 3,
 }
 
+/** Columns this table can be ordered by, beyond its worst-first default. */
+type SortKey = 'status' | 'endDate' | 'name' | 'owner' | 'pillarLabel' | 'location'
+
+/** Builds an "All X" + one-per-distinct-value option list for a text column. */
+function toFilterOptions(
+  projects: readonly OngoingProject[],
+  select: (project: OngoingProject) => string,
+  allLabel: string,
+) {
+  const unique = [...new Set(projects.map(select))].filter(Boolean).sort()
+  return [{ value: 'all', label: allLabel }, ...unique.map((value) => ({ value, label: value }))]
+}
+
 /**
  * `onChanged` re-fetches the Overview payload after a project is removed —
  * stakeholder feedback asked to be able to add, modify and delete priority
@@ -60,6 +75,29 @@ export function OngoingProjectsTable({
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [deleteError, setDeleteError] = useState('')
 
+  // Review feedback: this table needs filtering by status/owner/pillar/
+  // location and sorting by end date to be usable (docs/M300 Monitoring
+  // Platform Feedback.pptx, slide 3). `statusFilter` above stays separate —
+  // it is the donut chart's click-through, not one of these controls.
+  const [ownerFilter, setOwnerFilter] = useState('all')
+  const [pillarFilter, setPillarFilter] = useState('all')
+  const [locationFilter, setLocationFilter] = useState('all')
+  const [sortKey, setSortKey] = useState<SortKey>('status')
+  const [descending, setDescending] = useState(false)
+
+  const ownerOptions = useMemo(
+    () => toFilterOptions(projects, (project) => project.owner, 'All owners'),
+    [projects],
+  )
+  const pillarOptions = useMemo(
+    () => toFilterOptions(projects, (project) => project.pillarLabel, 'All pillars'),
+    [projects],
+  )
+  const locationOptions = useMemo(
+    () => toFilterOptions(projects, (project) => project.location, 'All locations'),
+    [projects],
+  )
+
   async function handleDelete(project: OngoingProject) {
     if (!window.confirm(`Remove "${project.name}" from the priority project register?`)) return
     setDeleteError('')
@@ -80,29 +118,17 @@ export function OngoingProjectsTable({
   // about whether the same date is overdue.
   const [now] = useState(() => new Date())
 
-  // Ranked once, before filtering, so search results keep the same worst-first
-  // order rather than falling back to whatever order the API returned.
-  const rankedProjects = useMemo(
-    () =>
-      [...projects].sort(
-        (a, b) =>
-          STATUS_SEVERITY[a.currentStatus] - STATUS_SEVERITY[b.currentStatus] ||
-          // Within a status, the nearest deadline is the more urgent one.
-          new Date(a.endDate).getTime() - new Date(b.endDate).getTime(),
-      ),
-    [projects],
-  )
-
   const filteredProjects = useMemo(() => {
-    const byStatus = statusFilter
-      ? rankedProjects.filter((project) => project.currentStatus === statusFilter)
-      : rankedProjects
-
     const query = search.trim().toLocaleLowerCase()
-    if (!query) return byStatus
 
-    return byStatus.filter((project) =>
-      [
+    const matching = projects.filter((project) => {
+      if (statusFilter && project.currentStatus !== statusFilter) return false
+      if (ownerFilter !== 'all' && project.owner !== ownerFilter) return false
+      if (pillarFilter !== 'all' && project.pillarLabel !== pillarFilter) return false
+      if (locationFilter !== 'all' && project.location !== locationFilter) return false
+      if (!query) return true
+
+      return [
         project.id,
         project.name,
         project.programmeName,
@@ -111,9 +137,51 @@ export function OngoingProjectsTable({
         project.leadName,
         project.location,
         project.currentStatus.replace('-', ' '),
-      ].some((value) => value.toLocaleLowerCase().includes(query)),
-    )
-  }, [rankedProjects, search, statusFilter])
+      ].some((value) => value.toLocaleLowerCase().includes(query))
+    })
+
+    const direction = descending ? -1 : 1
+    return [...matching].sort((a, b) => {
+      switch (sortKey) {
+        case 'endDate':
+          return (new Date(a.endDate).getTime() - new Date(b.endDate).getTime()) * direction
+        case 'name':
+          return a.name.localeCompare(b.name) * direction
+        case 'owner':
+          return a.owner.localeCompare(b.owner) * direction
+        case 'pillarLabel':
+          return a.pillarLabel.localeCompare(b.pillarLabel) * direction
+        case 'location':
+          return a.location.localeCompare(b.location) * direction
+        default:
+          // Worst first, so leadership meets the blocked and delayed projects
+          // before the healthy ones. Within a status, the nearest deadline is
+          // the more urgent one.
+          return (
+            (STATUS_SEVERITY[a.currentStatus] - STATUS_SEVERITY[b.currentStatus] ||
+              new Date(a.endDate).getTime() - new Date(b.endDate).getTime()) * direction
+          )
+      }
+    })
+  }, [
+    projects,
+    search,
+    statusFilter,
+    ownerFilter,
+    pillarFilter,
+    locationFilter,
+    sortKey,
+    descending,
+  ])
+
+  function toggleSort(key: SortKey) {
+    if (key === sortKey) {
+      setDescending((value) => !value)
+      return
+    }
+    setSortKey(key)
+    setDescending(false)
+  }
   const pageCount = Math.max(1, Math.ceil(filteredProjects.length / PAGE_SIZE))
   const currentPage = Math.min(page, pageCount)
   const firstIndex = (currentPage - 1) * PAGE_SIZE
@@ -161,14 +229,50 @@ export function OngoingProjectsTable({
             />
           </div>
         </div>
+        <SelectField
+          label="Owner"
+          value={ownerFilter}
+          options={ownerOptions}
+          onChange={(value) => {
+            setOwnerFilter(value)
+            setPage(1)
+          }}
+          className="w-full sm:w-44"
+        />
+
+        <SelectField
+          label="Pillar"
+          value={pillarFilter}
+          options={pillarOptions}
+          onChange={(value) => {
+            setPillarFilter(value)
+            setPage(1)
+          }}
+          className="w-full sm:w-40"
+        />
+
+        <SelectField
+          label="Location"
+          value={locationFilter}
+          options={locationOptions}
+          onChange={(value) => {
+            setLocationFilter(value)
+            setPage(1)
+          }}
+          className="w-full sm:w-40"
+        />
+
         {/*
-          Only while a search is active. The unfiltered total is already stated
-          by the pagination summary below, and printing it here as well gave
-          the card three separate counts of the same six projects. The node
-          stays mounted so the live region can announce into it.
+          Only while something is narrowing the list. The unfiltered total is
+          already stated by the pagination summary below, and printing it here
+          as well gave the card three separate counts of the same projects.
+          The node stays mounted so the live region can announce into it.
         */}
         <p aria-live="polite" className="pb-2 text-xs text-text-muted">
-          {search.trim()
+          {search.trim() ||
+          ownerFilter !== 'all' ||
+          pillarFilter !== 'all' ||
+          locationFilter !== 'all'
             ? `${filteredProjects.length} project${filteredProjects.length === 1 ? '' : 's'} found`
             : ''}
         </p>
@@ -188,14 +292,44 @@ export function OngoingProjectsTable({
         <table className="w-full min-w-[980px] border-collapse text-left">
           <thead className="bg-surface-sunken text-xs font-medium text-text-muted">
             <tr>
-              <th className="px-3 py-2.5">Project</th>
+              <SortableColumnHeader
+                label="Project"
+                active={sortKey === 'name'}
+                descending={descending}
+                onClick={() => toggleSort('name')}
+              />
               <th className="px-3 py-2.5">Programme</th>
-              <th className="px-3 py-2.5">Pillar</th>
-              <th className="px-3 py-2.5">Owner</th>
+              <SortableColumnHeader
+                label="Pillar"
+                active={sortKey === 'pillarLabel'}
+                descending={descending}
+                onClick={() => toggleSort('pillarLabel')}
+              />
+              <SortableColumnHeader
+                label="Owner"
+                active={sortKey === 'owner'}
+                descending={descending}
+                onClick={() => toggleSort('owner')}
+              />
               <th className="px-3 py-2.5">Lead</th>
-              <th className="px-3 py-2.5">Location</th>
-              <th className="px-3 py-2.5">End date</th>
-              <th className="px-3 py-2.5">Status</th>
+              <SortableColumnHeader
+                label="Location"
+                active={sortKey === 'location'}
+                descending={descending}
+                onClick={() => toggleSort('location')}
+              />
+              <SortableColumnHeader
+                label="End date"
+                active={sortKey === 'endDate'}
+                descending={descending}
+                onClick={() => toggleSort('endDate')}
+              />
+              <SortableColumnHeader
+                label="Status"
+                active={sortKey === 'status'}
+                descending={descending}
+                onClick={() => toggleSort('status')}
+              />
               <th className="px-3 py-2.5">Comment</th>
               <th className="px-3 py-2.5">
                 <span className="sr-only">Actions</span>

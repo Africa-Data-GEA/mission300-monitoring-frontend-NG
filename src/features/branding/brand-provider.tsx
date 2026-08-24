@@ -1,5 +1,6 @@
 import { useEffect, type ReactNode } from 'react'
 import { CHART_BLUE, setChartAccent } from '@/config/chart-colors'
+import { setActiveCurrency } from '@/lib/currency'
 import type { BrandFonts } from '@/api/schemas/branding'
 import { useBrandConfig } from './api'
 import { buildChartScale, buildColorRamp } from './color-ramp'
@@ -110,6 +111,9 @@ export function BrandProvider({ children }: { children: ReactNode }) {
     if (!data) return
     applyCssOverrides(data.primaryColor, data.secondaryColor, data.textColor, data.sidebarColor)
     applyFontOverrides(data.fonts)
+    // Monetary formatters read this singleton rather than taking a prop, the
+    // same way charts read CHART_BLUE — see src/lib/currency.ts.
+    setActiveCurrency(data.currency)
   }, [data])
 
   return children

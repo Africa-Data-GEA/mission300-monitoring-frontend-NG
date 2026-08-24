@@ -265,6 +265,7 @@ const CHANNEL_INSTITUTIONS: Record<string, readonly string[]> = {
   'grid-connections': ['tcn', 'fmop'],
   'mini-grid-connections': ['rea'],
   'solar-home-systems': ['rea'],
+  'clean-cooking': ['rea'],
 }
 
 function institutionMatches(value: string, institution: string) {
@@ -301,13 +302,45 @@ function applyInstitutionFilter(
   }
 }
 
+/**
+ * Which delivery channel each technology narrows to. Generation
+ * technologies (hydro, solar, gas) have no access-delivery channel of their
+ * own, so they narrow the section to nothing rather than silently ignoring
+ * the selection.
+ */
+const TECHNOLOGY_CHANNELS: Record<string, readonly string[]> = {
+  grid: ['grid-connections'],
+  'mini-grid': ['mini-grid-connections'],
+  shs: ['solar-home-systems'],
+  'clean-cooking': ['clean-cooking'],
+  hydro: [],
+  solar: [],
+  gas: [],
+}
+
+function applyTechnologyFilter(
+  payload: ExecutiveOverview,
+  technology: string,
+): ExecutiveOverview {
+  const channels = TECHNOLOGY_CHANNELS[technology]
+  if (!technology || technology === 'all' || !channels) return payload
+
+  return {
+    ...payload,
+    accessDelivery: payload.accessDelivery.filter((channel) => channels.includes(channel.id)),
+  }
+}
+
 function applyExecutiveFilters(
   payload: ExecutiveOverview,
-  filters: { period: string; pillar: string; institution: string },
+  filters: { period: string; pillar: string; institution: string; technology: string },
 ) {
-  return applyInstitutionFilter(
-    applyPillarFilter(applyPeriodFilter(payload, filters.period), filters.pillar),
-    filters.institution,
+  return applyTechnologyFilter(
+    applyInstitutionFilter(
+      applyPillarFilter(applyPeriodFilter(payload, filters.period), filters.pillar),
+      filters.institution,
+    ),
+    filters.technology,
   )
 }
 
@@ -828,6 +861,7 @@ export const handlers = [
         period: params.get('period') ?? 'q3-2025',
         pillar: params.get('pillar') ?? 'all',
         institution: params.get('institution') ?? 'all',
+        technology: params.get('technology') ?? 'all',
       }),
     )
   }),

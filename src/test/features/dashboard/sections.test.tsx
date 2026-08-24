@@ -268,7 +268,7 @@ describe('Section D — delivery status and exceptions', () => {
   it('renders ongoing projects in a paginated table with drill-down links', () => {
     renderWithRouter(<DeliveryStatusSection panel={deliveryStatus} onProjectsChanged={() => {}} />)
 
-    expect(screen.getByRole('table')).toBeInTheDocument()
+    expect(screen.getAllByRole('table')).toHaveLength(2)
     expect(screen.getByText(/Showing 1.*5 of 8 records/)).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'North East 330kV Line Upgrade' })).toHaveAttribute(
       'href',
@@ -284,7 +284,8 @@ describe('Section D — delivery status and exceptions', () => {
     const user = userEvent.setup()
     renderWithRouter(<DeliveryStatusSection panel={deliveryStatus} onProjectsChanged={() => {}} />)
 
-    await user.click(screen.getByRole('button', { name: 'Next page' }))
+    const projectsPanel = within(screen.getByRole('tabpanel'))
+    await user.click(projectsPanel.getByRole('button', { name: 'Next page' }))
 
     expect(screen.getByText(/Showing 6.*8 of 8 records/)).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Feeder Rehabilitation Lots, Lagos' })).toBeInTheDocument()
@@ -299,7 +300,9 @@ describe('Section D — delivery status and exceptions', () => {
     expect(screen.getByText('2 projects found')).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Ikeja Franchise Meter Rollout, Phase 2' })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Feeder Rehabilitation Lots, Lagos' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Next page' })).toBeDisabled()
+    expect(
+      within(screen.getByRole('tabpanel')).getByRole('button', { name: 'Next page' }),
+    ).toBeDisabled()
   })
 
   it('switches to an overall project-status chart', async () => {
@@ -318,36 +321,47 @@ describe('Section D — delivery status and exceptions', () => {
   it('links to the full bottlenecks module', () => {
     renderWithRouter(<DeliveryStatusSection panel={deliveryStatus} onProjectsChanged={() => {}} />)
 
-    expect(screen.getByRole('link', { name: 'View all' })).toHaveAttribute(
-      'href',
-      '/bottlenecks',
-    )
+    expect(
+      screen.getByRole('link', { name: 'Open the full register' }),
+    ).toHaveAttribute('href', '/bottlenecks')
   })
 
-  it('renders the ranked exceptions with severity and days unresolved', async () => {
+  /*
+   * Time unresolved is now a sortable column on the row itself rather than a
+   * field inside a hover popover — review feedback was that it is one of the
+   * two fields that decide whether a bottleneck matters.
+   */
+  it('renders the bottleneck rows with severity and time unresolved', () => {
     renderWithRouter(<DeliveryStatusSection panel={deliveryStatus} onProjectsChanged={() => {}} />)
 
     expect(
       screen.getByText('Tariff shortfall / cost-reflectivity subsidy funding gap'),
     ).toBeInTheDocument()
     expect(screen.getAllByText('Critical')).not.toHaveLength(0)
+    expect(screen.getByText('118 days')).toBeInTheDocument()
+  })
 
-    // Days unresolved is stated in words in the exception's own info popover
-    // ("Time unresolved"), not printed on the row itself.
-    fireEvent.click(
-      screen.getByRole('button', {
-        name: /About Tariff shortfall \/ cost-reflectivity subsidy funding gap/,
-      }),
+  it('filters the bottleneck table by severity', async () => {
+    const user = userEvent.setup()
+    renderWithRouter(<DeliveryStatusSection panel={deliveryStatus} onProjectsChanged={() => {}} />)
+
+    expect(
+      screen.getByText(`${deliveryStatus.exceptions.length} of ${deliveryStatus.exceptions.length} shown`),
+    ).toBeInTheDocument()
+
+    await user.type(
+      screen.getByRole('searchbox', { name: 'Search bottlenecks' }),
+      'Tariff shortfall',
     )
-    const dialog = await screen.findByRole('dialog')
-    expect(dialog).toHaveTextContent(/118 days/)
+
+    expect(screen.getByText(`1 of ${deliveryStatus.exceptions.length} shown`)).toBeInTheDocument()
   })
 
   /*
-   * The five-record cap is enforced in the component rather than trusted to
-   * the API, so an over-long response cannot break the layout.
+   * No longer capped at five: the section became a paginated table so the
+   * whole unresolved set is reachable, rather than a ranked sample.
    */
-  it('caps the exception table at five records', () => {
+  it('paginates rather than truncating a long bottleneck list', () => {
     const many: Bottleneck[] = Array.from({ length: 9 }, (_, index) => ({
       ...deliveryStatus.exceptions[0]!,
       id: `cpr-${index}`,
@@ -361,9 +375,8 @@ describe('Section D — delivery status and exceptions', () => {
       />,
     )
 
-    const list = screen.getByRole('list', { name: 'Priority exceptions' })
-    expect(within(list).getAllByRole('listitem')).toHaveLength(5)
-    expect(screen.queryByText('Exception 5')).not.toBeInTheDocument()
+    expect(screen.getByText('9 of 9 shown')).toBeInTheDocument()
+    expect(screen.getByText(/Showing 1.*8 of 9 records/)).toBeInTheDocument()
   })
 
   it('reports a clear state when there are no exceptions', () => {
@@ -375,7 +388,7 @@ describe('Section D — delivery status and exceptions', () => {
     )
 
     expect(
-      screen.getByText('No unresolved priority exceptions.'),
+      screen.getByText('No unresolved delivery bottlenecks.'),
     ).toBeInTheDocument()
   })
 })

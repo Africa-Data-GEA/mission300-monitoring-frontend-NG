@@ -9,6 +9,7 @@ export function PasswordPage() {
     <PasswordLoginView
       account={login.account}
       form={login.form}
+      loading={login.isPending}
       onBack={login.goBack}
       onShowPasswordChange={login.setShowPassword}
       onSubmit={login.submit}

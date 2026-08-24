@@ -1,5 +1,6 @@
 import type { z } from 'zod'
 import { environment } from '@/config/environment'
+import { clearAuthSession, readAuthSession } from '@/features/auth/auth-session'
 import { dispatchLocalRequest } from '@/mocks/local-router'
 
 /**
@@ -73,8 +74,10 @@ async function request<T>(
 ): Promise<T> {
   const { body, headers, method = 'GET', ...rest } = options
   const isFormData = typeof FormData !== 'undefined' && body instanceof FormData
+  const accessToken = path.startsWith('/auth/') ? null : readAuthSession()?.accessToken
   const resolvedHeaders = {
     ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
+    ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
     ...headers,
   }
   const resolvedBody = body === undefined ? undefined : isFormData ? (body as FormData) : JSON.stringify(body)
@@ -103,6 +106,10 @@ async function request<T>(
   if (!response.ok) {
     // Try to surface the server's error payload; fall back to the status text.
     const payload = await response.json().catch(() => undefined)
+    if (response.status === 401 && !path.startsWith('/auth/')) {
+      clearAuthSession()
+    }
+
     throw new ApiError(
       response.status,
       typeof payload === 'object' && payload !== null && 'message' in payload

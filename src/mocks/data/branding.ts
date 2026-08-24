@@ -41,6 +41,7 @@ const DEFAULT_BRAND_CONFIG: BrandConfig = {
   textColor: '#101828',
   sidebarColor: '#004972',
   logoUrl: '/Logos/geapp.png',
+  currency: { code: 'NGN', symbol: '₦', locale: 'en-NG' },
   fonts: {
     h1: DEFAULT_FONT,
     h2: DEFAULT_FONT,
@@ -60,9 +61,14 @@ function readStoredConfig(): BrandConfig | null {
     if (!raw) return null
     const parsed = JSON.parse(raw) as Partial<StoredConfig>
     if (parsed.version !== CONFIG_VERSION || !parsed.config) return null
-    // A config saved before font roles existed won't have `fonts` — fall
-    // back to the default rather than failing `brandConfigSchema` on GET.
-    return { ...DEFAULT_BRAND_CONFIG, ...parsed.config, fonts: parsed.config.fonts ?? DEFAULT_BRAND_CONFIG.fonts }
+    // A config saved before font roles or currency existed won't carry them —
+    // fall back to the default rather than failing `brandConfigSchema` on GET.
+    return {
+      ...DEFAULT_BRAND_CONFIG,
+      ...parsed.config,
+      fonts: parsed.config.fonts ?? DEFAULT_BRAND_CONFIG.fonts,
+      currency: parsed.config.currency ?? DEFAULT_BRAND_CONFIG.currency,
+    }
   } catch {
     return null
   }

@@ -9,7 +9,16 @@ export const stateDiscoFilters: StateDiscoFilters = {
   distributionCompanies: [{ value: 'national', label: 'National weighted value' }, { value: 'ikeja', label: 'Ikeja DisCo' }, { value: 'kano', label: 'Kano DisCo' }],
   states: [{ value: 'all', label: 'All states' }, { value: 'kaduna', label: 'Kaduna' }, { value: 'lagos', label: 'Lagos' }],
   utilityMetrics: [{ value: 'all', label: 'All utility metrics' }, { value: 'metering', label: 'Metering' }, { value: 'collection', label: 'Collection efficiency' }],
-  serviceBands: [{ value: 'all', label: 'All bands' }, { value: 'a', label: 'Band A' }, { value: 'b', label: 'Band B' }],
+  // All five bands the tariff order defines — the list previously stopped at
+  // B, so bands C–E could not be selected even though rows carry them.
+  serviceBands: [
+    { value: 'all', label: 'All bands' },
+    { value: 'a', label: 'Band A' },
+    { value: 'b', label: 'Band B' },
+    { value: 'c', label: 'Band C' },
+    { value: 'd', label: 'Band D' },
+    { value: 'e', label: 'Band E' },
+  ],
   validationStatuses: [{ value: 'confirmed', label: 'Confirmed' }, { value: 'provisional', label: 'Provisional' }],
   sources: [{ value: 'nerc', label: 'NERC' }, { value: 'rea', label: 'REA' }, { value: 'implementation-register', label: 'Implementation Register' }],
 }

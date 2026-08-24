@@ -49,13 +49,32 @@ export function Sidebar({
         className,
       )}
     >
+      {/*
+        The platform name sits beside the mark rather than leaving the header
+        as logo-plus-empty-space — review feedback was that the gap under the
+        logo read as dead real estate, and that the full platform name should
+        be stated rather than implied (see docs/M300 Monitoring Platform
+        Feedback.pptx, slides 1-2).
+      */}
       <div className="shrink-0 px-4 pt-5 pb-4">
-        <Link to="/" aria-label="Go to the public landing page" className="inline-block">
+        <Link
+          to="/"
+          aria-label="Go to the public landing page"
+          className="flex items-center gap-2.5"
+        >
           <img
-            alt={brand?.countryName ?? 'gEApp'}
+            alt=""
             src={brand?.logoUrl ?? '/Logos/geapp.png'}
-            className="h-11 w-auto max-w-full object-contain"
+            className="h-10 w-auto shrink-0 object-contain"
           />
+          <span className="min-w-0">
+            <span className="block text-sm font-semibold leading-tight text-text-default">
+              {brand?.countryName ?? 'Nigeria'} — Mission 300
+            </span>
+            <span className="mt-0.5 block text-2xs leading-tight text-text-muted">
+              Compact Progress Monitoring Platform
+            </span>
+          </span>
         </Link>
       </div>
 

@@ -11,6 +11,7 @@ import {
 } from 'lucide-react'
 import { Link, useNavigate } from 'react-router'
 import { Button } from '@/components/ui/button'
+import { dashboardToast } from '@/lib/dashboard-toast'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { SideDialog } from '@/components/ui/side-dialog'
 import { ADMIN_MENU_ITEMS } from '@/config/navigation'
@@ -73,6 +74,7 @@ export function SidebarUserMenu() {
 
   function logout() {
     clearAuthSession()
+    dashboardToast.success('Signed out securely')
     navigate('/account/login', { replace: true })
   }
 

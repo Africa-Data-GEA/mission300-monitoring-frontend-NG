@@ -1,34 +1,41 @@
 import { formatDate } from '@/lib/format'
 import { usePublicOverview, usePublicStateCoverage } from './api'
-import { AccessChannelsChart } from './components/access-channels-chart'
+import { AccessDelivery } from './components/access-delivery'
+import { DataConfidenceKey } from './components/data-confidence-key'
 import { DeliveryInMotion } from './components/delivery-in-motion'
 import { Institutions } from './components/institutions'
+import { KpiStrip } from './components/kpi-strip'
 import { NationalStatement } from './components/national-statement'
 import { NationalStatementSkeleton } from './components/national-statement-skeleton'
 import { PerformanceEvolution } from './components/performance-evolution'
 import { PublicFooter } from './components/public-footer'
 import { PublicHeader } from './components/public-header'
 import { buildEvolutionSeries } from './lib/evolution-series'
+import { buildKpiFigures } from './lib/headline-figures'
 
 /**
  * Public gateway — the front door at `/`, seen before anyone signs in.
  *
- * Sections:
- *   §02  National statement and latest figures (+ data-confidence key)
- *   §04  Evolution over time / access connections by channel
- *   §06  Delivery in motion, by state — a ranked list, not a map (see
- *        DeliveryInMotion's own comment for why)
- *   §08  Who reports these figures
- *   §09  Footer
+ * THE PAGE IS AN ARGUMENT, IN ORDER. Each numbered section answers the next
+ * question a reader actually asks, and the numbering is visible so a briefing
+ * can cite which part it quotes:
  *
- * §05 (the six-pillars cards) was removed on request — the same pillar
- * figures now live in the Evolution and Access-channels charts below
- * instead of a separate card grid.
+ *   Hero  What is the single most important fact?
+ *   01    What are the four figures behind it, and how good is the data?
+ *   02    How is that access being delivered?
+ *   03    Which direction is each indicator moving?
+ *   04    Did my state get anything?
+ *   05    Who is accountable for each of these numbers?
  *
- * Not built: §07 the human story, which is blocked on a real named account
- * from the comms team — a placeholder testimonial is the most
+ * Structurally: one dark band of claim, everything in between on white as
+ * evidence, one dark band to close. No section exists to fill a row.
+ *
+ * NOT BUILT: the human story (§07 of the build spec), blocked on a real named
+ * account from the comms team. A placeholder testimonial is the most
  * generated-looking thing that could appear on this page, and the spec is
- * explicit that this section must not ship without one.
+ * explicit that the section must not ship without one. Also not built: the
+ * Nigeria choropleth — see `DeliveryInMotion` for why the table is the right
+ * shipped answer rather than a half-finished map.
  *
  * FAILURE BEHAVIOUR: if the figures cannot be loaded the page still renders its
  * header, framing and footer, and says plainly that the numbers are
@@ -61,11 +68,16 @@ export function PublicGatewayPage() {
 
         {data && (
           <>
-            <NationalStatement cards={data.headlineCards} />
+            <NationalStatement
+              cards={data.headlineCards}
+              statesCovered={stateCoverage.data?.rows.length ?? null}
+            />
 
             <div className="mx-auto max-w-7xl px-4 pb-4 sm:px-6">
+              <KpiStrip figures={buildKpiFigures(data.headlineCards)} />
+              <DataConfidenceKey />
+              <AccessDelivery channels={data.accessDelivery} />
               <PerformanceEvolution series={buildEvolutionSeries(data)} />
-              <AccessChannelsChart channels={data.accessDelivery} />
               {stateCoverage.data && (
                 <DeliveryInMotion
                   rows={stateCoverage.data.rows}
@@ -81,8 +93,7 @@ export function PublicGatewayPage() {
       {data && (
         <PublicFooter
           lastUpdated={formatDate(
-            data.headlineCards.peopleWithElectricityAccess.provenance
-              .lastUpdated,
+            data.headlineCards.peopleWithElectricityAccess.provenance.lastUpdated,
           )}
         />
       )}

@@ -79,6 +79,24 @@ register. This is a federal government record, not a product launch.
 - `seamless`, `empower`, `unlock`, `revolutionize`, `transforming`
 - Any headline of the form "Empowering X. Transforming Y."
 
+**AMENDED 2026-08-24 — the home page redesign.** Three rules above were
+changed on request, deliberately, and are recorded here so the next change does
+not fight them:
+
+1. **A hero background image is now permitted**, behind a heavy navy scrim
+   (`HeroBackdrop`). The ban on *stock* photography stands unchanged — a real,
+   credited photograph or nothing. See `public/hero/README.md`.
+2. **The hero is a dark band, not white.** "No gradient mesh" still holds; a
+   flat navy field with a directional scrim is not that.
+3. **Type on this page runs larger than the dashboard's 13px base**, and the
+   page carries its own chart language (`lib/landing-chart-theme.ts`). The
+   *continuity* requirement is now met through shared tokens, shared provenance
+   components and identical vocabulary — not through identical type size.
+
+Everything else in this section is unchanged and still binding, including the
+generic test, "every number comes from the API", and "every number carries its
+provenance".
+
 **Visual register.** The Nigerian coat of arms (`public/Logos/geapp.png`) and
 flag green `#008751`. Official record, not startup SaaS.
 

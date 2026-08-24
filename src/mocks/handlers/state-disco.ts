@@ -1,3 +1,4 @@
+import type { DeliveryRow } from '@/api/schemas/state-disco'
 import { delay, http, HttpResponse } from '../local-router'
 import {
   discoComparisonRows,
@@ -12,6 +13,27 @@ import {
 function filterUtility<T extends { id: string }>(rows: T[], request: Request) {
   const value = new URL(request.url).searchParams.get('distributionCompany')
   return !value || value === 'national' ? rows : rows.filter((row) => row.id === value)
+}
+
+/**
+ * Delivery rows are keyed by milestone id ("del-001"), not by utility id, so
+ * the generic `filterUtility` above matched nothing and silently emptied this
+ * tab whenever a DisCo was selected. These rows are matched on the utility
+ * name instead, and the Service band control — offered in the filter bar but
+ * never applied to any query — now actually narrows the rows it claims to
+ * (docs/M300 Monitoring Platform Feedback.pptx, slide 11).
+ */
+function filterDeliveryRows(rows: DeliveryRow[], request: Request) {
+  const params = new URL(request.url).searchParams
+  const utility = params.get('distributionCompany')
+  const band = params.get('serviceBand')
+
+  return rows.filter((row) => {
+    if (utility && utility !== 'national' && !row.utility.toLowerCase().startsWith(utility.toLowerCase())) {
+      return false
+    }
+    return !band || band === 'all' || row.serviceBand.toLowerCase() === band.toLowerCase()
+  })
 }
 
 export const stateDiscoHandlers = [
@@ -46,7 +68,7 @@ export const stateDiscoHandlers = [
         title: 'Utility delivery and reporting compliance',
         description: 'Performance Improvement Plan milestones linked to evidence and open bottlenecks.',
       },
-      rows: filterUtility(utilityDeliveryRows, request),
+      rows: filterDeliveryRows(utilityDeliveryRows, request),
     })
   }),
   http.get('/api/state-disco/states', async ({ request }) => {

@@ -19,11 +19,13 @@ interface ForgotPasswordValues {
 
 export function ForgotPasswordView({
   form,
+  loading,
   onSubmit,
   serverError,
   successMessage,
 }: {
   readonly form: UseFormReturn<ForgotPasswordValues>
+  readonly loading: boolean
   readonly onSubmit: () => void
   readonly serverError: string
   readonly successMessage: string
@@ -70,7 +72,7 @@ export function ForgotPasswordView({
                               ? 'border-status-at-risk'
                               : 'border-border-strong hover:border-text-subtle',
                           )}
-                          disabled={form.formState.isSubmitting}
+                          disabled={loading}
                           inputMode="email"
                           placeholder="name@organisation.gov.ng"
                           type="email"
@@ -86,7 +88,7 @@ export function ForgotPasswordView({
                   </p>
                 ) : null}
                 <div className="mt-6">
-                  <AuthSubmitButton loading={form.formState.isSubmitting}>
+                  <AuthSubmitButton loading={loading} loadingLabel="Sending…">
                     Send reset instructions
                   </AuthSubmitButton>
                 </div>

@@ -7,6 +7,7 @@ import type {
 import { bottlenecksRegister } from './bottlenecks'
 import { getKpiProfile, kpiExplorerCatalogue } from './kpi-explorer'
 import { programmes, projects } from './programs'
+import { discoComparisonRows } from './state-disco'
 
 /**
  * Derives each Compact pillar dashboard from data that already exists
@@ -52,6 +53,8 @@ function buildHeadlineCard(kpiId: string): PillarHeadlineCard {
     baselineLabel: profile.baselineLabel,
     targetLabel: profile.targetLabel,
     target: profile.target,
+    targetBasis: profile.targetBasis,
+    targetBasisLabel: profile.targetBasisLabel,
     trend: profile.trend,
     validationStatus: profile.validationStatus,
     provenance: profile.provenance,
@@ -133,6 +136,9 @@ export function buildPillarDashboard(pillar: PillarId): PillarDashboardOverview 
       .map((row) => buildCoreIndicator(row.id, row.sourceDataset)),
     deliveryStatus: { counts, total: statuses.length },
     bottlenecks,
+    programmes: pillarProgrammes,
+    projects: pillarProjects,
+    discoPerformance: pillar === 'financially-viable-utilities' ? discoComparisonRows : [],
     kpis: kpiExplorerCatalogue.filter((row) => row.pillar === pillar),
   }
 }

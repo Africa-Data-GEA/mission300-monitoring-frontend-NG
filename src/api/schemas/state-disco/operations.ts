@@ -24,6 +24,18 @@ export const deliveryRowSchema = z.object({
   id: z.string().min(1),
   utility: z.string().min(1),
   milestone: z.string().min(1),
+  /**
+   * The service band this milestone applies to. Review found the Service
+   * band filter offered on this tab with no matching column, so a filtered
+   * result could not be read back from the table
+   * (docs/M300 Monitoring Platform Feedback.pptx, slide 11). The field is
+   * now carried on the row and shown as a column, so the filter and the
+   * table agree.
+   */
+  serviceBand: z.enum(['A', 'B', 'C', 'D', 'E']),
+  /** Sortable ISO date behind `dueDateLabel` — the label ("31 Dec 2025")
+   * sorts alphabetically, which puts April before January. */
+  dueDate: z.iso.datetime(),
   dueDateLabel: z.string().min(1),
   executionStatus: z.string().min(1),
   achievedLabel: z.string().min(1),

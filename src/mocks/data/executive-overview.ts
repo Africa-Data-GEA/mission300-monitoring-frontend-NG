@@ -14,6 +14,7 @@ import type {
   OngoingProject,
   ProjectStatusSummary,
 } from '@/features/dashboard/types'
+import { formatCurrency, USD } from '@/lib/currency'
 import { bottlenecksRegister } from './bottlenecks'
 import { getKpiProfile } from './kpi-explorer'
 import { projects } from './programs'
@@ -52,6 +53,20 @@ function toConfidence(status: ValidationStatus): DataConfidence {
   if (status === 'confirmed') return 'confirmed'
   if (status === 'future') return 'future-gap'
   return 'requires-validation'
+}
+
+/**
+ * Appends the target's deadline to its label unless the label already names
+ * that year. Review feedback was that a target without a date ("100% market
+ * remittance compliance") does not say what is actually being committed to
+ * (docs/M300 Monitoring Platform Feedback.pptx, slide 3); the date is held
+ * structurally on the KPI profile (`targetDate`), so this only formats it.
+ */
+function withTargetDate(label: string, targetDate: string | null): string {
+  if (!targetDate) return label
+  const year = targetDate.match(/20\d\d/)?.[0]
+  if (year && label.includes(year)) return label
+  return `${label} — by ${targetDate}`
 }
 
 /* ---------------- Section A — Headline cards ------------------------- */
@@ -110,7 +125,7 @@ function buildAccessRateCard(): AccessRateCard {
     previousPublication: previous
       ? `previous publication ${previous.value}% (${previous.period})`
       : 'No previous publication on record',
-    targetLabel: profile.targetLabel,
+    targetLabel: withTargetDate(profile.targetLabel, profile.targetDate),
     trend: profile.trend,
     source: toSourceTag(profile.validationStatus),
     confidence: toConfidence(profile.validationStatus),
@@ -191,10 +206,18 @@ function buildCleanCookingAccessCard(): CompactOutcomeCard {
 
 /* ---------------- Section B — Access delivery by channel -------------- */
 
+/**
+ * Clean cooking is tracked as a delivery channel alongside the three
+ * electrification routes, not only as a headline outcome card — review
+ * feedback asked why it was missing from this section when it is one of the
+ * ways access is actually delivered (docs/M300 Monitoring Platform
+ * Feedback.pptx, slide 2).
+ */
 const ACCESS_CHANNEL_KPI_IDS: Record<string, string> = {
   'grid-connections': 'M300-P2-001',
   'mini-grid-connections': 'M300-P2-003',
   'solar-home-systems': 'M300-P2-006',
+  'clean-cooking': 'M300-P2-011',
 }
 
 function buildAccessChannel(id: string, kpiId: string): AccessChannel {
@@ -210,7 +233,7 @@ function buildAccessChannel(id: string, kpiId: string): AccessChannel {
     value: numberFormatter.format(current),
     rawValue: current,
     target: profile.target,
-    targetLabel: profile.targetLabel,
+    targetLabel: withTargetDate(profile.targetLabel, profile.targetDate),
     percentComplete,
     trend: profile.trend,
     source: toSourceTag(profile.validationStatus),
@@ -279,7 +302,9 @@ const NATIONAL_PERFORMANCE_METRICS: {
     scaleMax: 2500,
     expected: 1700,
     caption: 'Outstanding = approved requirement − funded',
-    formatValue: (v) => `₦${(v / 1000).toFixed(2)}tn`,
+    // National currency, so it follows the configured brand currency rather
+    // than a hardcoded naira sign.
+    formatValue: (v) => formatCurrency(`${(v / 1000).toFixed(2)}tn`),
   },
   {
     id: 'private-capital',
@@ -288,7 +313,10 @@ const NATIONAL_PERFORMANCE_METRICS: {
     scaleMax: 15_500,
     expected: 2_400,
     caption: 'Tracked from the January 2025 baseline',
-    formatValue: (v) => `$${(v / 1000).toFixed(1)}B`,
+    // Mobilised international private capital is quoted in USD by convention,
+    // whichever country the deployment serves — an explicit override rather
+    // than an accident of hardcoding.
+    formatValue: (v) => formatCurrency(`${(v / 1000).toFixed(1)}B`, { currency: USD }),
   },
 ]
 
@@ -308,7 +336,7 @@ function buildBulletMetric(config: (typeof NATIONAL_PERFORMANCE_METRICS)[number]
     target: profile.target,
     direction: profile.direction,
     value: config.formatValue(current),
-    targetLabel: profile.targetLabel,
+    targetLabel: withTargetDate(profile.targetLabel, profile.targetDate),
     caption: config.caption,
     trend: profile.trend,
     source: toSourceTag(profile.validationStatus),
@@ -390,7 +418,13 @@ function buildExceptions(): Bottleneck[] {
       const severityDelta = (SEVERITY_RANK[a.severity] ?? 0) - (SEVERITY_RANK[b.severity] ?? 0)
       return severityDelta !== 0 ? severityDelta : b.ageDays - a.ageDays
     })
-    .slice(0, 5)
+    /*
+      No longer capped at five here. This section is now a filterable,
+      sortable, searchable table rather than a ranked five-row sample, so it
+      needs the whole unresolved set to filter across — review feedback was
+      that understanding where bottlenecks are is a primary task, not a
+      glance (docs/M300 Monitoring Platform Feedback.pptx, slide 4).
+    */
     .map((row) => ({
       id: row.id,
       title: row.issue,

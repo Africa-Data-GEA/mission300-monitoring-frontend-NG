@@ -1,7 +1,8 @@
 import { lazy, Suspense } from 'react'
 import { createBrowserRouter } from 'react-router'
 import { AppShell } from '@/components/layout/app-shell'
-import { RouteFallback } from '@/components/layout/route-fallback'
+import { AuthRouteFallback, RouteFallback } from '@/components/layout/route-fallback'
+import { RequireAuth } from '@/features/auth/require-auth'
 import { dataSubmissionRoutes } from '@/features/data-submissions/routes'
 import { stateDiscoRoutes } from '@/features/state-disco/routes'
 
@@ -127,6 +128,10 @@ function lazyRoute(element: React.ReactNode) {
   return <Suspense fallback={<RouteFallback />}>{element}</Suspense>
 }
 
+function authRoute(element: React.ReactNode) {
+  return <Suspense fallback={<AuthRouteFallback />}>{element}</Suspense>
+}
+
 /**
  * Route table.
  *
@@ -147,15 +152,15 @@ export interface RouteHandle {
 export const router = createBrowserRouter([
   {
     path: '/account/login',
-    element: lazyRoute(<LoginPage />),
+    element: authRoute(<LoginPage />),
   },
   {
     path: '/account/change-password',
-    element: lazyRoute(<PasswordPage />),
+    element: authRoute(<PasswordPage />),
   },
   {
     path: '/account/forgot-password',
-    element: lazyRoute(<ForgotPasswordPage />),
+    element: authRoute(<ForgotPasswordPage />),
   },
   /*
    * `/` is the public gateway, not a redirect into the dashboard.
@@ -178,8 +183,12 @@ export const router = createBrowserRouter([
         element: lazyRoute(<ProgressPage />),
       },
       {
-    element: <AppShell />,
-    children: [
+        element: (
+          <RequireAuth>
+            <AppShell />
+          </RequireAuth>
+        ),
+        children: [
       {
         path: 'dashboard',
         element: lazyRoute(<DashboardPage />),

@@ -6,6 +6,7 @@ export function ForgotPasswordPage() {
   return (
     <ForgotPasswordView
       form={passwordReset.form}
+      loading={passwordReset.isPending}
       onSubmit={passwordReset.submit}
       serverError={passwordReset.serverError}
       successMessage={passwordReset.successMessage}

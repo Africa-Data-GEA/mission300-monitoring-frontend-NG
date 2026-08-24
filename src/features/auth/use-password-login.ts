@@ -4,8 +4,10 @@ import { useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router'
 import { z } from 'zod'
 import { ApiError } from '@/lib/api-client'
+import { dashboardToast } from '@/lib/dashboard-toast'
 import { authenticate } from './api'
 import { clearPendingAccount, readPendingAccount, saveAuthSession } from './auth-session'
+import { showPendingState } from './show-pending-state'
 
 const passwordFormSchema = z.object({
   password: z.string().min(1, 'Enter your password'),
@@ -16,6 +18,7 @@ type PasswordFormValues = z.infer<typeof passwordFormSchema>
 export function usePasswordLogin() {
   const navigate = useNavigate()
   const [account] = useState(readPendingAccount)
+  const [isPending, setIsPending] = useState(false)
   const [serverError, setServerError] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const form = useForm<PasswordFormValues>({
@@ -30,6 +33,8 @@ export function usePasswordLogin() {
   const submit = form.handleSubmit(async ({ password }) => {
     if (!account) return
     setServerError('')
+    setIsPending(true)
+    await showPendingState()
     try {
       const session = await authenticate(account.email, password)
       saveAuthSession(session)
@@ -38,11 +43,17 @@ export function usePasswordLogin() {
       // institution-scoped Data Submissions overview instead.
       const landingPath =
         session.user.role === 'institutional-data-provider' ? '/data-submissions' : '/dashboard'
+      dashboardToast.success(`Welcome back, ${session.user.name}`, {
+        description: 'You are now signed in to the M300 Monitoring Platform.',
+      })
       navigate(landingPath, { replace: true })
     } catch (error) {
-      setServerError(
-        error instanceof ApiError ? error.message : 'Something went wrong. Please try again.',
-      )
+      const message =
+        error instanceof ApiError ? error.message : 'Something went wrong. Please try again.'
+      setServerError(message)
+      dashboardToast.error('Sign-in failed', { description: message })
+    } finally {
+      setIsPending(false)
     }
   })
 
@@ -51,5 +62,5 @@ export function usePasswordLogin() {
     navigate('/account/login', { state: { email: account?.email ?? '' } })
   }
 
-  return { account, form, goBack, serverError, showPassword, submit, setShowPassword }
+  return { account, form, goBack, isPending, serverError, showPassword, submit, setShowPassword }
 }

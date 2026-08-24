@@ -14,6 +14,7 @@ interface PasswordFormValues {
 export function PasswordLoginView({
   account,
   form,
+  loading,
   onBack,
   onShowPasswordChange,
   onSubmit,
@@ -22,6 +23,7 @@ export function PasswordLoginView({
 }: {
   readonly account: IdentifiedAccount
   readonly form: UseFormReturn<PasswordFormValues>
+  readonly loading: boolean
   readonly onBack: () => void
   readonly onShowPasswordChange: (visible: boolean) => void
   readonly onSubmit: () => void
@@ -33,7 +35,7 @@ export function PasswordLoginView({
       <div className="auth-step-enter">
         <button
           className="-ml-2 mb-5 inline-flex items-center gap-1.5 rounded-control px-2 py-1.5 text-sm font-medium text-text-muted transition-colors hover:bg-surface-sunken hover:text-text-default"
-          disabled={form.formState.isSubmitting}
+          disabled={loading}
           onClick={onBack}
           type="button"
         >
@@ -45,7 +47,7 @@ export function PasswordLoginView({
         </h1>
         <button
           className="mt-3 inline-flex max-w-full items-center gap-2 rounded-pill border border-border-default bg-surface-sunken px-3 py-2 text-sm text-text-muted transition-colors hover:border-border-strong"
-          disabled={form.formState.isSubmitting}
+          disabled={loading}
           onClick={onBack}
           title="Use a different account"
           type="button"
@@ -83,7 +85,7 @@ export function PasswordLoginView({
                           'h-11 w-full rounded-control border bg-surface py-2 pl-10 pr-11 text-base text-text-default transition-[border-color,box-shadow] placeholder:text-text-subtle',
                           fieldState.error ? 'border-status-at-risk' : 'border-border-strong hover:border-text-subtle',
                         )}
-                        disabled={form.formState.isSubmitting}
+                        disabled={loading}
                         placeholder="Enter your password"
                         type={showPassword ? 'text' : 'password'}
                       />
@@ -103,7 +105,9 @@ export function PasswordLoginView({
             />
             {serverError ? <p className="mt-2 text-sm text-status-at-risk" role="alert">{serverError}</p> : null}
             <div className="mt-6">
-              <AuthSubmitButton loading={form.formState.isSubmitting}>Sign in</AuthSubmitButton>
+              <AuthSubmitButton loading={loading} loadingLabel="Signing in…">
+                Sign in
+              </AuthSubmitButton>
             </div>
           </form>
         </Form>

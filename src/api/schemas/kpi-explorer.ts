@@ -145,6 +145,7 @@ export const updateKpiMetadataRequestSchema = z.object({
   baselineLabel: z.string(),
   target: z.number().nullable(),
   targetLabel: z.string(),
+  targetDate: z.string().nullable(),
   sourceInstitution: z.string().min(1),
   sourceDataset: z.string().min(1),
   sourceReference: z.string(),
@@ -173,6 +174,33 @@ export const kpiProfileSchema = z.object({
   currentLabel: z.string(),
   target: z.number().nullable(),
   targetLabel: z.string(),
+  /**
+   * What kind of thing the target is, so a card can tell three states apart
+   * that all previously collapsed into "no confirmed target":
+   *
+   * - `level` (default): the target is a value in this indicator's own unit,
+   *   so progress-to-target is meaningful and a bar can be drawn.
+   * - `growth-rate`: a Compact commitment exists, but it is expressed as a
+   *   rate of change rather than a level in this indicator's unit. Progress
+   *   cannot be drawn, but the commitment must still be shown — review
+   *   feedback found an access-rate card reading as though it had no target
+   *   when in fact the target was simply in a different unit
+   *   (docs/M300 Monitoring Platform Feedback.pptx, slide 6).
+   * - `none`: no target has been agreed at all.
+   */
+  targetBasis: z.enum(['level', 'growth-rate', 'none']).optional(),
+  /** Short face label for a `growth-rate` target, e.g. "9%/yr growth". */
+  targetBasisLabel: z.string().optional(),
+  /**
+   * When the target is to be met, e.g. "2030" or "end 2027". Structured
+   * separately from `targetLabel` so a target always states its deadline
+   * rather than depending on whoever wrote the label remembering to include
+   * one — review feedback found targets like "100% market remittance
+   * compliance" with no date attached (docs/M300 Monitoring Platform
+   * Feedback.pptx, slide 3). Null where no deadline has been agreed; it is
+   * then shown as such rather than silently omitted.
+   */
+  targetDate: z.string().nullable(),
   /** Signed variance against target, following the configured direction. */
   varianceLabel: z.string(),
   direction: improvementDirectionSchema,

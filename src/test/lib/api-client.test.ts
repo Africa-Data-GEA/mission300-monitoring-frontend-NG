@@ -1,13 +1,16 @@
 import { http, HttpResponse } from 'msw'
-import { describe, expect, it } from 'vitest'
-import { server } from '@/mocks/server'
+import { afterEach, describe, expect, it } from 'vitest'
+import { saveAuthSession } from '@/features/auth/auth-session'
 import { ApiError, api } from '@/lib/api-client'
+import { server } from '@/mocks/server'
 
 /*
  * These tests register runtime handlers on the shared MSW server. The global
  * setup resets handlers between tests, so registrations do not leak.
  */
 describe('api client', () => {
+  afterEach(() => sessionStorage.clear())
+
   describe('request building', () => {
     it('prefixes paths with the API base URL', async () => {
       server.use(
@@ -76,6 +79,52 @@ describe('api client', () => {
       expect(headers.auth).toBe('Bearer token')
       expect(headers.contentType).toBe('application/json')
     })
+
+    it('attaches the stored access token to protected API requests', async () => {
+      let authorization: string | null = null
+      saveAuthSession({
+        accessToken: 'real-session-token',
+        user: {
+          id: 'user-1',
+          name: 'Test User',
+          email: 'test@example.com',
+          role: 'system-administrator',
+        },
+      })
+      server.use(
+        http.get('/api/widgets', ({ request }) => {
+          authorization = request.headers.get('authorization')
+          return HttpResponse.json({})
+        }),
+      )
+
+      await api.get('/widgets')
+
+      expect(authorization).toBe('Bearer real-session-token')
+    })
+
+    it('does not attach a stored access token to authentication requests', async () => {
+      let authorization: string | null = null
+      saveAuthSession({
+        accessToken: 'old-session-token',
+        user: {
+          id: 'user-1',
+          name: 'Test User',
+          email: 'test@example.com',
+          role: 'system-administrator',
+        },
+      })
+      server.use(
+        http.post('/api/auth/login', ({ request }) => {
+          authorization = request.headers.get('authorization')
+          return HttpResponse.json({})
+        }),
+      )
+
+      await api.post('/auth/login', {})
+
+      expect(authorization).toBeNull()
+    })
   })
 
   describe('HTTP verbs', () => {
@@ -139,6 +188,26 @@ describe('api client', () => {
 
       await expect(api.get('/widgets')).rejects.toBeInstanceOf(ApiError)
       await expect(api.get('/widgets')).rejects.toMatchObject({ status: 403 })
+    })
+
+    it('clears an expired backend session after a protected request returns 401', async () => {
+      saveAuthSession({
+        accessToken: 'expired-token',
+        user: {
+          id: 'user-1',
+          name: 'Test User',
+          email: 'test@example.com',
+          role: 'system-administrator',
+        },
+      })
+      server.use(
+        http.get('/api/widgets', () =>
+          HttpResponse.json({ message: 'Session expired.' }, { status: 401 }),
+        ),
+      )
+
+      await expect(api.get('/widgets')).rejects.toMatchObject({ status: 401 })
+      expect(sessionStorage.getItem('m300-auth')).toBeNull()
     })
 
     it("surfaces the server's message when one is provided", async () => {

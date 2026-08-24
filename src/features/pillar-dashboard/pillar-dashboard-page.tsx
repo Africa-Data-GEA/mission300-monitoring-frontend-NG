@@ -4,7 +4,7 @@ import { ErrorState } from '@/components/ui/error-state'
 import { CoreIndicatorsSection } from './components/core-indicators-section'
 import { HeadlineCardsSection } from './components/headline-cards-section'
 import { PillarDashboardSkeleton } from './components/pillar-dashboard-skeleton'
-import { PillarKpiList } from './components/pillar-kpi-list'
+import { PillarDeliverySection } from './components/pillar-delivery-section'
 import { usePillarDashboardPage } from './use-pillar-dashboard-page'
 
 /**
@@ -55,7 +55,12 @@ export function PillarDashboardPage() {
 
       <CoreIndicatorsSection indicators={data.coreIndicators} pillar={data.pillar} />
 
-      <PillarKpiList rows={data.kpis} />
+      <PillarDeliverySection
+        pillar={data.pillar}
+        programmes={data.programmes}
+        projects={data.projects}
+        discoPerformance={data.discoPerformance}
+      />
     </div>
   )
 }

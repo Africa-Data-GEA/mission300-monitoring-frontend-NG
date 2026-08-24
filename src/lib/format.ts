@@ -1,3 +1,5 @@
+import { getLocale } from './currency'
+
 /**
  * Formatting helpers.
  *
@@ -11,7 +13,7 @@ export function formatDateTime(iso: string): string {
   const date = new Date(iso)
   if (Number.isNaN(date.getTime())) return '—'
 
-  return new Intl.DateTimeFormat('en-NG', {
+  return new Intl.DateTimeFormat(getLocale(), {
     dateStyle: 'medium',
     timeStyle: 'short',
     timeZone: DISPLAY_TIME_ZONE,
@@ -22,7 +24,7 @@ export function formatDate(iso: string): string {
   const date = new Date(iso)
   if (Number.isNaN(date.getTime())) return '—'
 
-  return new Intl.DateTimeFormat('en-NG', {
+  return new Intl.DateTimeFormat(getLocale(), {
     dateStyle: 'medium',
     timeZone: DISPLAY_TIME_ZONE,
   }).format(date)

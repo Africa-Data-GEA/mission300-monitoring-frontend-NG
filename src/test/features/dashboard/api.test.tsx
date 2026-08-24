@@ -50,7 +50,7 @@ describe('useExecutiveOverview', () => {
     })
 
     expect(result.current.data?.headlineCards.accessRate.value).toBe('70.0%')
-    expect(result.current.data?.accessDelivery).toHaveLength(3)
+    expect(result.current.data?.accessDelivery).toHaveLength(4)
     expect(result.current.data?.nationalPerformance).toHaveLength(6)
     expect(result.current.data?.deliveryStatus.ongoingProjects).toHaveLength(8)
   })
@@ -81,7 +81,7 @@ describe('useExecutiveOverview', () => {
       expect(url).not.toContain('?')
     })
 
-    it('serialises only the three supported executive filters', async () => {
+    it('serialises only the executive filters the endpoint can apply', async () => {
       let url = ''
       server.use(
         http.get('/api/executive-overview', ({ request }) => {
@@ -109,10 +109,13 @@ describe('useExecutiveOverview', () => {
         'period=q2-2025',
         'pillar=last-mile-access',
         'institution=nerc',
+        'technology=mini-grid',
       ]) {
         expect(url, fragment).toContain(fragment)
       }
-      for (const excluded of ['priority', 'geographicScope', 'distributionCompany', 'technology']) {
+      // Still not sent: nothing in the payload can answer these three yet —
+      // see the note in GlobalFilterBar on why they have no control either.
+      for (const excluded of ['priority', 'geographicScope', 'distributionCompany']) {
         expect(url).not.toContain(excluded)
       }
     })

@@ -10,6 +10,9 @@ export const filterOptions: DashboardFilterOptions = {
     { value: 'q2-2025', label: 'Q2 2025' },
     { value: 'q1-2025', label: 'Q1 2025' },
     { value: 'fy-2025', label: 'FY 2025' },
+    // Reveals the custom date-range picker rather than selecting a preset —
+    // see CUSTOM_PERIOD in api/schemas/filters.ts and GlobalFilterBar.
+    { value: 'custom', label: 'Custom range…' },
   ],
   pillars: [
     { value: 'all', label: 'All pillars' },

@@ -1,4 +1,5 @@
 import { fileURLToPath, URL } from 'node:url'
+import { loadEnv } from 'vite'
 import { defineConfig, type Plugin } from 'vitest/config'
 import react, { reactCompilerPreset } from '@vitejs/plugin-react'
 import babel from '@rolldown/plugin-babel'
@@ -19,11 +20,12 @@ import tailwindcss from '@tailwindcss/vite'
  * /api/* request gets an honest 404 instead, and the console message says
  * plainly that the mock worker missed it.
  */
-function apiFallbackPlugin(): Plugin {
+function apiFallbackPlugin(apiProxyEnabled = false): Plugin {
   return {
     name: 'api-fallback-404',
     configureServer(server) {
       server.middlewares.use((req, res, next) => {
+        if (apiProxyEnabled) return next()
         if (!req.url?.startsWith('/api/')) return next()
 
         res.statusCode = 404
@@ -42,35 +44,51 @@ function apiFallbackPlugin(): Plugin {
 }
 
 // https://vite.dev/config/
-export default defineConfig({
-  plugins: [
-    react(),
-    babel({ presets: [reactCompilerPreset()] }),
-    tailwindcss(),
-    apiFallbackPlugin(),
-  ],
-  resolve: {
-    alias: {
-      '@': fileURLToPath(new URL('./src', import.meta.url)),
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, '.', '')
+  const proxyTarget = env.VITE_API_PROXY_TARGET
+
+  return {
+    plugins: [
+      react(),
+      babel({ presets: [reactCompilerPreset()] }),
+      tailwindcss(),
+      apiFallbackPlugin(Boolean(proxyTarget)),
+    ],
+    resolve: {
+      alias: {
+        '@': fileURLToPath(new URL('./src', import.meta.url)),
+      },
     },
-  },
-  test: {
-    environment: 'jsdom',
-    globals: true,
-    setupFiles: ['./src/test/setup.ts'],
-    /*
-     * CSS is not processed for tests. Assertions check class names and inline
-     * styles, never computed styles, so running the Tailwind pipeline per test
-     * file bought nothing and dominated the run time.
-     */
-    css: false,
-    /*
-     * jsdom environment setup is expensive on Windows. Left unbounded, enough
-     * workers spawn to starve each other and trivial synchronous renders time
-     * out. Capping workers keeps the suite comfortably inside the timeout.
-     */
-    testTimeout: 20_000,
-    hookTimeout: 20_000,
-    maxWorkers: 4,
-  },
+    server: proxyTarget
+      ? {
+          proxy: {
+            '/api': {
+              target: proxyTarget,
+              changeOrigin: true,
+              secure: true,
+            },
+          },
+        }
+      : undefined,
+    test: {
+      environment: 'jsdom',
+      globals: true,
+      setupFiles: ['./src/test/setup.ts'],
+      /*
+       * CSS is not processed for tests. Assertions check class names and inline
+       * styles, never computed styles, so running the Tailwind pipeline per test
+       * file bought nothing and dominated the run time.
+       */
+      css: false,
+      /*
+       * jsdom environment setup is expensive on Windows. Left unbounded, enough
+       * workers spawn to starve each other and trivial synchronous renders time
+       * out. Capping workers keeps the suite comfortably inside the timeout.
+       */
+      testTimeout: 20_000,
+      hookTimeout: 20_000,
+      maxWorkers: 4,
+    },
+  }
 })

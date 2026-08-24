@@ -3,10 +3,11 @@ import { Card } from '@/components/ui/card'
 import { InfoPopover } from '@/components/ui/info-popover'
 import { ProgressBar } from '@/components/ui/progress-bar'
 import { TrendIndicator } from '@/components/ui/trend-indicator'
+import { getLocale } from '@/lib/currency'
 import { getUrbanRuralBreakdown } from '../lib/urban-rural-split'
 import type { AccessChannel } from '../types'
 
-const numberFormatter = new Intl.NumberFormat('en-NG')
+const numberFormatter = new Intl.NumberFormat(getLocale())
 
 /** Expandable illustrative urban/rural split for a channel's connection
  * count — a popover rather than an inline expansion, so opening it doesn't

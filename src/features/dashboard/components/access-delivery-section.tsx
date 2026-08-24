@@ -1,15 +1,19 @@
 import { Card } from '@/components/ui/card'
 import type { AccessChannel } from '../types'
 import { AccessChannelCard } from './access-channel-card'
-import { AccessDeliveryChart } from './access-delivery-chart'
 
 /**
  * Section B — Access Delivery by Channel.
  *
- * Grid connections, mini-grid household connections and Solar Home Systems.
- * The chart sits alongside the per-channel cards rather than above them, so
- * the "how are we doing" visual and the exact figures read as one section,
- * not two stacked ones.
+ * Grid connections, mini-grid household connections, Solar Home Systems and
+ * clean cooking — one card per channel, each carrying its own
+ * delivered-against-target progress and trend pill.
+ *
+ * The side-by-side "progress to target" bar chart that used to sit beside
+ * these cards was removed: review feedback was that the cards already say
+ * what the chart said, more precisely, and that the space was better spent
+ * giving every channel equal weight (docs/M300 Monitoring Platform
+ * Feedback.pptx, slide 2).
  */
 export function AccessDeliverySection({
   channels,
@@ -27,39 +31,20 @@ export function AccessDeliverySection({
         </p>
       ) : (
       /*
-        Both columns stretch to the same height, and the cards are stacked one
-        per row rather than laid out two-up. With three channels a two-column
-        grid left a fourth cell empty, and the chart beside it had to stretch
-        past its own content to cover the gap. One card per channel, in the
-        same order as the chart's bars, means each row of the panel reads
-        straight across: bar on the left, its numbers on the right.
+        Four across on a wide screen, one per channel, so no channel reads as
+        subordinate to the others. Cards stretch to a shared height via the
+        grid, keeping their progress bars on one baseline.
       */
-      <div className="mt-3 grid gap-4 xl:grid-cols-[1fr_1.2fr]">
-        <Card className="flex flex-col p-4">
-          <h3 className="text-xs font-medium tracking-wide text-text-subtle uppercase">
-            Progress to target
-          </h3>
-          {/*
-            Anchored to the top rather than centred: the chart is a fixed pixel
-            height, so when this card is stretched to match the taller card
-            column beside it, centring pushed the plot toward the middle and
-            left a large dead gap between the heading and the first bar. Top
-            anchoring keeps the heading and bars reading as one block; any
-            leftover height falls below the plot instead.
-          */}
-          <div className="mt-2 flex flex-1 flex-col justify-start">
-            <AccessDeliveryChart channels={channels} />
-          </div>
-        </Card>
-
-        <ul aria-label="Access delivery channels" className="grid gap-3">
-          {channels.map((channel) => (
-            <li key={channel.id}>
-              <AccessChannelCard channel={channel} />
-            </li>
-          ))}
-        </ul>
-      </div>
+      <ul
+        aria-label="Access delivery channels"
+        className="mt-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-4"
+      >
+        {channels.map((channel) => (
+          <li key={channel.id}>
+            <AccessChannelCard channel={channel} />
+          </li>
+        ))}
+      </ul>
       )}
     </Card>
   )

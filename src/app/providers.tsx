@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useState, type ReactNode } from 'react'
+import { DashboardToaster } from '@/components/ui/dashboard-toast'
 import { BrandProvider } from '@/features/branding/brand-provider'
 
 /**
@@ -27,7 +28,10 @@ export function AppProviders({ children }: { children: ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <BrandProvider>{children}</BrandProvider>
+      <BrandProvider>
+        {children}
+        <DashboardToaster />
+      </BrandProvider>
     </QueryClientProvider>
   )
 }

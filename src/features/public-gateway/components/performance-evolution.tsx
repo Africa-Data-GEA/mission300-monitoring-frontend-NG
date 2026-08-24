@@ -1,86 +1,67 @@
-import Chart from 'react-apexcharts'
-import type { MetricProvenance } from '@/api/schemas/common'
-import { InfoPopover } from '@/components/ui/info-popover'
-import {
-  LANDING_CHART_TITLE_CLASSES,
-  LANDING_CHART_UNIT_CLASSES,
-  landingChartBase,
-} from '../lib/landing-chart-theme'
+import { useMemo, useState } from 'react'
+import { PILLARS, PILLAR_LABELS } from '@/api/schemas/common'
+import { EvolutionChart, type EvolutionSeries } from './evolution-chart'
+import { FilterPills, type FilterOption } from './filter-pills'
+import { SectionHeading } from './section-heading'
 
-export interface EvolutionSeries {
-  id: string
-  title: string
-  unit: string
-  points: readonly { period: string; value: number }[]
-  /** Every number on this page must carry its provenance (source
-   * institution, reporting period, validation status) per
-   * docs/public-gateway-home.md §01 — these charts are no exception. */
-  provenance: MetricProvenance
-  sourceLabel: string
-}
+const ALL = 'all'
 
 /**
- * "Evolution of ..." line charts, modelled on the IEA electricity data
- * explorer's evolution charts — a bold title, a grey unit subtitle, then a
- * single smoothed line across real reporting periods. Pulls history from
- * every metric that has one (see public-gateway-page.tsx for what's
- * assembled into `series`): all six national-performance metrics plus the
- * electricity access rate and generation capacity headline cards — not a
- * curated pair, so every real reporting series on this payload gets a chart.
+ * Every reporting series the payload carries, filterable by Compact pillar.
+ *
+ * WHY A FILTER AND NOT A CURATED SELECTION. Eight charts on one screen is more
+ * than anyone reads, and the obvious fix — pick the three most flattering — is
+ * the one thing a government record must not do. Filtering keeps every series
+ * present and lets the reader narrow it themselves, so nothing is hidden and
+ * nothing is chosen on their behalf.
+ *
+ * Pillars with no chartable series are not offered as options. An empty filter
+ * result reads as a bug, and offering a control that produces one wastes the
+ * reader's click to tell them nothing.
+ *
+ * A series needs at least two points to be a line. Anything shorter is a single
+ * reading, which belongs in the headline strip above and not here.
  */
 export function PerformanceEvolution({ series }: { series: readonly EvolutionSeries[] }) {
-  const chartable = series.filter((entry) => entry.points.length >= 2)
+  const [pillar, setPillar] = useState<string>(ALL)
+
+  const chartable = useMemo(() => series.filter((entry) => entry.points.length >= 2), [series])
+
+  const options = useMemo<FilterOption[]>(() => {
+    const populated = PILLARS.filter((id) => chartable.some((entry) => entry.pillar === id)).map((id) => ({
+      id,
+      label: PILLAR_LABELS[id],
+      meta: String(chartable.filter((entry) => entry.pillar === id).length),
+    }))
+    return [{ id: ALL, label: 'All pillars', meta: String(chartable.length) }, ...populated]
+  }, [chartable])
+
+  const visible = pillar === ALL ? chartable : chartable.filter((entry) => entry.pillar === pillar)
 
   if (chartable.length === 0) return null
 
   return (
     <section aria-labelledby="performance-evolution" className="mt-14">
-      <h2
+      <SectionHeading
         id="performance-evolution"
-        className="text-[1.5rem] leading-8 font-bold tracking-tight text-text-default"
-      >
-        Evolution over time
-      </h2>
+        index="03"
+        title="How the indicators have moved"
+        description="Every national indicator with more than one reporting period, plotted over its own real periods. Figures are not interpolated between reports."
+        controls={
+          options.length > 1 ? (
+            <FilterPills
+              label="Filter indicators by Compact pillar"
+              options={options}
+              value={pillar}
+              onChange={setPillar}
+            />
+          ) : undefined
+        }
+      />
 
-      <div className="mt-4 grid gap-8 lg:grid-cols-2">
-        {chartable.map((entry) => (
-          <div key={entry.id}>
-            <div className="flex items-start gap-1">
-              <p className={LANDING_CHART_TITLE_CLASSES}>Evolution of {entry.title.toLowerCase()}</p>
-              <InfoPopover
-                label={`About ${entry.title}`}
-                provenance={entry.provenance}
-                sourceLabel={entry.sourceLabel}
-              />
-            </div>
-            <p className={LANDING_CHART_UNIT_CLASSES}>{entry.unit}</p>
-
-            <div className="mt-3">
-              <Chart
-                type="area"
-                height={260}
-                series={[{ name: entry.title, data: entry.points.map((point) => point.value) }]}
-                options={{
-                  ...landingChartBase(),
-                  xaxis: {
-                    ...landingChartBase().xaxis,
-                    categories: entry.points.map((point) => point.period),
-                  },
-                  stroke: { curve: 'smooth', width: 2.5 },
-                  fill: {
-                    type: 'gradient',
-                    gradient: { shadeIntensity: 1, opacityFrom: 0.25, opacityTo: 0.02, stops: [0, 95, 100] },
-                  },
-                  markers: { size: 0, hover: { size: 5 } },
-                  legend: { show: false },
-                  tooltip: {
-                    ...landingChartBase().tooltip,
-                    y: { formatter: (value) => `${value.toLocaleString('en-US')}` },
-                  },
-                }}
-              />
-            </div>
-          </div>
+      <div className="mt-px grid gap-px bg-border-strong lg:grid-cols-2">
+        {visible.map((entry) => (
+          <EvolutionChart key={entry.id} series={entry} />
         ))}
       </div>
     </section>
