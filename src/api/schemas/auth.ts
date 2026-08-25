@@ -7,7 +7,17 @@ export const identifyAccountRequestSchema = z.object({
 export const identifiedAccountSchema = z.object({
   email: z.email(),
   displayName: z.string().min(1),
-  institution: z.string().min(1),
+  /**
+   * Allowed to be empty. The Nigeria backend returns `""` for an account with
+   * no institution assigned yet, which is a legitimate state — an oversight
+   * user, or a provider whose institution has not been linked. Requiring a
+   * non-empty string here rejected the whole 200 response and failed sign-in
+   * at the email step with no way for the user to proceed.
+   *
+   * Nothing in the sign-in flow renders this field; it is carried so the
+   * password step can show who is signing in once a backend populates it.
+   */
+  institution: z.string(),
 })
 
 export const loginRequestSchema = z.object({

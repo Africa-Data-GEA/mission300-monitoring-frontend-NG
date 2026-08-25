@@ -3,8 +3,8 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useLocation } from 'react-router'
 import { forgotPasswordRequestSchema } from '@/api/schemas/auth'
-import { ApiError } from '@/lib/api-client'
 import { dashboardToast } from '@/lib/dashboard-toast'
+import { authErrorMessage } from './auth-error-message'
 import { requestPasswordReset } from './api'
 import { showPendingState } from './show-pending-state'
 
@@ -39,8 +39,7 @@ export function useForgotPassword() {
       setSuccessMessage(response.message)
       dashboardToast.success('Reset instructions sent', { description: response.message })
     } catch (error) {
-      const message =
-        error instanceof ApiError ? error.message : 'Something went wrong. Please try again.'
+      const message = authErrorMessage(error)
       setServerError(message)
       dashboardToast.error('Reset request failed', { description: message })
     } finally {

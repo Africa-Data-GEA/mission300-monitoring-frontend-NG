@@ -3,8 +3,8 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useLocation, useNavigate } from 'react-router'
 import { identifyAccountRequestSchema } from '@/api/schemas/auth'
-import { ApiError } from '@/lib/api-client'
 import { dashboardToast } from '@/lib/dashboard-toast'
+import { authErrorMessage } from './auth-error-message'
 import { identifyAccount } from './api'
 import { savePendingAccount } from './auth-session'
 import { showPendingState } from './show-pending-state'
@@ -39,8 +39,7 @@ export function useEmailLogin() {
       savePendingAccount(account)
       navigate('/account/change-password')
     } catch (error) {
-      const message =
-        error instanceof ApiError ? error.message : 'Something went wrong. Please try again.'
+      const message = authErrorMessage(error)
       setServerError(message)
       dashboardToast.error('Account could not be verified', { description: message })
     } finally {

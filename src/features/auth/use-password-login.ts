@@ -3,8 +3,8 @@ import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router'
 import { z } from 'zod'
-import { ApiError } from '@/lib/api-client'
 import { dashboardToast } from '@/lib/dashboard-toast'
+import { authErrorMessage } from './auth-error-message'
 import { authenticate } from './api'
 import { clearPendingAccount, readPendingAccount, saveAuthSession } from './auth-session'
 import { showPendingState } from './show-pending-state'
@@ -48,8 +48,7 @@ export function usePasswordLogin() {
       })
       navigate(landingPath, { replace: true })
     } catch (error) {
-      const message =
-        error instanceof ApiError ? error.message : 'Something went wrong. Please try again.'
+      const message = authErrorMessage(error)
       setServerError(message)
       dashboardToast.error('Sign-in failed', { description: message })
     } finally {
