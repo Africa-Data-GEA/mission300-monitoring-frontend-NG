@@ -15,17 +15,6 @@ export function PublicHeader() {
 
   return (
     <header className="sticky top-0 z-50">
-      <div className="bg-landing-navy text-white">
-        <div className="mx-auto flex min-h-8 max-w-[96rem] items-center justify-between gap-6 px-4 py-1.5 sm:px-6">
-          <p className="text-[0.625rem] leading-4 font-medium tracking-[0.12em] text-white/70 uppercase sm:text-[0.6875rem]">
-            Federal Republic of Nigeria · Federal Ministry of Power
-          </p>
-          <p className="hidden text-[0.625rem] leading-4 font-medium tracking-[0.08em] text-white/55 uppercase sm:block">
-            Official public record
-          </p>
-        </div>
-      </div>
-
       <div className="border-b border-[#dce3e8] bg-white/95 text-text-default backdrop-blur-md">
         <div className="mx-auto flex min-h-[4.5rem] max-w-[96rem] items-center gap-7 px-4 sm:px-6">
           <Link to="/" className="flex min-w-0 items-center gap-3.5">

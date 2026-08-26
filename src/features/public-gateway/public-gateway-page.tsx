@@ -84,9 +84,7 @@ export function PublicGatewayPage() {
               />
             )}
 
-            <div className="mx-auto max-w-[96rem] px-4 pb-4 sm:px-6">
-              <Institutions />
-            </div>
+            <Institutions />
           </>
         )}
       </main>

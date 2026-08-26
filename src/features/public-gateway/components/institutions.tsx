@@ -1,66 +1,98 @@
-import { SectionHeading } from './section-heading'
-
-/**
- * Section 05 — the institutions behind the record.
- *
- * NOT A LOGO WALL. A row of greyscale logos with a hover effect is a
- * fundraising-page convention: it signals endorsement without saying anything.
- * A reader who does not already know what NERC is learns nothing from its mark.
- *
- * ONE LINE EACH, AND IT IS THE USEFUL ONE. An earlier version gave every
- * institution both a mandate sentence and the figures it reports — twelve lines
- * of prose closing a page that had already spent too many. The mandate is
- * general knowledge or a search away; which numbers above belong to whom is
- * not, and it is the only line that connects this section to the charts. So the
- * mandate goes and the reporting line stays.
- *
- * Each of these is a real stakeholder already modelled in the platform's
- * Stakeholders module.
- */
-const INSTITUTIONS = [
-  {
-    name: 'Federal Ministry of Power',
-    reports: 'Compact Progress Report headline outcomes',
-  },
+const REPORTING_INSTITUTIONS = [
   {
     name: 'Nigerian Electricity Regulatory Commission',
-    reports: 'Metering rate · market remittance · tariff shortfall',
+    shortName: 'NERC',
+    logo: '/Logos/processed/nerc-transparent.png',
+    logoClassName: 'max-h-[4.25rem] max-w-[4.25rem]',
   },
   {
     name: 'Rural Electrification Agency',
-    reports: 'Mini-grid connections · solar home systems',
+    shortName: 'REA',
+    logo: '/Logos/processed/rea.png',
+    logoClassName: 'max-h-[4.5rem] max-w-[9.5rem]',
   },
   {
     name: 'Transmission Company of Nigeria',
-    reports: 'Network capacity · evacuation constraints',
+    shortName: 'TCN',
+    logo: '/Logos/tcn.jpg',
+    logoClassName: 'max-h-[4.5rem] max-w-[5.5rem] mix-blend-multiply',
   },
   {
     name: 'Nigerian Independent System Operator',
-    reports: 'Available generation capacity',
+    shortName: 'NISO',
+    logo: '/Logos/processed/niso-transparent.png',
+    logoClassName: 'max-h-[3.25rem] max-w-[9.5rem]',
   },
   {
-    name: 'Distribution companies (DisCos)',
-    reports: 'New grid connections · ATC&C losses',
+    name: 'Distribution companies',
+    shortName: 'DisCos',
+    logo: null,
+    logoClassName: '',
   },
 ] as const
 
+/** Publisher-led accountability map using the institutions' actual marks. */
 export function Institutions() {
   return (
-    <section aria-labelledby="institutions" className="mt-14">
-      <SectionHeading id="institutions" index="05" title="Who reports these figures" />
+    <section id="institutions" aria-labelledby="institutions-heading" className="bg-[#f7f9fb] py-16 sm:py-20">
+      <div className="mx-auto max-w-[96rem] px-4 sm:px-6">
+        <h2
+          id="institutions-heading"
+          className="text-[1.875rem] leading-9 font-semibold tracking-tight text-landing-blue sm:text-[2.25rem] sm:leading-10"
+        >
+          Who reports these figures
+        </h2>
 
-      <dl className="mt-px grid gap-px bg-border-strong md:grid-cols-2 xl:grid-cols-3">
-        {INSTITUTIONS.map((institution) => (
-          <div key={institution.name} className="bg-surface p-4">
-            <dt className="text-[0.875rem] leading-5 font-bold text-text-default">
-              {institution.name}
-            </dt>
-            <dd className="mt-1 text-[0.8125rem] leading-5 text-text-muted">
-              {institution.reports}
-            </dd>
+        <div className="mt-8 grid overflow-hidden bg-white lg:grid-cols-[17rem_minmax(0,1fr)]">
+          <div className="flex min-h-[13rem] items-center justify-center bg-white p-7">
+            <img
+              src="/Logos/geapp.png"
+              alt="Federal Republic of Nigeria coat of arms"
+              className="max-h-32 max-w-40 object-contain mix-blend-multiply"
+            />
           </div>
-        ))}
-      </dl>
+          <div className="flex flex-col justify-center bg-landing-blue px-7 py-9 text-white sm:px-10">
+            <p className="text-[0.625rem] leading-4 font-bold tracking-[0.14em] text-white/55 uppercase">
+              Lead publisher
+            </p>
+            <h3 className="mt-2 text-[1.5rem] leading-8 font-semibold tracking-tight">
+              Federal Ministry of Power
+            </h3>
+          </div>
+        </div>
+
+        <ol className="mt-px grid gap-px bg-[#dce4e9] sm:grid-cols-2 lg:grid-cols-5">
+          {REPORTING_INSTITUTIONS.map((institution, index) => (
+            <li key={institution.shortName} className="flex min-h-[15rem] flex-col bg-white p-5 sm:p-6">
+              <div className="flex h-20 items-center justify-between gap-4">
+                {institution.logo ? (
+                  <img
+                    src={institution.logo}
+                    alt={`${institution.shortName} logo`}
+                    className={`object-contain ${institution.logoClassName}`}
+                  />
+                ) : (
+                  <div className="flex size-16 items-center justify-center rounded-full bg-[#edf2f5] text-center text-[0.6875rem] leading-4 font-bold text-landing-blue">
+                    11<br />DisCos
+                  </div>
+                )}
+                <span className="text-[0.625rem] leading-4 font-medium text-[#a0adb6] tabular-nums">
+                  {String(index + 1).padStart(2, '0')}
+                </span>
+              </div>
+
+              <div className="mt-auto pt-5">
+                <p className="text-[0.6875rem] leading-4 font-bold tracking-[0.08em] text-landing-blue uppercase">
+                  {institution.shortName}
+                </p>
+                <h3 className="mt-1.5 text-[0.875rem] leading-5 font-semibold text-[#263b49]">
+                  {institution.name}
+                </h3>
+              </div>
+            </li>
+          ))}
+        </ol>
+      </div>
     </section>
   )
 }
