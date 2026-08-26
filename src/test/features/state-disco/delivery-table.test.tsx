@@ -21,6 +21,61 @@ async function renderPage() {
   )
 }
 
+describe('State & DisCo section-scoped filters', () => {
+  /*
+   * Service band and Validation status used to sit in the page-wide filter
+   * bar even though each only genuinely applies to one or two of the five
+   * sections sharing that bar — a reader picking a band would see Delivery
+   * narrow while DisCo comparison, right above it, silently didn't move.
+   * They now live inside the section they actually filter.
+   */
+  it('places the Service band filter inside Delivery & compliance, not the shared page filter bar', async () => {
+    renderRoutesWithProviders([{ path: 'state-disco', element: <StateDiscoPage /> }], {
+      route: '/state-disco',
+    })
+    const deliveryHeading = await screen.findByRole(
+      'heading',
+      { name: 'Delivery & compliance' },
+      { timeout: 5000 },
+    )
+    const section = deliveryHeading.closest('section') as HTMLElement
+    expect(within(section).getByRole('combobox', { name: 'Service band' })).toBeInTheDocument()
+
+    // The shared page-level bar (outside every section) must not carry it —
+    // that was the actual bug: one control claiming to affect the whole page.
+    const user = userEvent.setup()
+    await user.click(screen.getByRole('button', { name: /^Filters/i }))
+    const popover = await screen.findByRole('dialog', { name: /More filters/i })
+    expect(within(popover).queryByText('Service band')).toBeNull()
+  }, 60_000)
+
+  it('narrows only the Delivery table, leaving DisCo comparison unaffected', async () => {
+    renderRoutesWithProviders([{ path: 'state-disco', element: <StateDiscoPage /> }], {
+      route: '/state-disco',
+    })
+    const deliveryTable = await screen.findByRole(
+      'table',
+      { name: /Utility delivery and compliance/i },
+      { timeout: 5000 },
+    )
+    const comparisonTable = screen.getByRole('table', {
+      name: /Distribution Company customers and metering/i,
+    })
+    const comparisonRowsBefore = within(comparisonTable).getAllByRole('row').length
+
+    const deliveryHeading = screen.getByRole('heading', { name: 'Delivery & compliance' })
+    const section = deliveryHeading.closest('section') as HTMLElement
+    const user = userEvent.setup()
+    await user.click(within(section).getByRole('combobox', { name: 'Service band' }))
+    await user.click(await screen.findByRole('option', { name: 'Band E' }))
+
+    await screen.findByText('Rural Band E network densification', {}, { timeout: 5000 })
+    expect(within(deliveryTable).queryByText('112,400 installed')).toBeNull()
+    // Comparison table is untouched by a filter that was never about it.
+    expect(within(comparisonTable).getAllByRole('row').length).toBe(comparisonRowsBefore)
+  }, 60_000)
+})
+
 describe('State & DisCo delivery table', () => {
   it('shows Service band as a column, because it is offered as a filter', async () => {
     const table = await renderPage()

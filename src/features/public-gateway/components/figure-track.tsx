@@ -30,7 +30,7 @@ export function FigureTrack({ track, label }: { track: FigureTrack; label: strin
       >
         {/* Baseline-to-current fill: the distance actually covered. */}
         <div
-          className="absolute inset-y-0 bg-brand-600"
+          className="absolute inset-y-0 bg-landing-blue"
           style={{
             left: track.baseline === null ? '0%' : position(Math.min(track.baseline, track.current)),
             right: `calc(100% - ${position(track.current)})`,
@@ -41,7 +41,7 @@ export function FigureTrack({ track, label }: { track: FigureTrack; label: strin
             shown, but visibly not part of the Compact's own progress. */}
         {track.baseline !== null && (
           <div
-            className="absolute inset-y-0 left-0 bg-brand-200"
+            className="absolute inset-y-0 left-0 bg-landing-blue-lighter"
             style={{ right: `calc(100% - ${position(track.baseline)})` }}
           />
         )}

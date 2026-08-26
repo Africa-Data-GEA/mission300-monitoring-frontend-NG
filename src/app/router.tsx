@@ -64,6 +64,12 @@ const ProgramsPage = lazy(() =>
   })),
 )
 
+const BottlenecksPage = lazy(() =>
+  import('@/features/bottlenecks/bottlenecks-page').then((module) => ({
+    default: module.BottlenecksPage,
+  })),
+)
+
 const ReportsPage = lazy(() =>
   import('@/features/reports/reports-page').then((module) => ({
     default: module.ReportsPage,
@@ -212,6 +218,18 @@ export const router = createBrowserRouter([
       {
         path: 'programs',
         element: lazyRoute(<ProgramsPage />),
+        handle: { globalFilters: false } satisfies RouteHandle,
+      },
+      /*
+       * The bottleneck register. Programs remains the drill-down home for a
+       * single project's bottlenecks, but the register also needs its own
+       * address: Executive Overview already linked here, and review asked for
+       * bottleneck cross-links from the Programs tables
+       * (docs/M300 Monitoring Platform Feedback.pptx, slide 12).
+       */
+      {
+        path: 'bottlenecks',
+        element: lazyRoute(<BottlenecksPage />),
         handle: { globalFilters: false } satisfies RouteHandle,
       },
       {

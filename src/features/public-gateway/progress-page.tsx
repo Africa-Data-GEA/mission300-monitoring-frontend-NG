@@ -78,7 +78,7 @@ export function ProgressPage() {
                     {row.label}
                   </dt>
                   <dd className="mt-1 flex flex-wrap items-baseline gap-x-4 gap-y-1">
-                    <span className="text-[1.75rem] leading-9 font-bold tracking-tight text-text-default">
+                    <span className="font-landing-figure text-[2rem] leading-9 font-bold tracking-tight text-text-default tabular-nums">
                       {row.value}
                     </span>
                     <span className="text-[0.9375rem] leading-6 text-text-muted">

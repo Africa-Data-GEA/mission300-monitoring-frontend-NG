@@ -6,17 +6,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>emrc-geapp</title>
     <!--
-      Inter Tight, from Google Fonts — used only on the public landing pages
-      (public gateway `/` and `/progress`), scoped there via the
-      `.font-landing` rule in src/index.css. Every other page keeps the
-      self-hosted Google Sans (see src/styles/fonts.css) so the authenticated
-      app has no runtime font-CDN dependency; the landing pages are the one
-      deliberate exception.
+      Barlow Condensed, from Google Fonts — used only for the large figure
+      numerals on the public landing pages (public gateway `/` and
+      `/progress`), scoped via the `.font-landing-figure` rule in
+      src/index.css. Everything else on those pages, headings and body text
+      alike, is the same self-hosted Google Sans the authenticated app uses
+      (see src/styles/fonts.css) — the landing pages previously ran their own
+      full type family (Inter Tight); that has been dropped so the public and
+      authenticated experiences read as one product, with this one condensed
+      face reserved for the numbers.
     -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter+Tight:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&display=swap"
       rel="stylesheet"
     />
   </head>

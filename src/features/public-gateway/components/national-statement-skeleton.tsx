@@ -12,8 +12,8 @@ export function NationalStatementSkeleton() {
     <div aria-busy="true">
       <span className="sr-only">Loading national figures</span>
 
-      <div aria-hidden="true" className="bg-brand-800">
-        <div className="mx-auto flex max-w-7xl flex-col gap-10 px-4 py-12 sm:px-6 sm:py-16 lg:flex-row lg:gap-14">
+      <div aria-hidden="true" className="bg-landing-deep-navy">
+        <div className="mx-auto flex max-w-[96rem] flex-col gap-10 px-4 py-12 sm:px-6 sm:py-16 lg:flex-row lg:gap-14">
           <div className="min-w-0 flex-1 animate-pulse">
             <div className="h-4 w-72 max-w-full bg-white/20" />
             <div className="mt-5 h-12 w-full max-w-[34rem] bg-white/20" />
@@ -37,7 +37,7 @@ export function NationalStatementSkeleton() {
         </div>
       </div>
 
-      <div aria-hidden="true" className="mx-auto max-w-7xl px-4 sm:px-6">
+      <div aria-hidden="true" className="mx-auto max-w-[96rem] px-4 sm:px-6">
         <div className="mt-10 animate-pulse">
           <div className="h-6 w-64 border-b-2 border-border-default pb-3" />
           <div className="mt-px grid gap-px bg-border-strong sm:grid-cols-2 xl:grid-cols-4">

@@ -1,7 +1,6 @@
 import { Link } from 'react-router'
 import type { HeadlineCards } from '@/api/schemas/executive-overview'
 import { formatDate } from '@/lib/format'
-import { CONFIDENCE_LABELS } from '../lib/headline-figures'
 import { HeroBackdrop } from './hero-backdrop'
 import { HeroDataCard } from './hero-data-card'
 
@@ -30,58 +29,65 @@ import { HeroDataCard } from './hero-data-card'
  * values here are that scale and are intentional — do not "fix" them back to the
  * app tokens.
  */
-export function NationalStatement({
-  cards,
-  statesCovered,
-}: {
-  cards: HeadlineCards
-  /** Number of states with an approved coverage breakdown, for the record's
-   * own metadata. Null while the state payload has not loaded — the row is
-   * dropped rather than showing a zero that reads as "no states covered". */
-  statesCovered: number | null
-}) {
+export function NationalStatement({ cards }: { cards: HeadlineCards }) {
   const headline = cards.peopleWithElectricityAccess
 
+  /*
+   * Three rows, not five. A metadata card is only read if it can be taken in
+   * at a glance; at five rows it becomes a second paragraph wearing a border.
+   * Period, source and date are what a journalist needs to cite the figure —
+   * confidence is already on every card as a labelled dot, and the state count
+   * is stated by the state table itself.
+   */
   const metadataRows = [
-    { label: 'Reporting period', value: headline.reportingPeriod },
-    { label: 'Data confidence', value: CONFIDENCE_LABELS[headline.source] },
-    ...(statesCovered === null
-      ? []
-      : [{ label: 'Coverage', value: `${statesCovered} states with an approved delivery breakdown` }]),
-    { label: 'Published by', value: headline.provenance.source },
-    { label: 'Last updated', value: formatDate(headline.provenance.lastUpdated) },
+    { label: 'Period', value: headline.reportingPeriod },
+    { label: 'Source', value: headline.provenance.source },
+    { label: 'Updated', value: formatDate(headline.provenance.lastUpdated) },
   ]
 
   return (
-    <section aria-labelledby="national-statement" className="relative isolate bg-brand-800">
+    <section
+      aria-labelledby="national-statement"
+      className="relative isolate flex min-h-screen items-center bg-landing-deep-navy"
+    >
       <HeroBackdrop />
-      <div className="relative mx-auto flex max-w-7xl flex-col gap-10 px-4 py-12 sm:px-6 sm:py-16 lg:flex-row lg:items-start lg:gap-14">
+      <div className="relative mx-auto flex w-full max-w-[96rem] flex-col gap-10 px-4 py-12 sm:px-6 sm:py-16 lg:flex-row lg:items-start lg:gap-14">
         <div className="min-w-0 flex-1">
-          <p className="text-[0.75rem] leading-4 font-bold tracking-[0.16em] text-white/60 uppercase">
-            Federal Republic of Nigeria · National Energy Compact
+          <p className="text-[0.75rem] leading-4 font-medium tracking-[0.16em] text-white/70 uppercase">
+            Federal Republic of Nigeria
           </p>
 
           <h1
             id="national-statement"
-            className="mt-4 max-w-[38rem] text-[2.25rem] leading-[2.625rem] font-bold tracking-tight text-white sm:text-[3rem] sm:leading-[3.25rem]"
+            className="mt-4 max-w-[38rem] text-[2.25rem] leading-[2.625rem] font-semibold tracking-tight text-white sm:text-[3rem] sm:leading-[3.25rem]"
           >
-            {headline.value} Nigerians have electricity access
+            {/* Only the figure itself switches face — see .font-landing-figure's
+                note in index.css. The surrounding sentence stays on the page's
+                normal type so it reads as one heading, not two fonts stitched
+                together. */}
+            <span className="font-landing-figure text-landing-gold tabular-nums">{headline.value}</span> Nigerians
+            have electricity access
           </h1>
 
+          {/*
+            One line, and every word in it is a figure. The previous version
+            added a second sentence explaining what the page does, which is the
+            kind of copy a reader skips and a designer keeps.
+          */}
           <p className="mt-5 max-w-[36rem] text-[1.0625rem] leading-7 text-white/80">
-            Up from a baseline of {headline.baselineLabel}, against a national
-            target of {headline.targetLabel}. This page publishes the figures
-            behind that number, each with the institution responsible for it and
-            the status of the data.
+            Up from {headline.baselineLabel}. Target {headline.targetLabel}.
           </p>
 
           <div className="mt-8 flex flex-wrap items-center gap-x-8 gap-y-4">
             <Link
               to="/progress"
-              className="border-2 border-white bg-white px-5 py-2.5 text-[1rem] leading-6 font-bold text-brand-800 transition-colors hover:bg-transparent hover:text-white"
+              className="rounded-[0.375rem] border-2 border-white bg-white px-5 py-2.5 text-[1rem] leading-6 font-semibold text-landing-navy transition-colors hover:bg-transparent hover:text-white"
             >
               See national progress
             </Link>
+            {/* The header already carries a Sign in button; this is the one
+                place that says who it is for, in six words rather than a
+                sentence. */}
             <p className="text-[0.875rem] leading-5 text-white/70">
               <Link
                 to="/account/login"
@@ -89,20 +95,15 @@ export function NationalStatement({
               >
                 Sign in
               </Link>{' '}
-              — for institutions submitting data, reviewers and oversight users.
+              — for reporting institutions
             </p>
           </div>
         </div>
 
-        <HeroDataCard
-          rows={metadataRows}
-          links={[
-            { label: 'Latest published figures', to: '#latest-figures' },
-            { label: 'How access is being delivered', to: '#access-delivery' },
-            { label: 'Delivery by state', to: '#delivery-in-motion' },
-            { label: 'Who reports these figures', to: '#institutions' },
-          ]}
-        />
+        {/* No jump-links here: the header's Figures / Delivery / About menus
+            already reach every section, and repeating them cost four more
+            lines of text in the one place that should be scannable. */}
+        <HeroDataCard rows={metadataRows} />
       </div>
     </section>
   )

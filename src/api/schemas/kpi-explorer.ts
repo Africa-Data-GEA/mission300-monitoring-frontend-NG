@@ -97,6 +97,14 @@ export const kpiCatalogueRowSchema = z.object({
   readiness: readinessTierSchema,
   validationStatus: validationStatusSchema,
   lastUpdated: z.iso.datetime(),
+  /**
+   * False once an indicator has been retired. Optional so every existing
+   * fixture and backend response stays valid — absent means active. Retired
+   * indicators are hidden from the catalogue by default but never deleted,
+   * because published values must remain traceable. See
+   * setKpiActiveRequestSchema.
+   */
+  active: z.boolean().optional(),
 })
 
 /* ------------------------------------------------------------------ *
@@ -152,6 +160,54 @@ export const updateKpiMetadataRequestSchema = z.object({
 })
 
 export type UpdateKpiMetadataRequest = z.infer<typeof updateKpiMetadataRequestSchema>
+
+/**
+ * Creating a brand-new indicator.
+ *
+ * Review noted that existing indicators can be modified but there was no way
+ * to add an extra KPI or retire one (docs/M300 Monitoring Platform
+ * Feedback.pptx, slide 15). Deliberately scoped to what identifies and
+ * defines an indicator — its values arrive later, through an approved data
+ * submission, never typed in here. A new indicator therefore starts with no
+ * current value and `future` validation status.
+ */
+export const createKpiRequestSchema = z.object({
+  id: z
+    .string()
+    .trim()
+    .min(3, 'Give the indicator an identifier, e.g. M300-P1-020')
+    .regex(/^[A-Za-z0-9-]+$/, 'Use letters, numbers and hyphens only'),
+  name: z.string().trim().min(3, 'Give the indicator a name'),
+  pillar: pillarIdSchema,
+  category: z.string().trim().min(1, 'Select a category'),
+  unit: z.string().trim().min(1, 'State the unit, e.g. % or MW'),
+  definition: z.string().trim().min(10, 'Describe what this indicator measures'),
+  formula: z.string().trim().min(1, 'State how it is calculated'),
+  frequency: z.string().trim().min(1, 'State the reporting frequency'),
+  sourceInstitution: z.string().trim().min(1, 'Name the responsible institution'),
+  sourceDataset: z.string().trim().min(1, 'Name the dataset it is measured from'),
+  readiness: readinessTierSchema,
+})
+
+export const createKpiResponseSchema = z.object({
+  row: kpiCatalogueRowSchema,
+  message: z.string().min(1),
+})
+
+/**
+ * Retiring or restoring an indicator. Deactivation is reversible and never
+ * deletes: an indicator that has already published values must stay
+ * traceable, so it is marked inactive and hidden from the default catalogue
+ * rather than removed.
+ */
+export const setKpiActiveRequestSchema = z.object({
+  active: z.boolean(),
+  reason: z.string().trim().max(500).optional(),
+})
+
+export type CreateKpiRequest = z.infer<typeof createKpiRequestSchema>
+export type CreateKpiResponse = z.infer<typeof createKpiResponseSchema>
+export type SetKpiActiveRequest = z.infer<typeof setKpiActiveRequestSchema>
 
 export const kpiProfileSchema = z.object({
   id: z.string().min(1),

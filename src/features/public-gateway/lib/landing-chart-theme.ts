@@ -18,16 +18,35 @@ import type { ApexOptions } from 'apexcharts'
  * charts reach most ministerial readers, photocopied into a briefing pack.
  * No red/green pair sits adjacent in the order.
  */
-export const LANDING_FONT_FAMILY = "'Inter Tight', ui-sans-serif, system-ui, sans-serif"
+/**
+ * The landing pages now run the same body typeface as the authenticated
+ * dashboard, 'Google Sans' — see `.font-landing`'s note in index.css for why
+ * the earlier Inter Tight was dropped. ApexCharts renders into an SVG/canvas
+ * context outside the page's own cascade, so this repeats the literal family
+ * name rather than referencing `var(--font-sans)`, matching how
+ * `config/chart-colors.ts` does it for the authenticated app's own charts.
+ */
+export const LANDING_FONT_FAMILY = "'Google Sans', ui-sans-serif, system-ui, sans-serif"
 
+/*
+ * Anchored on SE4ALL's own palette (seforall.org), not the app's admin-
+ * configurable brand colour — same reasoning as `--color-landing-*` in
+ * theme.css: this page has no session and cannot read Administration >
+ * Customization, so its colours must be fixed, not inherited.
+ *
+ * Also more saturated than the previous earth-tone set (burnt orange,
+ * bronze) — those read as muted/desaturated next to SE4ALL's own site, which
+ * leans on a punchy gold against deep navy. This set keeps the same
+ * monotonic-lightness/greyscale-separable property, just with more chroma.
+ */
 export const LANDING_PALETTE = [
-  '#004972', // CDMU navy — the primary series
+  '#065a89', // Primary institutional blue
+  '#065a89', // SE4ALL mid blue
   '#0f8b8d', // teal
-  '#c2571a', // burnt orange
   '#5b4bb7', // violet
+  '#c2571a', // burnt orange
   '#00764a', // green
-  '#8f5605', // bronze
-  '#0077b9', // mid blue
+  '#ffb800', // SE4ALL saturated gold — lightest, so it stays last in the descent
 ] as const
 
 /** Grey used for a projected or unapproved value, in every landing chart. */
@@ -60,6 +79,10 @@ export function landingChartBase(id?: string): ApexOptions {
       animations: { enabled: false },
       background: 'transparent',
       parentHeightOffset: 0,
+      // A small, low-opacity lift under the plotted shape — bar or line — for
+      // depth without reading as decoration. Kept subtle: this is a government
+      // record, not a marketing chart, so the effect is felt more than seen.
+      dropShadow: { enabled: true, top: 2, left: 0, blur: 3, opacity: 0.1 },
     },
     colors: [...LANDING_PALETTE],
     grid: {

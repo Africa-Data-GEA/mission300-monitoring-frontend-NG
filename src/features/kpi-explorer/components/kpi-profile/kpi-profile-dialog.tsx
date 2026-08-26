@@ -9,6 +9,7 @@ import { KpiMetadataEditDialog } from './kpi-metadata-edit-dialog'
 import { LinkedRecordsPanel } from './linked-records-panel'
 import { MetadataPanel } from './metadata-panel'
 import { ProfileSkeleton } from './profile-skeleton'
+import { RetireKpiButton } from './retire-kpi-button'
 import { TraceabilityPanel } from './traceability-panel'
 import { ValuesPanel } from './values-panel'
 
@@ -49,7 +50,13 @@ export function KpiProfileDialog({
       ) : (
         <div className="flex flex-col gap-5">
           {canEditMetadata && (
-            <div className="flex justify-end">
+            <div className="flex flex-wrap justify-end gap-2">
+              {/* Retiring an indicator sits beside editing it, because it is
+                  the same registry-management concern — review asked for the
+                  ability to deactivate a KPI, not only change its definition
+                  (docs/M300 Monitoring Platform Feedback.pptx, slide 15).
+                  Retiring never deletes: published values stay traceable. */}
+              <RetireKpiButton kpiId={profile.id} name={profile.name} />
               <Button type="button" variant="secondary" size="sm" onClick={() => setEditOpen(true)}>
                 Edit definition &amp; targets
               </Button>

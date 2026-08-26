@@ -6,18 +6,35 @@ import { api } from '@/lib/api-client'
 /**
  * National figures for the public gateway.
  *
- * TEMPORARY ENDPOINT. This currently reads `/executive-overview`, the same
- * authenticated payload the dashboard uses. docs/public-gateway-home.md §11
- * specifies a dedicated `GET /api/public/overview` — unauthenticated, cacheable,
- * carrying only what is cleared for publication. That endpoint does not exist
- * yet, and inventing a fake one here would hide the dependency.
+ * READS THE AUTHENTICATED ENDPOINT, ON PURPOSE.
  *
- * Swapping to it is a one-line change to the path below, which is why the call
- * is isolated in this feature rather than importing the dashboard's hook: the
- * public gateway must not grow a dependency on an authenticated module.
+ * `GET /api/public/overview` now EXISTS on the Nigeria backend and is
+ * unauthenticated — an earlier version of this comment said it did not, which
+ * was true when written and is not any more. It is still not used here, and
+ * the reason is content rather than plumbing: it serves a much thinner payload
+ * than this page renders.
  *
- * Until the real endpoint lands, treat anything rendered from this as
- * unreviewed for public release.
+ * What it returns:  headlineStrip (2 figures), deliveryChannels (3),
+ *                   pillarIndicators (2) — each carrying only a formatted
+ *                   `value` string, a reporting period and provenance.
+ * What it omits:    `rawValue`, `target`, `baseline`, `scaleMin`/`scaleMax`,
+ *                   `sparkline` and `history`.
+ *
+ * Those omissions are precisely the fields the redesigned page is built from:
+ * no `baseline`/`target` means no bullet track on the headline cards, no
+ * `history` means no evolution charts, and no `target` on a channel means the
+ * share-of-target view has nothing to divide by. Switching today would trade a
+ * working page for a thinner one.
+ *
+ * SO THE SEQUENCE IS: the public endpoint grows those fields, then this becomes
+ * a one-line path change. It is isolated in this feature rather than importing
+ * the dashboard's hook precisely so that stays a one-line change — the public
+ * gateway must not grow a dependency on an authenticated module.
+ *
+ * UNTIL THEN: this page requires a signed-in session to render figures, which
+ * is wrong for a public front door and is the single most important thing to
+ * fix about it. Treat anything rendered from this as unreviewed for public
+ * release.
  */
 export const publicGatewayKeys = {
   all: ['public-gateway'] as const,

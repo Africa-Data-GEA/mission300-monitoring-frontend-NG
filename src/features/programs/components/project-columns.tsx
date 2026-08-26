@@ -22,12 +22,15 @@ export function buildProjectColumns(
       header: 'Project',
       className: 'min-w-56',
       sortValue: (row) => row.name,
+      // Same fix as programme-columns.tsx: an untruncated button let this
+      // column stretch to fit the longest project name on the page.
       cell: (row) => (
-        <div className="min-w-0">
+        <div className="max-w-xs min-w-0">
           <button
             type="button"
             onClick={() => onOpenProject(row)}
-            className="text-left font-medium text-text-default hover:text-brand-700 hover:underline"
+            title={row.name}
+            className="block w-full truncate text-left font-medium text-text-default hover:text-brand-700 hover:underline"
           >
             {row.name}
           </button>

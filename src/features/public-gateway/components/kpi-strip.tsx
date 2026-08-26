@@ -1,37 +1,33 @@
 import type { KpiFigure } from '../lib/headline-figures'
 import { KpiCard } from './kpi-card'
-import { SectionHeading } from './section-heading'
 
-/**
- * The national headline strip — the four Compact outcomes, side by side.
- *
- * DIVIDERS ARE THE GAP. The grid has a 1px gap over a border-coloured
- * background, so the rules between cells are the gap itself. That is what makes
- * four cards read as one instrument: there is no gutter, no shadow and no
- * rounding to separate them, only a hairline, exactly as a printed statistical
- * table separates its columns.
- *
- * Two columns before four, never three: three columns leaves one card orphaned
- * on its own row, which visually promotes whichever figure lands there.
- */
+/** A full-width, colour-blocked national snapshot immediately after the hero. */
 export function KpiStrip({ figures }: { figures: readonly KpiFigure[] }) {
   return (
-    <section aria-labelledby="latest-figures" className="mt-10">
-      <SectionHeading
-        id="latest-figures"
-        index="01"
-        title="Latest published figures"
-        controls={
-          <p className="max-w-[20rem] text-[0.8125rem] leading-5 text-text-muted">
-            The four outcomes tracked by the Compact Progress Report.
+    <section aria-labelledby="latest-figures" className="bg-[#f1f4f7] py-12 sm:py-14">
+      <div className="mx-auto max-w-[96rem] px-4 sm:px-6">
+        <div className="flex flex-wrap items-end justify-between gap-x-10 gap-y-3">
+          <div>
+            <p className="text-[0.6875rem] leading-4 font-bold tracking-[0.14em] text-landing-blue uppercase">
+              National snapshot
+            </p>
+            <h2
+              id="latest-figures"
+              className="mt-1.5 text-[1.875rem] leading-9 font-bold tracking-tight text-landing-navy sm:text-[2.25rem] sm:leading-10"
+            >
+              Latest published figures
+            </h2>
+          </div>
+          <p className="pb-1 text-[0.6875rem] leading-4 font-semibold tracking-[0.06em] text-[#667684] uppercase">
+            Compact Progress Report targets
           </p>
-        }
-      />
+        </div>
 
-      <div className="mt-px grid gap-px bg-border-strong sm:grid-cols-2 xl:grid-cols-4">
-        {figures.map((figure) => (
-          <KpiCard key={figure.id} figure={figure} />
-        ))}
+        <div className="mt-7 grid gap-px overflow-hidden bg-[#d7e0e7] sm:grid-cols-2 xl:grid-cols-4">
+          {figures.map((figure) => (
+            <KpiCard key={figure.id} figure={figure} />
+          ))}
+        </div>
       </div>
     </section>
   )

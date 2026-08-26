@@ -108,6 +108,35 @@
   --color-chart-blue-lightest: #fffcf0;
   --color-chart-accent: #ffca05;
 
+  /* --- Public landing pages (public gateway `/`, `/progress`) ------------
+   * Deliberately NOT `--color-brand-*`: those are overridden at runtime by
+   * BrandProvider from whatever an admin has saved in Administration >
+   * Customization (see src/features/branding/brand-provider.tsx). The public
+   * gateway has no session and cannot read that config in the first place,
+   * so a page that used `bg-brand-800` etc. was quietly inheriting the
+   * authenticated app's admin-configurable colour instead of having its own —
+   * an anonymous visitor's homepage should not repaint itself because
+   * someone logged into the internal tool picked a new primary colour.
+   *
+   * Fixed, verified against the live SE4ALL site (seforall.org) rather than
+   * invented — #065A89 is the public experience's primary institutional blue,
+   * and #FFB800 is its own saturated
+   * gold/amber accent (its most-used background-color value). Mirrors the
+   * navy+gold shape the rest of this platform already uses, but as its own
+   * fixed set, never touched by BrandProvider. */
+  --color-landing-deep-navy: #002036;
+  --color-landing-navy: #065a89;
+  --color-landing-blue: #065a89;
+  --color-landing-blue-light: #4e93b5;
+  --color-landing-blue-lighter: #b8d8e6;
+  --color-landing-gold: #ffb800;
+  /* The vivid gold above is 1.7:1 against white — fine as a background or a
+   * chart line, where a dark label sits on top of or beside it, but it fails
+   * WCAG AA (needs 3:1 even at large text) used directly as text colour on a
+   * white card. This darker amber keeps the same hue at 5.9:1, for anywhere
+   * the gold is the text itself rather than a fill behind other text. */
+  --color-landing-gold-text: #8a5a00;
+
   /* --- Typography --------------------------------------------------------
    * Deliberately tighter than the Tailwind default: this is a dense
    * operational tool viewed at 100% zoom for long stretches, not a marketing

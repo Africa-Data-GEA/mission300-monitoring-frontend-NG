@@ -14,6 +14,20 @@ export function ProjectStatusEvolutionTable({ projects }: { projects: readonly O
     return <p className="mt-3 py-8 text-center text-sm text-text-muted">No ongoing projects found.</p>
   }
 
+  /*
+   * With no periods there are no columns, and the table degenerates into a
+   * bare list of project names pretending to be a history. Say plainly that
+   * the history was not supplied instead — the backend currently omits
+   * `statusHistory` entirely (see BACKEND TOLERANCE in the schema).
+   */
+  if (periods.length === 0) {
+    return (
+      <p className="mt-3 py-8 text-center text-sm text-text-muted">
+        No status history has been reported for these projects yet.
+      </p>
+    )
+  }
+
   return (
     <div className="mt-3 overflow-x-auto rounded-lg border border-border-default">
       <table className="w-full min-w-[820px] border-collapse text-left">

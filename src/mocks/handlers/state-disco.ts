@@ -16,6 +16,18 @@ function filterUtility<T extends { id: string }>(rows: T[], request: Request) {
 }
 
 /**
+ * Applies the Validation status control, which was offered in the filter bar
+ * but never read by any query (docs/M300 Monitoring Platform Feedback.pptx,
+ * slide 11). Every table this page renders carries `validationLabel`, so the
+ * same filter applies uniformly and is readable back from a column.
+ */
+function filterByValidation<T extends { validationLabel: string }>(rows: T[], request: Request) {
+  const value = new URL(request.url).searchParams.get('validationStatus')
+  if (!value || value === 'all') return rows
+  return rows.filter((row) => row.validationLabel.toLowerCase() === value.toLowerCase())
+}
+
+/**
  * Delivery rows are keyed by milestone id ("del-001"), not by utility id, so
  * the generic `filterUtility` above matched nothing and silently emptied this
  * tab whenever a DisCo was selected. These rows are matched on the utility
@@ -28,12 +40,14 @@ function filterDeliveryRows(rows: DeliveryRow[], request: Request) {
   const utility = params.get('distributionCompany')
   const band = params.get('serviceBand')
 
-  return rows.filter((row) => {
+  const matched = rows.filter((row) => {
     if (utility && utility !== 'national' && !row.utility.toLowerCase().startsWith(utility.toLowerCase())) {
       return false
     }
     return !band || band === 'all' || row.serviceBand.toLowerCase() === band.toLowerCase()
   })
+
+  return filterByValidation(matched, request)
 }
 
 export const stateDiscoHandlers = [
@@ -46,7 +60,7 @@ export const stateDiscoHandlers = [
     await delay(100)
     return HttpResponse.json({
       meta: stateDiscoOverview.meta,
-      rows: filterUtility(discoComparisonRows, request),
+      rows: filterByValidation(filterUtility(discoComparisonRows, request), request),
     })
   }),
   http.get('/api/state-disco/supply-tariff', async ({ request }) => {
@@ -74,9 +88,10 @@ export const stateDiscoHandlers = [
   http.get('/api/state-disco/states', async ({ request }) => {
     await delay(100)
     const state = new URL(request.url).searchParams.get('state')
-    const rows = !state || state === 'all'
-      ? stateCoverageRows
-      : stateCoverageRows.filter((row) => row.id === state)
+    const rows = filterByValidation(
+      !state || state === 'all' ? stateCoverageRows : stateCoverageRows.filter((row) => row.id === state),
+      request,
+    )
     return HttpResponse.json({
       meta: {
         ...stateDiscoOverview.meta,

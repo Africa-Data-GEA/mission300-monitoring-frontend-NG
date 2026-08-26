@@ -1,19 +1,14 @@
 /**
  * Where the hero photograph is read from.
  *
- * Drop a file at `public/hero/national-electrification.jpg` and it appears
- * behind the headline. Nothing else needs to change, and nothing breaks while
- * the file is absent — the navy field and the data texture below render on
- * their own, so the hero never shows a broken-image gap or a grey box.
- *
- * WHAT TO PUT HERE. A real photograph of Nigerian electrification work or
- * infrastructure, credited. Not a stock library image of solar panels or of
- * smiling villagers: the build spec bans those by name, and for a good reason —
- * a generic image is the single fastest way to make a page of real figures look
- * like a brochure that invented them. If no real photograph is cleared for
- * publication, leaving this absent is the better outcome, not a worse one.
+ * `public/bg.avif` — supplied directly rather than dropped into
+ * `public/hero/` per that folder's own README, because the file already
+ * existed at the project root when this was wired up. Nothing else needs to
+ * change if it is replaced later, and nothing breaks while it is absent — the
+ * navy field and the data texture below render on their own, so the hero
+ * never shows a broken-image gap or a grey box.
  */
-export const HERO_IMAGE_URL = '/hero/national-electrification.jpg'
+export const HERO_IMAGE_URL = '/bg.avif'
 
 /**
  * The layered background of the hero band.
@@ -36,7 +31,7 @@ export function HeroBackdrop() {
   return (
     <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
       <div
-        className="absolute inset-0 bg-cover bg-center opacity-45"
+        className="absolute inset-0 bg-cover bg-center opacity-75"
         style={{ backgroundImage: `url('${HERO_IMAGE_URL}')` }}
       />
 
@@ -82,7 +77,7 @@ export function HeroBackdrop() {
       </svg>
 
       {/* Scrim last, so it sits over both the photograph and the texture. */}
-      <div className="absolute inset-0 bg-[linear-gradient(100deg,rgba(0,44,68,0.95)_0%,rgba(0,44,68,0.88)_42%,rgba(0,44,68,0.55)_100%)]" />
+      <div className="absolute inset-0 bg-[linear-gradient(100deg,rgba(0,32,54,0.9)_0%,rgba(0,32,54,0.7)_45%,rgba(0,32,54,0.22)_100%)]" />
     </div>
   )
 }

@@ -30,7 +30,11 @@ export function FilterPills({
   onChange: (id: string) => void
 }) {
   return (
-    <div role="group" aria-label={label} className="flex flex-wrap gap-1">
+    <div
+      role="group"
+      aria-label={label}
+      className="inline-flex max-w-full flex-nowrap gap-1 overflow-x-auto rounded-[0.625rem] border border-[#d7e0e7] bg-white/75 p-1"
+    >
       {options.map((option) => {
         const isActive = option.id === value
         return (
@@ -41,8 +45,8 @@ export function FilterPills({
             onClick={() => onChange(option.id)}
             className={
               isActive
-                ? 'border border-brand-600 bg-brand-600 px-2.5 py-1 text-[0.75rem] leading-4 font-semibold text-white'
-                : 'border border-border-strong bg-surface px-2.5 py-1 text-[0.75rem] leading-4 font-semibold text-text-muted transition-colors hover:border-text-muted hover:text-text-default'
+                ? 'shrink-0 rounded-[0.4375rem] bg-landing-blue px-3 py-1.5 text-[0.75rem] leading-4 font-semibold whitespace-nowrap text-white shadow-[0_1px_2px_rgba(6,90,137,0.18)]'
+                : 'shrink-0 rounded-[0.4375rem] bg-transparent px-3 py-1.5 text-[0.75rem] leading-4 font-medium whitespace-nowrap text-[#5e7180] transition-colors hover:bg-[#e8eff4] hover:text-landing-blue'
             }
           >
             {option.label}

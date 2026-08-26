@@ -18,6 +18,7 @@ import { getKpiProfile, publishKpiValue } from '../data/kpi-explorer'
 import { getLiveBackendUrl, proxyToLiveBackend } from '../live-backend'
 import type {
   KpiExtraction,
+  Obligation,
   SubmissionDetail,
   SubmissionListItem,
   ValidationQueueItem,
@@ -27,6 +28,41 @@ import type {
 function pageNumber(value: string | null, fallback: number) {
   const parsed = Number(value)
   return Number.isInteger(parsed) && parsed > 0 ? parsed : fallback
+}
+
+/** Statuses that mean the obligation is finished and no longer in the queue. */
+const SETTLED_STATUS_CODES = new Set(['accepted', 'approved', 'provisional'])
+
+/**
+ * Aggregate indicators for the obligations table (see obligationStatsSchema).
+ *
+ * Days overdue is read from the record's own `dueLabel` ("8 days overdue")
+ * rather than computed against the wall clock: these fixtures carry fixed due
+ * dates with hand-written labels, so a clock-based figure would drift away
+ * from the label shown in the very same row.
+ */
+function buildObligationStats(rows: Obligation[]) {
+  const counts = new Map<string, { code: string; label: string; tone: string; count: number }>()
+  for (const row of rows) {
+    const entry = counts.get(row.status.code)
+    if (entry) entry.count += 1
+    else counts.set(row.status.code, { ...row.status, count: 1 })
+  }
+
+  const overdueDays = rows
+    .map((row) => /^(\d+)\s+days?\s+overdue/i.exec(row.dueLabel)?.[1])
+    .filter((value): value is string => Boolean(value))
+    .map(Number)
+
+  return {
+    total: rows.length,
+    byStatus: [...counts.values()].sort((a, b) => b.count - a.count),
+    overdueCount: rows.filter((row) => row.status.code === 'overdue').length,
+    averageDaysOverdue: overdueDays.length
+      ? Math.round((overdueDays.reduce((sum, days) => sum + days, 0) / overdueDays.length) * 10) / 10
+      : null,
+    openCount: rows.filter((row) => !SETTLED_STATUS_CODES.has(row.status.code)).length,
+  }
 }
 
 function paginate<T>(items: T[], url: URL) {
@@ -42,7 +78,7 @@ function filterRows<T extends {
   institution: string
   dataset?: string
   reportingPeriod: string
-  status: WorkflowStatus
+  status: WorkflowStatus | null
 }>(rows: T[], url: URL) {
   const search = (url.searchParams.get('search') ?? '').toLowerCase()
   const institution = url.searchParams.get('institution')
@@ -56,7 +92,7 @@ function filterRows<T extends {
       (!institution || searchable.includes(institution.replaceAll('-', ' '))) &&
       (!dataset || row.dataset?.toLowerCase().includes(dataset.replaceAll('-', ' '))) &&
       (!period || row.reportingPeriod.toLowerCase().replaceAll(' ', '-') === period) &&
-      (!status || row.status.code === status)
+      (!status || row.status?.code === status)
   })
 }
 
@@ -278,7 +314,9 @@ export const dataSubmissionHandlers = [
     if (liveBackend) return proxyToLiveBackend(request, liveBackend)
     await delay(100)
     const url = new URL(request.url)
-    return HttpResponse.json(paginate(filterRows(submissionObligations, url), url))
+    const matched = filterRows(submissionObligations, url)
+    // Stats describe the filtered set, not the page — see obligationStatsSchema.
+    return HttpResponse.json({ ...paginate(matched, url), stats: buildObligationStats(matched) })
   }),
   http.get('/api/data-submissions/submissions', async ({ request }) => {
     const liveBackend = getLiveBackendUrl()

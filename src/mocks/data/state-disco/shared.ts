@@ -19,7 +19,14 @@ export const stateDiscoFilters: StateDiscoFilters = {
     { value: 'd', label: 'Band D' },
     { value: 'e', label: 'Band E' },
   ],
-  validationStatuses: [{ value: 'confirmed', label: 'Confirmed' }, { value: 'provisional', label: 'Provisional' }],
+  // "All" added and made the default — the control previously defaulted to
+  // `confirmed`, which, once it actually filtered, would have silently hidden
+  // every provisional row rather than showing the full picture first.
+  validationStatuses: [
+    { value: 'all', label: 'All validation statuses' },
+    { value: 'confirmed', label: 'Confirmed' },
+    { value: 'provisional', label: 'Provisional' },
+  ],
   sources: [{ value: 'nerc', label: 'NERC' }, { value: 'rea', label: 'REA' }, { value: 'implementation-register', label: 'Implementation Register' }],
 }
 

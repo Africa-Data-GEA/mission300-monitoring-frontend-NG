@@ -1,10 +1,12 @@
 import { ArrowRight } from 'lucide-react'
+import { useState } from 'react'
 import { Link } from 'react-router'
 import type { DeliveryRow, StateCoverageRow } from '@/api/schemas/state-disco'
 import type { Column } from '@/components/ui/data-table'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
+import { SelectField } from '@/components/ui/select-field'
 import { formatDate } from '@/lib/format'
 import {
   useDiscoComparison,
@@ -54,7 +56,22 @@ const deliveryColumns: Column<DeliveryRow>[] = [
     sortValue: (row) => row.bottleneck,
     cell: (row) => row.bottleneck || <span className="text-text-muted">None</span>,
   },
+  // Shown for the same reason as Service band: it is a filter, so it must be
+  // readable back from the table.
+  { id: 'validation', header: 'Validation', cell: (row) => row.validationLabel, sortValue: (row) => row.validationLabel },
 ]
+
+/**
+ * These cells hold display strings ("112,400", "98.4%"), so sorting them as
+ * text would order 9 after 10 and 1,200 before 900. Review asked for sorting
+ * across every table on this page (docs/M300 Monitoring Platform
+ * Feedback.pptx, slide 11), so numeric columns sort on the parsed number.
+ * Returns null — which DataTable sorts last — when there is no number to read.
+ */
+function numericSort(value: string): number | null {
+  const parsed = Number.parseFloat(value.replace(/[^0-9.-]/g, ''))
+  return Number.isNaN(parsed) ? null : parsed
+}
 
 const stateColumns: Column<StateCoverageRow>[] = [
   {
@@ -68,14 +85,15 @@ const stateColumns: Column<StateCoverageRow>[] = [
     ),
     sortValue: (row) => row.state,
   },
-  { id: 'mini-grid', header: 'Mini-grid connections', cell: (row) => row.miniGridConnections, align: 'right' },
-  { id: 'shs', header: 'Solar Home Systems', cell: (row) => row.solarHomeSystems, align: 'right' },
-  { id: 'programmes', header: 'Programmes', cell: (row) => row.activeProgrammes, align: 'right' },
-  { id: 'projects', header: 'Projects', cell: (row) => row.activeProjects, align: 'right' },
-  { id: 'bottlenecks', header: 'Open bottlenecks', cell: (row) => row.openBottlenecks, align: 'right' },
+  { id: 'mini-grid', header: 'Mini-grid connections', cell: (row) => row.miniGridConnections, align: 'right', sortValue: (row) => numericSort(row.miniGridConnections) },
+  { id: 'shs', header: 'Solar Home Systems', cell: (row) => row.solarHomeSystems, align: 'right', sortValue: (row) => numericSort(row.solarHomeSystems) },
+  { id: 'programmes', header: 'Programmes', cell: (row) => row.activeProgrammes, align: 'right', sortValue: (row) => numericSort(row.activeProgrammes) },
+  { id: 'projects', header: 'Projects', cell: (row) => row.activeProjects, align: 'right', sortValue: (row) => numericSort(row.activeProjects) },
+  { id: 'bottlenecks', header: 'Open bottlenecks', cell: (row) => row.openBottlenecks, align: 'right', sortValue: (row) => numericSort(row.openBottlenecks) },
   {
     id: 'validation',
     header: 'Validated coverage',
+    sortValue: (row) => row.validationLabel,
     cell: (row) => (
       <div className="min-w-36">
         <p className="text-xs">{row.validationLabel}</p>
@@ -98,10 +116,25 @@ export function StateDiscoPage() {
   const state = useStateDiscoQuery()
   const filters = useStateDiscoFilters()
   const overview = useStateDiscoOverview(state.query)
-  const comparison = useDiscoComparison(state.query)
+
+  /*
+   * Service band and Validation status are scoped to the one or two sections
+   * they actually mean something for, rather than living in the page-wide
+   * filter bar above — see the comment in state-disco-filters.tsx. Each
+   * section's own query still goes through the same shared query params
+   * (period, DisCo, state), just with its own local filter merged in.
+   */
+  const [comparisonValidation, setComparisonValidation] = useState('all')
+  const comparison = useDiscoComparison({ ...state.query, validationStatus: comparisonValidation })
+
   const supplyTariff = useSupplyTariff(state.query)
-  const delivery = useUtilityDelivery(state.query)
-  const coverage = useStateCoverage(state.query)
+
+  const [deliveryBand, setDeliveryBand] = useState('all')
+  const [deliveryValidation, setDeliveryValidation] = useState('all')
+  const delivery = useUtilityDelivery({ ...state.query, serviceBand: deliveryBand, validationStatus: deliveryValidation })
+
+  const [statesValidation, setStatesValidation] = useState('all')
+  const coverage = useStateCoverage({ ...state.query, validationStatus: statesValidation })
 
   const error =
     filters.error ?? overview.error ?? comparison.error ?? supplyTariff.error ?? delivery.error ?? coverage.error
@@ -116,7 +149,16 @@ export function StateDiscoPage() {
   return (
     <StateDiscoShell
       title="State & DisCo Performance"
-      description="Utility performance defaults to approved national and Distribution Company records."
+      /*
+       * Review asked what distinguishes this page from the Financially Viable
+       * Utilities pillar dashboard (docs/M300 Monitoring Platform
+       * Feedback.pptx, slide 11). They answer different questions: the pillar
+       * page reports national Compact progress against that pillar's targets,
+       * whereas this page is the operational breakdown underneath it — who
+       * delivered what, DisCo by DisCo and state by state. Stating it here
+       * rather than leaving readers to infer it from the content.
+       */
+      description="Operational breakdown of delivery by Distribution Company and state. For national progress against the Compact's utility-viability targets, see the Financially Viable Utilities pillar dashboard."
     >
       {filters.data && (
         <StateDiscoFilterBar options={filters.data} query={state.query} onChange={state.setQuery} onReset={state.reset} />
@@ -152,7 +194,18 @@ export function StateDiscoPage() {
 
             {/* DisCo comparison */}
             <section>
-              <h2 className="text-lg font-semibold">Distribution Company comparison</h2>
+              <div className="flex flex-wrap items-end justify-between gap-2">
+                <h2 className="text-lg font-semibold">Distribution Company comparison</h2>
+                {filters.data && (
+                  <SelectField
+                    label="Validation status"
+                    value={comparisonValidation}
+                    options={filters.data.validationStatuses}
+                    onChange={setComparisonValidation}
+                    className="w-44"
+                  />
+                )}
+              </div>
               <div className="mt-3 grid gap-3 lg:grid-cols-2">
                 <DiscoComparisonChart
                   title="Energy received vs billed"
@@ -193,6 +246,7 @@ export function StateDiscoPage() {
                     {
                       id: 'customers',
                       header: 'Customers',
+                      sortValue: (row) => numericSort(row.activeCustomers),
                       cell: (row) => (
                         <>
                           <p>{row.activeCustomers} active</p>
@@ -200,8 +254,12 @@ export function StateDiscoPage() {
                         </>
                       ),
                     },
-                    { id: 'metering', header: 'Metering rate', cell: (row) => row.meteringRate },
-                    { id: 'remittance', header: 'Remittance', cell: (row) => row.remittancePerformance },
+                    { id: 'metering', header: 'Metering rate', cell: (row) => row.meteringRate, sortValue: (row) => numericSort(row.meteringRate) },
+                    { id: 'remittance', header: 'Remittance', cell: (row) => row.remittancePerformance, sortValue: (row) => numericSort(row.remittancePerformance) },
+                    // Validation status is filterable, so it is readable here
+                    // as its own sortable column rather than only as small
+                    // print under the DisCo name.
+                    { id: 'validation', header: 'Validation', cell: (row) => row.validationLabel, sortValue: (row) => row.validationLabel },
                   ]}
                   rows={comparison.data.rows}
                   getRowId={(row) => row.id}
@@ -222,7 +280,27 @@ export function StateDiscoPage() {
 
             {/* Delivery & compliance */}
             <section>
-              <h2 className="text-lg font-semibold">Delivery & compliance</h2>
+              <div className="flex flex-wrap items-end justify-between gap-2">
+                <h2 className="text-lg font-semibold">Delivery & compliance</h2>
+                {filters.data && (
+                  <div className="flex flex-wrap gap-2">
+                    <SelectField
+                      label="Service band"
+                      value={deliveryBand}
+                      options={filters.data.serviceBands}
+                      onChange={setDeliveryBand}
+                      className="w-36"
+                    />
+                    <SelectField
+                      label="Validation status"
+                      value={deliveryValidation}
+                      options={filters.data.validationStatuses}
+                      onChange={setDeliveryValidation}
+                      className="w-44"
+                    />
+                  </div>
+                )}
+              </div>
               <div className="mt-3 grid gap-3 lg:grid-cols-[1fr_1.4fr]">
                 <DeliveryStatusChart rows={delivery.data.rows} />
                 <Card className="p-3">
@@ -238,7 +316,18 @@ export function StateDiscoPage() {
 
             {/* State view */}
             <section>
-              <h2 className="text-lg font-semibold">State delivery coverage</h2>
+              <div className="flex flex-wrap items-end justify-between gap-2">
+                <h2 className="text-lg font-semibold">State delivery coverage</h2>
+                {filters.data && (
+                  <SelectField
+                    label="Validation status"
+                    value={statesValidation}
+                    options={filters.data.validationStatuses}
+                    onChange={setStatesValidation}
+                    className="w-44"
+                  />
+                )}
+              </div>
               <Card className="mt-3 bg-status-info/10 p-3 text-sm text-text-default">{coverage.data.notice}</Card>
               <div className="mt-3">
                 <StateCoverageChart rows={coverage.data.rows} />

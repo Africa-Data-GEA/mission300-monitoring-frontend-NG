@@ -1,17 +1,7 @@
 import type { StateCoverageRow as StateRow } from '@/api/schemas/state-disco'
 import { InfoPopover } from '@/components/ui/info-popover'
 
-/**
- * One state in the coverage table.
- *
- * THE BAR AND THE NUMBER TOGETHER. The percentage is the value a reader quotes;
- * the bar is what lets them scan forty rows and see the distribution without
- * reading any of them. Neither substitutes for the other, so both are in the
- * same cell rather than the bar replacing the figure.
- *
- * The rank is shown because the section's whole question is comparative — a
- * state commissioner is asking where they sit, not only what their number is.
- */
+/** One quiet, scan-friendly row in the public state ranking. */
 export function StateCoverageRow({
   row,
   rank,
@@ -19,63 +9,67 @@ export function StateCoverageRow({
 }: {
   row: StateRow
   rank: number
-  /** The page's own snapshot date, used where a state has nothing validated of
-   * its own yet — not an invented date. */
   asOf: string
 }) {
+  const confirmed = row.validationLabel.toLowerCase() === 'confirmed'
+
   return (
-    <tr className="border-b border-border-default align-middle">
-      <td className="py-3 pr-3 text-[0.8125rem] leading-5 font-semibold text-text-subtle tabular-nums">
-        {rank}
-      </td>
-      <td className="py-3 pr-4">
-        <p className="text-[0.875rem] leading-5 font-bold text-text-default">{row.state}</p>
-        <p className="text-[0.75rem] leading-4 text-text-muted">{row.zone}</p>
-      </td>
-      <td className="py-3 pr-4">
-        <div className="flex items-center gap-2.5">
-          <span className="h-2 w-full min-w-16 max-w-40 flex-1 bg-surface-sunken">
-            <span
-              className="block h-2 bg-brand-600"
+    <article className="grid gap-x-5 gap-y-3 border-b border-white/12 px-1 py-5 last:border-b-0 sm:grid-cols-[2rem_11rem_minmax(0,1fr)_auto] sm:items-center sm:px-2">
+      <p className="text-[0.75rem] leading-5 font-medium text-white/35 tabular-nums">
+        {String(rank).padStart(2, '0')}
+      </p>
+
+      <div>
+        <h3 className="text-[0.9375rem] leading-5 font-semibold text-white">{row.state}</h3>
+        <p className="mt-0.5 text-[0.6875rem] leading-4 text-white/45">{row.zone}</p>
+      </div>
+
+      <div className="min-w-0 sm:px-2">
+        <div className="flex items-center gap-3">
+          <div className="h-1.5 min-w-0 flex-1 overflow-hidden rounded-full bg-white/12">
+            <div
+              className="h-full rounded-full bg-landing-gold"
               style={{ width: `${Math.min(100, row.coverageBarPercent)}%` }}
             />
-          </span>
-          <span className="w-10 shrink-0 text-right text-[0.875rem] leading-5 font-bold text-text-default tabular-nums">
-            {row.coverageBarPercent.toFixed(0)}%
-          </span>
+          </div>
+          <p className="font-landing-figure w-12 shrink-0 text-right text-[1.25rem] leading-6 font-semibold text-white tabular-nums">
+            {row.coverageBarPercent.toFixed(0)}<span className="text-landing-gold">%</span>
+          </p>
         </div>
-      </td>
-      <td className="hidden py-3 pr-4 text-right text-[0.875rem] leading-5 text-text-default tabular-nums md:table-cell">
-        {row.miniGridConnections}
-      </td>
-      <td className="hidden py-3 pr-4 text-right text-[0.875rem] leading-5 text-text-default tabular-nums md:table-cell">
-        {row.solarHomeSystems}
-      </td>
-      <td className="hidden py-3 pr-4 text-right text-[0.875rem] leading-5 text-text-default tabular-nums lg:table-cell">
-        {row.activeProjects}
-        <span className="ml-1 text-[0.75rem] text-text-subtle">/ {row.activeProgrammes}</span>
-      </td>
-      <td className="py-3 pl-1 text-right">
-        <span className="inline-flex items-center gap-1.5">
-          <span className="hidden text-[0.75rem] leading-4 text-text-muted sm:inline">
-            {row.validationLabel}
-          </span>
-          <InfoPopover
-            label={`About ${row.state}'s coverage figure`}
-            provenance={{
-              definition: `${row.state}'s validated distributed-energy delivery coverage.`,
-              methodology:
-                'Connection counts are not converted into an inferred state electricity-access rate.',
-              source: row.validatedBy ? `Validated by ${row.validatedBy}` : row.validationLabel,
-              lastUpdated: row.validatedAt ?? asOf,
-            }}
-            details={[
-              { label: 'Open bottlenecks', value: row.openBottlenecks },
-              { label: 'Active programmes', value: row.activeProgrammes },
-            ]}
-          />
+        <p className="mt-2 text-[0.6875rem] leading-4 text-white/48">
+          <span className="font-semibold text-white/82">{row.miniGridConnections}</span> mini-grid
+          <span className="mx-2 text-white/20">·</span>
+          <span className="font-semibold text-white/82">{row.solarHomeSystems}</span> solar homes
+          <span className="mx-2 text-white/20">·</span>
+          <span className="font-semibold text-white/82">{row.activeProjects}</span> projects
+          <span className="mx-1 text-white/20">/</span>
+          <span className="font-semibold text-white/82">{row.activeProgrammes}</span> programmes
+        </p>
+      </div>
+
+      <div className="flex items-center gap-2 sm:justify-end">
+        <span
+          aria-hidden="true"
+          className={`size-1.5 rounded-full ${confirmed ? 'bg-landing-blue' : 'bg-landing-gold'}`}
+        />
+        <span className="text-[0.6875rem] leading-4 font-medium text-white/50">
+          {row.validationLabel}
         </span>
-      </td>
-    </tr>
+        <InfoPopover
+          label={`About ${row.state}'s coverage figure`}
+          provenance={{
+            definition: `${row.state}'s validated distributed-energy delivery coverage.`,
+            methodology: 'Connection counts are not converted into an inferred state electricity-access rate.',
+            source: row.validatedBy ? `Validated by ${row.validatedBy}` : row.validationLabel,
+            lastUpdated: row.validatedAt ?? asOf,
+          }}
+          details={[
+            { label: 'Open bottlenecks', value: row.openBottlenecks },
+            { label: 'Active programmes', value: row.activeProgrammes },
+          ]}
+          className="[&_button]:text-white/55 [&_button:hover]:text-white"
+        />
+      </div>
+    </article>
   )
 }

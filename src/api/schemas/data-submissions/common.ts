@@ -6,6 +6,9 @@ export const workflowStatusCodeSchema = z.enum([
   'due', 'draft', 'validation-failed', 'ready', 'pending-review',
   'returned', 'rejected', 'provisional', 'approved', 'overdue',
   'missing', 'open', 'in-progress', 'resolved',
+  // Automated validation has its own backend states. They share the same
+  // badge shape but are not submission workflow states.
+  'pass', 'fail', 'pending',
 ])
 
 export const workflowStatusSchema = z.object({

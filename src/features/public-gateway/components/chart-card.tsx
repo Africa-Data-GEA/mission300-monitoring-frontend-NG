@@ -37,7 +37,7 @@ export function ChartCard({
   /** Filter pills, toggles or a legend, rendered opposite the title. */
   controls?: ReactNode
   children: ReactNode
-  source: string
+  source?: string
   chartId?: string
   dataset: ChartDataset
   /** A caveat that belongs to this chart specifically — a missing target, a

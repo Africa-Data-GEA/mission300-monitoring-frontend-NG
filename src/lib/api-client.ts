@@ -67,6 +67,45 @@ export class ContractError extends Error {
 
 type RequestOptions = Omit<RequestInit, 'body'> & { body?: unknown }
 
+async function authenticatedDownload(path: string): Promise<Blob> {
+  // API-provided links include `/api`, while BASE_URL already points there.
+  // Static mock assets remain ordinary same-origin downloads.
+  const isApiDownload = path.startsWith('/api/')
+  const requestPath = isApiDownload ? path.slice('/api'.length) : path
+  const accessToken = isApiDownload ? readAuthSession()?.accessToken : null
+  const response = isApiDownload
+    ? environment.usesLocalRouter
+      ? await dispatchLocalRequest('GET', `${BASE_URL}${requestPath}`, {
+          headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
+        })
+      : await fetch(`${BASE_URL}${requestPath}`, {
+          headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
+        })
+    : await fetch(requestPath)
+
+  if (!response) {
+    throw new ContractError(path, [{ path: '(response)', message: `no handler matched GET ${path}` }])
+  }
+
+  if (!response.ok) {
+    const contentType = response.headers.get('content-type') ?? ''
+    const payload: unknown = contentType.includes('json')
+      ? await response.json().catch(() => undefined)
+      : await response.text().catch(() => undefined)
+
+    if (response.status === 401 && isApiDownload) clearAuthSession()
+    throw new ApiError(
+      response.status,
+      typeof payload === 'object' && payload !== null && 'message' in payload
+        ? String((payload as { message: unknown }).message)
+        : response.statusText,
+      payload,
+    )
+  }
+
+  return response.blob()
+}
+
 async function request<T>(
   path: string,
   schema: z.ZodType<T> | undefined,
@@ -188,4 +227,5 @@ export const api = {
   ) => request<T>(path, schema, { ...options, method: 'PATCH', body }),
   delete: <T>(path: string, schema?: z.ZodType<T>, options?: RequestOptions) =>
     request<T>(path, schema, { ...options, method: 'DELETE' }),
+  download: authenticatedDownload,
 }

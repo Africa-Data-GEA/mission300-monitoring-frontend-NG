@@ -15,13 +15,19 @@ import {
   stakeholderInstitutions,
 } from './data/stakeholders'
 import {
+  createKpi,
   getKpiProfile,
   kpiExplorerCatalogue,
   kpiExplorerFilterOptions,
   kpiExplorerOverview,
+  setKpiActive,
   updateKpiMetadata,
 } from './data/kpi-explorer'
-import { updateKpiMetadataRequestSchema } from '@/api/schemas/kpi-explorer'
+import {
+  createKpiRequestSchema,
+  setKpiActiveRequestSchema,
+  updateKpiMetadataRequestSchema,
+} from '@/api/schemas/kpi-explorer'
 import { getLiveBackendUrl } from './live-backend'
 
 /**
@@ -492,6 +498,59 @@ export const handlers = [
   }),
 
   /**
+   * POST /api/kpi-explorer/kpis — registers a new indicator.
+   *
+   * Review asked for the ability to add extra KPIs, not only edit existing
+   * ones (docs/M300 Monitoring Platform Feedback.pptx, slide 15). The new
+   * indicator carries no value: numbers only ever arrive via an approved
+   * data submission.
+   */
+  http.post('/api/kpi-explorer/kpis', async ({ request }) => {
+    await delay(200)
+    const result = createKpiRequestSchema.safeParse(await request.json())
+    if (!result.success) {
+      return HttpResponse.json(
+        { message: result.error.issues[0]?.message ?? 'Invalid indicator.' },
+        { status: 400 },
+      )
+    }
+    const row = createKpi(result.data)
+    if (!row) {
+      return HttpResponse.json(
+        { message: `An indicator with id ${result.data.id} already exists.` },
+        { status: 409 },
+      )
+    }
+    return HttpResponse.json(
+      { row, message: `${row.name} added to the registry. It will show a value once a submission is approved.` },
+      { status: 201 },
+    )
+  }),
+
+  /**
+   * PATCH /api/kpi-explorer/kpis/:id/active — retires or restores an
+   * indicator. Never deletes: published values must stay traceable.
+   */
+  http.patch('/api/kpi-explorer/kpis/:id/active', async ({ request, params }) => {
+    await delay(200)
+    const result = setKpiActiveRequestSchema.safeParse(await request.json())
+    if (!result.success) {
+      return HttpResponse.json(
+        { message: result.error.issues[0]?.message ?? 'Invalid request.' },
+        { status: 400 },
+      )
+    }
+    const row = setKpiActive(String(params.id), result.data.active)
+    if (!row) {
+      return HttpResponse.json({ message: `No indicator found with id ${params.id}` }, { status: 404 })
+    }
+    return HttpResponse.json({
+      row,
+      message: result.data.active ? `${row.name} restored.` : `${row.name} retired from the registry.`,
+    })
+  }),
+
+  /**
    * GET /api/kpi-explorer
    *
    * Query (all optional): search, pillar, category, readiness,
@@ -515,6 +574,10 @@ export const handlers = [
     const validationStatus = params.get('validationStatus') ?? 'all'
 
     const filtered = kpiExplorerCatalogue.filter((row) => {
+      // Retired indicators are hidden from the catalogue but never deleted —
+      // `?includeRetired=true` brings them back for an admin reviewing what
+      // has been taken out of service. `active` absent means active.
+      if (row.active === false && params.get('includeRetired') !== 'true') return false
       const matchesSearch =
         !search ||
         [row.id, row.name, row.sourceInstitution].some((field) =>

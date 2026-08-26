@@ -8,7 +8,10 @@ export const DEFAULT_STATE_DISCO_QUERY: Required<StateDiscoQuery> = {
   state: 'all',
   utilityMetric: 'all',
   serviceBand: 'all',
-  validationStatus: 'confirmed',
+  // Defaults to showing everything — see the note in shared.ts. Filtering to
+  // `confirmed` by default would hide provisional rows before the reader has
+  // seen them.
+  validationStatus: 'all',
   source: 'nerc',
 }
 

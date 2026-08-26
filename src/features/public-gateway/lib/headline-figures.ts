@@ -28,8 +28,13 @@ export interface KpiFigure {
    * null rather than a guessed scale — the spec forbids inventing a target. */
   readonly track: FigureTrack | null
   readonly sparkline: readonly { period: string; value: number }[]
-  /** One short line under the figure: what the target actually is. */
-  readonly context: string
+  /** One short line under the figure — for whatever the track above it does
+   * NOT already say. Null where there is nothing left to add: a card with a
+   * baseline→current→target bullet track already prints its baseline and
+   * target as that track's own axis labels, so restating "Baseline X ·
+   * target Y" as a sentence underneath it is the same two facts twice on one
+   * card, not a second one. */
+  readonly context: string | null
 }
 
 /**
@@ -64,9 +69,11 @@ export function buildKpiFigures(cards: HeadlineCards): KpiFigure[] {
       source: accessRate.source,
       track: null,
       sparkline: accessRate.sparkline,
-      context: accessRate.targetLabel
-        ? `Target ${accessRate.targetLabel} · previously published ${accessRate.previousPublication}`
-        : `Previously published ${accessRate.previousPublication}`,
+      // `previousPublication` already reads as a complete phrase ("previous
+      // publication 61% (2022)", or "No previous publication on record") —
+      // prepending a second "previously published" here just repeated the
+      // same word twice in one sentence.
+      context: null,
     },
     {
       id: 'generation-capacity',
@@ -89,7 +96,7 @@ export function buildKpiFigures(cards: HeadlineCards): KpiFigure[] {
         milestones: [],
       },
       sparkline: generationCapacity.sparkline,
-      context: `${generationCapacity.availabilityRatio.toFixed(1)}% of installed capacity available · ${generationCapacity.benchmarkLabel}`,
+      context: null,
     },
     compactOutcomeFigure('clean-cooking', cooking),
   ]
@@ -118,7 +125,10 @@ function compactOutcomeFigure(
       milestones: card.milestones,
     },
     sparkline: [],
-    context: `Baseline ${card.baselineLabel} · target ${card.targetLabel}`,
+    // No context sentence: the bullet track above already prints
+    // `baselineLabel` and `targetLabel` as its own left/right axis labels —
+    // see the note on KpiFigure.context.
+    context: null,
   }
 }
 
@@ -139,7 +149,7 @@ export const CONFIDENCE_LABELS: Record<SourceTag, string> = {
 export const CONFIDENCE_DOT_CLASSES: Record<SourceTag, string> = {
   live: 'bg-status-on-track',
   'live-cpr': 'bg-status-on-track',
-  'public-source': 'bg-brand-400',
+  'public-source': 'bg-landing-blue-light',
   indicative: 'bg-status-no-data',
   'requires-validation': 'bg-status-lagging',
 }

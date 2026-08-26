@@ -357,7 +357,7 @@ export function OngoingProjectsTable({
                 </td>
                 <td className="px-3 py-3 text-sm text-text-muted">{project.pillarLabel}</td>
                 <td className="px-3 py-3 text-sm text-text-muted">{project.owner}</td>
-                <td className="px-3 py-3 text-sm text-text-muted">{project.leadName}</td>
+                <td className="px-3 py-3 text-sm text-text-muted">{project.leadName || '—'}</td>
                 <td className="px-3 py-3 text-sm text-text-muted">{project.location}</td>
                 <td className="px-3 py-3 text-sm whitespace-nowrap text-text-muted">
                   {dateFormatter.format(new Date(project.endDate))}

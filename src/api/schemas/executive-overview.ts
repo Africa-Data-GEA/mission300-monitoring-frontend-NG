@@ -12,6 +12,57 @@ import { dashboardFilterValuesSchema } from './filters'
 import { executionStatusSchema, pipelineReadinessSchema, statusHistoryEntrySchema } from './programs'
 
 /**
+ * ============================================================================
+ * BACKEND TOLERANCE
+ * ============================================================================
+ *
+ * The Nigeria backend (`ExecutiveOverviewController::show`) predates several
+ * fields this frontend added, and returns a 200 without them. Validating
+ * strictly meant the whole page failed with a ContractError and showed an
+ * error state, which is a worse outcome than rendering everything the backend
+ * *does* send.
+ *
+ * So the fields the backend omits are given defaults here, at the boundary, in
+ * one visible place. Two rules govern what a default may be:
+ *
+ *   1. It must be EMPTY, never invented. `[]` and `null` are honest — they say
+ *      "not supplied". A fabricated milestone or a guessed target would put a
+ *      number on a government dashboard that no institution reported.
+ *   2. Every consumer must already degrade visibly on the empty value. That is
+ *      checked, not assumed: no milestone ticks on the bullet charts, no trend
+ *      view on the national-performance rows, no evolution charts on the public
+ *      gateway, no CPR caption. The absence is what tells a reader the backend
+ *      has not caught up.
+ *
+ * REMOVE THESE DEFAULTS once the backend sends the fields. They are a bridge,
+ * not the contract — the required shapes below are still what the API owes.
+ * The gaps as of 2026-08-25: `cprTargets`, `kpiId` on all four headline cards,
+ * `milestones`, `history`, `statusHistory`, `leadName`, `comment`,
+ * `pipelineReadiness`, `followUp`, and period labels on both sparklines.
+ */
+
+/**
+ * A period-labelled series that also accepts the backend's bare number array.
+ *
+ * `[52.0, 55.0, 58.5]` becomes `[{period: 'Period 1', value: 52}, ...]`. The
+ * VALUES are real; only the labels are missing, and the schemas below document
+ * that these arrays are ordered oldest-to-newest — so position is genuine
+ * information and "Period 1" states it without inventing a reporting date.
+ *
+ * It is deliberately not a real-looking label. A chart axis reading "Q1 2024"
+ * that this client made up would be indistinguishable from one the Ministry
+ * reported, and that is exactly the confusion the provenance rules exist to
+ * prevent.
+ */
+const periodSeriesSchema = z.preprocess(
+  (input) =>
+    Array.isArray(input) && input.every((entry) => typeof entry === 'number')
+      ? input.map((value, index) => ({ period: `Period ${index + 1}`, value }))
+      : input,
+  z.array(z.object({ period: z.string().min(1), value: z.number() })),
+)
+
+/**
  * Contract for GET /api/executive-overview.
  *
  * Mirrors the page specification section by section — see
@@ -55,11 +106,15 @@ export const compactOutcomeCardSchema = z.object({
   provenance: metricProvenanceSchema,
   /** Empty where no intermediate checkpoints have been defined for this
    * outcome — the card then plots baseline/current/target only, as before. */
-  milestones: z.array(outcomeMilestoneSchema),
+  // Defaulted: see BACKEND TOLERANCE. Empty means the bullet chart draws
+  // baseline/current/target with no interim checkpoints.
+  milestones: z.array(outcomeMilestoneSchema).default([]),
   /** The KPI Explorer profile this outcome rolls up from, where one exists,
    * so the "four CPR targets" summary can deep-link into it. Null for a
    * composite figure with no single backing profile. */
-  kpiId: z.string().nullable(),
+  // Defaulted: see BACKEND TOLERANCE. Null disables the KPI Explorer
+  // deep-link, exactly as it already does for a composite figure.
+  kpiId: z.string().nullable().default(null),
 }).refine((card) => card.scaleMax > card.scaleMin, {
   message: 'scaleMax must be greater than scaleMin',
   path: ['scaleMax'],
@@ -78,7 +133,8 @@ export const accessRateCardSchema = z.object({
   value: z.string().min(1),
   rawValue: z.number(),
   /** The backing KPI Explorer profile, for the "four CPR targets" deep link. */
-  kpiId: z.string().min(1),
+  // Defaulted: see BACKEND TOLERANCE. Null disables the deep-link.
+  kpiId: z.string().min(1).nullable().default(null),
   sourceYear: z.string().min(1),
   previousPublication: z.string(),
   targetLabel: z.string(),
@@ -89,7 +145,7 @@ export const accessRateCardSchema = z.object({
   /** Ordered oldest-to-newest readings, one per prior publication. Carries
    * the KPI profile's own period label per point (see BulletMetric.history's
    * comment) so a real time axis can be drawn, not just an unlabelled line. */
-  sparkline: z.array(z.object({ period: z.string().min(1), value: z.number() })),
+  sparkline: periodSeriesSchema.default([]),
 })
 
 /** A3. Available generation capacity, with a trend sparkline. */
@@ -97,7 +153,8 @@ export const generationCapacityCardSchema = z.object({
   title: z.string().min(1),
   icon: metricIconNameSchema,
   /** The backing KPI Explorer profile, for the "four CPR targets" deep link. */
-  kpiId: z.string().min(1),
+  // Defaulted: see BACKEND TOLERANCE. Null disables the deep-link.
+  kpiId: z.string().min(1).nullable().default(null),
   availableMw: z.number().min(0),
   installedMw: z.number().min(0),
   value: z.string().min(1),
@@ -105,7 +162,7 @@ export const generationCapacityCardSchema = z.object({
   availabilityRatio: z.number().min(0).max(100),
   /** Ordered oldest-to-newest readings. Two points minimum to draw a line.
    * Period-labelled, same reasoning as AccessRateCard.sparkline above. */
-  sparkline: z.array(z.object({ period: z.string().min(1), value: z.number() })),
+  sparkline: periodSeriesSchema.default([]),
   benchmarkLabel: z.string(),
   reportingPeriod: z.string().min(1),
   trend: trendSchema.optional(),
@@ -175,7 +232,9 @@ export const bulletMetricSchema = z
     direction: improvementDirectionSchema,
     value: z.string().min(1),
     targetLabel: z.string(),
-    caption: z.string().optional(),
+    // The PHP controller explicitly emits null when a metric has no caption.
+    // Normalize that wire value to the optional value the UI already expects.
+    caption: z.preprocess((value) => (value === null ? undefined : value), z.string().optional()),
     trend: trendSchema.optional(),
     source: sourceTagSchema,
     confidence: dataConfidenceSchema,
@@ -186,7 +245,7 @@ export const bulletMetricSchema = z
      * profile's own period label per point (not just the bare value) so a
      * consumer can plot a real time axis, e.g. the public gateway's
      * evolution charts — not just an unlabelled sparkline. */
-    history: z.array(z.object({ period: z.string().min(1), value: z.number() })),
+    history: periodSeriesSchema.default([]),
   })
   // A degenerate scale would make every position zero, silently flattening the
   // chart rather than failing.
@@ -217,7 +276,8 @@ export const bottleneckSchema = z.object({
   daysUnresolved: z.number().int().min(0),
   /** The register's free-text follow-up note — what's being done about it,
    * not just that it's unresolved. Shown in the exception's detail popover. */
-  followUp: z.string(),
+  // Defaulted: see BACKEND TOLERANCE. Rendered as an em dash.
+  followUp: z.string().default(''),
   provenance: metricProvenanceSchema,
 })
 
@@ -233,7 +293,8 @@ export const deliveryStatusPanelSchema = z.object({
       owner: z.string().min(1),
       /** The named person leading delivery, distinct from `owner` (the
        * accountable institution). */
-      leadName: z.string().min(1),
+      // Defaulted: see BACKEND TOLERANCE. Rendered as an em dash.
+      leadName: z.string().default(''),
       location: z.string().min(1),
       latitude: z.number().min(-90).max(90),
       longitude: z.number().min(-180).max(180),
@@ -241,14 +302,19 @@ export const deliveryStatusPanelSchema = z.object({
       /** Null once a project is active — carried through from Programs so a
        * project still in the pipeline (not yet active delivery) is visible
        * here too, not only in the full Programs → Projects table. */
-      pipelineReadiness: pipelineReadinessSchema.nullable(),
+      // Defaulted: see BACKEND TOLERANCE. Null hides the readiness badge,
+      // as it already does for a project in active delivery.
+      pipelineReadiness: pipelineReadinessSchema.nullable().default(null),
       startDate: z.iso.datetime(),
       endDate: z.iso.datetime(),
       /** The workbook's "Comment – Issues/Main Risk/Bottlenecks" narrative,
        * surfaced here rather than requiring a click through to Programs. */
-      comment: z.string(),
+      // Defaulted: see BACKEND TOLERANCE.
+      comment: z.string().default(''),
       /** Ordered oldest-to-newest status per reporting period. */
-      statusHistory: z.array(statusHistoryEntrySchema),
+      // Defaulted: see BACKEND TOLERANCE. Empty makes the status-evolution
+      // table say plainly that no history was supplied.
+      statusHistory: z.array(statusHistoryEntrySchema).default([]),
     }),
   ),
   statusSummary: z.array(
@@ -284,8 +350,11 @@ export const executiveOverviewSchema = z.object({
   /** Echoes the pillar the payload was calculated for; 'all' for All Pillars. */
   appliedPillar: z.string(),
   headlineCards: headlineCardsSchema,
-  /** Always the same four headline cards, reframed as CPR targets. */
-  cprTargets: z.array(cprTargetSchema).length(4),
+  /** Always the same four headline cards, reframed as CPR targets.
+   * Defaulted: see BACKEND TOLERANCE. Empty hides the CPR caption entirely
+   * rather than asserting a framing the backend did not send. The `.length(4)`
+   * the contract owes is therefore relaxed to "four, or none". */
+  cprTargets: z.union([z.array(cprTargetSchema).length(4), z.array(cprTargetSchema).max(0)]).default([]),
   accessDelivery: z.array(accessChannelSchema),
   nationalPerformance: z.array(bulletMetricSchema),
   deliveryStatus: deliveryStatusPanelSchema,

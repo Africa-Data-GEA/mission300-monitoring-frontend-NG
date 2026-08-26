@@ -1,3 +1,4 @@
+import { Link } from 'react-router'
 import type { ProgrammeRecord } from '@/api/schemas/programs'
 import type { Column } from '@/components/ui/data-table'
 import { ValidationBadge } from '@/components/ui/validation-badge'
@@ -22,16 +23,27 @@ export function buildProgrammeColumns(
     header: 'Programme',
     className: 'min-w-56',
     sortValue: (row) => row.name,
+    /*
+     * The button holding the name had no width cap, so with no `truncate` to
+     * bound against, the table's auto layout stretched this column to fit
+     * the longest programme name on the page — e.g. "Nigeria–Niger Regional
+     * Interconnection Programme" — pushing every other column off-balance.
+     * `max-w-xs` gives it an actual ceiling; `title` keeps the full name
+     * reachable on hover once it's cut off.
+     */
     cell: (row) => (
-      <div className="min-w-0">
+      <div className="max-w-xs min-w-0">
         <button
           type="button"
           onClick={() => onOpenProgramme(row)}
-          className="text-left font-medium text-text-default hover:text-brand-700 hover:underline"
+          title={row.name}
+          className="block w-full truncate text-left font-medium text-text-default hover:text-brand-700 hover:underline"
         >
           {row.name}
         </button>
-        <p className="truncate text-xs text-text-muted">{row.objectives}</p>
+        <p className="truncate text-xs text-text-muted" title={row.objectives}>
+          {row.objectives}
+        </p>
       </div>
     ),
   },
@@ -90,7 +102,37 @@ export function buildProgrammeColumns(
   {
     id: 'bottlenecks',
     header: 'Bottlenecks',
-    cell: (row) => (row.bottlenecks.length > 0 ? row.bottlenecks.join(', ') : '—'),
+    sortValue: (row) => row.bottlenecks.length,
+    /*
+     * Each id links into the bottleneck register rather than sitting as flat
+     * text — review's one ask for this page was that clicking a bottleneck
+     * should take you to the issue register
+     * (docs/M300 Monitoring Platform Feedback.pptx, slide 12). `?id=` opens
+     * the register focused on that single record.
+     *
+     * stopPropagation because these rows are themselves clickable (they drill
+     * into the programme), and a bottleneck link must win over that.
+     */
+    cell: (row) =>
+      row.bottlenecks.length > 0 ? (
+        <span className="flex flex-wrap gap-x-1.5 gap-y-1">
+          {row.bottlenecks.map((id, index) => (
+            <span key={id}>
+              <Link
+                to={`/bottlenecks?id=${encodeURIComponent(id)}`}
+                onClick={(event) => event.stopPropagation()}
+                className="text-link underline underline-offset-2 hover:no-underline"
+                title={`Open ${id} in the bottleneck register`}
+              >
+                {id}
+              </Link>
+              {index < row.bottlenecks.length - 1 && ','}
+            </span>
+          ))}
+        </span>
+      ) : (
+        '—'
+      ),
   },
   {
     id: 'validation',

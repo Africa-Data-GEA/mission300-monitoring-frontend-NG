@@ -20,13 +20,31 @@ export function StateDiscoFilterBar({
     ['reportingPeriod', 'Reporting period', options.reportingPeriods],
     ['distributionCompany', 'Distribution Company', options.distributionCompanies],
   ] as const
+  /*
+   * Review's rule for this page was that a field offered as a filter must be
+   * readable back from the table, "or remove it from the filter"
+   * (docs/M300 Monitoring Platform Feedback.pptx, slide 11).
+   *
+   * `utilityMetric` and `source` are removed under that rule: neither exists
+   * as a field on any row this page renders, so nothing could be filtered by
+   * them and no column could show the result. They were inert controls. If
+   * the underlying rows later carry a metric or a source, they belong here
+   * again — with a matching column.
+   *
+   * `serviceBand` and `validationStatus` moved out of this shared bar
+   * entirely — see the local filter controls inside each relevant section on
+   * the page (Delivery & compliance, DisCo comparison, States). This page
+   * merged five originally-separate tabs into one scroll, and neither field
+   * applies to every one of them: Service band only ever meant anything on
+   * the Delivery table, Validation status applies to three of the four data
+   * tables but not Supply & tariff. Sitting in a page-wide bar, they looked
+   * global but silently only touched one section — a reader changing Service
+   * band would see Delivery narrow while DisCo comparison, sitting right
+   * above it, didn't move, with no indication why.
+   */
   const advanced = [
     ['view', 'View', options.views],
     ['state', 'State', options.states],
-    ['utilityMetric', 'Utility metric', options.utilityMetrics],
-    ['serviceBand', 'Service band', options.serviceBands],
-    ['validationStatus', 'Validation status', options.validationStatuses],
-    ['source', 'Source', options.sources],
   ] as const
   const activeCount = advanced.filter(([key]) => query[key] !== DEFAULTS[key]).length
 
@@ -44,7 +62,6 @@ export function StateDiscoFilterBar({
   )
 }
 
-const DEFAULTS: Pick<Required<StateDiscoQuery>, 'view' | 'state' | 'utilityMetric' | 'serviceBand' | 'validationStatus' | 'source'> = {
-  view: 'disco', state: 'all', utilityMetric: 'all', serviceBand: 'all',
-  validationStatus: 'confirmed', source: 'nerc',
+const DEFAULTS: Pick<Required<StateDiscoQuery>, 'view' | 'state'> = {
+  view: 'disco', state: 'all',
 }

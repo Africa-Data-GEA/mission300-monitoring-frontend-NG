@@ -26,7 +26,11 @@ const columns: Column<DataGap>[] = [
   { id: 'category', header: 'Gap category', cell: (row) => <><p>{row.category}</p><p className="text-xs text-text-muted">{row.readinessTier}</p></> },
   { id: 'owner', header: 'Owner', cell: (row) => row.owner },
   { id: 'action', header: 'Next action', cell: (row) => row.nextAction, className: 'min-w-64' },
-  { id: 'status', header: 'Status', cell: (row) => <WorkflowStatusBadge status={row.status} /> },
+  {
+    id: 'status',
+    header: 'Status',
+    cell: (row) => row.status ? <WorkflowStatusBadge status={row.status} /> : <span className="text-text-muted">Not supplied</span>,
+  },
 ]
 
 export function DataGapsPage() {
@@ -46,7 +50,7 @@ export function DataGapsPage() {
               columns={columns}
               rows={list.data.items}
               getRowId={(row) => row.id}
-              rowActions={(row) => (
+              rowActions={(row) => row.availableActions.includes('view') && (
                 <Button aria-label={`Open ${row.kpiId} in KPI Explorer`} size="icon" variant="ghost"><ExternalLink /></Button>
               )}
             />

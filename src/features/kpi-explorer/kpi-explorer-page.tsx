@@ -1,6 +1,10 @@
+import { Plus } from 'lucide-react'
+import { useState } from 'react'
 import { Breadcrumb } from '@/components/ui/breadcrumb'
+import { Button } from '@/components/ui/button'
 import { ErrorState } from '@/components/ui/error-state'
 import { CatalogueTable } from './components/catalogue-table'
+import { CreateKpiDialog } from './components/create-kpi-dialog'
 import { Distributions } from './components/distributions/distributions'
 import { KpiExplorerFilters } from './components/kpi-explorer-filters'
 import { KpiExplorerSkeleton } from './components/kpi-explorer-skeleton'
@@ -20,6 +24,7 @@ import { useKpiExplorerPage } from './use-kpi-explorer-page'
  */
 export function KpiExplorerPage() {
   const page = useKpiExplorerPage()
+  const [createOpen, setCreateOpen] = useState(false)
 
   if (page.isPending) return <KpiExplorerSkeleton />
 
@@ -46,9 +51,18 @@ export function KpiExplorerPage() {
             { label: 'KPI Directory' },
           ]}
         />
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight text-text-default">
-          KPI Directory
-        </h1>
+        <div className="mt-2 flex flex-wrap items-center justify-between gap-3">
+          <h1 className="text-3xl font-semibold tracking-tight text-text-default">
+            KPI Directory
+          </h1>
+          {/* Registry management — review asked for the ability to add extra
+              indicators and retire existing ones, not only edit them
+              (docs/M300 Monitoring Platform Feedback.pptx, slide 15). */}
+          <Button type="button" onClick={() => setCreateOpen(true)}>
+            <Plus aria-hidden="true" />
+            Add indicator
+          </Button>
+        </div>
       </div>
 
       {page.filterOptions && (
@@ -81,6 +95,8 @@ export function KpiExplorerPage() {
         isPending={page.isProfilePending}
         onClose={page.closeProfile}
       />
+
+      <CreateKpiDialog open={createOpen} onClose={() => setCreateOpen(false)} />
     </div>
   )
 }

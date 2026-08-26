@@ -30,13 +30,19 @@
   h6 { font-family: var(--font-heading-6); }
 
   /*
-   * Inter Tight, for the public landing pages only (public gateway `/` and
-   * `/progress` — see public-gateway-page.tsx and progress-page.tsx). Loaded
-   * from Google Fonts in index.html. Scoped to a class rather than changing
-   * --font-body/--font-heading-*, which are the authenticated app's fonts
-   * (and are admin-customizable via BrandProvider) — this must not affect
-   * them. The heading selectors here need the class prefix to out-specificity
-   * the plain `h1`..`h6` rules above.
+   * The public landing pages (public gateway `/` and `/progress` — see
+   * public-gateway-page.tsx and progress-page.tsx) now run the same body and
+   * heading typeface as the authenticated dashboard, `--font-sans` (Google
+   * Sans, self-hosted — see src/styles/fonts.css). They previously carried
+   * their own family, Inter Tight; that distinction is gone on purpose, so a
+   * reader moving from the public record into the signed-in platform sees one
+   * product, not two.
+   *
+   * `.font-landing` is kept as a class (rather than being deleted now that it
+   * resolves to the same font as everywhere else) because these pages still
+   * set their own, larger type SCALE — see national-statement.tsx's own note
+   * on that. It is also the hook `.font-landing-figure` below relies on to
+   * fall back to.
    */
   .font-landing,
   .font-landing h1,
@@ -45,7 +51,23 @@
   .font-landing h4,
   .font-landing h5,
   .font-landing h6 {
-    font-family: 'Inter Tight', var(--font-sans);
+    font-family: var(--font-sans);
+  }
+
+  /*
+   * Barlow Condensed, reserved for the standout figures on the landing
+   * pages — the hero's headline number, each KPI card's big value, the
+   * `/progress` page's figure column — never for headings, body copy or
+   * small in-table numbers, which stay on Google Sans for legibility at
+   * small sizes. A tall, narrow face reads as "this is the number that
+   * matters" the way a heavier weight alone does not, without pulling the
+   * page into a second typeface for anything else. Loaded from Google Fonts
+   * in index.html; falls back to the page's own body font if that load
+   * fails, never to a generic system serif/sans that would look broken next
+   * to it.
+   */
+  .font-landing-figure {
+    font-family: 'Barlow Condensed', var(--font-sans);
   }
 
   /*

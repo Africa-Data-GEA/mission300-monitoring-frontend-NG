@@ -18,6 +18,40 @@ import {
 } from '@/api/schemas/data-submissions'
 import { api } from '@/lib/api-client'
 
+function withObligationContext(value: unknown, obligationId: string, kind: 'entry' | 'upload') {
+  if (!value || typeof value !== 'object') return value
+
+  const definition = value as Record<string, unknown>
+  if (kind === 'upload') return { obligationId, ...definition }
+
+  const sections = Array.isArray(definition.sections)
+    ? definition.sections.map((section, sectionIndex) => {
+        if (!section || typeof section !== 'object') return section
+        const current = section as Record<string, unknown>
+        const fields = Array.isArray(current.fields)
+          ? current.fields.map((field) => {
+              if (!field || typeof field !== 'object') return field
+              const currentField = field as Record<string, unknown>
+              return {
+                ...currentField,
+                helpText: currentField.helpText ?? '',
+                options: currentField.options ?? [],
+              }
+            })
+          : current.fields
+
+        return {
+          id: current.id ?? `section-${sectionIndex + 1}`,
+          description: current.description ?? '',
+          ...current,
+          fields,
+        }
+      })
+    : definition.sections
+
+  return { obligationId, ...definition, sections }
+}
+
 export const submissionKeys = {
   all: ['data-submissions'] as const,
   filters: () => ['data-submissions', 'filters'] as const,
@@ -88,7 +122,10 @@ export const useDataGaps = (query: DataSubmissionQuery) =>
 export function useManualEntryDefinition(id: string) {
   return useQuery({
     queryKey: submissionKeys.entry(id),
-    queryFn: () => api.get(`/data-submissions/obligations/${id}/entry`, manualEntryDefinitionSchema),
+    queryFn: async () => {
+      const response = await api.get<unknown>(`/data-submissions/obligations/${id}/entry`)
+      return manualEntryDefinitionSchema.parse(withObligationContext(response, id, 'entry'))
+    },
     enabled: Boolean(id),
   })
 }
@@ -96,7 +133,10 @@ export function useManualEntryDefinition(id: string) {
 export function useUploadDefinition(id: string) {
   return useQuery({
     queryKey: submissionKeys.upload(id),
-    queryFn: () => api.get(`/data-submissions/obligations/${id}/upload`, uploadDefinitionSchema),
+    queryFn: async () => {
+      const response = await api.get<unknown>(`/data-submissions/obligations/${id}/upload`)
+      return uploadDefinitionSchema.parse(withObligationContext(response, id, 'upload'))
+    },
     enabled: Boolean(id),
   })
 }

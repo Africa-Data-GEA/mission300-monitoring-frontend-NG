@@ -3,7 +3,9 @@ import type {
   KpiExplorerFilterOptions,
   KpiExplorerOverview,
   KpiProfile,
+  ReadinessTier,
 } from '@/api/schemas/kpi-explorer'
+import type { PillarId } from '@/api/schemas/common'
 import type { KpiExtraction } from '@/api/schemas/data-submissions'
 
 /**
@@ -1050,7 +1052,8 @@ const PROFILES: Record<string, KpiProfile> = {
     frequency: 'Annual',
     disaggregation: 'Urban/rural where available',
     limitations:
-      'Tracked via international survey series (SDG7 Tracking, IEA), which publish on a lag and can differ from national administrative counts.',
+      'Tracked via international survey series (SDG7 Tracking, IEA), which publish on a lag and can differ from national administrative counts. ' +
+      'The Compact’s 9% per annum improvement commitment is a growth rate, not a % access-rate level, so its application to this series is pending confirmation — no level target is asserted above.',
     baseline: 61,
     baselineLabel: '61% national electricity access rate (2022, SDG7 Tracking Report)',
     current: 70,
@@ -1062,8 +1065,14 @@ const PROFILES: Record<string, KpiProfile> = {
     // Feedback.pptx, slide 6). docs/specs/executive-overview.md records that
     // the 9%/yr commitment is "subject to confirmation of its application to
     // the access-rate series", so no level target is asserted here.
-    targetLabel:
-      'No approved access-rate level target. The Compact commits to 9% per annum improvement — a growth rate, not a % access level; its application to this series is pending confirmation.',
+    //
+    // Kept SHORT deliberately — this is a `targetLabel`, not a methodology
+    // note, and it renders directly on card faces (including the public
+    // gateway's, which has no popover-only slot for it). The first version of
+    // this fix wrote a full explanatory sentence here and it landed as a
+    // paragraph on the public homepage. The fuller explanation lives in
+    // `limitations` below, reachable through the profile/definition panel.
+    targetLabel: 'No approved level target — 9%/yr growth commitment',
     targetBasis: 'growth-rate',
     targetBasisLabel: '9%/yr growth commitment',
     targetDate: null,
@@ -2055,17 +2064,19 @@ const PROFILES: Record<string, KpiProfile> = {
     aggregation: 'National',
     frequency: 'Annual',
     disaggregation: 'Urban/rural where available',
-    limitations: 'National survey coverage is annual, so intra-year change cannot be observed. Prior-year comparison is an illustrative estimate, not institutionally confirmed data.',
+    limitations:
+      'National survey coverage is annual, so intra-year change cannot be observed. Prior-year comparison is an illustrative estimate, not institutionally confirmed data. ' +
+      'The Compact’s 25% per annum growth commitment is a growth rate, not a % access-rate level, so its application to this series is pending confirmation — no level target is asserted above.',
     baseline: 23.5,
     baselineLabel: 'Illustrative estimate — not institutionally confirmed (2023)',
     current: 26,
     currentLabel: '26% (2024, latest published figure)',
     target: null,
-    // Same unit-mismatch fix as the electricity access rate above — the
-    // commitment is a growth rate, not a % access level, so it is described
-    // as such instead of occupying the target slot.
-    targetLabel:
-      'No approved clean-cooking access-rate level target. The Compact commits to 25% per annum growth — a growth rate, not a % access level; its application to this series is pending confirmation.',
+    // Same unit-mismatch fix as the electricity access rate above — kept
+    // short for the same reason (see M300-PX-001): `targetLabel` renders
+    // directly on card faces, including the public gateway's, with no
+    // popover-only slot. Full nuance lives in `limitations` above.
+    targetLabel: 'No approved level target — 25%/yr growth commitment',
     targetBasis: 'growth-rate',
     targetBasisLabel: '25%/yr growth commitment',
     targetDate: null,
@@ -4423,6 +4434,98 @@ export function updateKpiMetadata(
   }
 
   return getKpiProfile(id) ?? null
+}
+
+/**
+ * Adds a brand-new indicator to the registry.
+ *
+ * It starts with no value and `future` validation status: a KPI's numbers
+ * only ever arrive through an approved data submission, never at creation
+ * time. Returns null if the id is already taken.
+ */
+export function createKpi(input: {
+  id: string
+  name: string
+  pillar: PillarId
+  category: string
+  unit: string
+  definition: string
+  formula: string
+  frequency: string
+  sourceInstitution: string
+  sourceDataset: string
+  readiness: ReadinessTier
+}): KpiCatalogueRow | null {
+  if (CATALOGUE.some((entry) => entry.id.toLowerCase() === input.id.toLowerCase())) return null
+
+  const row: KpiCatalogueRow = {
+    id: input.id,
+    name: input.name,
+    pillar: input.pillar,
+    category: input.category,
+    unit: input.unit,
+    sourceInstitution: input.sourceInstitution,
+    sourceDataset: input.sourceDataset,
+    frequency: input.frequency,
+    readiness: input.readiness,
+    validationStatus: 'future',
+    lastUpdated: new Date().toISOString(),
+    active: true,
+  }
+  CATALOGUE.push(row)
+
+  PROFILES[input.id] = {
+    id: input.id,
+    name: input.name,
+    pillar: input.pillar,
+    definition: input.definition,
+    formula: input.formula,
+    unit: input.unit,
+    aggregation: '',
+    frequency: input.frequency,
+    disaggregation: '',
+    limitations: 'Newly registered indicator — no data has been submitted against it yet.',
+    baseline: null,
+    baselineLabel: 'No baseline recorded',
+    current: null,
+    currentLabel: 'Awaiting first submission',
+    target: null,
+    targetLabel: 'No target agreed',
+    targetDate: null,
+    varianceLabel: '—',
+    direction: 'higher-is-better',
+    history: [],
+    sourceInstitution: input.sourceInstitution,
+    sourceDataset: input.sourceDataset,
+    sourceReference: '',
+    reportingPeriod: '',
+    validationStatus: 'future',
+    validationDecision: '',
+    version: 'v0.1',
+    // No data has been submitted against a newly registered indicator yet.
+    confidence: 'future-gap',
+    provenance: {
+      definition: input.definition,
+      methodology: input.formula,
+      source: input.sourceInstitution,
+      lastUpdated: new Date().toISOString(),
+    },
+    linkedRecords: [],
+  }
+
+  return row
+}
+
+/**
+ * Retires or restores an indicator. Never deletes: an indicator that has
+ * already published values must stay traceable, so this only flips a flag.
+ */
+export function setKpiActive(id: string, active: boolean): KpiCatalogueRow | null {
+  const row = CATALOGUE.find((entry) => entry.id === id)
+  if (!row) return null
+  row.active = active
+  row.lastUpdated = new Date().toISOString()
+  return row
 }
 
 export const kpiExplorerCatalogue = CATALOGUE

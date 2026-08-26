@@ -4,6 +4,7 @@ import { Pagination } from '@/components/ui/pagination'
 import { useObligations, useSubmissionFilters } from '../api'
 import { ListState } from '../components/list-state'
 import { ObligationActions } from '../components/obligation-actions'
+import { ObligationStats } from '../components/obligation-stats'
 import { OBLIGATIONS_COLUMNS } from '../components/obligations-columns'
 import { WorkflowFilters } from '../components/workflow-filters'
 import { WorkflowShell } from '../components/workflow-shell'
@@ -33,6 +34,7 @@ export function ObligationsPage() {
         error={error}
         retry={() => void list.refetch()}
       >
+        {list.data && <ObligationStats stats={list.data.stats} />}
         {list.data && (
           <Card className="p-3">
             <DataTable

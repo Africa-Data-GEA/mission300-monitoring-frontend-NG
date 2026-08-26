@@ -4,7 +4,9 @@ import { pageOf, workflowActionSchema, workflowStatusSchema } from './common'
 
 export const submissionTemplateSchema = z.object({
   id: z.string().min(1),
-  version: z.string().min(1),
+  // The deployed API currently serialises this as a number while the mock
+  // contract uses a string. Keep one string representation in the UI.
+  version: z.coerce.string().min(1),
   fileName: z.string().min(1),
   downloadUrl: z.string().min(1),
 })
@@ -14,11 +16,11 @@ export const obligationSchema = z.object({
   institution: z.string().min(1),
   /** The named person responsible for submitting this obligation — stakeholder
    * feedback asked to see a lead for submitting data, not the institution alone. */
-  focalPerson: z.string().min(1),
+  focalPerson: z.string().min(1).default('Not supplied'),
   /** FK → Dataset.id (see datasets.ts). `dataset` below stays as the
    * display label (mirrors Dataset.name) so every existing column/screen
    * reading it is unaffected — this is the real link that was missing. */
-  datasetId: z.string().min(1),
+  datasetId: z.string().default(''),
   dataset: z.string().min(1),
   reportingPeriod: z.string().min(1),
   frequency: z.string().min(1),
@@ -30,7 +32,37 @@ export const obligationSchema = z.object({
   availableActions: z.array(workflowActionSchema),
 })
 
-export const obligationListSchema = pageOf(obligationSchema)
+/**
+ * Aggregate data-operations indicators shown above the obligations table.
+ *
+ * Review asked for "count by status; average queue age; average days overdue
+ * etc.", filterable by dataset and responsible organisation
+ * (docs/M300 Monitoring Platform Feedback.pptx, slide 13). These are computed
+ * over the whole filtered set, not the visible page, so the numbers describe
+ * the filter rather than the pagination.
+ */
+export const obligationStatsSchema = z.object({
+  total: z.number().int().min(0),
+  byStatus: z.array(
+    z.object({
+      code: z.string().min(1),
+      label: z.string().min(1),
+      tone: z.string().min(1),
+      count: z.number().int().min(0),
+    }),
+  ),
+  overdueCount: z.number().int().min(0),
+  /** Mean days overdue across overdue obligations; null when none are. */
+  averageDaysOverdue: z.number().nullable(),
+  /** Obligations still awaiting action (not accepted/approved). */
+  openCount: z.number().int().min(0),
+})
+
+export const obligationListSchema = pageOf(obligationSchema).extend({
+  stats: obligationStatsSchema,
+})
+
+export type ObligationStats = z.infer<typeof obligationStatsSchema>
 
 export const entryFieldSchema = z.object({
   id: z.string().min(1),

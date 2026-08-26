@@ -28,14 +28,14 @@ export const utilityOperationsRows: UtilityOperationsRow[] = [
 
 export const utilityDeliveryRows: DeliveryRow[] = [
   {
-    id: 'del-001', utility: 'Ikeja DisCo', milestone: 'Deploy 170,000 additional meters',
+    id: 'del-001', validationLabel: 'Confirmed', utility: 'Ikeja DisCo', milestone: 'Deploy 170,000 additional meters',
     serviceBand: 'A', dueDate: '2025-12-31T00:00:00Z',
     dueDateLabel: '31 Dec 2025', executionStatus: 'On track', achievedLabel: '112,400 installed',
     evidenceLabel: 'Monthly metering return', reportingCompliance: 'Complete',
     bottleneck: 'Port clearance delays for meter components',
   },
   {
-    id: 'del-002', utility: 'Kano DisCo', milestone: 'Reduce feeder technical losses',
+    id: 'del-002', validationLabel: 'Confirmed', utility: 'Kano DisCo', milestone: 'Reduce feeder technical losses',
     serviceBand: 'C', dueDate: '2025-09-30T00:00:00Z',
     dueDateLabel: '30 Sep 2025', executionStatus: 'Delayed', achievedLabel: '4 of 9 feeders completed',
     evidenceLabel: 'PIP progress report', reportingCompliance: 'Late',
@@ -45,21 +45,21 @@ export const utilityDeliveryRows: DeliveryRow[] = [
    * resolve to — with only bands A and C present the control could not be
    * meaningfully exercised. */
   {
-    id: 'del-003', utility: 'Abuja DisCo', milestone: 'Upgrade 33kV injection substations',
+    id: 'del-003', validationLabel: 'Provisional', utility: 'Abuja DisCo', milestone: 'Upgrade 33kV injection substations',
     serviceBand: 'B', dueDate: '2026-03-31T00:00:00Z',
     dueDateLabel: '31 Mar 2026', executionStatus: 'On track', achievedLabel: '6 of 11 substations energised',
     evidenceLabel: 'Quarterly capital works return', reportingCompliance: 'Complete',
     bottleneck: '',
   },
   {
-    id: 'del-004', utility: 'Ibadan DisCo', milestone: 'Extend Band D feeder supply hours',
+    id: 'del-004', validationLabel: 'Confirmed', utility: 'Ibadan DisCo', milestone: 'Extend Band D feeder supply hours',
     serviceBand: 'D', dueDate: '2026-06-30T00:00:00Z',
     dueDateLabel: '30 Jun 2026', executionStatus: 'At risk', achievedLabel: '9.2 of 12 target hours',
     evidenceLabel: 'Monthly supply-hours return', reportingCompliance: 'Late',
     bottleneck: 'Gas supply constraints limiting available generation',
   },
   {
-    id: 'del-005', utility: 'Jos DisCo', milestone: 'Rural Band E network densification',
+    id: 'del-005', validationLabel: 'Provisional', utility: 'Jos DisCo', milestone: 'Rural Band E network densification',
     serviceBand: 'E', dueDate: '2026-01-31T00:00:00Z',
     dueDateLabel: '31 Jan 2026', executionStatus: 'Delayed', achievedLabel: '3 of 14 communities connected',
     evidenceLabel: 'Rural electrification progress report', reportingCompliance: 'Outstanding',

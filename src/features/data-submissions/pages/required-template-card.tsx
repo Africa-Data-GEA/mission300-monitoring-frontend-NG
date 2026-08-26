@@ -1,7 +1,7 @@
-import { Download } from 'lucide-react'
 import type { UploadDefinition } from '@/api/schemas/data-submissions'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
+import { TemplateDownloadButton } from '../components/template-download-button'
 
 /** Sidebar summarising the required template, plus the submit action. */
 export function RequiredTemplateCard({
@@ -21,12 +21,7 @@ export function RequiredTemplateCard({
       <p className="mt-2 text-sm">{template.fileName}</p>
       <p className="text-xs text-text-muted">Version {template.version}</p>
 
-      <Button asChild className="mt-4 w-full" variant="secondary">
-        <a href={template.downloadUrl} download>
-          <Download />
-          Download template
-        </a>
-      </Button>
+      <TemplateDownloadButton template={template} />
 
       {uploadError && (
         <p className="mt-4 text-sm text-status-at-risk" role="alert">

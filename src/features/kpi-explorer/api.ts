@@ -1,10 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { keepPreviousData } from '@tanstack/react-query'
 import {
+  createKpiResponseSchema,
   kpiExplorerFilterOptionsSchema,
   kpiExplorerOverviewSchema,
   kpiProfileSchema,
+  type CreateKpiRequest,
   type KpiExplorerQuery,
+  type SetKpiActiveRequest,
   type UpdateKpiMetadataRequest,
 } from '@/api/schemas/kpi-explorer'
 import { api } from '@/lib/api-client'
@@ -68,6 +71,37 @@ export function useKpiProfile(id: string | null) {
  * data submission. System-administrator only — see role-access.ts and the
  * gate in metadata-panel.tsx/values-panel.tsx.
  */
+/**
+ * Registers a brand-new indicator — see createKpiRequestSchema. Review asked
+ * for the ability to add extra KPIs and retire existing ones, not only edit
+ * them (docs/M300 Monitoring Platform Feedback.pptx, slide 15).
+ */
+export function useCreateKpi() {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (input: CreateKpiRequest) =>
+      api.post('/kpi-explorer/kpis', input, createKpiResponseSchema),
+    onSuccess: () => {
+      client.invalidateQueries({ predicate: (query) => query.queryKey[0] === 'kpi-explorer' })
+    },
+  })
+}
+
+/**
+ * Retires or restores an indicator. Never deletes — a KPI that has published
+ * values stays traceable, it is only hidden from the default catalogue.
+ */
+export function useSetKpiActive(id: string) {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (input: SetKpiActiveRequest) =>
+      api.patch(`/kpi-explorer/kpis/${id}/active`, input, createKpiResponseSchema),
+    onSuccess: () => {
+      client.invalidateQueries({ predicate: (query) => query.queryKey[0] === 'kpi-explorer' })
+    },
+  })
+}
+
 export function useUpdateKpiMetadata(id: string) {
   const client = useQueryClient()
   return useMutation({

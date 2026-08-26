@@ -17,7 +17,7 @@ export function VersionHistoryCard({
         {history.map((item) => (
           <li key={item.id} className="border-l-2 border-border-default pl-3">
             <div className="flex flex-wrap items-center gap-2">
-              <WorkflowStatusBadge status={item.status} />
+              {item.status && <WorkflowStatusBadge status={item.status} />}
               <span className="text-xs text-text-muted">
                 {item.occurredAtLabel}
               </span>

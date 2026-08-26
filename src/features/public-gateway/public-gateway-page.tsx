@@ -1,7 +1,6 @@
 import { formatDate } from '@/lib/format'
 import { usePublicOverview, usePublicStateCoverage } from './api'
 import { AccessDelivery } from './components/access-delivery'
-import { DataConfidenceKey } from './components/data-confidence-key'
 import { DeliveryInMotion } from './components/delivery-in-motion'
 import { Institutions } from './components/institutions'
 import { KpiStrip } from './components/kpi-strip'
@@ -55,7 +54,7 @@ export function PublicGatewayPage() {
         {isPending && <NationalStatementSkeleton />}
 
         {isError && (
-          <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16">
+          <div className="mx-auto max-w-[96rem] px-4 py-12 sm:px-6 sm:py-16">
             <h1 className="text-[2.25rem] leading-[2.625rem] font-bold tracking-tight text-text-default sm:text-[3rem] sm:leading-[3.25rem]">
               National electrification record
             </h1>
@@ -68,22 +67,24 @@ export function PublicGatewayPage() {
 
         {data && (
           <>
-            <NationalStatement
-              cards={data.headlineCards}
-              statesCovered={stateCoverage.data?.rows.length ?? null}
-            />
+            <NationalStatement cards={data.headlineCards} />
 
-            <div className="mx-auto max-w-7xl px-4 pb-4 sm:px-6">
-              <KpiStrip figures={buildKpiFigures(data.headlineCards)} />
-              <DataConfidenceKey />
+            <KpiStrip figures={buildKpiFigures(data.headlineCards)} />
+
+            <div className="mx-auto max-w-[96rem] px-4 pb-14 sm:px-6">
               <AccessDelivery channels={data.accessDelivery} />
-              <PerformanceEvolution series={buildEvolutionSeries(data)} />
-              {stateCoverage.data && (
-                <DeliveryInMotion
-                  rows={stateCoverage.data.rows}
-                  asOf={data.headlineCards.peopleWithElectricityAccess.provenance.lastUpdated}
-                />
-              )}
+            </div>
+
+            <PerformanceEvolution series={buildEvolutionSeries(data)} />
+
+            {stateCoverage.data && (
+              <DeliveryInMotion
+                rows={stateCoverage.data.rows}
+                asOf={data.headlineCards.peopleWithElectricityAccess.provenance.lastUpdated}
+              />
+            )}
+
+            <div className="mx-auto max-w-[96rem] px-4 pb-4 sm:px-6">
               <Institutions />
             </div>
           </>

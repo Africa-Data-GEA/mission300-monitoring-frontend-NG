@@ -32,7 +32,7 @@ export const validationIssueSchema = z.object({
 
 export const statusHistoryItemSchema = z.object({
   id: z.string().min(1),
-  status: workflowStatusSchema,
+  status: workflowStatusSchema.nullable().default(null),
   actor: z.string().min(1),
   occurredAt: z.iso.datetime(),
   occurredAtLabel: z.string().min(1),
@@ -61,7 +61,7 @@ export const kpiExtractionSchema = z.object({
   value: z.number(),
 })
 
-export const submissionDetailSchema = validationQueueItemSchema.extend({
+const submissionDetailObjectSchema = validationQueueItemSchema.extend({
   fileName: z.string().nullable(),
   sourceReference: z.string(),
   notes: z.string(),
@@ -70,6 +70,31 @@ export const submissionDetailSchema = validationQueueItemSchema.extend({
   permittedDecisions: z.array(z.enum(['approved', 'provisional', 'returned', 'rejected'])),
   extractedValues: z.array(kpiExtractionSchema),
 })
+
+export const submissionDetailSchema = z.preprocess((value) => {
+  if (!value || typeof value !== 'object' || !('history' in value)) return value
+
+  const detail = value as Record<string, unknown>
+  if (!Array.isArray(detail.history)) return value
+
+  return {
+    ...detail,
+    history: detail.history.map((item, index) => {
+      if (!item || typeof item !== 'object') return item
+      const historyItem = item as Record<string, unknown>
+      const occurredAt = typeof historyItem.occurredAt === 'string'
+        ? historyItem.occurredAt
+        : `history-${index + 1}`
+
+      return {
+        ...historyItem,
+        id: historyItem.id ?? `${occurredAt}-${index + 1}`,
+        status: historyItem.status ?? null,
+        occurredAtLabel: historyItem.occurredAtLabel ?? occurredAt,
+      }
+    }),
+  }
+}, submissionDetailObjectSchema)
 
 export const validationDecisionRequestSchema = z.object({
   decision: z.enum(['approved', 'provisional', 'returned', 'rejected']),

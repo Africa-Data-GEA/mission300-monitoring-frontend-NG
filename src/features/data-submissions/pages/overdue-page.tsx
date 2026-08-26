@@ -19,7 +19,7 @@ const columns: Column<OverdueItem>[] = [
     sortValue: (row) => row.dataset,
   },
   { id: 'period', header: 'Period', cell: (row) => row.reportingPeriod },
-  { id: 'due', header: 'Due date', cell: (row) => row.dueDateLabel, sortValue: (row) => row.dueDate },
+  { id: 'due', header: 'Due date', cell: (row) => row.dueDateLabel, sortValue: (row) => row.dueDate ?? '' },
   { id: 'delay', header: 'Compliance position', cell: (row) => <><WorkflowStatusBadge status={row.status} /><p className="mt-1 text-xs text-text-muted">{row.overdueLabel}</p></> },
   { id: 'owner', header: 'Submission owner', cell: (row) => row.owner },
 ]
