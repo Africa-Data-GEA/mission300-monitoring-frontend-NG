@@ -8,7 +8,7 @@ import { statuses } from './statuses'
 
 const meteringPerformance = datasets.find((entry) => entry.id === 'ds-metering-performance')!
 const miniGridConnections = datasets.find((entry) => entry.id === 'ds-mini-grid-connections')!
-const generationAvailability = datasets.find((entry) => entry.id === 'ds-generation-availability')!
+const transmissionCapacity = datasets.find((entry) => entry.id === 'ds-transmission-transfer-capacity')!
 
 export const submissionObligations: Obligation[] = [
   {
@@ -32,21 +32,18 @@ export const submissionObligations: Obligation[] = [
   {
     id: 'obl-003', institution: 'Transmission Company of Nigeria',
     focalPerson: 'Emeka Okafor',
-    datasetId: generationAvailability.id, dataset: generationAvailability.name,
+    datasetId: transmissionCapacity.id, dataset: transmissionCapacity.name,
     reportingPeriod: 'Q3 2026',
     frequency: 'Quarterly', dueDate: '2026-10-10T17:00:00Z',
-    dueLabel: '8 days overdue', status: statuses.overdue, template: generationAvailability.template,
+    dueLabel: '8 days overdue', status: statuses.overdue, template: transmissionCapacity.template,
     acceptedSubmissionId: null,
     availableActions: ['upload-template', 'download-template'],
   },
-  {
-    id: 'obl-004', institution: 'NERC', focalPerson: 'Grace Adeyemi',
-    datasetId: meteringPerformance.id, dataset: meteringPerformance.name,
-    reportingPeriod: 'Q2 2026', frequency: 'Quarterly',
-    dueDate: '2026-07-15T17:00:00Z', dueLabel: 'Accepted 13 Jul 2026',
-    status: statuses.approved, template: meteringPerformance.template, acceptedSubmissionId: 'SUB-2026-0018',
-    availableActions: ['view'],
-  },
+  // NERC's Q2 2026 metering return is already accepted (see SUB-2026-0018 in
+  // submissions.ts) — a fulfilled period does not stay listed here as an
+  // outstanding obligation; it lives in submission history instead. Keeping
+  // both was the exact confusion this fix removes: the same dataset showing
+  // twice, once owed and once already done.
 ]
 
 export const manualEntryDefinitions: Record<string, ManualEntryDefinition> = {

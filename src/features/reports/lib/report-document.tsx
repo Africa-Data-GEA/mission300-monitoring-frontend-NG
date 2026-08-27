@@ -1,30 +1,47 @@
 import { Document, Page, StyleSheet, Text, View } from '@react-pdf/renderer'
 import type { ReportPreview } from '@/api/schemas/reports'
+import './pdf-fonts'
 import type { Orientation } from './types'
 
-/** brand-700 in src/styles/theme.css — repeated here because @react-pdf cannot read CSS custom properties. */
-const ACCENT = '#016E44'
+/**
+ * Navy/gold — the same fixed Mission 300 palette the bespoke Compact
+ * Progress Report PDF uses (compact-progress-report-document.tsx), not the
+ * admin-configurable `--color-brand-*` tokens: every report this app
+ * generates should read as one consistent, modern document family rather
+ * than the builder's output looking like a different product from the CPR
+ * quick-export.
+ */
+const NAVY = '#002036'
+const GOLD = '#FFB800'
 const MUTED = '#5B6472'
 const BORDER = '#D8DCE3'
 const MARGIN = 40
 
 const styles = StyleSheet.create({
-  page: { padding: MARGIN, fontSize: 9, fontFamily: 'Helvetica', color: '#1A1F29' },
+  page: { padding: MARGIN, fontSize: 9, fontFamily: 'Google Sans', color: '#1A1F29' },
 
   // Cover page — full-bleed colour band up top, meta grid below.
-  coverPage: { padding: 0, fontFamily: 'Helvetica', color: '#1A1F29' },
+  coverPage: { padding: 0, fontFamily: 'Google Sans', color: '#1A1F29' },
   coverBand: {
-    backgroundColor: ACCENT,
+    backgroundColor: NAVY,
     color: '#FFFFFF',
     paddingHorizontal: MARGIN,
     paddingTop: 44,
     paddingBottom: 44,
   },
   coverWordmarkRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  coverWordmarkDot: { width: 5, height: 5, borderRadius: 2.5, backgroundColor: '#FFFFFF' },
-  coverWordmark: { fontSize: 10, fontFamily: 'Helvetica-Bold', color: '#FFFFFF', letterSpacing: 2 },
+  coverWordmarkDot: { width: 5, height: 5, borderRadius: 2.5, backgroundColor: GOLD },
+  coverWordmark: { fontSize: 10, fontFamily: 'Google Sans', fontWeight: 700, color: '#FFFFFF', letterSpacing: 2 },
   coverWordmarkSub: { fontSize: 8, color: '#FFFFFF', opacity: 0.8, marginTop: 3 },
-  coverTitle: { fontSize: 25, fontFamily: 'Helvetica-Bold', lineHeight: 1.25, marginTop: 60, maxWidth: '85%' },
+  coverTitle: {
+    fontSize: 25,
+    fontFamily: 'Google Sans',
+    fontWeight: 700,
+    color: GOLD,
+    lineHeight: 1.25,
+    marginTop: 60,
+    maxWidth: '85%',
+  },
   coverSubtitle: { fontSize: 12, color: '#FFFFFF', opacity: 0.9, marginTop: 8 },
   coverMetaBlock: {
     marginTop: 'auto',
@@ -34,7 +51,7 @@ const styles = StyleSheet.create({
     paddingVertical: 28,
   },
   coverMetaRow: { flexDirection: 'row', width: '50%', marginBottom: 8, paddingRight: 12 },
-  coverMetaLabel: { width: 110, fontFamily: 'Helvetica-Bold', color: MUTED, fontSize: 8 },
+  coverMetaLabel: { width: 110, fontFamily: 'Google Sans', fontWeight: 700, color: MUTED, fontSize: 8 },
   coverMetaValue: { flex: 1, fontSize: 9 },
 
   // Content pages
@@ -47,28 +64,32 @@ const styles = StyleSheet.create({
     paddingBottom: 8,
     marginBottom: 14,
   },
-  headerTitle: { fontSize: 9, fontFamily: 'Helvetica-Bold' },
+  headerTitle: { fontSize: 9, fontFamily: 'Google Sans', fontWeight: 700 },
   headerMeta: { fontSize: 8, color: MUTED },
   sectionTitle: {
     fontSize: 12,
-    fontFamily: 'Helvetica-Bold',
+    fontFamily: 'Google Sans',
+    fontWeight: 700,
+    color: NAVY,
     marginTop: 12,
     marginBottom: 6,
   },
-  table: { borderWidth: 1, borderColor: BORDER, borderRadius: 2 },
-  headerRow: { flexDirection: 'row', backgroundColor: '#F4F5F7' },
+  table: { borderWidth: 1, borderColor: BORDER, borderRadius: 12, overflow: 'hidden' },
+  headerRow: { flexDirection: 'row', backgroundColor: NAVY },
   row: { flexDirection: 'row', borderTopWidth: 1, borderTopColor: BORDER },
   cellHeader: {
     flex: 1,
-    padding: 5,
-    fontFamily: 'Helvetica-Bold',
+    padding: 8,
+    fontFamily: 'Google Sans',
+    fontWeight: 700,
     fontSize: 8,
+    color: '#FFFFFF',
     borderRightWidth: 1,
-    borderRightColor: BORDER,
+    borderRightColor: NAVY,
   },
   cell: {
     flex: 1,
-    padding: 5,
+    padding: 8,
     fontSize: 8,
     borderRightWidth: 1,
     borderRightColor: BORDER,
@@ -86,10 +107,10 @@ const styles = StyleSheet.create({
   },
 
   // Closing page
-  closingAccentBar: { width: 48, height: 4, backgroundColor: ACCENT, marginBottom: 16 },
-  closingTitle: { fontSize: 20, fontFamily: 'Helvetica-Bold', marginBottom: 18 },
+  closingAccentBar: { width: 48, height: 5, borderRadius: 3, backgroundColor: GOLD, marginBottom: 18 },
+  closingTitle: { fontSize: 20, fontFamily: 'Google Sans', fontWeight: 700, color: NAVY, marginBottom: 18 },
   closingBlock: { marginBottom: 16 },
-  closingLabel: { fontSize: 8, fontFamily: 'Helvetica-Bold', color: MUTED, marginBottom: 3 },
+  closingLabel: { fontSize: 8, fontFamily: 'Google Sans', fontWeight: 700, color: MUTED, marginBottom: 3 },
   closingText: { fontSize: 9, lineHeight: 1.5 },
 })
 

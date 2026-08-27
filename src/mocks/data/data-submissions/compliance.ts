@@ -4,7 +4,7 @@ import { statuses } from './statuses'
 export const overdueItems: OverdueItem[] = [
   {
     id: 'ovd-001', institution: 'Transmission Company of Nigeria',
-    dataset: 'Generation availability', reportingPeriod: 'Q3 2026',
+    dataset: 'Transmission transfer capacity', reportingPeriod: 'Q3 2026',
     dueDate: '2026-10-10T17:00:00Z', dueDateLabel: '10 Oct 2026',
     overdueLabel: '8 days overdue', owner: 'Funmilayo Adeyemi',
     status: statuses.overdue, availableActions: ['contact-owner', 'upload-template'],

@@ -13,7 +13,7 @@ export const dataSubmissionFilters: DataSubmissionFilters = {
     all,
     { value: 'metering', label: 'Metering performance' },
     { value: 'mini-grid', label: 'Mini-grid connections' },
-    { value: 'generation', label: 'Generation availability' },
+    { value: 'transmission-capacity', label: 'Transmission transfer capacity' },
   ],
   reportingPeriods: [
     all,

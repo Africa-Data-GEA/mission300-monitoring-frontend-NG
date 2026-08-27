@@ -22,7 +22,7 @@ export function ReportDocumentPreview({
     <div className="flex min-w-0 flex-1 justify-center rounded-card bg-surface-sunken px-4 py-6 sm:px-8">
       <div
         className={cn(
-          'h-fit w-full shrink-0 bg-white text-[#1A1F29] shadow-[0_1px_2px_rgba(16,24,40,0.06),0_8px_24px_rgba(16,24,40,0.08)]',
+          'h-fit w-full shrink-0 overflow-hidden rounded-2xl bg-white text-[#1A1F29] shadow-[0_1px_2px_rgba(16,24,40,0.06),0_8px_24px_rgba(16,24,40,0.08)]',
           orientation === 'portrait' ? 'max-w-[720px]' : 'max-w-[980px]',
         )}
       >
@@ -59,23 +59,23 @@ function CoverPage({ preview }: { preview: ReportPreview }) {
 
   return (
     <div className="flex min-h-[460px] flex-col">
-      <div className="relative overflow-hidden bg-brand-700 px-10 py-12 text-white sm:px-14 sm:py-16">
+      <div className="relative overflow-hidden bg-landing-deep-navy px-10 py-12 text-white sm:px-14 sm:py-16">
         <div
           aria-hidden="true"
-          className="absolute -top-16 -right-16 size-56 rounded-full bg-white/10"
+          className="absolute -top-16 -right-16 size-56 rounded-full bg-landing-gold/10"
         />
         <div
           aria-hidden="true"
-          className="absolute -bottom-24 -left-10 size-64 rounded-full bg-black/10"
+          className="absolute -bottom-24 -left-10 size-64 rounded-full bg-black/20"
         />
 
         <div className="relative flex items-center gap-2">
-          <div className="size-2 rounded-full bg-white" />
+          <div className="size-2 rounded-full bg-landing-gold" />
           <p className="text-xs font-bold tracking-[0.2em]">MISSION 300</p>
         </div>
         <p className="relative mt-1 text-[11px] text-white/75">Monitoring &amp; Evaluation Dashboard</p>
 
-        <h2 className="relative mt-14 max-w-[85%] text-2xl leading-tight font-bold sm:mt-20 sm:text-3xl">
+        <h2 className="relative mt-14 max-w-[85%] text-2xl leading-tight font-bold text-landing-gold sm:mt-20 sm:text-3xl">
           {metadata.title}
         </h2>
         <p className="relative mt-3 text-sm text-white/85">{metadata.reportingPeriod}</p>
@@ -117,18 +117,18 @@ function ContentPages({
         <div className="flex flex-col gap-6">
           {sections.map((section) => (
             <div key={section.title}>
-              <h3 className="mb-2 text-sm font-bold text-[#1A1F29]">{section.title}</h3>
+              <h3 className="mb-2 text-sm font-bold text-landing-deep-navy">{section.title}</h3>
               {section.rows.length === 0 ? (
                 <p className="text-xs text-text-muted italic">No records match the applied filters.</p>
               ) : (
-                <div className="overflow-x-auto rounded-[2px] border border-[#D8DCE3]">
+                <div className="overflow-hidden rounded-xl border border-[#D8DCE3]">
                   <table className="w-full min-w-[420px] border-collapse text-left text-[11px]">
                     <thead>
-                      <tr className="bg-[#F4F5F7]">
+                      <tr className="bg-landing-deep-navy">
                         {section.columns.map((column) => (
                           <th
                             key={column}
-                            className="border-r border-[#D8DCE3] px-2 py-1.5 font-bold text-[#1A1F29] last:border-r-0"
+                            className="border-r border-white/15 px-3 py-2 font-bold text-white last:border-r-0"
                           >
                             {column}
                           </th>
@@ -141,7 +141,7 @@ function ContentPages({
                           {row.map((cell, cellIndex) => (
                             <td
                               key={cellIndex}
-                              className="border-r border-[#D8DCE3] px-2 py-1.5 text-[#1A1F29] last:border-r-0"
+                              className="border-r border-[#D8DCE3] px-3 py-2 text-[#1A1F29] last:border-r-0"
                             >
                               {cell}
                             </td>
@@ -165,8 +165,8 @@ function ClosingPage({ preview }: { preview: ReportPreview }) {
 
   return (
     <div className="flex min-h-[300px] flex-col p-10 sm:p-14">
-      <div className="h-1 w-12 bg-brand-700" />
-      <h2 className="mt-4 mb-5 text-xl font-bold text-[#1A1F29]">End of report</h2>
+      <div className="h-1.5 w-12 rounded-full bg-landing-gold" />
+      <h2 className="mt-4 mb-5 text-xl font-bold text-landing-deep-navy">End of report</h2>
 
       <div className="flex flex-col gap-4 text-sm">
         <ClosingBlock label="Data source" text={metadata.sourceNotes} />

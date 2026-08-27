@@ -31,7 +31,7 @@ export const submissionRecords: SubmissionListItem[] = [
   },
   {
     id: 'SUB-2026-0019', institution: 'Transmission Company of Nigeria',
-    dataset: 'Generation availability', reportingPeriod: 'Q3 2026',
+    dataset: 'Transmission transfer capacity', reportingPeriod: 'Q3 2026',
     method: 'template-upload', methodLabel: 'Template upload', version: 1,
     submittedBy: 'Funmilayo Adeyemi', submittedAt: '2026-10-12T14:10:00Z',
     submittedAtLabel: '12 Oct 2026, 15:10', status: statuses.returned,

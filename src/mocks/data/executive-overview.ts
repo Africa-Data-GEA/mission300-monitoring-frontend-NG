@@ -96,8 +96,16 @@ function buildPeopleWithElectricityAccessCard(): CompactOutcomeCard {
       { label: '2028 checkpoint', value: 190 },
     ],
     // A composite figure blended from grid, mini-grid and SHS connections —
-    // no single KPI Explorer profile backs it directly.
+    // no single KPI Explorer profile backs it directly. See M300-P2-024
+    // ("People Connected to Electricity (Canonical)") for the beneficiary-
+    // event-backed, SE4ALL-aligned version of this metric — currently a
+    // small pilot ledger, not yet at the scale to replace this composite.
     kpiId: null,
+    relatedKpiNote: {
+      label: 'SE4ALL-aligned pilot ledger (M300-P2-024)',
+      kpiId: 'M300-P2-024',
+      value: getKpiProfile('M300-P2-024')?.currentLabel ?? 'Not yet available',
+    },
     provenance: {
       definition:
         'Cumulative number of people with electricity access across grid, mini-grid and solar home system solutions.',
@@ -191,8 +199,17 @@ function buildCleanCookingAccessCard(): CompactOutcomeCard {
       { label: '2028 checkpoint', value: 70 },
     ],
     // A composite figure blended across cooking-fuel technologies — no
-    // single KPI Explorer profile backs it directly.
+    // single KPI Explorer profile backs it directly. See M300-P2-025
+    // ("Clean Cooking — Verified Beneficiary Households (Canonical)") for
+    // the beneficiary-event-backed, SE4ALL-aligned version of this metric —
+    // currently a small pilot ledger, not yet at the scale to replace this
+    // composite.
     kpiId: null,
+    relatedKpiNote: {
+      label: 'SE4ALL-aligned pilot ledger (M300-P2-025)',
+      kpiId: 'M300-P2-025',
+      value: getKpiProfile('M300-P2-025')?.currentLabel ?? 'Not yet available',
+    },
     provenance: {
       definition:
         'Share of Nigeria’s population with access to clean fuels and technologies for cooking.',

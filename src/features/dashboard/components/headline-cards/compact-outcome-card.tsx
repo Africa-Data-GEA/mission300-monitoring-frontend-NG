@@ -1,3 +1,4 @@
+import { Link } from 'react-router'
 import { BulletChart } from '@/components/ui/bullet-chart'
 import { TrendIndicator } from '@/components/ui/trend-indicator'
 import { cn } from '@/lib/utils'
@@ -74,6 +75,15 @@ export function CompactOutcomeCard({
         <div className="mt-auto pt-3">
           <TrendIndicator trend={data.trend} />
         </div>
+      )}
+
+      {data.relatedKpiNote && (
+        <Link
+          to={`/kpis?kpi=${data.relatedKpiNote.kpiId}`}
+          className="mt-2 block text-xs text-text-muted underline-offset-2 hover:text-brand-700 hover:underline"
+        >
+          See also — {data.relatedKpiNote.label}: {data.relatedKpiNote.value}
+        </Link>
       )}
     </MetricCardFrame>
   )

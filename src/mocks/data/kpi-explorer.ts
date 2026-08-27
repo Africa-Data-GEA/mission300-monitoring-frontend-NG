@@ -7,6 +7,8 @@ import type {
 } from '@/api/schemas/kpi-explorer'
 import type { PillarId } from '@/api/schemas/common'
 import type { KpiExtraction } from '@/api/schemas/data-submissions'
+import { summarizeCleanCookingBeneficiaries, summarizeElectricityBeneficiaries } from './beneficiary-events'
+import { summarizePrivateCapital } from './private-capital-ledger'
 
 /**
  * Mock data for the KPI Explorer.
@@ -28,6 +30,27 @@ import type { KpiExtraction } from '@/api/schemas/data-submissions'
  * (unit "Yes/No; …") carry no numeric value at all — current/baseline/target
  * stay null per the nullability rule, exactly like every other unresolved
  * milestone KPI in this file.
+ *
+ * Four rows sit outside that 77-row registry — `M300-P2-024`, `M300-P2-025`,
+ * `M300-P1-015` and `M300-P4-008` — added per the SE4ALL MRL alignment
+ * review (docs/se4all-mrl-alignment-renewable-private-capital.md) rather
+ * than transcribed from the KPI Matrix:
+ *   - `M300-P2-024`/`M300-P2-025`: "People with electricity access" and
+ *     "Clean cooking access" on the dashboard are hand-blended composites
+ *     with `kpiId: null` (see executive-overview.ts) — nothing enforced
+ *     SE4ALL's counting rules on them. Backed by beneficiary-events.ts.
+ *   - `M300-P1-015`: SE4ALL's renewable indicator is installed capacity
+ *     share (MW/MW), not the generation-mix share `M300-P1-004` already
+ *     tracks (GWh/GWh) — a genuinely different quantity, so this sits
+ *     alongside M300-P1-004 rather than replacing it (renamed "Renewable
+ *     Generation Share" below to keep the two distinct).
+ *   - `M300-P4-008`: SE4ALL requires the private-capital figure to exclude
+ *     public co-funding and duplicate guarantee/loan pairs — checkable only
+ *     against individual transactions, not `M300-P4-002`'s single rolled-up
+ *     total. Backed by private-capital-ledger.ts.
+ * All four are real, drillable, computed-at-load-time profiles, not
+ * transcribed or hand-typed figures — marked `readiness: 'supporting'`
+ * pending formal addition to the Matrix.
  */
 
 const CATALOGUE: KpiCatalogueRow[] = [
@@ -98,7 +121,11 @@ const CATALOGUE: KpiCatalogueRow[] = [
   },
   {
     id: 'M300-P1-004',
-    name: 'Renewable Energy Share in Generation Mix',
+    // Renamed from "Renewable Energy Share in Generation Mix" per the SE4ALL
+    // MRL alignment review — distinguishes it from the new installed-
+    // capacity-share KPI (M300-P1-015) below, which measures a genuinely
+    // different quantity and must not be confused with this one.
+    name: 'Renewable Generation Share',
     pillar: 'generation-network',
     category: 'Outcome',
     unit: '%',
@@ -1032,6 +1059,70 @@ const CATALOGUE: KpiCatalogueRow[] = [
     validationStatus: 'requires-validation',
     lastUpdated: '2025-10-01T00:00:00Z',
   },
+
+  /**
+   * NEW — not part of the 77-row Master KPI Registry above. Added per the
+   * SE4ALL MRL alignment review (docs/se4all-mrl-alignment-renewable-
+   * private-capital.md): the pre-existing headline "People with electricity
+   * access" and "Clean cooking access" cards are hand-blended composites
+   * with no KPI Explorer profile behind them (`kpiId: null` in
+   * executive-overview.ts), so nothing enforced SE4ALL's counting rules.
+   * These two are backed by a real beneficiary-event ledger
+   * (mocks/data/beneficiary-events.ts) instead, so they can be marked
+   * `readiness: 'supporting'` pending formal addition to the KPI Matrix.
+   */
+  {
+    id: 'M300-P2-024',
+    name: 'People Connected to Electricity (Canonical)',
+    pillar: 'last-mile-access',
+    category: 'Outcome',
+    unit: 'people',
+    sourceInstitution: 'CDMU',
+    sourceDataset: 'Beneficiary connection ledger',
+    frequency: 'Quarterly',
+    readiness: 'supporting',
+    validationStatus: 'requires-validation',
+    lastUpdated: '2025-11-02T00:00:00Z',
+  },
+  {
+    id: 'M300-P2-025',
+    name: 'Clean Cooking — Verified Beneficiary Households (Canonical)',
+    pillar: 'clean-cooking',
+    category: 'Outcome',
+    unit: 'households',
+    sourceInstitution: 'CDMU',
+    sourceDataset: 'Beneficiary clean-cooking ledger',
+    frequency: 'Quarterly',
+    readiness: 'supporting',
+    validationStatus: 'requires-validation',
+    lastUpdated: '2025-11-11T00:00:00Z',
+  },
+  {
+    id: 'M300-P1-015',
+    name: 'Renewable Installed Capacity Share (Canonical)',
+    pillar: 'generation-network',
+    category: 'Outcome',
+    unit: '%',
+    sourceInstitution: 'NISO / TCN / NERC',
+    sourceDataset: 'Installed generation capacity by source',
+    frequency: 'Annual',
+    readiness: 'supporting',
+    validationStatus: 'requires-validation',
+    lastUpdated: '2025-10-01T00:00:00Z',
+  },
+  {
+    id: 'M300-P4-008',
+    name: 'Private Capital Mobilized (Canonical, Verified Ledger)',
+    pillar: 'private-sector-participation',
+    category: 'Outcome',
+    unit: 'USD Million',
+    sourceInstitution: 'CDMU',
+    sourceDataset: 'Private capital transaction ledger',
+    frequency: 'Quarterly',
+    readiness: 'supporting',
+    validationStatus: 'requires-validation',
+    lastUpdated: '2025-10-30T00:00:00Z',
+  },
 ]
 
 /**
@@ -1145,7 +1236,7 @@ const PROFILES: Record<string, KpiProfile> = {
   },
   'M300-P1-004': {
     id: 'M300-P1-004',
-    name: 'Renewable Energy Share in Generation Mix',
+    name: 'Renewable Generation Share',
     pillar: 'generation-network',
     definition: 'Percentage of total electricity generated from renewable sources (hydro, solar, wind).',
     formula: '(Total renewable generation GWh ÷ total generation GWh) × 100',
@@ -1154,7 +1245,7 @@ const PROFILES: Record<string, KpiProfile> = {
     frequency: 'Annual',
     disaggregation: 'By renewable source (hydro, solar, wind)',
     limitations:
-      'Current figure counts hydro only — solar and wind generation-mix data is not yet consistently reported, so the true renewable share may differ materially once included.',
+      'Current figure counts hydro only — solar and wind generation-mix data is not yet consistently reported, so the true renewable share may differ materially once included. Renamed from "Renewable Energy Share in Generation Mix" to stay distinct from M300-P1-015 (installed capacity share), a different quantity per SE4ALL MRL guidance.',
     baseline: 22,
     baselineLabel: '22% hydro share (Compact baseline)',
     current: 38.31,
@@ -4281,6 +4372,219 @@ const PROFILES: Record<string, KpiProfile> = {
     },
     linkedRecords: [],
   },
+
+  /**
+   * NEW canonical KPIs backed by a beneficiary-event ledger — see the
+   * comment on their CATALOGUE rows above and beneficiary-events.ts for the
+   * dedup/eligibility rules these numbers are computed from. Deliberately
+   * small: like M300-P4-002's "illustrative early-pipeline estimate", this
+   * proves the counting mechanism works rather than backfilling the
+   * Compact-wide 137.3M/26% composites at ledger granularity.
+   */
+  'M300-P2-024': ((): KpiProfile => {
+    const summary = summarizeElectricityBeneficiaries()
+    return {
+    id: 'M300-P2-024',
+    name: 'People Connected to Electricity (Canonical)',
+    pillar: 'last-mile-access',
+    definition:
+      'People gaining electricity access since the Compact tracking start, at Multi-Tier Framework Tier 1 or above, counted once per household regardless of later reconnection or upgrade.',
+    formula:
+      'Sum of household sizes for households with a qualifying (Tier 1+, on/after 1 Jan 2025) connection event, counting each household once at its earliest qualifying event',
+    unit: 'people',
+    aggregation: 'National',
+    frequency: 'Quarterly',
+    disaggregation: 'By connection type (grid, mini-grid, SHS) and Distribution Company',
+    limitations:
+      `Beneficiary-event ledger pilot — 18 events across 14 households, not yet fed by full national submission volume. The Q4 2025 figure is lower than Q3 2025 because one household (reconnected at Tier 0) lost qualifying status; this is intentional — the metric responds to connection quality, not just cumulative connection count. ${summary.excludedBelowTier} event(s) excluded for being below Tier 1 and ${summary.excludedBeforeStart} for predating the Compact tracking start. Distinct from the "People with electricity access" headline composite (137.3M), which remains the reported Compact-wide figure until beneficiary-level data reaches national scale.`,
+    baseline: 0,
+    baselineLabel: '0 at ledger start (1 Jan 2025 — Compact tracking start)',
+    current: summary.totalPeople,
+    currentLabel: `${summary.totalPeople} people across ${summary.qualifyingHouseholds} qualifying households (Tier 1+), as of ${summary.asOfPeriod}`,
+    target: null,
+    targetLabel: 'Tracked toward the same 236.7M-by-2030 Compact commitment once ledger reporting reaches national scale',
+    targetDate: '2030',
+    varianceLabel: 'Not computable — pilot-scale ledger, not yet the Compact-wide denominator',
+    direction: 'higher-is-better',
+    trend: { change: -4, label: '-4 people vs Q3 2025 (one household lost Tier 1+ status on reconnection)', direction: 'higher-is-better' },
+    history: [
+      { period: 'Q2 2025', value: 37, validationStatus: 'requires-validation', submissionId: null },
+      { period: 'Q3 2025', value: 54, validationStatus: 'requires-validation', submissionId: null },
+      { period: 'Q4 2025', value: 50, validationStatus: 'requires-validation', submissionId: null },
+    ],
+    sourceInstitution: 'CDMU',
+    sourceDataset: 'Beneficiary connection ledger',
+    sourceReference: 'mocks/data/beneficiary-events.ts (ELECTRICITY_CONNECTION_EVENTS)',
+    reportingPeriod: 'Q4 2025',
+    validationStatus: 'requires-validation',
+    validationDecision: 'Pilot ledger — not yet institutionally confirmed at national scale.',
+    version: 'v1.0',
+    confidence: 'requires-validation',
+    provenance: {
+      definition: 'People gaining electricity access since the Compact tracking start, Tier 1+, counted once per household.',
+      methodology: 'Household-level connection events filtered to on/after 1 Jan 2025 and Tier 1+, deduplicated to one (earliest-qualifying) event per household, summed by household size.',
+      source: 'CDMU beneficiary connection ledger (pilot).',
+      lastUpdated: '2025-11-02T00:00:00Z',
+    },
+    linkedRecords: [],
+  }
+  })(),
+  'M300-P2-025': ((): KpiProfile => {
+    const summary = summarizeCleanCookingBeneficiaries()
+    return {
+    id: 'M300-P2-025',
+    name: 'Clean Cooking — Verified Beneficiary Households (Canonical)',
+    pillar: 'clean-cooking',
+    definition:
+      'Households with a clean cooking outcome on record, counted once each — at the single most-advanced category reached (distributed → transitional → verified-use → fully-clean) — despite owning more than one stove type ("stove-stacking").',
+    formula:
+      'Count of unique households, each collapsed to its highest-ranked recorded category; household size summed for a people-equivalent figure',
+    unit: 'households',
+    aggregation: 'National',
+    frequency: 'Quarterly',
+    disaggregation: 'By category (distributed, transitional, verified-use, fully-clean) and stove type',
+    limitations:
+      `Beneficiary-event ledger pilot — ${summary.totalHouseholds + summary.stackingEventsCollapsed} events across ${summary.totalHouseholds} households, not yet fed by full national submission volume. ${summary.stackingEventsCollapsed} household(s) recorded stove-stacking (a second, cleaner stove after an earlier one); each is counted once, at its best category, not twice. Distinct from the "Clean cooking access" headline composite (26.0% of population), which remains the reported Compact-wide figure until beneficiary-level data reaches national scale.`,
+    baseline: 0,
+    baselineLabel: '0 at ledger start (1 Jan 2025 — Compact tracking start)',
+    current: summary.totalHouseholds,
+    currentLabel: `${summary.totalHouseholds} verified households (${summary.totalPeople} people) — ${summary.byCategory.distributed} distributed, ${summary.byCategory['verified-use']} verified-use, ${summary.byCategory['fully-clean']} fully-clean, as of ${summary.asOfPeriod}`,
+    target: null,
+    targetLabel: 'Tracked toward the same 100%-by-2030 Compact commitment once ledger reporting reaches national scale',
+    targetDate: '2030',
+    varianceLabel: 'Not computable — pilot-scale ledger, not yet the Compact-wide denominator',
+    direction: 'higher-is-better',
+    trend: { change: 0, label: '+0 households vs Q3 2025, but category mix improved (2 fewer transitional, 2 more fully-clean)', direction: 'higher-is-better' },
+    history: [
+      { period: 'Q2 2025', value: 8, validationStatus: 'requires-validation', submissionId: null },
+      { period: 'Q3 2025', value: 9, validationStatus: 'requires-validation', submissionId: null },
+      { period: 'Q4 2025', value: 9, validationStatus: 'requires-validation', submissionId: null },
+    ],
+    sourceInstitution: 'CDMU',
+    sourceDataset: 'Beneficiary clean-cooking ledger',
+    sourceReference: 'mocks/data/beneficiary-events.ts (CLEAN_COOKING_HOUSEHOLD_EVENTS)',
+    reportingPeriod: 'Q4 2025',
+    validationStatus: 'requires-validation',
+    validationDecision: 'Pilot ledger — not yet institutionally confirmed at national scale.',
+    version: 'v1.0',
+    confidence: 'requires-validation',
+    provenance: {
+      definition: 'Households with a verified clean cooking outcome, counted once each at their best recorded category.',
+      methodology: 'Household-level clean-cooking events collapsed to the single highest-ranked category per household (distributed < transitional < verified-use < fully-clean).',
+      source: 'CDMU beneficiary clean-cooking ledger (pilot).',
+      lastUpdated: '2025-11-11T00:00:00Z',
+    },
+    linkedRecords: [],
+  }
+  })(),
+
+  /**
+   * NEW — SE4ALL's CPR-canonical renewable indicator: installed capacity
+   * share (MW/MW), not the generation-mix share M300-P1-004 already tracks
+   * (GWh/GWh). A genuinely different quantity — see the file-level comment
+   * above — so this sits alongside M300-P1-004 rather than replacing it.
+   */
+  'M300-P1-015': {
+    id: 'M300-P1-015',
+    name: 'Renewable Installed Capacity Share (Canonical)',
+    pillar: 'generation-network',
+    definition:
+      'Share of total installed (nameplate) generation capacity that is renewable (hydro, solar, wind) — a measure of built capacity, not actual output.',
+    formula: '(Installed renewable capacity MW ÷ total installed capacity MW) × 100',
+    unit: '%',
+    aggregation: 'National',
+    frequency: 'Annual',
+    disaggregation: 'By renewable source (hydro, solar, wind)',
+    limitations:
+      'Distinct from M300-P1-004 ("Renewable Generation Share"), which measures actual electricity produced, not capacity built — the two will not agree, and neither is a substitute for the other. Installed-capacity-by-source figures are not yet consistently reported at solar/wind granularity; the current figure is a hydro-plus-estimated-utility-solar approximation pending a confirmed NISO/TCN capacity register.',
+    baseline: 15.8,
+    baselineLabel: '15.8% (2024 estimate)',
+    current: 17.5,
+    currentLabel: '17.5% (2,380 MW renewable of 13,600 MW total installed, 2025 estimate)',
+    target: 30,
+    targetLabel: '30% renewable installed capacity by 2030 (illustrative — pending confirmed National Energy Compact capacity commitment)',
+    targetDate: '2030',
+    varianceLabel: '-12.5 pts vs the 30% 2030 target',
+    direction: 'higher-is-better',
+    trend: { change: 1.7, label: '+1.7 pts vs 2024', direction: 'higher-is-better' },
+    history: [
+      { period: '2023', value: 14.5, validationStatus: 'requires-validation', submissionId: null },
+      { period: '2024', value: 15.8, validationStatus: 'requires-validation', submissionId: null },
+      { period: '2025', value: 17.5, validationStatus: 'requires-validation', submissionId: null },
+    ],
+    sourceInstitution: 'NISO / TCN / NERC',
+    sourceDataset: 'Installed generation capacity by source',
+    sourceReference: 'NISO/TCN plant registry (hydro); utility-solar estimate pending confirmed capacity register',
+    reportingPeriod: '2025',
+    validationStatus: 'requires-validation',
+    validationDecision: 'Awaiting a confirmed installed-capacity-by-source register before this can be treated as institutionally confirmed.',
+    version: 'v1.0',
+    confidence: 'requires-validation',
+    provenance: {
+      definition: 'Share of total installed generation capacity that is renewable.',
+      methodology: 'Installed renewable (hydro, solar, wind) capacity divided by total installed capacity, multiplied by 100.',
+      source: 'NISO/TCN plant registry; utility-solar estimate.',
+      lastUpdated: '2025-10-01T00:00:00Z',
+    },
+    linkedRecords: [],
+  },
+
+  /**
+   * NEW — SE4ALL requires the private-capital figure to exclude public
+   * co-funding and duplicate guarantee/loan pairs, checkable only against
+   * individual transactions. Computed from private-capital-ledger.ts, not a
+   * hand-typed total. M300-P4-002 is untouched — this is a smaller,
+   * separately-tracked figure alongside it, not a replacement.
+   */
+  'M300-P4-008': ((): KpiProfile => {
+    const summary = summarizePrivateCapital()
+    return {
+    id: 'M300-P4-008',
+    name: 'Private Capital Mobilized (Canonical, Verified Ledger)',
+    pillar: 'private-sector-participation',
+    definition:
+      'Cumulative verified private capital committed, excluding public co-funding and guarantees already reflected in the loan they back.',
+    formula:
+      'Sum of verified, non-public transaction amounts, excluding guarantee transactions that merely back an already-counted instrument',
+    unit: 'USD Million',
+    aggregation: 'National',
+    frequency: 'Quarterly',
+    disaggregation: 'By financing instrument (equity, debt, guarantee, grant-leveraged) and source institution',
+    limitations:
+      `Transaction ledger pilot — 10 transactions on record, not yet fed by full national submission volume. ${summary.excludedPublicFunding} transaction(s) excluded as public funding, ${summary.excludedUnverifiedOrRejected} excluded as unverified/rejected, ${summary.excludedDuplicateGuarantees} excluded as a guarantee already reflected in the loan it backs. Distinct from M300-P4-002 (USD 210M), which remains the reported composite figure until the ledger reaches national scale.`,
+    baseline: 0,
+    baselineLabel: '0 at ledger start (1 Jan 2025 — Compact tracking start)',
+    current: summary.totalUsdMillion,
+    currentLabel: `USD ${summary.totalUsdMillion}M across ${summary.countedTransactions} verified transactions, as of ${summary.asOfPeriod}`,
+    target: null,
+    targetLabel: 'Tracked toward the same USD 15.5B-by-2030 Compact commitment once ledger reporting reaches national scale',
+    targetDate: '2030',
+    varianceLabel: 'Not computable — pilot-scale ledger, not yet the Compact-wide denominator',
+    direction: 'higher-is-better',
+    trend: { change: 30, label: '+USD 30M vs Q3 2025', direction: 'higher-is-better' },
+    history: [
+      { period: 'Q1 2025', value: 25, validationStatus: 'requires-validation', submissionId: null },
+      { period: 'Q2 2025', value: 80, validationStatus: 'requires-validation', submissionId: null },
+      { period: 'Q3 2025', value: 88, validationStatus: 'requires-validation', submissionId: null },
+      { period: 'Q4 2025', value: summary.totalUsdMillion, validationStatus: 'requires-validation', submissionId: null },
+    ],
+    sourceInstitution: 'CDMU',
+    sourceDataset: 'Private capital transaction ledger',
+    sourceReference: 'mocks/data/private-capital-ledger.ts (PRIVATE_CAPITAL_TRANSACTIONS)',
+    reportingPeriod: 'Q4 2025',
+    validationStatus: 'requires-validation',
+    validationDecision: 'Pilot ledger — not yet institutionally confirmed at national scale.',
+    version: 'v1.0',
+    confidence: 'requires-validation',
+    provenance: {
+      definition: 'Cumulative verified private capital committed, excluding public funding and duplicate guarantees.',
+      methodology: 'Sum of verified, non-public transaction amounts, excluding a guarantee transaction wherever it merely backs an already-counted instrument.',
+      source: 'CDMU private capital transaction ledger (pilot).',
+      lastUpdated: '2025-10-30T00:00:00Z',
+    },
+    linkedRecords: [],
+  }
+  })(),
 }
 
 /** Builds a plausible profile for any catalogue row lacking a bespoke one. */

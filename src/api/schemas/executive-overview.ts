@@ -115,6 +115,18 @@ export const compactOutcomeCardSchema = z.object({
   // Defaulted: see BACKEND TOLERANCE. Null disables the KPI Explorer
   // deep-link, exactly as it already does for a composite figure.
   kpiId: z.string().nullable().default(null),
+  /** A pointer to a related, separately-tracked KPI Explorer profile that
+   * measures a stricter or differently-scoped version of this same outcome —
+   * e.g. a beneficiary-event-backed "canonical" KPI sitting alongside a
+   * hand-blended composite. Distinct from `kpiId`: that field means "this
+   * profile backs this card's own number"; this one means "see also", for a
+   * profile that measures something related but not numerically identical.
+   * Null where no such related KPI exists. */
+  // Defaulted: see BACKEND TOLERANCE. Null hides the "see also" row.
+  relatedKpiNote: z
+    .object({ label: z.string().min(1), kpiId: z.string().min(1), value: z.string().min(1) })
+    .nullable()
+    .default(null),
 }).refine((card) => card.scaleMax > card.scaleMin, {
   message: 'scaleMax must be greater than scaleMin',
   path: ['scaleMax'],

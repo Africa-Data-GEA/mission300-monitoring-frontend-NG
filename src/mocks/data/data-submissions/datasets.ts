@@ -12,17 +12,26 @@ export const datasets: Dataset[] = [
     id: 'ds-metering-performance',
     name: 'Metering performance',
     purpose:
-      'Tracks customer metering coverage and billing/collection efficiency across DisCos, feeding the ' +
-      'financially-viable-utilities pillar’s metering-rate KPI.',
+      'One category within NERC’s real compiled quarterly return (the same "Compiled NERC Data" workbook NERC ' +
+      'already submits, covering 2020–2026) — specifically its "Disco Metering" sheet: one row per DisCo per ' +
+      'month, registered and metered customer counts. Feeds the financially-viable-utilities pillar’s Metering ' +
+      'Rate KPI (M300-P3-004). The same one-file upload also carries the energy-received/billed and revenue ' +
+      'billed/collected sheets that feed ATC&C Loss Rate — a single NERC submission satisfies both, which is ' +
+      'why the workbook is accepted here even though this obligation only reads its metering sheet.',
     pillar: 'financially-viable-utilities',
-    requiredDataPoints: ['Distribution company', 'Registered customers', 'Metered customers'],
+    requiredDataPoints: [
+      'DisCo (one of the eleven, as named in the workbook — Ikeja, Eko, Abuja, Kaduna, Kano, Benin, Enugu, Ibadan, Jos, Yola, PH)',
+      'Reporting month and year',
+      'Registered customers (from "Disco Metering")',
+      'Metered customers (from "Disco Metering")',
+    ],
     frequency: 'Quarterly',
     ownerInstitution: 'NERC',
     template: {
-      id: 'tpl-metering-v3',
-      version: '3.0',
-      fileName: 'metering-performance-v3.csv',
-      downloadUrl: '/templates/metering-performance-v3.csv',
+      id: 'tpl-nerc-compiled-data',
+      version: '2026',
+      fileName: 'compiled-nerc-data-2020-2026.xlsx',
+      downloadUrl: '/templates/compiled-nerc-data-2020-2026.xlsx',
     },
   },
   {
@@ -42,20 +51,21 @@ export const datasets: Dataset[] = [
     },
   },
   {
-    id: 'ds-generation-availability',
-    name: 'Generation availability',
+    id: 'ds-transmission-transfer-capacity',
+    name: 'Transmission transfer capacity',
     purpose:
-      'Tracks available generation capacity actually dispatched onto the grid, feeding the ' +
-      'generation-network pillar’s available-capacity KPI.',
+      'Tracks available cross-regional transmission transfer capacity on TCN’s own network, feeding the ' +
+      'generation-network pillar’s Available Transmission Transfer Capacity KPI (M300-P1-012). Distinct from ' +
+      'generation capacity itself, which NISO/GenCos report separately — TCN owns the wires, not the plants.',
     pillar: 'generation-network',
-    requiredDataPoints: ['Reporting plant or operator', 'Available capacity (MW)', 'Dispatched capacity (MW)'],
+    requiredDataPoints: ['Reporting corridor or interconnector', 'Available transfer capacity (MW)', 'Constraint notes'],
     frequency: 'Quarterly',
     ownerInstitution: 'Transmission Company of Nigeria',
     template: {
-      id: 'tpl-generation-v2',
-      version: '2.0',
-      fileName: 'generation-availability-v2.csv',
-      downloadUrl: '/templates/generation-availability-v2.csv',
+      id: 'tpl-transmission-capacity-v1',
+      version: '1.0',
+      fileName: 'transmission-transfer-capacity-v1.csv',
+      downloadUrl: '/templates/transmission-transfer-capacity-v1.csv',
     },
   },
 ]

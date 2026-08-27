@@ -254,7 +254,7 @@ describe('Section C — national performance', () => {
     expect(screen.queryByText('Requires validation')).not.toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('button', {
-      name: /About Renewable Energy Share in Generation Mix/i,
+      name: /About Renewable Generation Share/i,
     }))
     const dialog = await screen.findByRole('dialog')
     expect(within(dialog).getByText('NERC')).toBeInTheDocument()

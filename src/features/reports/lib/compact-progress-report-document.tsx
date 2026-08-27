@@ -1,22 +1,7 @@
-import { Document, Font, Image, Page, StyleSheet, Text, View } from '@react-pdf/renderer'
+import { Document, Image, Page, StyleSheet, Text, View } from '@react-pdf/renderer'
 import { pdf } from '@react-pdf/renderer'
-import googleSans400 from '@/assets/fonts/google-sans-400.ttf'
-import googleSans500 from '@/assets/fonts/google-sans-500.ttf'
-import googleSans700 from '@/assets/fonts/google-sans-700.ttf'
 import type { CompactProgressReportData } from './compact-progress-report-data'
-
-// The same self-hosted "Google Sans" the app's own UI uses (src/styles/fonts.css)
-// registered for @react-pdf/renderer too, so the generated PDF's typography
-// matches the dashboard's rather than falling back to the default PDF-viewer
-// Helvetica.
-Font.register({
-  family: 'Google Sans',
-  fonts: [
-    { src: googleSans400, fontWeight: 400 },
-    { src: googleSans500, fontWeight: 500 },
-    { src: googleSans700, fontWeight: 700 },
-  ],
-})
+import './pdf-fonts'
 
 /**
  * A bespoke, fixed-layout PDF matching the real Mission 300 Compact Progress
@@ -74,7 +59,7 @@ const styles = StyleSheet.create({
 
   // Cover page
   coverPage: { padding: 0, flexDirection: 'row' },
-  coverLeft: { width: '55%', backgroundColor: NAVY, color: '#ffffff', padding: 32, justifyContent: 'space-between' },
+  coverLeft: { width: '55%', backgroundColor: NAVY, color: '#ffffff', padding: 40, justifyContent: 'space-between' },
   coverRight: { width: '45%' },
   coverLogosRow: { flexDirection: 'row', alignItems: 'center', gap: 14 },
   coverTitle: { fontSize: 30, fontFamily: 'Google Sans', fontWeight: 700, color: GOLD, lineHeight: 1.15, marginTop: 24 },
@@ -99,11 +84,11 @@ const styles = StyleSheet.create({
   externalUseText: { fontSize: 7, fontFamily: 'Google Sans', fontWeight: 700, color: NAVY, textAlign: 'center', lineHeight: 1.2 },
 
   // Generic content page
-  contentPage: { padding: 32, fontFamily: 'Google Sans', fontSize: 9, color: '#1a1f29' },
-  twoCol: { flexDirection: 'row', gap: 14 },
+  contentPage: { padding: 36, fontFamily: 'Google Sans', fontSize: 9, color: '#1a1f29' },
+  twoCol: { flexDirection: 'row', gap: 18 },
   col: { flex: 1 },
-  navyBox: { backgroundColor: NAVY, color: '#ffffff', padding: 14, borderRadius: 4 },
-  goldBorderBox: { borderWidth: 1, borderColor: GOLD, padding: 14, borderRadius: 4 },
+  navyBox: { backgroundColor: NAVY, color: '#ffffff', padding: 18, borderRadius: 10 },
+  goldBorderBox: { borderWidth: 1, borderColor: GOLD, padding: 18, borderRadius: 10 },
   boxTitle: { fontSize: 10, fontFamily: 'Google Sans', fontWeight: 700, marginBottom: 8 },
   boxTitleNavy: { fontSize: 10, fontFamily: 'Google Sans', fontWeight: 700, marginBottom: 8, color: NAVY },
   bodyText: { fontSize: 8, lineHeight: 1.55 },
@@ -120,55 +105,55 @@ const styles = StyleSheet.create({
   targetNode: {
     alignSelf: 'center',
     backgroundColor: NAVY,
-    borderRadius: 4,
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    marginBottom: 14,
+    borderRadius: 20,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    marginBottom: 18,
   },
   targetNodeText: { fontSize: 9, fontFamily: 'Google Sans', fontWeight: 700, color: GOLD, textAlign: 'center' },
-  targetCardsRow: { flexDirection: 'row', gap: 8 },
-  targetCard: { flex: 1, backgroundColor: '#fdf3d8', borderWidth: 1, borderColor: GOLD, borderRadius: 4, padding: 8 },
+  targetCardsRow: { flexDirection: 'row', gap: 10 },
+  targetCard: { flex: 1, backgroundColor: '#fdf3d8', borderWidth: 1, borderColor: GOLD, borderRadius: 12, padding: 12 },
   targetCardIcon: { width: 18, height: 18, marginBottom: 6 },
   targetCardLabel: { fontSize: 8, fontFamily: 'Google Sans', fontWeight: 700, color: NAVY, marginBottom: 4 },
   targetCardDesc: { fontSize: 7, lineHeight: 1.4, color: '#333' },
-  pillarBoxesRow: { flexDirection: 'row', gap: 6, marginTop: 14 },
-  pillarBox: { flex: 1, borderWidth: 1, borderColor: BORDER, borderRadius: 4, padding: 6 },
+  pillarBoxesRow: { flexDirection: 'row', gap: 8, marginTop: 18 },
+  pillarBox: { flex: 1, borderWidth: 1, borderColor: BORDER, borderRadius: 10, padding: 10 },
   pillarBoxLabel: { fontSize: 7, fontFamily: 'Google Sans', fontWeight: 700, color: NAVY, textAlign: 'center', lineHeight: 1.3 },
 
   // Key targets table
-  keyTargetsTable: { borderWidth: 1, borderColor: GOLD, borderRadius: 4, marginTop: 12, width: '100%' },
+  keyTargetsTable: { borderWidth: 1, borderColor: GOLD, borderRadius: 12, marginTop: 16, width: '100%', overflow: 'hidden' },
   keyTargetsHeaderRow: { flexDirection: 'row', backgroundColor: NAVY },
   keyTargetsRow: { flexDirection: 'row', borderTopWidth: 1, borderTopColor: BORDER },
-  ktCellHeader: { flex: 1, padding: 5, fontSize: 7.5, fontFamily: 'Google Sans', fontWeight: 700, color: '#ffffff' },
-  ktCellHeaderFirst: { flex: 1.6, padding: 5, fontSize: 7.5, fontFamily: 'Google Sans', fontWeight: 700, color: '#ffffff' },
-  ktCell: { flex: 1, padding: 5, fontSize: 8 },
-  ktCellFirst: { flex: 1.6, padding: 5 },
+  ktCellHeader: { flex: 1, padding: 8, fontSize: 7.5, fontFamily: 'Google Sans', fontWeight: 700, color: '#ffffff' },
+  ktCellHeaderFirst: { flex: 1.6, padding: 8, fontSize: 7.5, fontFamily: 'Google Sans', fontWeight: 700, color: '#ffffff' },
+  ktCell: { flex: 1, padding: 8, fontSize: 8 },
+  ktCellFirst: { flex: 1.6, padding: 8 },
   ktCellFirstLabel: { fontSize: 8, fontFamily: 'Google Sans', fontWeight: 700 },
   ktCellFirstUnit: { fontSize: 7, color: TEXT_MUTED, marginTop: 2 },
   mapBox: { alignItems: 'center', marginTop: 6, marginBottom: 6 },
 
   // Reform-status cross-tab
-  crossTabTable: { borderWidth: 1, borderColor: NAVY, borderRadius: 2, marginTop: 10 },
+  crossTabTable: { borderWidth: 1, borderColor: NAVY, borderRadius: 12, marginTop: 14, overflow: 'hidden' },
   crossTabHeaderRow: { flexDirection: 'row', backgroundColor: NAVY },
-  crossTabHeaderCell: { flex: 1, padding: 5, fontSize: 7, fontFamily: 'Google Sans', fontWeight: 700, color: '#ffffff', textAlign: 'center' },
-  crossTabFirstHeaderCell: { flex: 1.2, padding: 5, fontSize: 7, fontFamily: 'Google Sans', fontWeight: 700, color: '#ffffff' },
+  crossTabHeaderCell: { flex: 1, padding: 7, fontSize: 7, fontFamily: 'Google Sans', fontWeight: 700, color: '#ffffff', textAlign: 'center' },
+  crossTabFirstHeaderCell: { flex: 1.2, padding: 7, fontSize: 7, fontFamily: 'Google Sans', fontWeight: 700, color: '#ffffff' },
   crossTabRow: { flexDirection: 'row', borderTopWidth: 1, borderTopColor: BORDER },
-  crossTabCell: { flex: 1, padding: 5, fontSize: 7.5, textAlign: 'center' },
-  crossTabFirstCell: { flex: 1.2, padding: 5, fontSize: 7.5, fontFamily: 'Google Sans', fontWeight: 700 },
+  crossTabCell: { flex: 1, padding: 7, fontSize: 7.5, textAlign: 'center' },
+  crossTabFirstCell: { flex: 1.2, padding: 7, fontSize: 7.5, fontFamily: 'Google Sans', fontWeight: 700 },
   crossTabTotalRow: { flexDirection: 'row', borderTopWidth: 1, borderTopColor: NAVY, backgroundColor: '#fdf3d8' },
 
   // Priority actions detail table
-  detailTable: { borderWidth: 1, borderColor: BORDER, marginTop: 10 },
+  detailTable: { borderWidth: 1, borderColor: BORDER, borderRadius: 12, marginTop: 14, overflow: 'hidden' },
   detailHeaderRow: { flexDirection: 'row', backgroundColor: NAVY },
-  detailHeaderCell: { padding: 5, fontSize: 6.5, fontFamily: 'Google Sans', fontWeight: 700, color: '#ffffff' },
+  detailHeaderCell: { padding: 7, fontSize: 6.5, fontFamily: 'Google Sans', fontWeight: 700, color: '#ffffff' },
   detailRow: { flexDirection: 'row', borderTopWidth: 1, borderTopColor: BORDER },
-  detailCell: { padding: 5, fontSize: 7 },
-  statusBadge: { borderRadius: 3, paddingVertical: 2, paddingHorizontal: 4, alignSelf: 'flex-start' },
+  detailCell: { padding: 7, fontSize: 7 },
+  statusBadge: { borderRadius: 8, paddingVertical: 3, paddingHorizontal: 7, alignSelf: 'flex-start' },
   statusBadgeText: { fontSize: 6.5, fontFamily: 'Google Sans', fontWeight: 700, color: '#ffffff' },
 
   // Closing page
   closingPage: { padding: 0, flexDirection: 'row' },
-  closingLeft: { width: '55%', padding: 32, justifyContent: 'space-between' },
+  closingLeft: { width: '55%', padding: 40, justifyContent: 'space-between' },
   closingRight: { width: '45%' },
   closingTitle: { fontSize: 16, fontFamily: 'Google Sans', fontWeight: 700, color: NAVY, marginBottom: 12 },
 })
