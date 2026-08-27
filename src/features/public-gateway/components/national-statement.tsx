@@ -48,7 +48,7 @@ export function NationalStatement({ cards }: { cards: HeadlineCards }) {
   return (
     <section
       aria-labelledby="national-statement"
-      className="relative isolate flex min-h-screen items-center bg-landing-deep-navy"
+      className="relative isolate flex min-h-[60vh] items-center bg-landing-deep-navy"
     >
       <HeroBackdrop />
       <div className="relative mx-auto flex w-full max-w-[96rem] flex-col gap-10 px-4 py-12 sm:px-6 sm:py-16 lg:flex-row lg:items-start lg:gap-14">

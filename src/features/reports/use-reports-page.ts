@@ -15,6 +15,8 @@ import {
   useReportsFilters,
   useReportsOverview,
 } from './api'
+import { buildCompactProgressReportData } from './lib/compact-progress-report-data'
+import { buildCompactProgressReportPdf } from './lib/compact-progress-report-document'
 import { downloadBlob } from './lib/download'
 import { buildReportWorkbook } from './lib/export-excel'
 import { buildReportPdf } from './lib/export-pdf'
@@ -123,10 +125,18 @@ export function useReportsPage() {
         ...defaultConfig(card.reportType),
         format,
       })
+      // The Compact Progress Report PDF is a bespoke, fixed layout matching
+      // the real CPR's design/structure (see compact-progress-report-
+      // document.tsx) — everything else still goes through the generic
+      // builder document. `generateReport` above still runs first so this
+      // download is tracked in Saved Reports history the same as any other
+      // export; only the PDF bytes themselves diverge.
       const blob =
-        format === 'pdf'
-          ? await buildReportPdf(generated, { orientation: 'portrait' })
-          : await buildReportWorkbook(generated)
+        card.id === 'compact-progress-report' && format === 'pdf'
+          ? await buildCompactProgressReportPdf(buildCompactProgressReportData())
+          : format === 'pdf'
+            ? await buildReportPdf(generated, { orientation: 'portrait' })
+            : await buildReportWorkbook(generated)
       downloadBlob(blob, savedReport.fileReference)
     } finally {
       setCompactExportKey(null)

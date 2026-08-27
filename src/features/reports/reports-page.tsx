@@ -5,6 +5,7 @@ import { Card } from '@/components/ui/card'
 import { ErrorState } from '@/components/ui/error-state'
 import { BuilderSidebar } from './components/builder/builder-sidebar'
 import { ReportDocumentPreview } from './components/builder/report-document-preview'
+import { CompactExportsSection } from './components/compact-exports-section'
 import { NigeriaProgressReportSection } from './components/nigeria-progress-report-section'
 import { ReportsSkeleton } from './components/reports-skeleton'
 import { SavedReportsFilters } from './components/saved-reports-filters'
@@ -71,6 +72,12 @@ export function ReportsPage() {
           isPending={page.isPreviewPending}
         />
       </div>
+
+      <CompactExportsSection
+        cards={page.compactExports}
+        exportingKey={page.compactExportKey}
+        onExport={(card, format) => void page.exportCompactCard(card, format)}
+      />
 
       <NigeriaProgressReportSection />
 
