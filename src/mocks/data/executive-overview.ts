@@ -143,7 +143,12 @@ function buildAccessRateCard(): AccessRateCard {
 }
 
 function buildGenerationCapacityCard(): GenerationCapacityCard {
-  const profile = getKpiProfile('M300-P1-003')!
+  // M300-P1-016 ("Available Generation Capacity" — GenCo-declared, before
+  // real-time constraints), not M300-P1-003 ("Available (Dispatched)",
+  // net of constraints) — swapped per review so the headline reads a bit
+  // higher than actual dispatch. M300-P1-003 is untouched and still shows as
+  // a supporting indicator on the pillar dashboard.
+  const profile = getKpiProfile('M300-P1-016')!
   const availableMw = profile.current ?? 0
   // Installed nameplate capacity (13.6 GW) is not yet its own tracked KPI
   // Explorer indicator — only available/dispatched capacity is. Kept as a
@@ -153,7 +158,7 @@ function buildGenerationCapacityCard(): GenerationCapacityCard {
   return {
     title: 'Available generation capacity',
     icon: 'generation',
-    kpiId: 'M300-P1-003',
+    kpiId: 'M300-P1-016',
     availableMw,
     installedMw,
     value: `${(availableMw / 1000).toFixed(1)} GW`,

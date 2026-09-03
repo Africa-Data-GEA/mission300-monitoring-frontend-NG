@@ -28,7 +28,10 @@ const PILLAR_LABELS: Record<PillarId, string> = {
 
 /** The four real KPI Matrix indicators used as this pillar's headline cards. */
 const PILLAR_KPI_IDS: Record<PillarId, readonly [string, string, string, string]> = {
-  'generation-network': ['M300-P1-003', 'M300-P1-005', 'M300-P1-004', 'M300-P1-012'],
+  // M300-P1-003 ("Available (Dispatched) Generation Capacity") swapped out for
+  // the new M300-P1-016 ("Available Generation Capacity") per the review — it
+  // stays in the catalogue below as a supporting indicator, not deleted.
+  'generation-network': ['M300-P1-016', 'M300-P1-005', 'M300-P1-004', 'M300-P1-012'],
   'last-mile-access': ['M300-PX-001', 'M300-P2-001', 'M300-P2-003', 'M300-P2-006'],
   'financially-viable-utilities': ['M300-P3-004', 'M300-P3-006', 'M300-P3-009', 'M300-P3-010'],
   'private-sector-participation': ['M300-P4-002', 'M300-P4-003', 'M300-P4-001', 'M300-P4-006'],

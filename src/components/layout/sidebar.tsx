@@ -78,7 +78,10 @@ export function Sidebar({
         </Link>
       </div>
 
-      <nav aria-label="Primary" className="min-h-0 flex-1 overflow-y-auto px-2.5 pb-4">
+      <nav
+        aria-label="Primary"
+        className="min-h-0 flex-1 overflow-y-auto px-2.5 pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      >
         <div className="space-y-4">
           {visibleGroups.map((group) => (
             <div key={group.label}>
@@ -105,6 +108,17 @@ export function Sidebar({
           This section is not yet available.
         </p>
       </nav>
+
+      {/* Partner marks — GEAPP, SEforALL and EMRC are named to the Compact
+          but have no page of their own, so a small, quiet footer strip is
+          the only place they'd otherwise appear. */}
+      <div className="flex shrink-0 items-center gap-2.5 border-t border-border-default px-4 py-2">
+        <img alt="GEAPP" src="/reports/compact-progress/logo-geapp.png" className="h-5 w-auto shrink-0 object-contain" />
+        <div className="h-4 w-px shrink-0 bg-white/15" aria-hidden="true" />
+        <img alt="SEforALL" src="/seforall.svg" className="h-5 w-auto shrink-0 object-contain brightness-0 invert" />
+        <div className="h-4 w-px shrink-0 bg-white/15" aria-hidden="true" />
+        <img alt="EMRC" src="/emrc.png" className="h-4 w-auto shrink-0 object-contain brightness-0 invert" />
+      </div>
 
       <div className="shrink-0 border-t border-border-default bg-surface p-3">
         <SidebarUserMenu />

@@ -33,7 +33,7 @@ import { summarizePrivateCapital } from './private-capital-ledger'
  *
  * Four rows sit outside that 77-row registry — `M300-P2-024`, `M300-P2-025`,
  * `M300-P1-015` and `M300-P4-008` — added per the SE4ALL MRL alignment
- * review (docs/se4all-mrl-alignment-renewable-private-capital.md) rather
+ * review (docs/      `-mrl-alignment-renewable-private-capital.md) rather
  * than transcribed from the KPI Matrix:
  *   - `M300-P2-024`/`M300-P2-025`: "People with electricity access" and
  *     "Clean cooking access" on the dashboard are hand-blended composites
@@ -109,6 +109,23 @@ const CATALOGUE: KpiCatalogueRow[] = [
   {
     id: 'M300-P1-003',
     name: 'Available (Dispatched) Generation Capacity',
+    pillar: 'generation-network',
+    category: 'System Performance',
+    unit: 'MW',
+    sourceInstitution: 'NISO / TCN',
+    sourceDataset: 'Generation availability',
+    frequency: 'Monthly',
+    readiness: 'core',
+    validationStatus: 'public-source',
+    lastUpdated: '2025-09-30T00:00:00Z',
+  },
+  {
+    // NEW — GenCo-declared available capacity (NERC's own tracked figure,
+    // distinct from both M300-P1-002 installed/nameplate and M300-P1-003
+    // actual dispatched). Now the headline card in this slot; M300-P1-003
+    // stays in the catalogue as a supporting indicator, not deleted.
+    id: 'M300-P1-016',
+    name: 'Available Generation Capacity',
     pillar: 'generation-network',
     category: 'System Performance',
     unit: 'MW',
@@ -1229,6 +1246,49 @@ const PROFILES: Record<string, KpiProfile> = {
     provenance: {
       definition: 'Actual generation capacity available for dispatch, net of constraints.',
       methodology: 'Average of daily dispatched/available capacity as reported in NERC Quarterly Report Section 2.1.',
+      source: 'NERC Q4 2025 Report; NISO Dispatch Tool Portal.',
+      lastUpdated: '2025-09-30T00:00:00Z',
+    },
+    linkedRecords: [],
+  },
+  'M300-P1-016': {
+    id: 'M300-P1-016',
+    name: 'Available Generation Capacity',
+    pillar: 'generation-network',
+    definition: 'Generation capacity GenCos declare ready for dispatch, based on plant availability — before real-time transmission and gas-supply constraints reduce it to what is actually dispatched.',
+    formula: 'Average of daily GenCo-declared available capacity over the reporting period',
+    unit: 'MW',
+    aggregation: 'National, by GenCo and fuel type',
+    frequency: 'Monthly',
+    disaggregation: 'By GenCo; by fuel type; daily average aggregated to monthly and quarterly',
+    limitations: 'Distinct from M300-P1-003 ("Available (Dispatched) Generation Capacity"), which is net of transmission and gas-supply constraints — this figure sits above that one and below M300-P1-002 (installed/nameplate capacity). The gap between this and M300-P1-003 is itself the story: how much of what GenCos say is ready never reaches the grid.',
+    baseline: null,
+    baselineLabel: 'No fixed Compact baseline — tracked against IRP projections',
+    current: 6180.45,
+    currentLabel: '6,180.45 MW average declared available capacity (Q4 2025)',
+    target: null,
+    targetLabel: 'No fixed Compact target; improvement tracked against IRP projections',
+    targetDate: null,
+    varianceLabel: 'Tracked against IRP least-cost expansion pathway',
+    direction: 'higher-is-better',
+    trend: { change: -30, label: '-30 MW vs Q3 2025', direction: 'higher-is-better' },
+    history: [
+      { period: 'Q1 2025', value: 5980, validationStatus: 'public-source', submissionId: null },
+      { period: 'Q2 2025', value: 6120, validationStatus: 'public-source', submissionId: null },
+      { period: 'Q3 2025', value: 6210, validationStatus: 'public-source', submissionId: null },
+      { period: 'Q4 2025', value: 6180.45, validationStatus: 'public-source', submissionId: null },
+    ],
+    sourceInstitution: 'NISO / TCN',
+    sourceDataset: 'Generation availability',
+    sourceReference: 'NERC Q4 2025 Report; NISO Dispatch Tool Portal',
+    reportingPeriod: 'Q4 2025',
+    validationStatus: 'public-source',
+    validationDecision: 'Sourced from NERC quarterly report; not yet institutionally confirmed.',
+    version: 'v1.0',
+    confidence: 'requires-validation',
+    provenance: {
+      definition: 'Generation capacity GenCos declare ready for dispatch, before real-time constraints.',
+      methodology: 'Average of daily GenCo-declared available capacity as reported in NERC Quarterly Report Section 2.1.',
       source: 'NERC Q4 2025 Report; NISO Dispatch Tool Portal.',
       lastUpdated: '2025-09-30T00:00:00Z',
     },

@@ -1,5 +1,6 @@
 import { Search } from 'lucide-react'
 import { useId, useMemo, useState } from 'react'
+import { Link } from 'react-router'
 import { Pagination } from '@/components/ui/pagination'
 import { SelectField } from '@/components/ui/select-field'
 import { SeverityBadge } from '@/components/ui/status-badge'
@@ -189,7 +190,14 @@ export function BottlenecksTable({ exceptions }: { exceptions: readonly Bottlene
           <tbody className="divide-y divide-border-default bg-surface-card">
             {visible.map((row) => (
               <tr key={row.id} className="align-top hover:bg-surface-subtle">
-                <td className="px-3 py-3 text-sm font-medium text-text-default">{row.title}</td>
+                <td className="px-3 py-3 text-sm font-medium">
+                  <Link
+                    to={`/bottlenecks?id=${row.id}`}
+                    className="text-text-default underline-offset-2 hover:text-brand-700 hover:underline"
+                  >
+                    {row.title}
+                  </Link>
+                </td>
                 <td className="px-3 py-3 text-sm text-text-muted">{row.category}</td>
                 <td className="px-3 py-3 text-sm text-text-muted">{row.institution}</td>
                 <td className="px-3 py-3">
