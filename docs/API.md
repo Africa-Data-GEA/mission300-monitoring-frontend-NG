@@ -484,13 +484,66 @@ Four panels' worth of data in one response:
   *Nullability carries meaning*), matching `*Label` display strings,
   `varianceLabel` (signed, following `direction`), `history[]` (each point:
   `period`, `value`, `validationStatus`, `submissionId` nullable — points
-  seeded before submission-tracing existed).
+  seeded before submission-tracing existed), **`targets[]`** (new — see
+  below).
 - **Traceability** — `sourceInstitution`, `sourceDataset`, `sourceReference`,
   `reportingPeriod`, `validationStatus`, `validationDecision`, `version`,
   `confidence`, `provenance`.
 - **`linkedRecords[]`** — delivery records (programme/project/milestone/
   action) joined through the indicator identifier, each with `type`,
   `title`, `institution`, `status`.
+
+#### Field-to-column reference — what already exists vs. what's new
+
+Confirmed directly against the live database (`kpi_definition` and
+`target_baseline` tables both already exist, already hold real rows, and are
+already read/written by the current backend code). Only one field below is
+new. Everything else in this endpoint is already built and already working
+today — this table exists so there is no ambiguity about which is which.
+
+| Response field | Backend table.column | Status |
+| --- | --- | --- |
+| `definition` | `kpi_definition.definition` | Already exists |
+| `formula` | `kpi_definition.formula` | Already exists |
+| `unit` | `kpi_definition.unit` | Already exists |
+| `aggregation` | `kpi_definition.aggregation` | Already exists |
+| `frequency` | `kpi_definition.frequency` | Already exists |
+| `disaggregation` | `kpi_definition.disaggregation` | Already exists |
+| `limitations` | `kpi_definition.limitations` | Already exists |
+| `sourceInstitution` | `kpi_definition.source_institution` | Already exists |
+| `sourceDataset` | `kpi_definition.source_dataset` | Already exists |
+| `sourceReference` | `kpi_definition.source_reference` | Already exists |
+| `provenance.definition` | `kpi_definition.provenance_definition` | Already exists |
+| `provenance.methodology` | `kpi_definition.provenance_methodology` | Already exists |
+| `provenance.source` | `kpi_definition.provenance_source` | Already exists |
+| `provenance.lastUpdated` | `kpi_definition.updated_at` | Already exists |
+| `baseline` / `baselineLabel` | `target_baseline` row where `type = 'baseline'` | Already exists |
+| `target` / `targetLabel` / `targetDate` | `target_baseline` row where `type = 'target'` (single row / latest) | Already exists |
+| **`targets[]`** | `target_baseline` rows where `type = 'target'` (**all** matching rows, not just one) | **New** |
+
+#### `targets[]` — periodic target checkpoints
+
+`target`/`targetLabel`/`targetDate` above stay the single primary/final
+commitment every existing chart already renders — nothing about those three
+fields changes. `targets[]` is additive: the *full* set of target
+checkpoints for this KPI, for a Compact commitment with interim milestones
+on the way to a final year (e.g. 45% by 2026, 60% by 2028, 75% by 2030 — not
+just the 2030 figure alone). Each entry:
+
+```jsonc
+{ "period": "2026", "value": 45, "label": "45% by 2026 (interim checkpoint)" }
+```
+
+`period` is a plain string, the same format used everywhere else in this
+contract — a bare year (`"2026"`) or a year-quarter (`"2026-Q1"`). Empty
+array where only the single primary target has ever been set.
+
+**The only actual change required:** today, the query behind this endpoint
+collapses `target_baseline` down to one `type = 'target'` row per KPI (via a
+`MAX(...)`/latest-row pattern). `targets[]` needs *every* matching row
+instead, each becoming one `{period, value, label}` entry. No new table, no
+new column, no new data — the same rows already sitting in `target_baseline`
+today, just returned as a list instead of collapsed to one.
 
 ### `PATCH /api/kpi-explorer/kpis/:id`
 
@@ -502,16 +555,29 @@ change through a data submission being approved and published (see
 `POST /api/data-submissions/validation/:id/decisions`). **404** with
 `{ "message": … }` for an unknown id.
 
-**Request** — every field required, `baseline`/`target` nullable:
+**Request** — every field required except `targets`, `baseline`/`target` nullable:
 ```jsonc
 {
   "definition": "…", "formula": "…", "unit": "%",
   "aggregation": "…", "frequency": "Monthly", "disaggregation": "…", "limitations": "…",
   "baseline": 42, "baselineLabel": "Approx. 42% (2024 Compact baseline)",
   "target": 100, "targetLabel": "Metering gap closed by 2027",
+  "targets": [
+    { "period": "2026", "value": 60, "label": "60 by 2026 (interim checkpoint)" },
+    { "period": "2027", "value": 100, "label": "Metering gap closed by 2027 (final)" }
+  ],
   "sourceInstitution": "NERC", "sourceDataset": "Metering performance", "sourceReference": "…"
 }
 ```
+
+`targets`, when present, is the *complete replacement set* for this KPI's
+target checkpoints — not one row to upsert. On receiving it: delete (or
+version out) every existing `target_baseline` row for this `kpi_id` where
+`type = 'target'`, then insert one new row per array entry, each with that
+entry's `period` and `value`. Omitting `targets` entirely leaves existing
+checkpoints untouched — only send it when the interim-targets editor has
+actually been used. `baseline`/`baselineLabel` continue to write the single
+`type = 'baseline'` row exactly as before.
 
 **Response** `200` — the full updated `KpiProfile` (same shape as
 `GET /api/kpi-explorer/kpis/:id`), so the frontend can replace its cached

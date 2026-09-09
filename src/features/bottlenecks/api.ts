@@ -1,11 +1,13 @@
-import { keepPreviousData, useQuery } from '@tanstack/react-query'
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   bottlenecksFilterOptionsSchema,
   bottlenecksOverviewSchema,
   createBottleneckResponseSchema,
+  updateBottleneckStatusResponseSchema,
   type BottlenecksPagination,
   type BottlenecksQuery,
   type CreateBottleneckRequest,
+  type UpdateBottleneckStatusRequest,
 } from '@/api/schemas/bottlenecks'
 import { api } from '@/lib/api-client'
 
@@ -73,4 +75,19 @@ export function useBottlenecks(
  */
 export function createBottleneck(input: CreateBottleneckRequest) {
   return api.post('/bottlenecks', input, createBottleneckResponseSchema)
+}
+
+/**
+ * Updates a bottleneck's current status — previously there was no way to do
+ * this at all once a bottleneck was raised. Invalidates every bottlenecks
+ * list query on success so the register (standalone, or embedded on a
+ * project page) reflects the change without a manual refresh.
+ */
+export function useUpdateBottleneckStatus(id: string) {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (input: UpdateBottleneckStatusRequest) =>
+      api.patch(`/bottlenecks/${id}`, input, updateBottleneckStatusResponseSchema),
+    onSuccess: () => client.invalidateQueries({ queryKey: bottlenecksKeys.all }),
+  })
 }

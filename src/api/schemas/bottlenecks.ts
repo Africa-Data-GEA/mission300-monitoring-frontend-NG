@@ -89,6 +89,15 @@ export const alertCardSchema = z.object({
  * Section B — The bottleneck register
  * ------------------------------------------------------------------ */
 
+/** One snapshot in a bottleneck's status trail — M300-INT-006 flagged that
+ * only the current status/escalation state was visible, not how it got
+ * there. Mirrors `statusHistoryEntrySchema` on projects (programs.ts): same
+ * shape, same reasoning — a reporting-cycle snapshot, not a full audit log. */
+export const bottleneckStatusHistoryEntrySchema = z.object({
+  period: z.string().min(1),
+  status: bottleneckStatusSchema,
+})
+
 export const bottleneckRecordSchema = z.object({
   id: z.string().min(1),
   issue: z.string().min(1),
@@ -104,6 +113,9 @@ export const bottleneckRecordSchema = z.object({
   escalationStatus: escalationStatusSchema,
   status: bottleneckStatusSchema,
   lifecycleStage: lifecycleStageSchema,
+  /** Oldest-to-newest. Empty for a bottleneck that has never changed status
+   * since being raised — its one data point is `status` itself. */
+  statusHistory: z.array(bottleneckStatusHistoryEntrySchema).default([]),
 })
 
 /** Request body for creating a new bottleneck / exception record. */
@@ -121,6 +133,25 @@ export const createBottleneckRequestSchema = z.object({
 export const createBottleneckResponseSchema = z.object({
   record: bottleneckRecordSchema,
   message: z.string().min(1),
+})
+
+/**
+ * Updates a bottleneck's current status (and optionally its follow-up note).
+ * There was previously no way to change a bottleneck's status at all once
+ * raised — only `createBottleneck` existed. Deliberately narrow: this
+ * changes the current snapshot only. The append to `statusHistory` is a
+ * side effect the backend performs when the status actually changes value,
+ * not something the caller constructs directly — the same reasoning as
+ * `current`/`history` on a KPI only changing through a publish action, not a
+ * direct edit.
+ */
+export const updateBottleneckStatusRequestSchema = z.object({
+  status: bottleneckStatusSchema,
+  followUp: z.string().trim().max(1000).optional(),
+})
+
+export const updateBottleneckStatusResponseSchema = z.object({
+  record: bottleneckRecordSchema,
 })
 
 /* ------------------------------------------------------------------ *
@@ -236,8 +267,10 @@ export type EscalationStatus = z.infer<typeof escalationStatusSchema>
 export type EscalationLevel = z.infer<typeof escalationLevelSchema>
 export type AlertCard = z.infer<typeof alertCardSchema>
 export type BottleneckRecord = z.infer<typeof bottleneckRecordSchema>
+export type BottleneckStatusHistoryEntry = z.infer<typeof bottleneckStatusHistoryEntrySchema>
 export type CreateBottleneckRequest = z.infer<typeof createBottleneckRequestSchema>
 export type CreateBottleneckResponse = z.infer<typeof createBottleneckResponseSchema>
+export type UpdateBottleneckStatusRequest = z.infer<typeof updateBottleneckStatusRequestSchema>
 export type CategoryDistribution = z.infer<typeof categoryDistributionSchema>
 export type LifecycleDistribution = z.infer<typeof lifecycleDistributionSchema>
 export type InstitutionExceptions = z.infer<typeof institutionExceptionsSchema>

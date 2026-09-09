@@ -29,6 +29,12 @@ const REGISTER: BottleneckRecord[] = [
     escalationStatus: 'escalated',
     status: 'escalated',
     lifecycleStage: 'implementation',
+    statusHistory: [
+      { period: 'Jun 2025', status: 'open' },
+      { period: 'Jul 2025', status: 'in-progress' },
+      { period: 'Aug 2025', status: 'blocked' },
+      { period: 'Sep 2025', status: 'escalated' },
+    ],
   },
   {
     id: 'BTN-2025-015',
@@ -59,6 +65,10 @@ const REGISTER: BottleneckRecord[] = [
     escalationStatus: 'not-escalated',
     status: 'in-progress',
     lifecycleStage: 'design',
+    statusHistory: [
+      { period: 'Sep 2025', status: 'open' },
+      { period: 'Oct 2025', status: 'in-progress' },
+    ],
   },
   {
     id: 'BTN-2025-016',

@@ -31,6 +31,20 @@ export function ValuesPanel({ profile }: { profile: KpiProfile }) {
         <ProfileField label="Target" value={profile.targetLabel} />
         <ProfileField label="Variance" value={profile.varianceLabel} />
       </dl>
+
+      {profile.targets.length > 0 && (
+        <div className="mt-4">
+          <p className="text-xs text-text-muted">Interim targets over time</p>
+          <ul className="mt-1.5 flex flex-col gap-1">
+            {profile.targets.map((point) => (
+              <li key={point.period} className="flex items-baseline gap-2 text-sm">
+                <span className="w-16 shrink-0 font-medium text-text-default">{point.period}</span>
+                <span className="text-text-muted">{point.label}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </section>
   )
 }

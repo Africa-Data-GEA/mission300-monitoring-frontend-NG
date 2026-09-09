@@ -121,6 +121,24 @@ export const kpiHistoryPointSchema = z.object({
   submissionId: z.string().nullable(),
 })
 
+/**
+ * One periodic target point — e.g. an interim milestone on the way to the
+ * final Compact commitment, or a target formally renegotiated at a later
+ * date. Distinct from the single `target`/`targetLabel`/`targetDate` fields
+ * below: those remain the one primary/final target every existing consumer
+ * (bullet charts, headline cards) already renders, unchanged. `targets` is
+ * additive — the full periodic history, for anywhere that wants to plot more
+ * than one point (e.g. 2026 and 2028 checkpoints on the way to a 2030 goal).
+ * Mirrors the backend's own `target_baseline` table, which already supports
+ * multiple period-tagged rows per KPI even though this app's edit form
+ * previously only ever wrote one.
+ */
+export const kpiTargetPointSchema = z.object({
+  period: z.string().min(1),
+  value: z.number(),
+  label: z.string().min(1),
+})
+
 /** A delivery record linked to the indicator via its identifier. */
 export const linkedRecordSchema = z.object({
   id: z.string().min(1),
@@ -154,6 +172,10 @@ export const updateKpiMetadataRequestSchema = z.object({
   target: z.number().nullable(),
   targetLabel: z.string(),
   targetDate: z.string().nullable(),
+  /** The full periodic target history — see kpiTargetPointSchema on
+   * kpiProfileSchema. Optional: omitting it leaves existing periodic targets
+   * untouched; sending an array replaces the full list. */
+  targets: z.array(kpiTargetPointSchema).optional(),
   sourceInstitution: z.string().min(1),
   sourceDataset: z.string().min(1),
   sourceReference: z.string(),
@@ -257,6 +279,9 @@ export const kpiProfileSchema = z.object({
    * then shown as such rather than silently omitted.
    */
   targetDate: z.string().nullable(),
+  /** The full periodic target history — see kpiTargetPointSchema. Empty
+   * where only the single primary target above has ever been set. */
+  targets: z.array(kpiTargetPointSchema).default([]),
   /** Signed variance against target, following the configured direction. */
   varianceLabel: z.string(),
   direction: improvementDirectionSchema,
@@ -343,6 +368,7 @@ export type ValidationStatus = z.infer<typeof validationStatusSchema>
 export type CatalogueSummaryCard = z.infer<typeof catalogueSummaryCardSchema>
 export type KpiCatalogueRow = z.infer<typeof kpiCatalogueRowSchema>
 export type KpiHistoryPoint = z.infer<typeof kpiHistoryPointSchema>
+export type KpiTargetPoint = z.infer<typeof kpiTargetPointSchema>
 export type LinkedRecord = z.infer<typeof linkedRecordSchema>
 export type KpiProfile = z.infer<typeof kpiProfileSchema>
 export type PillarDistribution = z.infer<typeof pillarDistributionSchema>

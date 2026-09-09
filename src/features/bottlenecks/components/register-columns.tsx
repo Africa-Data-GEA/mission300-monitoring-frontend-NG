@@ -2,7 +2,7 @@ import { PILLAR_LABELS } from '@/types/domain'
 import type { BottleneckRecord } from '@/api/schemas/bottlenecks'
 import type { Column } from '@/components/ui/data-table'
 import { formatDate } from '@/lib/format'
-import { BottleneckStatusBadge } from './bottleneck-status-badge'
+import { BottleneckStatusEditor } from './bottleneck-status-editor'
 import { EscalationStatusBadge } from './escalation-status-badge'
 import { SeverityBadge } from './severity-badge'
 
@@ -96,6 +96,6 @@ export const REGISTER_COLUMNS: readonly Column<BottleneckRecord>[] = [
     id: 'status',
     header: 'Status',
     sortValue: (row) => row.status,
-    cell: (row) => <BottleneckStatusBadge status={row.status} />,
+    cell: (row) => <BottleneckStatusEditor record={row} />,
   },
 ]

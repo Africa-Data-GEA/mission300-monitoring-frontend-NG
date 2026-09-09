@@ -150,6 +150,49 @@ export const bottlenecksHandlers = [
   }),
 
   /**
+   * PATCH /api/bottlenecks/:id
+   *
+   * Updates a bottleneck's current status (and optionally its follow-up
+   * note) — the only way to change a bottleneck's status once raised; there
+   * was previously no update path at all. When the status actually changes,
+   * appends a new `statusHistory` entry rather than silently overwriting —
+   * that history is what the register's "History" popover reads.
+   */
+  http.patch('/api/bottlenecks/:id', async ({ request, params }) => {
+    await delay(300)
+
+    const record = bottlenecksRegister.find((entry) => entry.id === String(params.id))
+    if (!record) {
+      return HttpResponse.json({ message: 'The bottleneck was not found.' }, { status: 404 })
+    }
+
+    const body = (await request.json()) as { status?: string; followUp?: string }
+    if (!body.status) {
+      return HttpResponse.json({ message: 'A status is required.' }, { status: 422 })
+    }
+
+    const previousStatus = record.status
+    record.status = body.status as BottleneckRecord['status']
+    if (body.followUp !== undefined) record.followUp = body.followUp.trim()
+
+    if (record.status !== previousStatus) {
+      const period = new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+      record.statusHistory = [...record.statusHistory, { period, status: record.status }]
+
+      recordAuditEvent({
+        action: 'Updated bottleneck status',
+        module: 'Bottlenecks & Exceptions',
+        recordId: record.id,
+        priorValue: previousStatus,
+        newValue: record.status,
+        reference: record.linkedRecord || null,
+      })
+    }
+
+    return HttpResponse.json({ record })
+  }),
+
+  /**
    * GET /api/bottlenecks/by-project/:projectId
    *
    * The bottlenecks linked to one project, for Programs' project detail

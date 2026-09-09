@@ -1313,6 +1313,15 @@ const PROFILES: Record<string, KpiProfile> = {
     target: 75,
     targetLabel: '75% renewable energy share by 2030 (Nigeria National Energy Compact commitment, per GEAPP Reporting Nigeria Targets)',
     targetDate: '2030',
+    // Interim checkpoints on the way to the 2030 commitment — the new
+    // periodic-targets field (see kpiTargetPointSchema): the single target
+    // above stays the one figure every chart already renders; this is
+    // additive, for anywhere that wants to plot more than the final point.
+    targets: [
+      { period: '2026', value: 45, label: '45% by 2026 (interim checkpoint)' },
+      { period: '2028', value: 60, label: '60% by 2028 (interim checkpoint)' },
+      { period: '2030', value: 75, label: '75% by 2030 (final Compact commitment)' },
+    ],
     varianceLabel: '-36.69 pts vs the 75% 2030 target',
     direction: 'higher-is-better',
     trend: { change: 1.2, label: '+1.2 pts vs prior year', direction: 'higher-is-better' },
@@ -4777,6 +4786,7 @@ export function updateKpiMetadata(
     target: number | null
     targetLabel: string
     targetDate: string | null
+    targets?: { period: string; value: number; label: string }[]
     sourceInstitution: string
     sourceDataset: string
     sourceReference: string

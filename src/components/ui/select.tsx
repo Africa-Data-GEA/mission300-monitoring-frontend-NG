@@ -52,7 +52,11 @@ export function SelectContent({
         data-slot="select-content"
         position={position}
         className={cn(
-          'relative z-50 max-h-96 min-w-32 overflow-hidden rounded-control border border-border-default bg-surface shadow-lg',
+          // Higher than SideDialog's z-[70] — a Select rendered inside a
+          // side dialog was opening (Radix state changed) but painting
+          // underneath the dialog's own full-viewport overlay, so real
+          // clicks never reached the options.
+          'relative z-[80] max-h-96 min-w-32 overflow-hidden rounded-control border border-border-default bg-surface shadow-lg',
           'data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0',
           position === 'popper' && 'data-[side=bottom]:translate-y-1',
           className,
