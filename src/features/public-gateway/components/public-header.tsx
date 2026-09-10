@@ -35,6 +35,22 @@ export function PublicHeader() {
             </span>
           </Link>
 
+          {/* Funding partners — AfDB and the World Bank back the Compact
+              itself, shown quietly beside the masthead in their real brand
+              colours (official marks, via Wikimedia Commons). */}
+          <div className="hidden shrink-0 items-center gap-4 border-l border-[#dce3e8] pl-4 sm:flex">
+            <img
+              alt="African Development Bank"
+              src="/reports/compact-progress/afdb-color.png"
+              className="h-9 w-auto shrink-0 object-contain"
+            />
+            <img
+              alt="World Bank Group"
+              src="/reports/compact-progress/worldbank-color.png"
+              className="h-8 w-auto shrink-0 object-contain"
+            />
+          </div>
+
           <nav aria-label="Page sections" className="ml-auto hidden items-center gap-7 lg:flex">
             {NAV_ITEMS.map((item) => (
               <a
