@@ -82,14 +82,14 @@ export function Sidebar({
           shown quietly up top rather than competing with the platform mark. */}
       <div className="flex shrink-0 items-center gap-2.5 border-t border-border-default px-4 py-2">
         <img
-          alt="African Development Bank"
-          src="/reports/compact-progress/logo-afdb.png"
+          alt="World Bank Group"
+          src="/reports/compact-progress/logo-worldbank.png"
           className="h-6 w-auto shrink-0 object-contain"
         />
         <div className="h-4 w-px shrink-0 bg-white/15" aria-hidden="true" />
         <img
-          alt="World Bank Group"
-          src="/reports/compact-progress/logo-worldbank.png"
+          alt="African Development Bank"
+          src="/reports/compact-progress/logo-afdb.png"
           className="h-6 w-auto shrink-0 object-contain"
         />
       </div>
@@ -127,14 +127,18 @@ export function Sidebar({
 
       {/* Partner marks — SEforALL and GEAPP are named to the Compact but have
           no page of their own, so a small, quiet footer strip is the only
-          place they'd otherwise appear — plus the build credit. */}
+          place they'd otherwise appear. The build credit sits alone on the
+          right, separate from the partner marks on the left. */}
       <div className="flex shrink-0 items-center justify-between gap-2.5 border-t border-border-default px-4 py-2">
         <div className="flex items-center gap-2.5">
           <img alt="SEforALL" src="/seforall.svg" className="h-5 w-auto shrink-0 object-contain brightness-0 invert" />
           <div className="h-4 w-px shrink-0 bg-white/15" aria-hidden="true" />
           <img alt="GEAPP" src="/reports/compact-progress/logo-geapp.png" className="h-5 w-auto shrink-0 object-contain" />
         </div>
-        <span className="text-2xs leading-tight text-text-subtle">Developed by EMRC</span>
+        <div className="flex items-center gap-1.5">
+          <img alt="EMRC" src="/emrc.png" className="h-4 w-auto shrink-0 object-contain" />
+          <span className="text-2xs leading-tight text-text-subtle">Developed by EMRC</span>
+        </div>
       </div>
 
       <div className="shrink-0 border-t border-border-default bg-surface p-3">

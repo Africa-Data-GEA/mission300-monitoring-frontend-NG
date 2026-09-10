@@ -56,15 +56,19 @@ export function PublicFooter({ lastUpdated }: { lastUpdated: string }) {
         </div>
 
         {/* Delivery partners — SEforALL and GEAPP support the Compact's
-            tracking; EMRC built this platform. A quiet strip, same pattern
-            as the authenticated sidebar's own footer. */}
-        <div className="mt-10 flex flex-wrap items-center gap-5 border-t border-white/18 pt-6">
-          <img alt="SEforALL" src="/seforall.svg" className="h-6 w-auto shrink-0 object-contain brightness-0 invert" />
-          <div className="h-5 w-px shrink-0 bg-white/18" aria-hidden="true" />
-          <img alt="GEAPP" src="/reports/compact-progress/logo-geapp.png" className="h-6 w-auto shrink-0 object-contain" />
-          <div className="h-5 w-px shrink-0 bg-white/18" aria-hidden="true" />
-          <img alt="EMRC" src="/emrc.png" className="h-5 w-auto shrink-0 object-contain" />
-          <span className="text-[0.6875rem] leading-4 text-white/50">Platform built by EMRC</span>
+            tracking, grouped on the left. EMRC built this platform, credited
+            alone on the right — same pattern as the authenticated sidebar's
+            own footer. */}
+        <div className="mt-10 flex flex-wrap items-center justify-between gap-5 border-t border-white/18 pt-6">
+          <div className="flex items-center gap-5">
+            <img alt="SEforALL" src="/seforall.svg" className="h-6 w-auto shrink-0 object-contain brightness-0 invert" />
+            <div className="h-5 w-px shrink-0 bg-white/18" aria-hidden="true" />
+            <img alt="GEAPP" src="/reports/compact-progress/logo-geapp.png" className="h-6 w-auto shrink-0 object-contain" />
+          </div>
+          <div className="flex items-center gap-2">
+            <img alt="EMRC" src="/emrc.png" className="h-5 w-auto shrink-0 object-contain" />
+            <span className="text-[0.6875rem] leading-4 text-white/50">Platform built by EMRC</span>
+          </div>
         </div>
 
         <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-white/18 pt-5 text-[0.6875rem] leading-4 text-white/50">
