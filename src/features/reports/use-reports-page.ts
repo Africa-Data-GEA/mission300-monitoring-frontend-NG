@@ -16,7 +16,7 @@ import {
   useReportsOverview,
 } from './api'
 import { buildCompactProgressReportData } from './lib/compact-progress-report-data'
-import { buildCompactProgressReportPdf } from './lib/compact-progress-report-document'
+import { buildCompactProgressReportPdf } from './lib/build-compact-progress-report-pdf'
 import { downloadBlob } from './lib/download'
 import { buildReportWorkbook } from './lib/export-excel'
 import { buildReportPdf } from './lib/export-pdf'

@@ -5,6 +5,7 @@ import { PILLAR_LABELS } from '@/types/domain'
 import { SideDialog } from '@/components/ui/side-dialog'
 import { readAuthSession } from '@/features/auth/auth-session'
 import { canRoleReachModule } from '@/features/auth/role-access'
+import { ExternalStandardAlignmentPanel } from './external-standard-alignment-panel'
 import { KpiMetadataEditDialog } from './kpi-metadata-edit-dialog'
 import { LinkedRecordsPanel } from './linked-records-panel'
 import { MetadataPanel } from './metadata-panel'
@@ -64,6 +65,7 @@ export function KpiProfileDialog({
           )}
           <ValuesPanel profile={profile} />
           <MetadataPanel profile={profile} />
+          <ExternalStandardAlignmentPanel profile={profile} />
           <TraceabilityPanel profile={profile} />
           <LinkedRecordsPanel profile={profile} />
           {canEditMetadata && (

@@ -67,6 +67,7 @@ import type { ExecutiveOverview, OngoingProject } from '@/features/dashboard/typ
 import { bottlenecksHandlers } from './handlers/bottlenecks'
 import { brandingHandlers } from './handlers/branding'
 import { dataSubmissionHandlers } from './handlers/data-submissions'
+import { learningLogHandlers } from './handlers/learning-log'
 import { pillarDashboardHandlers } from './handlers/pillar-dashboard'
 import { programsHandlers } from './handlers/programs'
 import { reportsHandlers } from './handlers/reports'
@@ -424,6 +425,7 @@ export const handlers = [
   ...bottlenecksHandlers,
   ...brandingHandlers,
   ...dataSubmissionHandlers,
+  ...learningLogHandlers,
   ...pillarDashboardHandlers,
   ...programsHandlers,
   ...reportsHandlers,

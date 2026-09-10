@@ -50,6 +50,7 @@ const REGISTER: BottleneckRecord[] = [
     escalationStatus: 'not-escalated',
     status: 'open',
     lifecycleStage: 'design',
+    statusHistory: [{ period: 'Aug 2025', status: 'open' }],
   },
   {
     id: 'BTN-2025-011',
@@ -84,6 +85,10 @@ const REGISTER: BottleneckRecord[] = [
     escalationStatus: 'not-escalated',
     status: 'blocked',
     lifecycleStage: 'implementation',
+    statusHistory: [
+      { period: 'Sep 2025', status: 'open' },
+      { period: 'Oct 2025', status: 'blocked' },
+    ],
   },
   {
     id: 'BTN-2025-022',
@@ -99,6 +104,10 @@ const REGISTER: BottleneckRecord[] = [
     escalationStatus: 'escalated',
     status: 'escalated',
     lifecycleStage: 'implementation',
+    statusHistory: [
+      { period: 'Sep 2025', status: 'open' },
+      { period: 'Sep 2025', status: 'escalated' },
+    ],
   },
   {
     id: 'BTN-2025-027',
@@ -115,6 +124,7 @@ const REGISTER: BottleneckRecord[] = [
     escalationStatus: 'not-escalated',
     status: 'open',
     lifecycleStage: 'operations',
+    statusHistory: [{ period: 'Oct 2025', status: 'open' }],
   },
   {
     id: 'BTN-2025-009',
@@ -130,6 +140,11 @@ const REGISTER: BottleneckRecord[] = [
     escalationStatus: 'resolved',
     status: 'resolved',
     lifecycleStage: 'commissioning',
+    statusHistory: [
+      { period: 'Jul 2025', status: 'open' },
+      { period: 'Sep 2025', status: 'in-progress' },
+      { period: 'Oct 2025', status: 'resolved' },
+    ],
   },
   {
     id: 'BTN-2025-030',
@@ -145,6 +160,7 @@ const REGISTER: BottleneckRecord[] = [
     escalationStatus: 'not-escalated',
     status: 'open',
     lifecycleStage: 'procurement',
+    statusHistory: [{ period: 'Sep 2025', status: 'open' }],
   },
 ]
 

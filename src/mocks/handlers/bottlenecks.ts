@@ -124,6 +124,9 @@ export const bottlenecksHandlers = [
       status: 'open',
       lifecycleStage:
         (body.lifecycleStage ?? 'identification') as BottleneckRecord['lifecycleStage'],
+      // Empty per statusHistorySchema's own rule: a bottleneck just raised has
+      // never changed status, so its one data point is `status` itself.
+      statusHistory: [],
     }
 
     nextRecordNumber += 1

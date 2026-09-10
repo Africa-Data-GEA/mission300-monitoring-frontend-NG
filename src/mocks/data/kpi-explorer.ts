@@ -1148,7 +1148,24 @@ const CATALOGUE: KpiCatalogueRow[] = [
  * Registry — the mock returns a generated fallback only for a catalogue row
  * added without one, so every row stays drillable.
  */
-const PROFILES: Record<string, KpiProfile> = {
+/**
+ * A hand-authored profile, without `targets`/`externalStandardAlignment` —
+ * both were added to `kpiProfileSchema` after these were written, and the
+ * schema's own `.default([])`/`.default(null)` makes them required on the
+ * inferred `KpiProfile` type even though almost no indicator has periodic
+ * targets or a mapped external standard yet. Backfilled by `withDefaults`
+ * below rather than appended to every entry by hand; an entry that genuinely
+ * has one of these (see `M300-PX-001`'s SE4ALL alignment work) still states
+ * it inline and wins over the backfilled default.
+ */
+type RawKpiProfile = Omit<KpiProfile, 'targets' | 'externalStandardAlignment'> &
+  Partial<Pick<KpiProfile, 'targets' | 'externalStandardAlignment'>>
+
+function withDefaults(profile: RawKpiProfile): KpiProfile {
+  return { targets: [], externalStandardAlignment: null, ...profile }
+}
+
+const RAW_PROFILES: Record<string, RawKpiProfile> = {
   'M300-PX-001': {
     id: 'M300-PX-001',
     name: 'Electricity Access Rate',
@@ -1322,6 +1339,18 @@ const PROFILES: Record<string, KpiProfile> = {
       { period: '2028', value: 60, label: '60% by 2028 (interim checkpoint)' },
       { period: '2030', value: 75, label: '75% by 2030 (final Compact commitment)' },
     ],
+    externalStandardAlignment: {
+      standard: 'SE4ALL MRL Guidance Note (confidential draft, Aug 2026)',
+      inclusions: ['Electricity actually generated in the period, by source'],
+      exclusions: [
+        'Installed/nameplate capacity — tracked separately as M300-P1-015, the CPR-canonical indicator',
+        'Solar and wind generation not yet consistently reported (see limitations)',
+      ],
+      periodType: 'Annual, latest published figure',
+      assumptions: [
+        'Current figure is hydro-only; excludes unreported solar/wind generation, so true renewable share is understated',
+      ],
+    },
     varianceLabel: '-36.69 pts vs the 75% 2030 target',
     direction: 'higher-is-better',
     trend: { change: 1.2, label: '+1.2 pts vs prior year', direction: 'higher-is-better' },
@@ -2104,6 +2133,18 @@ const PROFILES: Record<string, KpiProfile> = {
     target: 15500,
     targetLabel: 'USD 15.5 billion by 2030 (Nigeria National Energy Compact commitment)',
     targetDate: '2030',
+    externalStandardAlignment: {
+      standard: 'SE4ALL MRL Guidance Note (confidential draft, Aug 2026)',
+      inclusions: ['Confirmed private capital commitments under approved capital-counting rules'],
+      exclusions: [
+        'Not yet enforced: public co-funding and duplicate guarantee/loan pairs — this figure is a manual quarterly total with no transaction trail to check against',
+      ],
+      periodType: 'Quarterly, cumulative since Compact tracking start',
+      assumptions: [
+        'This is NOT the CPR-canonical figure — the Compact Progress Report reads M300-P4-008 (verified transaction ledger) instead',
+        'Remains the reported dashboard figure until the ledger reaches national submission scale',
+      ],
+    },
     varianceLabel: '+USD 210 million since Q1 2025 (illustrative)',
     direction: 'higher-is-better',
     trend: { change: 90, label: '+USD 90 million vs Q3 2025', direction: 'higher-is-better' },
@@ -4450,7 +4491,7 @@ const PROFILES: Record<string, KpiProfile> = {
    * proves the counting mechanism works rather than backfilling the
    * Compact-wide 137.3M/26% composites at ledger granularity.
    */
-  'M300-P2-024': ((): KpiProfile => {
+  'M300-P2-024': ((): RawKpiProfile => {
     const summary = summarizeElectricityBeneficiaries()
     return {
     id: 'M300-P2-024',
@@ -4498,7 +4539,7 @@ const PROFILES: Record<string, KpiProfile> = {
     linkedRecords: [],
   }
   })(),
-  'M300-P2-025': ((): KpiProfile => {
+  'M300-P2-025': ((): RawKpiProfile => {
     const summary = summarizeCleanCookingBeneficiaries()
     return {
     id: 'M300-P2-025',
@@ -4573,6 +4614,19 @@ const PROFILES: Record<string, KpiProfile> = {
     target: 30,
     targetLabel: '30% renewable installed capacity by 2030 (illustrative — pending confirmed National Energy Compact capacity commitment)',
     targetDate: '2030',
+    externalStandardAlignment: {
+      standard: 'SE4ALL MRL Guidance Note (confidential draft, Aug 2026)',
+      inclusions: ['Installed (nameplate) renewable generation capacity: hydro, solar, wind'],
+      exclusions: [
+        'Actual electricity generated — tracked separately as M300-P1-004, the generation-mix indicator',
+        'Non-renewable capacity (thermal, gas)',
+      ],
+      periodType: 'Annual, latest confirmed capacity register',
+      assumptions: [
+        'Solar capacity is a utility-scale estimate pending a confirmed NISO/TCN capacity register — see limitations',
+        'This is the CPR-canonical indicator: the Compact Progress Report reads this KPI, not M300-P1-004',
+      ],
+    },
     varianceLabel: '-12.5 pts vs the 30% 2030 target',
     direction: 'higher-is-better',
     trend: { change: 1.7, label: '+1.7 pts vs 2024', direction: 'higher-is-better' },
@@ -4605,7 +4659,7 @@ const PROFILES: Record<string, KpiProfile> = {
    * hand-typed total. M300-P4-002 is untouched — this is a smaller,
    * separately-tracked figure alongside it, not a replacement.
    */
-  'M300-P4-008': ((): KpiProfile => {
+  'M300-P4-008': ((): RawKpiProfile => {
     const summary = summarizePrivateCapital()
     return {
     id: 'M300-P4-008',
@@ -4628,6 +4682,20 @@ const PROFILES: Record<string, KpiProfile> = {
     target: null,
     targetLabel: 'Tracked toward the same USD 15.5B-by-2030 Compact commitment once ledger reporting reaches national scale',
     targetDate: '2030',
+    externalStandardAlignment: {
+      standard: 'SE4ALL MRL Guidance Note (confidential draft, Aug 2026)',
+      inclusions: ['Verified, committed private-capital transactions (equity, debt, grant-leveraged)'],
+      exclusions: [
+        'Public funding — any transaction flagged isPublicFunding is dropped entirely',
+        'Duplicate guarantees — a guarantee transaction is dropped whenever it merely backs an already-counted loan, via linkedGuaranteeId',
+        'Unverified and rejected transactions',
+      ],
+      periodType: 'Quarterly, cumulative since ledger start (1 Jan 2025)',
+      assumptions: [
+        'This IS the CPR-canonical indicator — the Compact Progress Report reads this KPI, not M300-P4-002',
+        'Pilot scale only: 10 transactions on record, not yet fed by full national submission volume',
+      ],
+    },
     varianceLabel: 'Not computable — pilot-scale ledger, not yet the Compact-wide denominator',
     direction: 'higher-is-better',
     trend: { change: 30, label: '+USD 30M vs Q3 2025', direction: 'higher-is-better' },
@@ -4656,6 +4724,10 @@ const PROFILES: Record<string, KpiProfile> = {
   })(),
 }
 
+const PROFILES: Record<string, KpiProfile> = Object.fromEntries(
+  Object.entries(RAW_PROFILES).map(([id, profile]) => [id, withDefaults(profile)]),
+)
+
 /** Builds a plausible profile for any catalogue row lacking a bespoke one. */
 function fallbackProfile(row: KpiCatalogueRow): KpiProfile {
   const hasValue = row.validationStatus === 'confirmed' || row.validationStatus === 'public-source'
@@ -4683,6 +4755,8 @@ function fallbackProfile(row: KpiCatalogueRow): KpiProfile {
     targetDate: null,
     varianceLabel: 'Not computable without a target',
     direction: 'higher-is-better',
+    targets: [],
+    externalStandardAlignment: null,
     history: [],
     sourceInstitution: row.sourceInstitution,
     sourceDataset: row.sourceDataset,
@@ -4868,6 +4942,8 @@ export function createKpi(input: {
     targetDate: null,
     varianceLabel: '—',
     direction: 'higher-is-better',
+    targets: [],
+    externalStandardAlignment: null,
     history: [],
     sourceInstitution: input.sourceInstitution,
     sourceDataset: input.sourceDataset,

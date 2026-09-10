@@ -1,5 +1,4 @@
 import { Document, Image, Page, StyleSheet, Text, View } from '@react-pdf/renderer'
-import { pdf } from '@react-pdf/renderer'
 import type { CompactProgressReportData } from './compact-progress-report-data'
 import './pdf-fonts'
 
@@ -569,10 +568,4 @@ export function CompactProgressReportDocument({ data }: { data: CompactProgressR
       <ClosingPage data={data} />
     </Document>
   )
-}
-
-/** Renders the Compact Progress Report to a real PDF file, client-side —
- * mirrors `buildReportPdf`'s `pdf(...).toBlob()` pattern in export-pdf.tsx. */
-export async function buildCompactProgressReportPdf(data: CompactProgressReportData): Promise<Blob> {
-  return pdf(<CompactProgressReportDocument data={data} />).toBlob()
 }

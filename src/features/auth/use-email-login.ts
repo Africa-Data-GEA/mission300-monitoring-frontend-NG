@@ -37,7 +37,7 @@ export function useEmailLogin() {
     try {
       const account = await identifyAccount(email.trim())
       savePendingAccount(account)
-      navigate('/account/change-password')
+      navigate('/account/password')
     } catch (error) {
       const message = authErrorMessage(error)
       setServerError(message)

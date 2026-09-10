@@ -139,6 +139,38 @@ export const kpiTargetPointSchema = z.object({
   label: z.string().min(1),
 })
 
+/**
+ * How this indicator relates to an external methodology standard (e.g.
+ * SE4ALL's MRL guidance) — added per the SE4ALL MRL alignment review
+ * (docs/se4all-mrl-alignment-renewable-private-capital.md), which flagged
+ * that EMRC's KPI metadata had no way to record which version of an outside
+ * standard a KPI aligns to, or what it deliberately in/excludes relative to
+ * that standard. Optional and null for every KPI that has no external
+ * standard mapped to it yet — this is not retroactively invented for the
+ * other 70-odd KPIs in the registry, only added where a real alignment
+ * decision has actually been made.
+ */
+export const externalStandardAlignmentSchema = z.object({
+  /** The standard and version this KPI is checked against, e.g. "SE4ALL MRL
+   * Guidance Note v1 (confidential draft, Aug 2026)". */
+  standard: z.string().min(1),
+  /** What this KPI's figure deliberately counts, per the standard's rules. */
+  inclusions: z.array(z.string().min(1)),
+  /** What this KPI's figure deliberately excludes, per the standard's rules. */
+  exclusions: z.array(z.string().min(1)),
+  /** The standard's required reporting cadence for this indicator, e.g.
+   * "Annual" or "Quarterly, cumulative since Compact start" — may differ
+   * from this KPI's own `frequency` field, which is this indicator's actual
+   * reporting cadence today. */
+  periodType: z.string().min(1),
+  /** Assumptions the current figure relies on that the standard requires be
+   * stated explicitly, e.g. an estimation method standing in for data not
+   * yet collected at the required granularity. */
+  assumptions: z.array(z.string().min(1)),
+})
+
+export type ExternalStandardAlignment = z.infer<typeof externalStandardAlignmentSchema>
+
 /** A delivery record linked to the indicator via its identifier. */
 export const linkedRecordSchema = z.object({
   id: z.string().min(1),
@@ -176,6 +208,9 @@ export const updateKpiMetadataRequestSchema = z.object({
    * kpiProfileSchema. Optional: omitting it leaves existing periodic targets
    * untouched; sending an array replaces the full list. */
   targets: z.array(kpiTargetPointSchema).optional(),
+  /** See externalStandardAlignmentSchema. Optional: omitting it leaves the
+   * existing alignment (or lack of one) untouched. */
+  externalStandardAlignment: externalStandardAlignmentSchema.nullable().optional(),
   sourceInstitution: z.string().min(1),
   sourceDataset: z.string().min(1),
   sourceReference: z.string(),
@@ -282,6 +317,9 @@ export const kpiProfileSchema = z.object({
   /** The full periodic target history — see kpiTargetPointSchema. Empty
    * where only the single primary target above has ever been set. */
   targets: z.array(kpiTargetPointSchema).default([]),
+  /** See externalStandardAlignmentSchema. Null where no external standard
+   * has been mapped to this KPI yet — the common case today. */
+  externalStandardAlignment: externalStandardAlignmentSchema.nullable().default(null),
   /** Signed variance against target, following the configured direction. */
   varianceLabel: z.string(),
   direction: improvementDirectionSchema,

@@ -12,7 +12,7 @@ function renderLogin() {
   const router = createMemoryRouter(
     [
       { path: '/account/login', element: <LoginPage /> },
-      { path: '/account/change-password', element: <PasswordPage /> },
+      { path: '/account/password', element: <PasswordPage /> },
       { path: '/account/forgot-password', element: <ForgotPasswordPage /> },
       { path: '/dashboard', element: <h1>Dashboard home</h1> },
     ],
@@ -49,7 +49,7 @@ describe('LoginPage', () => {
     await user.click(screen.getByRole('button', { name: 'Next' }))
 
     expect(await screen.findByRole('heading', { name: 'Welcome back, Grace' })).toBeInTheDocument()
-    expect(router.state.location.pathname).toBe('/account/change-password')
+    expect(router.state.location.pathname).toBe('/account/password')
     expect(screen.getByLabelText('Password')).toHaveFocus()
     expect(screen.getByText('g.etim@emrc.ng')).toBeInTheDocument()
 

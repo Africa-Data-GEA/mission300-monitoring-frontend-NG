@@ -1084,7 +1084,7 @@ pnpm<span class="w"> </span>dev<span class="w">   </span><span class="c1"># http
 <p>Each nav item carries a <code>moduleKey</code>, independent of its display label, which role-based access checks against (§8.2) - so renaming a label in the sidebar never silently breaks access control.</p>
 <h3 id="72-route-table">7.2 Route Table</h3>
 <div class="codehilite"><pre><span></span><code>/account/login
-/account/change-password
+/account/password
 /account/forgot-password
 
 /  (AppShell)
@@ -1163,7 +1163,7 @@ pnpm<span class="w"> </span>dev<span class="w">   </span><span class="c1"># http
 </tr>
 </tbody>
 </table></div>
-<p>Three routes back this: <code>/account/login</code>, <code>/account/change-password</code>, <code>/account/forgot-password</code> - all outside the authenticated <code>AppShell</code>, per the route table (§7.2).</p>
+<p>Three routes back this: <code>/account/login</code>, <code>/account/password</code>, <code>/account/forgot-password</code> - all outside the authenticated <code>AppShell</code>, per the route table (§7.2).</p>
 <p><strong>Open item, carried from §6.6:</strong> the actual auth scheme (bearer token assumed, not yet confirmed by the backend team) is unresolved. Anyone integrating a real backend needs this settled first.</p>
 <h3 id="82-role-module-access-defined-partially-wired">8.2 Role &amp; Module Access - Defined, Partially Wired</h3>
 <p>Seven system roles exist in the <code>SystemRole</code> enum: <code>system-administrator</code>, <code>institutional-data-provider</code>, <code>data-reviewer</code>, <code>validator</code>, <code>dashboard-manager</code>, <code>oversight-user</code>, <code>read-only-user</code>.</p>

@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react'
-import { createBrowserRouter } from 'react-router'
+import { createBrowserRouter, Navigate } from 'react-router'
 import { AppShell } from '@/components/layout/app-shell'
 import { AuthRouteFallback, RouteFallback } from '@/components/layout/route-fallback'
 import { RequireAuth } from '@/features/auth/require-auth'
@@ -73,6 +73,12 @@ const BottlenecksPage = lazy(() =>
 const ReportsPage = lazy(() =>
   import('@/features/reports/reports-page').then((module) => ({
     default: module.ReportsPage,
+  })),
+)
+
+const LearningLogPage = lazy(() =>
+  import('@/features/learning-log/learning-log-page').then((module) => ({
+    default: module.LearningLogPage,
   })),
 )
 
@@ -160,9 +166,18 @@ export const router = createBrowserRouter([
     path: '/account/login',
     element: authRoute(<LoginPage />),
   },
+  /*
+   * The second sign-in step — the user enters their existing password. It was
+   * previously routed at /account/change-password, which read as a reset flow;
+   * that old path now redirects here so any saved link still lands correctly.
+   */
+  {
+    path: '/account/password',
+    element: authRoute(<PasswordPage />),
+  },
   {
     path: '/account/change-password',
-    element: authRoute(<PasswordPage />),
+    element: <Navigate to="/account/password" replace />,
   },
   {
     path: '/account/forgot-password',
@@ -275,6 +290,11 @@ export const router = createBrowserRouter([
       {
         path: 'reports',
         element: lazyRoute(<ReportsPage />),
+        handle: { globalFilters: false } satisfies RouteHandle,
+      },
+      {
+        path: 'learning-log',
+        element: lazyRoute(<LearningLogPage />),
         handle: { globalFilters: false } satisfies RouteHandle,
       },
       {

@@ -19,6 +19,7 @@ const ROLE_MODULE_KEYS: Record<string, readonly string[] | 'all'> = {
     'programs',
     'kpi-directory',
     'reports',
+    'learning-log',
   ],
   'oversight-user': ['executive-overview', 'pillar-dashboards', 'reports'],
   'read-only-user': ['executive-overview'],

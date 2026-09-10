@@ -1,6 +1,7 @@
 import { PILLARS, PILLAR_LABELS, type PillarId } from '@/api/schemas/common'
 import { EXECUTION_STATUS_LABELS, type ExecutionStatus } from '@/api/schemas/programs'
 import { executiveOverview } from '@/mocks/data/executive-overview'
+import { getKpiProfile } from '@/mocks/data/kpi-explorer'
 import { programmes, projects } from '@/mocks/data/programs'
 
 /**
@@ -91,14 +92,22 @@ const CROSS_TAB_STATUSES: readonly ExecutionStatus[] = [
   'completed',
 ]
 
-function formatBillions(value: number): string {
-  return `$${(value / 1000).toFixed(2)}B`
-}
-
 export function buildCompactProgressReportData(): CompactProgressReportData {
-  const { headlineCards, nationalPerformance, lastUpdated } = executiveOverview
-  const renewables = nationalPerformance.find((metric) => metric.id === 'renewable-share')
-  const privateCapital = nationalPerformance.find((metric) => metric.id === 'private-capital')
+  const { headlineCards, lastUpdated } = executiveOverview
+
+  // SE4ALL MRL alignment (docs/se4all-mrl-alignment-renewable-private-capital.md):
+  // the CPR must report the CPR-canonical figure, which is NOT the same
+  // number the day-to-day Executive Overview dashboard shows for either
+  // metric. Renewable share on the dashboard is generation-mix (GWh/GWh,
+  // M300-P1-004) — SE4ALL's CPR indicator is installed-capacity share
+  // (MW/MW, M300-P1-015). Private capital on the dashboard is the legacy
+  // manually-entered total (M300-P4-002) — SE4ALL's CPR indicator is the
+  // verified, exclusion-enforced ledger figure (M300-P4-008). Reading these
+  // two KPI Explorer profiles directly, rather than `nationalPerformance`,
+  // is what keeps the dashboard's own figures unchanged while fixing what
+  // the CPR itself reports.
+  const renewables = getKpiProfile('M300-P1-015')
+  const privateCapital = getKpiProfile('M300-P4-008')
 
   const keyTargets: CompactProgressKeyTarget[] = [
     {
@@ -116,18 +125,18 @@ export function buildCompactProgressReportData(): CompactProgressReportData {
       targetLabel: headlineCards.cleanCookingAccess.targetLabel,
     },
     {
-      label: 'Share of renewable energy in national generation',
-      unit: '% of generation',
-      baselineLabel: renewables ? `${renewables.baseline}%` : 'Not tracked',
-      currentLabel: renewables ? renewables.value : 'Not tracked',
-      targetLabel: renewables?.target !== null && renewables?.target !== undefined ? `${renewables.target}%` : 'No approved target',
+      label: 'Renewable installed capacity share (CPR-canonical)',
+      unit: '% of installed capacity',
+      baselineLabel: renewables?.baselineLabel ?? 'Not tracked',
+      currentLabel: renewables?.currentLabel ?? 'Not tracked',
+      targetLabel: renewables?.targetLabel ?? 'No approved target',
     },
     {
-      label: 'Private capital mobilized',
-      unit: 'Billion USD',
-      baselineLabel: privateCapital ? formatBillions(privateCapital.baseline) : 'TBC',
-      currentLabel: privateCapital ? privateCapital.value : 'No data provided yet',
-      targetLabel: privateCapital?.target !== null && privateCapital?.target !== undefined ? formatBillions(privateCapital.target) : 'No approved target',
+      label: 'Private capital mobilized (CPR-canonical, verified ledger)',
+      unit: 'USD Million',
+      baselineLabel: privateCapital?.baselineLabel ?? 'TBC',
+      currentLabel: privateCapital?.currentLabel ?? 'No data provided yet',
+      targetLabel: privateCapital?.targetLabel ?? 'No approved target',
     },
   ]
 
@@ -147,14 +156,14 @@ export function buildCompactProgressReportData(): CompactProgressReportData {
     {
       pillarId: 'generation-network',
       icon: 'renewables',
-      label: 'Renewables share',
-      description: renewables ? `Reach ${renewables.targetLabel}.` : 'No approved target on record.',
+      label: 'Renewable installed capacity share',
+      description: renewables?.targetLabel ? `Reach ${renewables.targetLabel}.` : 'No approved target on record.',
     },
     {
       pillarId: 'private-sector-participation',
       icon: 'private-capital',
-      label: 'Private capital mobilized',
-      description: privateCapital ? `Mobilize ${privateCapital.targetLabel}.` : 'No approved target on record.',
+      label: 'Private capital mobilized (verified ledger)',
+      description: privateCapital?.targetLabel ? `Mobilize ${privateCapital.targetLabel}.` : 'No approved target on record.',
     },
   ]
 

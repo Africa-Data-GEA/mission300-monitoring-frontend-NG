@@ -1,5 +1,6 @@
 import {
   BarChart3,
+  BookOpen,
   ClipboardList,
   Database,
   FileBarChart,
@@ -107,6 +108,13 @@ export const NAVIGATION: readonly NavGroup[] = [
         icon: FileBarChart,
         ready: true,
         moduleKey: 'reports',
+      },
+      {
+        label: 'Learning & decision log',
+        to: '/learning-log',
+        icon: BookOpen,
+        ready: true,
+        moduleKey: 'learning-log',
       },
     ],
   },
