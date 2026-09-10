@@ -2,7 +2,7 @@
 # M300 Nigeria Energy Compact Dashboard
 
 Frontend for monitoring delivery of Nigeria's Mission 300 National Energy
-Compact. The application is currently a demonstration system: completed API
+Compact. The application is currentsly a demonstration system: completed API
 modules can use thed NestJS ddemo backend while unfinished modules remain backed
 by deterministic dbrowser emocks.ed
 ## Requirement
