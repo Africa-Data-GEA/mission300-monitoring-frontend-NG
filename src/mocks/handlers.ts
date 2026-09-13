@@ -21,11 +21,13 @@ import {
   kpiExplorerFilterOptions,
   kpiExplorerOverview,
   setKpiActive,
+  setKpiCurrentValue,
   updateKpiMetadata,
 } from './data/kpi-explorer'
 import {
   createKpiRequestSchema,
   setKpiActiveRequestSchema,
+  setKpiCurrentValueRequestSchema,
   updateKpiMetadataRequestSchema,
 } from '@/api/schemas/kpi-explorer'
 import { getLiveBackendUrl } from './live-backend'
@@ -473,13 +475,13 @@ export const handlers = [
   /**
    * PATCH /api/kpi-explorer/kpis/:id
    *
-   * Updates a KPI's definition metadata — methodology, baseline, target,
-   * source. Never touches `current`/`history`, which only change through a
-   * published data submission (see the decisions handler in
-   * data-submissions.ts). No auth/role enforcement server-side in this mock
-   * — the frontend gates the edit UI to system-administrator; see
-   * canRoleReachModule and the real backend's own auth layer, once it has
-   * one, should enforce this for real.
+   * Updates a KPI's definition metadata — pillar assignment, methodology,
+   * baseline, target, source. Never touches `current`/`history`, which only
+   * change through a published data submission (see the decisions handler in
+   * data-submissions.ts) or the direct override below. No auth/role
+   * enforcement server-side in this mock — the frontend gates the edit UI to
+   * system-administrator; see canRoleReachModule and the real backend's own
+   * auth layer, once it has one, should enforce this for real.
    */
   http.patch('/api/kpi-explorer/kpis/:id', async ({ request, params }) => {
     await delay(200)
@@ -493,6 +495,32 @@ export const handlers = [
       )
     }
     const updated = updateKpiMetadata(id, result.data)
+    if (!updated) {
+      return HttpResponse.json({ message: `No indicator found with id ${id}` }, { status: 404 })
+    }
+    return HttpResponse.json(updated)
+  }),
+
+  /**
+   * PATCH /api/kpi-explorer/kpis/:id/current-value
+   *
+   * Directly sets a KPI's current value and appends a history point — an
+   * explicit admin override of the usual rule that a value only ever arrives
+   * via an approved data submission. See setKpiCurrentValueRequestSchema and
+   * setKpiCurrentValue. No auth/role enforcement server-side in this mock —
+   * the frontend gates this to system-administrator.
+   */
+  http.patch('/api/kpi-explorer/kpis/:id/current-value', async ({ request, params }) => {
+    await delay(200)
+    const id = String(params.id)
+    const result = setKpiCurrentValueRequestSchema.safeParse(await request.json())
+    if (!result.success) {
+      return HttpResponse.json(
+        { message: result.error.issues[0]?.message ?? 'Invalid value.' },
+        { status: 400 },
+      )
+    }
+    const updated = setKpiCurrentValue(id, result.data)
     if (!updated) {
       return HttpResponse.json({ message: `No indicator found with id ${id}` }, { status: 404 })
     }

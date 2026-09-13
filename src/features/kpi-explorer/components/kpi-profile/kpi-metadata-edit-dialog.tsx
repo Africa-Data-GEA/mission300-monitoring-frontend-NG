@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { SelectField } from '@/components/ui/select-field'
 import { SideDialog } from '@/components/ui/side-dialog'
 import { ApiError } from '@/lib/api-client'
+import { PILLARS, PILLAR_LABELS } from '@/types/domain'
 import { useUpdateKpiMetadata } from '../../api'
 
 const inputClass =
@@ -50,6 +51,7 @@ function buildPeriod(type: PeriodType, year: string, quarter: string): string {
 /** `null` in the number field reads as an empty input, not "0". */
 function toDraft(profile: KpiProfile): UpdateKpiMetadataRequest {
   return {
+    pillar: profile.pillar,
     definition: profile.definition,
     formula: profile.formula,
     unit: profile.unit,
@@ -70,11 +72,11 @@ function toDraft(profile: KpiProfile): UpdateKpiMetadataRequest {
 }
 
 /**
- * Editor for a KPI's definition metadata — methodology and reference
- * points (baseline/target), never the current value or its history, which
- * only change through a published data submission. Gated to
- * system-administrator by its callers (metadata-panel.tsx / values-panel.tsx),
- * not by this component — see role-access.ts.
+ * Editor for a KPI's definition — pillar assignment, methodology, and
+ * reference points (baseline/target). Never the current value or its
+ * history; see SetKpiCurrentValueDialog for that. Gated to
+ * system-administrator by its callers (kpi-profile-dialog.tsx /
+ * pillar-kpi-edit-button.tsx), not by this component — see role-access.ts.
  */
 export function KpiMetadataEditDialog({
   open,
@@ -134,6 +136,13 @@ export function KpiMetadataEditDialog({
       description={`${profile.id} — definition, baseline and target. Applies immediately once saved.`}
     >
       <div className="mx-auto flex max-w-2xl flex-col gap-5">
+        <SelectField
+          label="Pillar"
+          value={draft.pillar}
+          options={PILLARS.map((pillar) => ({ value: pillar, label: PILLAR_LABELS[pillar] }))}
+          onChange={(value) => field('pillar', value as UpdateKpiMetadataRequest['pillar'])}
+        />
+
         <label className="text-sm font-medium text-text-default">
           Definition
           <textarea

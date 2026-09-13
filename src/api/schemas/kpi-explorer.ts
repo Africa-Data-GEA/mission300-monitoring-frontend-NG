@@ -192,6 +192,9 @@ export const linkedRecordSchema = z.object({
  * submission being approved and published. See PATCH /kpi-explorer/kpis/:id.
  */
 export const updateKpiMetadataRequestSchema = z.object({
+  /** Which pillar this indicator rolls up under. Reassigning it moves the
+   * KPI's catalogue row and pillar-dashboard cards to the new pillar. */
+  pillar: pillarIdSchema,
   definition: z.string().min(1),
   formula: z.string().min(1),
   unit: z.string().min(1),
@@ -262,9 +265,26 @@ export const setKpiActiveRequestSchema = z.object({
   reason: z.string().trim().max(500).optional(),
 })
 
+/**
+ * Directly sets a KPI's current value and appends a history point, bypassing
+ * the Data Submissions & Validation workflow. This is an explicit admin
+ * override — normally a value only ever arrives via an approved submission
+ * (see publishKpiValue in mocks/data/kpi-explorer.ts) — for cases where an
+ * administrator needs to record a figure without routing it through that
+ * pipeline. Gated to system-administrator in the UI; see role-access.ts.
+ */
+export const setKpiCurrentValueRequestSchema = z.object({
+  value: z.number(),
+  currentLabel: z.string().trim().min(1, 'Describe the value, e.g. "38.31% (hydro only, NERC Q4 2025 report)"'),
+  reportingPeriod: z.string().trim().min(1, 'State the reporting period, e.g. Q4 2025'),
+  validationStatus: validationStatusSchema,
+  note: z.string().trim().max(500).optional(),
+})
+
 export type CreateKpiRequest = z.infer<typeof createKpiRequestSchema>
 export type CreateKpiResponse = z.infer<typeof createKpiResponseSchema>
 export type SetKpiActiveRequest = z.infer<typeof setKpiActiveRequestSchema>
+export type SetKpiCurrentValueRequest = z.infer<typeof setKpiCurrentValueRequestSchema>
 
 export const kpiProfileSchema = z.object({
   id: z.string().min(1),

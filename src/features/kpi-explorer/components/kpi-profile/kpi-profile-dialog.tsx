@@ -11,6 +11,7 @@ import { LinkedRecordsPanel } from './linked-records-panel'
 import { MetadataPanel } from './metadata-panel'
 import { ProfileSkeleton } from './profile-skeleton'
 import { RetireKpiButton } from './retire-kpi-button'
+import { SetKpiCurrentValueDialog } from './set-kpi-current-value-dialog'
 import { TraceabilityPanel } from './traceability-panel'
 import { ValuesPanel } from './values-panel'
 
@@ -34,6 +35,7 @@ export function KpiProfileDialog({
   onClose: () => void
 }) {
   const [editOpen, setEditOpen] = useState(false)
+  const [setValueOpen, setSetValueOpen] = useState(false)
   const session = readAuthSession()
   const canEditMetadata = !session || canRoleReachModule(session.user.role, 'kpi-metadata')
 
@@ -58,6 +60,11 @@ export function KpiProfileDialog({
                   (docs/M300 Monitoring Platform Feedback.pptx, slide 15).
                   Retiring never deletes: published values stay traceable. */}
               <RetireKpiButton kpiId={profile.id} name={profile.name} />
+              {/* Direct admin override of the current value — bypasses Data
+                  Submissions & Validation. See SetKpiCurrentValueDialog. */}
+              <Button type="button" variant="secondary" size="sm" onClick={() => setSetValueOpen(true)}>
+                Set current value
+              </Button>
               <Button type="button" variant="secondary" size="sm" onClick={() => setEditOpen(true)}>
                 Edit definition &amp; targets
               </Button>
@@ -69,7 +76,10 @@ export function KpiProfileDialog({
           <TraceabilityPanel profile={profile} />
           <LinkedRecordsPanel profile={profile} />
           {canEditMetadata && (
-            <KpiMetadataEditDialog open={editOpen} profile={profile} onClose={() => setEditOpen(false)} />
+            <>
+              <KpiMetadataEditDialog open={editOpen} profile={profile} onClose={() => setEditOpen(false)} />
+              <SetKpiCurrentValueDialog open={setValueOpen} profile={profile} onClose={() => setSetValueOpen(false)} />
+            </>
           )}
         </div>
       )}

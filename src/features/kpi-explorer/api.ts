@@ -8,6 +8,7 @@ import {
   type CreateKpiRequest,
   type KpiExplorerQuery,
   type SetKpiActiveRequest,
+  type SetKpiCurrentValueRequest,
   type UpdateKpiMetadataRequest,
 } from '@/api/schemas/kpi-explorer'
 import { api } from '@/lib/api-client'
@@ -114,6 +115,25 @@ export function useUpdateKpiMetadata(id: string) {
       // the two KPIs proxied live to the real backend (see LIVE_KPI_IDS in
       // handlers.ts), that refetch hits the backend rather than this mock,
       // silently reverting the edit just saved.
+      client.setQueryData(kpiExplorerKeys.profile(id), updated)
+      client.invalidateQueries({ predicate: (query) => query.queryKey[0] === 'kpi-explorer' && query.queryKey[1] === 'overview' })
+    },
+  })
+}
+
+/**
+ * Directly sets a KPI's current value, bypassing the Data Submissions &
+ * Validation workflow — an explicit admin override. See
+ * setKpiCurrentValueRequestSchema. Same cache-update reasoning as
+ * useUpdateKpiMetadata above: set the profile directly rather than
+ * invalidating it, so the two live-proxied KPIs aren't silently reverted.
+ */
+export function useSetKpiCurrentValue(id: string) {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (input: SetKpiCurrentValueRequest) =>
+      api.patch(`/kpi-explorer/kpis/${id}/current-value`, input, kpiProfileSchema),
+    onSuccess: (updated) => {
       client.setQueryData(kpiExplorerKeys.profile(id), updated)
       client.invalidateQueries({ predicate: (query) => query.queryKey[0] === 'kpi-explorer' && query.queryKey[1] === 'overview' })
     },

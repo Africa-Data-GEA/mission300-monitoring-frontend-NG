@@ -4,6 +4,7 @@ import type {
   KpiExplorerOverview,
   KpiProfile,
   ReadinessTier,
+  ValidationStatus,
 } from '@/api/schemas/kpi-explorer'
 import type { PillarId } from '@/api/schemas/common'
 import type { KpiExtraction } from '@/api/schemas/data-submissions'
@@ -4848,6 +4849,7 @@ export function publishKpiValue(
 export function updateKpiMetadata(
   id: string,
   patch: {
+    pillar: PillarId
     definition: string
     formula: string
     unit: string
@@ -4869,19 +4871,70 @@ export function updateKpiMetadata(
   const row = CATALOGUE.find((entry) => entry.id === id)
   if (!row) return null
 
+  row.pillar = patch.pillar
   row.sourceInstitution = patch.sourceInstitution
   row.sourceDataset = patch.sourceDataset
   row.unit = patch.unit
   row.frequency = patch.frequency
   row.lastUpdated = new Date().toISOString()
 
-  const profile = PROFILES[id]
-  if (profile) {
-    Object.assign(profile, patch)
-    return profile
-  }
+  const profile = PROFILES[id] ?? getKpiProfile(id)
+  if (!profile) return null
 
-  return getKpiProfile(id) ?? null
+  Object.assign(profile, patch)
+  PROFILES[id] = profile
+  return profile
+}
+
+/**
+ * Directly sets a KPI's current value and appends a history point — an
+ * explicit admin override of the usual rule that a value only ever arrives
+ * via an approved data submission (see publishKpiValue above). Materialises
+ * a bespoke profile into PROFILES on first use if the KPI only ever had a
+ * derived fallbackProfile, so the change actually sticks on the next fetch.
+ * Returns null if the id doesn't exist.
+ */
+export function setKpiCurrentValue(
+  id: string,
+  patch: {
+    value: number
+    currentLabel: string
+    reportingPeriod: string
+    validationStatus: ValidationStatus
+    note?: string
+  },
+): KpiProfile | null {
+  const row = CATALOGUE.find((entry) => entry.id === id)
+  if (!row) return null
+
+  const updatedAt = new Date().toISOString()
+  row.lastUpdated = updatedAt
+  row.validationStatus = patch.validationStatus
+
+  const profile = PROFILES[id] ?? getKpiProfile(id)
+  if (!profile) return null
+
+  profile.current = patch.value
+  profile.currentLabel = patch.currentLabel
+  profile.reportingPeriod = patch.reportingPeriod
+  profile.validationStatus = patch.validationStatus
+  profile.confidence = patch.validationStatus === 'confirmed' ? 'confirmed' : 'requires-validation'
+  profile.validationDecision = patch.note
+    ? `Manually set by an administrator: ${patch.note}`
+    : 'Manually set by an administrator, outside the data submission workflow.'
+  profile.provenance = { ...profile.provenance, lastUpdated: updatedAt }
+  profile.history = [
+    ...profile.history,
+    {
+      period: patch.reportingPeriod,
+      value: patch.value,
+      validationStatus: patch.validationStatus,
+      submissionId: null,
+    },
+  ]
+
+  PROFILES[id] = profile
+  return profile
 }
 
 /**
