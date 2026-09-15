@@ -21,7 +21,11 @@ export function OverviewPanel({ project }: { project: ProjectRecord }) {
         <ProfileField label="Program type" value={PROGRAM_TYPE_LABELS[project.programType]} />
         <ProfileField
           label="Timeline"
-          value={`${formatDate(project.startDate)} – ${formatDate(project.endDate)} (projected completion)`}
+          value={
+            project.endDate
+              ? `${formatDate(project.startDate)} to ${formatDate(project.endDate)} (projected completion)`
+              : `${formatDate(project.startDate)}, no projected completion date recorded`
+          }
         />
         <ProfileField label="Funding sources" value={project.fundingSource ?? 'Not yet secured'} />
         <ProfileField label="Funding structure" value={project.fundingStructure} />

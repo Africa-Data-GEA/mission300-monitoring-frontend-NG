@@ -1,0 +1,30 @@
+import { chromium } from 'playwright'
+const BASE = 'http://localhost:5179'
+const browser = await chromium.launch()
+const page = await browser.newPage({ viewport: { width: 1500, height: 1100 } })
+const errs=[], bad=[]
+page.on('console', m=>{ if(m.type()==='error') errs.push(m.text()) })
+page.on('pageerror', e=>errs.push('PAGEERROR: '+e.message))
+page.on('response', r=>{ if(r.status()>=400 && r.url().includes('3001')) bad.push(r.status()+' '+r.url()) })
+
+await page.goto(`${BASE}/account/login`, { waitUntil:'networkidle' })
+await page.locator('input[type="email"]').first().fill('admin@m300.local')
+await page.locator('button[type="submit"]').first().click()
+await page.waitForURL('**/account/password')
+await page.locator('input[name="password"]').first().fill('ChangeMe123!')
+await page.locator('button[type="submit"]').first().click()
+await page.waitForURL('**/dashboard', { timeout:20000 })
+await page.waitForTimeout(9000)
+const eo = await page.locator('body').innerText()
+const eoAtcc = eo.match(/ATC&C Loss Rate[\s\S]{0,60}?([\d.]+%)/)
+console.log('EXEC OVERVIEW ATC&C :', eoAtcc ? eoAtcc[1] : '??')
+
+await page.goto(`${BASE}/state-disco`, { waitUntil:'networkidle' })
+await page.waitForTimeout(9000)
+await page.screenshot({ path:'qa-screenshots/reconciled-state-disco.png' })
+const sd = await page.locator('body').innerText()
+const sdAtcc = sd.match(/Aggregate Technical[^\n]*\n?\s*([\d.]+%)/) || sd.match(/ATC&C[\s\S]{0,80}?([\d.]+%)/)
+console.log('STATE & DISCO ATC&C :', sdAtcc ? sdAtcc[1] : '??')
+console.log('console errors:', errs.length?errs.slice(0,3):'none')
+console.log('bad responses:', bad.length?bad.slice(0,3):'none')
+await browser.close()

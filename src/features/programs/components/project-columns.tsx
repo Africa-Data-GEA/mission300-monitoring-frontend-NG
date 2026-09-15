@@ -62,9 +62,11 @@ export function buildProjectColumns(
       id: 'completion',
       header: 'Projected completion date',
       className: 'min-w-32',
-      sortValue: (row) => row.endDate,
+      sortValue: (row) => row.endDate ?? '',
       cell: (row) => (
-        <span className="whitespace-nowrap text-text-muted">{formatDate(row.endDate)}</span>
+        <span className="whitespace-nowrap text-text-muted">
+          {row.endDate ? formatDate(row.endDate) : 'Not set'}
+        </span>
       ),
     },
     {

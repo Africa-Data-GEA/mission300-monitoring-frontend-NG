@@ -25,18 +25,28 @@ const dateFormatter = new Intl.DateTimeFormat('en-GB', {
  * ones — and because the list is paginated at five, an unsorted order can push
  * a blocked project onto page two where nobody looks.
  *
- * `currentStatus` excludes 'completed' at the schema level, so this map is
- * total over the statuses that can actually appear here.
+ * Completed work carries no delivery risk, so it sorts below every live
+ * status rather than competing with blocked and delayed projects for the
+ * top of page one.
  */
 const STATUS_SEVERITY: Record<OngoingProject['currentStatus'], number> = {
   blocked: 0,
   delayed: 1,
   'at-risk': 2,
   'on-track': 3,
+  completed: 4,
 }
 
 /** Columns this table can be ordered by, beyond its worst-first default. */
 type SortKey = 'status' | 'endDate' | 'name' | 'owner' | 'pillarLabel' | 'location'
+
+/**
+ * Sort key for a projected completion date. A project with no recorded date
+ * sorts last rather than first — an absent deadline is not an imminent one.
+ */
+function deadlineTime(endDate: string | null): number {
+  return endDate ? new Date(endDate).getTime() : Number.POSITIVE_INFINITY
+}
 
 /** Builds an "All X" + one-per-distinct-value option list for a text column. */
 function toFilterOptions(
@@ -144,7 +154,7 @@ export function OngoingProjectsTable({
     return [...matching].sort((a, b) => {
       switch (sortKey) {
         case 'endDate':
-          return (new Date(a.endDate).getTime() - new Date(b.endDate).getTime()) * direction
+          return (deadlineTime(a.endDate) - deadlineTime(b.endDate)) * direction
         case 'name':
           return a.name.localeCompare(b.name) * direction
         case 'owner':
@@ -159,7 +169,7 @@ export function OngoingProjectsTable({
           // the more urgent one.
           return (
             (STATUS_SEVERITY[a.currentStatus] - STATUS_SEVERITY[b.currentStatus] ||
-              new Date(a.endDate).getTime() - new Date(b.endDate).getTime()) * direction
+              deadlineTime(a.endDate) - deadlineTime(b.endDate)) * direction
           )
       }
     })
@@ -360,22 +370,28 @@ export function OngoingProjectsTable({
                 <td className="px-3 py-3 text-sm text-text-muted">{project.leadName || '—'}</td>
                 <td className="px-3 py-3 text-sm text-text-muted">{project.location}</td>
                 <td className="px-3 py-3 text-sm whitespace-nowrap text-text-muted">
-                  {dateFormatter.format(new Date(project.endDate))}
-                  {/*
-                    An absolute date alone makes the reader do the arithmetic.
-                    For a row already flagged delayed, the overdue span is the
-                    number that matters, so it is tinted to match the badge.
-                  */}
-                  <span
-                    className={cn(
-                      'mt-0.5 block text-xs',
-                      new Date(project.endDate).getTime() < now.getTime()
-                        ? 'font-medium text-status-at-risk'
-                        : 'text-text-subtle',
-                    )}
-                  >
-                    {formatDeadline(project.endDate, now)}
-                  </span>
+                  {project.endDate ? (
+                    <>
+                      {dateFormatter.format(new Date(project.endDate))}
+                      {/*
+                        An absolute date alone makes the reader do the arithmetic.
+                        For a row already flagged delayed, the overdue span is the
+                        number that matters, so it is tinted to match the badge.
+                      */}
+                      <span
+                        className={cn(
+                          'mt-0.5 block text-xs',
+                          new Date(project.endDate).getTime() < now.getTime()
+                            ? 'font-medium text-status-at-risk'
+                            : 'text-text-subtle',
+                        )}
+                      >
+                        {formatDeadline(project.endDate, now)}
+                      </span>
+                    </>
+                  ) : (
+                    <span className="text-text-subtle">Not set</span>
+                  )}
                 </td>
                 <td className="px-3 py-3">
                   <div className="flex flex-col items-start gap-1">

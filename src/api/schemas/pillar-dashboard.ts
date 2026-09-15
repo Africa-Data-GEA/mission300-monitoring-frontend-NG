@@ -1,6 +1,11 @@
 import { z } from 'zod'
 import { bottleneckRecordSchema } from './bottlenecks'
-import { metricProvenanceSchema, pillarIdSchema, trendSchema } from './common'
+import {
+  improvementDirectionSchema,
+  metricProvenanceSchema,
+  pillarIdSchema,
+  trendSchema,
+} from './common'
 import { discoComparisonRowSchema } from './state-disco'
 import { executionStatusSchema, programmeRecordSchema, projectRecordSchema } from './programs'
 import { kpiCatalogueRowSchema, validationStatusSchema } from './kpi-explorer'
@@ -37,6 +42,12 @@ export const pillarHeadlineCardSchema = z.object({
    * distinguish "no target agreed" from "target exists, in another unit". */
   targetBasis: z.enum(['level', 'growth-rate', 'none']).optional(),
   targetBasisLabel: z.string().optional(),
+  /**
+   * Which way is good. Without it the card cannot tell progress from
+   * regression: a lower-is-better indicator like ATC&C at 34.81% against a
+   * 20% target computes as "174% to target" on a bare current/target ratio.
+   */
+  direction: improvementDirectionSchema,
   trend: trendSchema.optional(),
   validationStatus: validationStatusSchema,
   provenance: metricProvenanceSchema,

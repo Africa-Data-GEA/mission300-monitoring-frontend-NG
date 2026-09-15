@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Outlet, useMatches } from 'react-router'
 import { GlobalFiltersProvider } from '@/app/global-filters'
+import { prefetchRouteChunks } from '@/app/route-chunks'
 import { GlobalFilterBar } from './global-filter-bar'
 import { Sidebar } from './sidebar'
 import { Topbar } from './topbar'
@@ -15,6 +16,15 @@ import { Topbar } from './topbar'
 export function AppShell() {
   const [isNavOpen, setNavOpen] = useState(false)
   const [filtersOpen, setFiltersOpen] = useState(false)
+
+  /*
+   * Warm the other routes' chunks in the background once the shell is up, so
+   * the first click on a nav item doesn't sit on the full-page loading
+   * skeleton while its chunk downloads. See route-chunks.ts.
+   */
+  useEffect(() => {
+    prefetchRouteChunks()
+  }, [])
 
   /*
    * A route opts out of the application-wide filter bar via

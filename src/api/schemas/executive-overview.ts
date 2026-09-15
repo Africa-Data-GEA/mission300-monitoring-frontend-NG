@@ -93,7 +93,15 @@ export const compactOutcomeCardSchema = z.object({
   value: z.string().min(1),
   current: z.number().min(0),
   baseline: z.number().min(0),
-  target: z.number().positive(),
+  /**
+   * Null where no positive level target exists yet for this outcome — e.g. a
+   * pilot beneficiary ledger tracked toward a national Compact commitment
+   * expressed in a different unit/scale than the ledger can honestly show
+   * progress against today. `BulletChart` already renders a null target
+   * (several Compact metrics have always had none); `targetLabel` still
+   * carries the real commitment as text even when this is null.
+   */
+  target: z.number().positive().nullable(),
   scaleMin: z.number(),
   scaleMax: z.number(),
   reportingPeriod: z.string().min(1),
@@ -310,7 +318,7 @@ export const deliveryStatusPanelSchema = z.object({
       location: z.string().min(1),
       latitude: z.number().min(-90).max(90),
       longitude: z.number().min(-180).max(180),
-      currentStatus: executionStatusSchema.exclude(['completed']),
+      currentStatus: executionStatusSchema,
       /** Null once a project is active — carried through from Programs so a
        * project still in the pipeline (not yet active delivery) is visible
        * here too, not only in the full Programs → Projects table. */
@@ -318,7 +326,9 @@ export const deliveryStatusPanelSchema = z.object({
       // as it already does for a project in active delivery.
       pipelineReadiness: pipelineReadinessSchema.nullable().default(null),
       startDate: z.iso.datetime(),
-      endDate: z.iso.datetime(),
+      /** Null where the source register records no projected completion
+       * date — see projectRecordSchema.endDate in programs.ts. */
+      endDate: z.iso.datetime().nullable(),
       /** The workbook's "Comment – Issues/Main Risk/Bottlenecks" narrative,
        * surfaced here rather than requiring a click through to Programs. */
       // Defaulted: see BACKEND TOLERANCE.
@@ -331,7 +341,7 @@ export const deliveryStatusPanelSchema = z.object({
   ),
   statusSummary: z.array(
     z.object({
-      status: executionStatusSchema.exclude(['completed']),
+      status: executionStatusSchema,
       count: z.number().int().min(0),
     }),
   ),

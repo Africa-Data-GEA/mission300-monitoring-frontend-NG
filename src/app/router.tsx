@@ -2,6 +2,7 @@ import { lazy, Suspense } from 'react'
 import { createBrowserRouter, Navigate } from 'react-router'
 import { AppShell } from '@/components/layout/app-shell'
 import { AuthRouteFallback, RouteFallback } from '@/components/layout/route-fallback'
+import { routeChunks } from '@/app/route-chunks'
 import { RequireAuth } from '@/features/auth/require-auth'
 import { dataSubmissionRoutes } from '@/features/data-submissions/routes'
 import { stateDiscoRoutes } from '@/features/state-disco/routes'
@@ -11,127 +12,127 @@ import { stateDiscoRoutes } from '@/features/state-disco/routes'
  * carries only the shell.
  */
 const DashboardPage = lazy(() =>
-  import('@/features/dashboard/dashboard-page').then((module) => ({
+  routeChunks.dashboard().then((module) => ({
     default: module.DashboardPage,
   })),
 )
 
 const PublicGatewayPage = lazy(() =>
-  import('@/features/public-gateway/public-gateway-page').then((module) => ({
+  routeChunks.publicGateway().then((module) => ({
     default: module.PublicGatewayPage,
   })),
 )
 
 const ProgressPage = lazy(() =>
-  import('@/features/public-gateway/progress-page').then((module) => ({
+  routeChunks.progress().then((module) => ({
     default: module.ProgressPage,
   })),
 )
 
 const AdministrationPage = lazy(() =>
-  import('@/features/administration/administration-page').then((module) => ({
+  routeChunks.administration().then((module) => ({
     default: module.AdministrationPage,
   })),
 )
 
 const StakeholdersPage = lazy(() =>
-  import('@/features/stakeholders/stakeholders-page').then((module) => ({
+  routeChunks.stakeholders().then((module) => ({
     default: module.StakeholdersPage,
   })),
 )
 
 const KpiExplorerPage = lazy(() =>
-  import('@/features/kpi-explorer/kpi-explorer-page').then((module) => ({
+  routeChunks.kpiExplorer().then((module) => ({
     default: module.KpiExplorerPage,
   })),
 )
 
 const PillarDashboardPage = lazy(() =>
-  import('@/features/pillar-dashboard/pillar-dashboard-page').then((module) => ({
+  routeChunks.pillarDashboard().then((module) => ({
     default: module.PillarDashboardPage,
   })),
 )
 
 const PillarIndexPage = lazy(() =>
-  import('@/features/pillar-dashboard/pillar-index-page').then((module) => ({
+  routeChunks.pillarIndex().then((module) => ({
     default: module.PillarIndexPage,
   })),
 )
 
 const ProgramsPage = lazy(() =>
-  import('@/features/programs/programs-page').then((module) => ({
+  routeChunks.programs().then((module) => ({
     default: module.ProgramsPage,
   })),
 )
 
 const BottlenecksPage = lazy(() =>
-  import('@/features/bottlenecks/bottlenecks-page').then((module) => ({
+  routeChunks.bottlenecks().then((module) => ({
     default: module.BottlenecksPage,
   })),
 )
 
 const ReportsPage = lazy(() =>
-  import('@/features/reports/reports-page').then((module) => ({
+  routeChunks.reports().then((module) => ({
     default: module.ReportsPage,
   })),
 )
 
 const LearningLogPage = lazy(() =>
-  import('@/features/learning-log/learning-log-page').then((module) => ({
+  routeChunks.learningLog().then((module) => ({
     default: module.LearningLogPage,
   })),
 )
 
 const ProgrammeDetailPage = lazy(() =>
-  import('@/features/programs/programme-detail-page').then((module) => ({
+  routeChunks.programmeDetail().then((module) => ({
     default: module.ProgrammeDetailPage,
   })),
 )
 
 const ProjectDetailPage = lazy(() =>
-  import('@/features/programs/project-detail-page').then((module) => ({
+  routeChunks.projectDetail().then((module) => ({
     default: module.ProjectDetailPage,
   })),
 )
 
 const AddProjectPage = lazy(() =>
-  import('@/features/programs/pages/add-project-page').then((module) => ({
+  routeChunks.addProject().then((module) => ({
     default: module.AddProjectPage,
   })),
 )
 
 const EditProjectPage = lazy(() =>
-  import('@/features/programs/pages/edit-project-page').then((module) => ({
+  routeChunks.editProject().then((module) => ({
     default: module.EditProjectPage,
   })),
 )
 
 const AddProgrammePage = lazy(() =>
-  import('@/features/programs/pages/add-programme-page').then((module) => ({
+  routeChunks.addProgramme().then((module) => ({
     default: module.AddProgrammePage,
   })),
 )
 
 const LoginPage = lazy(() =>
-  import('@/features/auth/login-page').then((module) => ({
+  routeChunks.login().then((module) => ({
     default: module.LoginPage,
   })),
 )
 
 const PasswordPage = lazy(() =>
-  import('@/features/auth/password-page').then((module) => ({
+  routeChunks.password().then((module) => ({
     default: module.PasswordPage,
   })),
 )
 
 const ForgotPasswordPage = lazy(() =>
-  import('@/features/auth/forgot-password-page').then((module) => ({
+  routeChunks.forgotPassword().then((module) => ({
     default: module.ForgotPasswordPage,
   })),
 )
 
 const NotFoundPage = lazy(() =>
-  import('@/features/not-found/not-found-page').then((module) => ({
+  routeChunks.notFound().then((module) => ({
     default: module.NotFoundPage,
   })),
 )

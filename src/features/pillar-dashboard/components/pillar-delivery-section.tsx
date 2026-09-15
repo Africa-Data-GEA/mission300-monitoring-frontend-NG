@@ -18,7 +18,7 @@ type DeliveryRecord = {
   supportingText: string
   institution: string
   location: string
-  endDate: string
+  endDate: string | null
   status: ExecutionStatus
   priority: ProgrammeRecord['priority']
   bottlenecks: readonly string[]
@@ -64,8 +64,12 @@ const DELIVERY_COLUMNS: readonly Column<DeliveryRecord>[] = [
     id: 'endDate',
     header: 'End date',
     className: 'min-w-28',
-    sortValue: (row) => row.endDate,
-    cell: (row) => <span className="whitespace-nowrap text-text-muted">{formatDate(row.endDate)}</span>,
+    sortValue: (row) => row.endDate ?? '',
+    cell: (row) => (
+      <span className="whitespace-nowrap text-text-muted">
+        {row.endDate ? formatDate(row.endDate) : 'Not set'}
+      </span>
+    ),
   },
   {
     id: 'status',

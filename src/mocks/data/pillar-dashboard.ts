@@ -52,6 +52,7 @@ function buildHeadlineCard(kpiId: string): PillarHeadlineCard {
     title: profile.name,
     value: profile.currentLabel,
     rawValue: profile.current,
+    direction: profile.direction,
     baseline: profile.baseline,
     baselineLabel: profile.baselineLabel,
     targetLabel: profile.targetLabel,

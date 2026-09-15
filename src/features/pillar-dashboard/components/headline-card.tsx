@@ -12,10 +12,28 @@ import { PillarKpiEditButton } from './pillar-kpi-edit-button'
  * drills down to the same indicator's full profile in KPI Explorer.
  */
 export function HeadlineCard({ card }: { card: PillarHeadlineCard }) {
-  const percentToTarget =
-    card.rawValue !== null && card.target !== null && card.target !== 0
-      ? (card.rawValue / card.target) * 100
-      : null
+  /**
+   * For a higher-is-better indicator, "% to target" is the share of the
+   * target level reached — the reading this card has always shown.
+   *
+   * A lower-is-better indicator cannot use that ratio: ATC&C at 34.81%
+   * against a 20% target came out as "174% to target" on a full bar,
+   * reading as comfortably ahead when it is in fact well short. Progress
+   * there is the distance already travelled down from the baseline
+   * (45 → 34.81 of the 45 → 20 journey), an honest 41%.
+   */
+  const percentToTarget = (() => {
+    if (card.rawValue === null || card.target === null) return null
+
+    if (card.direction === 'lower-is-better') {
+      if (card.baseline === null || card.baseline === card.target) return null
+      const travelled = (card.baseline - card.rawValue) / (card.baseline - card.target)
+      return Math.max(0, Math.min(100, travelled * 100))
+    }
+
+    if (card.target === 0) return null
+    return (card.rawValue / card.target) * 100
+  })()
 
   // A commitment stated as a rate of change rather than a level in this
   // indicator's unit — see `targetBasis` on kpiProfileSchema.

@@ -133,7 +133,7 @@ export function KpiMetadataEditDialog({
       open={open}
       onClose={onClose}
       title={`Edit ${profile.name}`}
-      description={`${profile.id} — definition, baseline and target. Applies immediately once saved.`}
+      description={`${profile.id}. Definition, baseline and target. Applies immediately once saved.`}
     >
       <div className="mx-auto flex max-w-2xl flex-col gap-5">
         <SelectField
@@ -257,7 +257,7 @@ export function KpiMetadataEditDialog({
                   field('targetDate', event.target.value.trim() === '' ? null : event.target.value)
                 }
                 className={inputClass}
-                placeholder="e.g. 2030, or end 2027 — blank if none agreed"
+                placeholder="e.g. 2030, or end 2027. Blank if none agreed"
               />
             </label>
           </div>
@@ -266,7 +266,7 @@ export function KpiMetadataEditDialog({
         <div className="border-t border-border-default pt-5">
           <h3 className="text-sm font-semibold text-text-default">Interim targets over time</h3>
           <p className="mt-1 text-xs text-text-muted">
-            Optional milestones on the way to the target above — e.g. a 2026 and a 2028 checkpoint before a
+            Optional milestones on the way to the target above, e.g. a 2026 and a 2028 checkpoint before a
             2030 final target. The target above stays the one figure every chart already renders; this list is
             additive.
           </p>

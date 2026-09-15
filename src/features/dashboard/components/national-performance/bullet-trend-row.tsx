@@ -55,7 +55,11 @@ export function BulletTrendRow({ metric }: { metric: BulletMetric }) {
                 axisBorder: { show: false },
               },
               yaxis: { labels: { show: false } },
-              grid: { show: false, padding: { left: 0, right: 0, top: 8, bottom: 0 } },
+              // Left/right insets keep the first and last point's value
+              // label and axis tick inside the plot area — at zero padding
+              // both were clipped by the chart edge ("15.55" rendered as
+              // "5.55", "Q3 2025" as "3 2025").
+              grid: { show: false, padding: { left: 16, right: 16, top: 8, bottom: 0 } },
               tooltip: {
                 y: {
                   formatter: (value: number) => `<strong>${value.toLocaleString('en-US')}</strong>`,

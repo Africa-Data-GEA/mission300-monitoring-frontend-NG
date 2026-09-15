@@ -2,7 +2,11 @@ import { useState } from 'react'
 import type { StateDiscoQuery } from '@/api/schemas/state-disco'
 
 export const DEFAULT_STATE_DISCO_QUERY: Required<StateDiscoQuery> = {
-  reportingPeriod: 'q3-2025',
+  // 'all' resolves server-side to each DisCo's latest reported quarter, so
+  // this page opens on the same figures the Executive Overview headlines
+  // show. A hardcoded quarter here silently pinned the page to an older
+  // period and made the two pages disagree on the national ATC&C rate.
+  reportingPeriod: 'all',
   view: 'disco',
   distributionCompany: 'national',
   state: 'all',

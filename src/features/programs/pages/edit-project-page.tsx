@@ -18,7 +18,10 @@ function toUpsertValues(project: ProjectRecord): UpsertProjectRequest {
     location: project.location,
     pillar: project.pillar,
     currentStatus: project.currentStatus,
-    endDate: project.endDate,
+    // The register can hold a project with no projected completion date, but
+    // the edit form requires one — an empty value here asks the editor to
+    // supply it rather than silently re-saving a placeholder.
+    endDate: project.endDate ?? '',
     comment: project.comment,
     pipelineReadiness: project.pipelineReadiness,
   }

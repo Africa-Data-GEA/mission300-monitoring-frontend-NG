@@ -234,8 +234,13 @@ export const projectRecordSchema = z.object({
   /** The workbook's "Current Project Status". */
   currentStatus: executionStatusSchema,
   startDate: z.iso.datetime(),
-  /** The workbook's "Projected Completion Date". */
-  endDate: z.iso.datetime(),
+  /**
+   * The workbook's "Projected Completion Date". Null where the source
+   * register records no projected completion date for the project — the
+   * NISO register leaves this blank for most of its entries, and a
+   * placeholder date here would read as a real commitment.
+   */
+  endDate: z.iso.datetime().nullable(),
   /** Null when no evidence document has been attached. */
   evidenceUrl: z.string().nullable(),
   bottlenecks: z.array(z.string()),

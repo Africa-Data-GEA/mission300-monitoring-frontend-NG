@@ -58,8 +58,8 @@ export function SetKpiCurrentValueDialog({
     <SideDialog
       open={open}
       onClose={onClose}
-      title={`Set current value — ${profile.name}`}
-      description={`${profile.id} — bypasses Data Submissions & Validation. Use only when a value cannot go through the normal submission workflow.`}
+      title={`Set current value: ${profile.name}`}
+      description={`${profile.id}. Bypasses Data Submissions & Validation. Use only when a value cannot go through the normal submission workflow.`}
     >
       <div className="mx-auto flex max-w-2xl flex-col gap-5">
         <div className="grid gap-4 sm:grid-cols-2">

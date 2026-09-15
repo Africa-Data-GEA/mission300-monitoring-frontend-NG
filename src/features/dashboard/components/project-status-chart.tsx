@@ -13,16 +13,19 @@ export function ProjectStatusChart({
   /** Fired when a donut slice is clicked — the natural "ops dashboard"
    * upgrade over a plain data explorer: clicking a status jumps straight to
    * that status's projects instead of just picturing the split. */
-  onStatusClick?: (status: Exclude<ExecutionStatus, 'completed'>) => void
+  onStatusClick?: (status: ExecutionStatus) => void
 }) {
   const total = summary.reduce((sum, entry) => sum + entry.count, 0)
   // Read inside the render body, not as a module-level constant, so a
   // brand-colour change (see BrandProvider) is picked up on the next render.
-  const STATUS_COLORS: Record<Exclude<ExecutionStatus, 'completed'>, string> = {
+  const STATUS_COLORS: Record<ExecutionStatus, string> = {
     'on-track': CHART_BLUE.darkest,
     'at-risk': CHART_BLUE.base,
     delayed: CHART_BLUE.light,
     blocked: getChartAccent(),
+    // Finished work sits apart from the live-delivery ramp rather than
+    // reading as another degree of risk on the same scale.
+    completed: CHART_BLUE.lightest,
   }
 
   if (total === 0) {
