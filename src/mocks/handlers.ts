@@ -422,6 +422,7 @@ function auditCutoff(period: string) {
 }
 
 const invitedUsers: UserAccount[] = []
+let allowSelfReview = false
 
 export const handlers = [
   ...bottlenecksHandlers,
@@ -692,6 +693,7 @@ export const handlers = [
         name: user.name,
         email: user.email,
         role: user.role,
+        roles: user.roles?.length ? user.roles : [user.role],
       },
     })
   }),
@@ -705,6 +707,34 @@ export const handlers = [
       message:
         'If an active account exists for that email, reset instructions have been sent.',
     })
+  }),
+
+  http.post('/api/auth/set-password', async ({ request }) => {
+    const body = (await request.json()) as { token?: string; newPassword?: string }
+    if (!body.token || (body.newPassword?.length ?? 0) < 8) {
+      return HttpResponse.json({ message: 'This link is invalid or has expired.' }, { status: 401 })
+    }
+    return HttpResponse.json({ message: 'Password set. You can now log in.' })
+  }),
+
+  http.get('/api/users/me', ({ request }) => {
+    const token = request.headers.get('authorization')?.replace(/^Bearer /, '')
+    const account = administrationUsers.find((user) => token === `mock-token-${user.id}`)
+    return account
+      ? HttpResponse.json(account)
+      : HttpResponse.json({ message: 'Not signed in.' }, { status: 401 })
+  }),
+
+  http.patch('/api/users/me', async ({ request }) => {
+    const token = request.headers.get('authorization')?.replace(/^Bearer /, '')
+    const account = administrationUsers.find((user) => token === `mock-token-${user.id}`)
+    if (!account) return HttpResponse.json({ message: 'Not signed in.' }, { status: 401 })
+    const body = (await request.json()) as { name?: string }
+    if (!body.name || body.name.trim().length < 2) {
+      return HttpResponse.json({ message: 'Enter your name.' }, { status: 400 })
+    }
+    account.name = body.name.trim()
+    return HttpResponse.json(account)
   }),
 
   /**
@@ -788,8 +818,12 @@ export const handlers = [
       email: string
       institution: string
       designation: string
-      role: UserAccount['role']
+      roles: UserAccount['role'][]
     }
+    if (!Array.isArray(body.roles) || !body.roles.length) {
+      return HttpResponse.json({ message: 'Select at least one role.' }, { status: 400 })
+    }
+    const primaryRole = body.roles[0] as UserAccount['role']
     const allUsers = [...administrationUsers, ...invitedUsers]
     if (allUsers.some((user) => user.email.toLowerCase() === body.email.toLowerCase())) {
       return HttpResponse.json(
@@ -804,7 +838,8 @@ export const handlers = [
       email: body.email,
       institution: body.institution,
       designation: body.designation,
-      role: body.role,
+      role: primaryRole,
+      roles: body.roles,
       status: 'pending',
       lastLogin: null,
       createdAt: new Date().toISOString(),
@@ -814,6 +849,31 @@ export const handlers = [
       user,
       message: `An invitation was sent to ${user.email}.`,
     })
+  }),
+
+  http.patch('/api/administration/users/:id/roles', async ({ request, params }) => {
+    const user = [...administrationUsers, ...invitedUsers].find((entry) => entry.id === params.id)
+    if (!user) return HttpResponse.json({ message: 'User account not found.' }, { status: 404 })
+    const body = (await request.json()) as { roles?: UserAccount['role'][] }
+    if (!Array.isArray(body.roles) || !body.roles.length || new Set(body.roles).size !== body.roles.length) {
+      return HttpResponse.json({ message: 'Select at least one distinct role.' }, { status: 400 })
+    }
+    user.role = body.roles[0] as UserAccount['role']
+    user.roles = body.roles
+    return HttpResponse.json(user)
+  }),
+
+  http.get('/api/administration/security', () =>
+    HttpResponse.json({ allowSelfReview }),
+  ),
+
+  http.put('/api/administration/security', async ({ request }) => {
+    const body = (await request.json()) as { allowSelfReview?: unknown }
+    if (typeof body.allowSelfReview !== 'boolean') {
+      return HttpResponse.json({ message: 'Invalid review policy.' }, { status: 400 })
+    }
+    allowSelfReview = body.allowSelfReview
+    return HttpResponse.json({ allowSelfReview })
   }),
 
   /**
@@ -861,18 +921,17 @@ export const handlers = [
         [user.name, user.email, user.institution, user.designation].some(
           (field) => field.toLowerCase().includes(search),
         )
-      const matchesRole = role === 'all' || user.role === role
+      const grantedRoles = user.roles?.length ? user.roles : [user.role]
+      const matchesRole = role === 'all' || grantedRoles.includes(role as UserAccount['role'])
       const matchesStatus = status === 'all' || user.status === status
       const matchesPermission =
         permission === 'all' ||
-        roleById.get(user.role)?.permissions.includes(
-          permission as never,
-        ) === true
+        grantedRoles.some((grantedRole) => roleById.get(grantedRole)?.permissions.includes(permission as never))
       const matchesScope =
         accessScope === 'all' || usersWithScope.has(user.id)
       const matchesModule =
         module === 'all' ||
-        roleReachesModule(roleById.get(user.role)!, module)
+        grantedRoles.some((grantedRole) => roleReachesModule(roleById.get(grantedRole)!, module))
 
       return (
         matchesSearch &&
@@ -921,7 +980,12 @@ export const handlers = [
         (permission === 'all' ||
           entry.permissions.includes(permission as never)) &&
         roleReachesModule(entry, module),
-    )
+    ).map((entry) => ({
+      ...entry,
+      assignedUsers: [...administrationUsers, ...invitedUsers].filter((user) =>
+        (user.roles?.length ? user.roles : [user.role]).includes(entry.role),
+      ).length,
+    }))
 
     return HttpResponse.json({
       ...administrationOverview,

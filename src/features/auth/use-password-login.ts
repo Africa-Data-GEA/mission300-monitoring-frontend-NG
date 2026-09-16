@@ -8,6 +8,7 @@ import { authErrorMessage } from './auth-error-message'
 import { authenticate } from './api'
 import { clearPendingAccount, readPendingAccount, saveAuthSession } from './auth-session'
 import { showPendingState } from './show-pending-state'
+import { landingPathForUser } from './role-access'
 
 const passwordFormSchema = z.object({
   password: z.string().min(1, 'Enter your password'),
@@ -41,8 +42,7 @@ export function usePasswordLogin() {
       // institutional-data-provider can't reach Executive Overview (see
       // role-access.ts's ROLE_MODULE_KEYS) — its landing page is its own
       // institution-scoped Data Submissions overview instead.
-      const landingPath =
-        session.user.role === 'institutional-data-provider' ? '/data-submissions' : '/dashboard'
+      const landingPath = landingPathForUser(session.user)
       dashboardToast.success(`Welcome back, ${session.user.name}`, {
         description: 'You are now signed in to the M300 Monitoring Platform.',
       })

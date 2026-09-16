@@ -29,6 +29,7 @@ export function useAdministrationPage() {
   const [auditPage, setAuditPage] = useState(1)
   const [activeTab, setActiveTab] = useState<AdministrationTab>('users')
   const [inviteOpen, setInviteOpen] = useState(false)
+  const [rolesUser, setRolesUser] = useState<UserAccount | null>(null)
 
   const filters = useAdministrationFilters()
   const overview = useAdministration(query, {
@@ -93,6 +94,7 @@ export function useAdministrationPage() {
     data: overview.data,
     activeTab,
     inviteOpen,
+    rolesUser,
     isPending: filters.isPending || overview.isPending,
     isError: overview.isError,
     error: overview.error ?? new Error('The administration data could not be loaded.'),
@@ -110,6 +112,9 @@ export function useAdministrationPage() {
     viewAuditUser,
     openInvite: () => setInviteOpen(true),
     closeInvite: () => setInviteOpen(false),
+    openRoleEditor: (user: UserAccount) => setRolesUser(user),
+    closeRoleEditor: () => setRolesUser(null),
+    refreshAfterRoleEdit: () => void overview.refetch(),
     refreshAfterInvite: () => void overview.refetch(),
   }
 }

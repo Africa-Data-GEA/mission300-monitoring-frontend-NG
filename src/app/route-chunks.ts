@@ -39,6 +39,7 @@ export const routeChunks = {
   login: () => import('@/features/auth/login-page'),
   password: () => import('@/features/auth/password-page'),
   forgotPassword: () => import('@/features/auth/forgot-password-page'),
+  setPassword: () => import('@/features/auth/set-password-page'),
   notFound: () => import('@/features/not-found/not-found-page'),
 } as const
 

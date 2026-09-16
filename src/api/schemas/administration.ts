@@ -125,6 +125,7 @@ export const userAccountSchema = z.object({
   institution: z.string().min(1),
   designation: z.string(),
   role: systemRoleSchema,
+  roles: z.array(systemRoleSchema).optional(),
   status: accountStatusSchema,
   /** Null for an account that has never signed in. */
   lastLogin: z.iso.datetime().nullable(),
@@ -136,7 +137,7 @@ export const inviteUserRequestSchema = z.object({
   email: z.email('Enter a valid email address'),
   institution: z.string().min(1, 'Select an institution'),
   designation: z.string().trim().min(2, 'Enter the designation'),
-  role: systemRoleSchema,
+  roles: z.array(systemRoleSchema).min(1, 'Select at least one role'),
   accessScope: scopeLevelSchema,
   invitationMessage: z.string().max(500).optional(),
 })
@@ -144,6 +145,14 @@ export const inviteUserRequestSchema = z.object({
 export const inviteUserResponseSchema = z.object({
   user: userAccountSchema,
   message: z.string().min(1),
+})
+
+export const updateUserRolesRequestSchema = z.object({
+  roles: z.array(systemRoleSchema).min(1, 'Select at least one role'),
+})
+
+export const securitySettingsSchema = z.object({
+  allowSelfReview: z.boolean(),
 })
 
 /* ------------------------------------------------------------------ *

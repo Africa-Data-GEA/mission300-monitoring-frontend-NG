@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button'
 import { PILLAR_LABELS } from '@/types/domain'
 import { SideDialog } from '@/components/ui/side-dialog'
 import { readAuthSession } from '@/features/auth/auth-session'
-import { canRoleReachModule } from '@/features/auth/role-access'
+import { canUserReachModule } from '@/features/auth/role-access'
 import { ExternalStandardAlignmentPanel } from './external-standard-alignment-panel'
 import { KpiMetadataEditDialog } from './kpi-metadata-edit-dialog'
 import { LinkedRecordsPanel } from './linked-records-panel'
@@ -37,7 +37,7 @@ export function KpiProfileDialog({
   const [editOpen, setEditOpen] = useState(false)
   const [setValueOpen, setSetValueOpen] = useState(false)
   const session = readAuthSession()
-  const canEditMetadata = !session || canRoleReachModule(session.user.role, 'kpi-metadata')
+  const canEditMetadata = !!session && canUserReachModule(session.user, 'kpi-metadata')
 
   return (
     <SideDialog

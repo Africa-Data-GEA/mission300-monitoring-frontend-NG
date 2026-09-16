@@ -18,7 +18,7 @@ export function useInviteUser(onInvited: () => void) {
       email: '',
       institution: '',
       designation: '',
-      role: 'read-only-user',
+      roles: [],
       accessScope: 'institution',
       invitationMessage: '',
     },

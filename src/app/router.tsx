@@ -1,9 +1,9 @@
 import { lazy, Suspense } from 'react'
-import { createBrowserRouter, Navigate } from 'react-router'
+import { createBrowserRouter, Navigate, Outlet } from 'react-router'
 import { AppShell } from '@/components/layout/app-shell'
 import { AuthRouteFallback, RouteFallback } from '@/components/layout/route-fallback'
 import { routeChunks } from '@/app/route-chunks'
-import { RequireAuth } from '@/features/auth/require-auth'
+import { RequireAuth, RequireModule } from '@/features/auth/require-auth'
 import { dataSubmissionRoutes } from '@/features/data-submissions/routes'
 import { stateDiscoRoutes } from '@/features/state-disco/routes'
 
@@ -131,6 +131,10 @@ const ForgotPasswordPage = lazy(() =>
   })),
 )
 
+const SetPasswordPage = lazy(() =>
+  routeChunks.setPassword().then((module) => ({ default: module.SetPasswordPage })),
+)
+
 const NotFoundPage = lazy(() =>
   routeChunks.notFound().then((module) => ({
     default: module.NotFoundPage,
@@ -139,6 +143,10 @@ const NotFoundPage = lazy(() =>
 
 function lazyRoute(element: React.ReactNode) {
   return <Suspense fallback={<RouteFallback />}>{element}</Suspense>
+}
+
+function moduleRoute(moduleKey: string, element: React.ReactNode) {
+  return <RequireModule moduleKey={moduleKey}>{lazyRoute(element)}</RequireModule>
 }
 
 function authRoute(element: React.ReactNode) {
@@ -184,6 +192,14 @@ export const router = createBrowserRouter([
     path: '/account/forgot-password',
     element: authRoute(<ForgotPasswordPage />),
   },
+  {
+    path: '/account/reset-password',
+    element: authRoute(<SetPasswordPage />),
+  },
+  {
+    path: '/account/set-password',
+    element: authRoute(<SetPasswordPage />),
+  },
   /*
    * `/` is the public gateway, not a redirect into the dashboard.
    *
@@ -213,27 +229,27 @@ export const router = createBrowserRouter([
         children: [
       {
         path: 'dashboard',
-        element: lazyRoute(<DashboardPage />),
+        element: moduleRoute('executive-overview', <DashboardPage />),
         handle: { globalFilters: true } satisfies RouteHandle,
       },
       {
         path: 'kpis',
-        element: lazyRoute(<KpiExplorerPage />),
+        element: moduleRoute('kpi-directory', <KpiExplorerPage />),
         handle: { globalFilters: false } satisfies RouteHandle,
       },
       {
         path: 'pillars',
-        element: lazyRoute(<PillarIndexPage />),
+        element: moduleRoute('pillar-dashboards', <PillarIndexPage />),
         handle: { globalFilters: false } satisfies RouteHandle,
       },
       {
         path: 'pillars/:pillar',
-        element: lazyRoute(<PillarDashboardPage />),
+        element: moduleRoute('pillar-dashboards', <PillarDashboardPage />),
         handle: { globalFilters: false } satisfies RouteHandle,
       },
       {
         path: 'programs',
-        element: lazyRoute(<ProgramsPage />),
+        element: moduleRoute('programs', <ProgramsPage />),
         handle: { globalFilters: false } satisfies RouteHandle,
       },
       /*
@@ -245,62 +261,69 @@ export const router = createBrowserRouter([
        */
       {
         path: 'bottlenecks',
-        element: lazyRoute(<BottlenecksPage />),
+        element: moduleRoute('programs', <BottlenecksPage />),
         handle: { globalFilters: false } satisfies RouteHandle,
       },
       {
         path: 'programs/new',
-        element: lazyRoute(<AddProgrammePage />),
+        element: moduleRoute('programs', <AddProgrammePage />),
         handle: { globalFilters: false } satisfies RouteHandle,
       },
       {
         path: 'programs/:programmeId',
-        element: lazyRoute(<ProgrammeDetailPage />),
+        element: moduleRoute('programs', <ProgrammeDetailPage />),
         handle: { globalFilters: false } satisfies RouteHandle,
       },
       {
         path: 'programs/projects/new',
-        element: lazyRoute(<AddProjectPage />),
+        element: moduleRoute('programs', <AddProjectPage />),
         handle: { globalFilters: false } satisfies RouteHandle,
       },
       {
         path: 'programs/projects/:projectId',
-        element: lazyRoute(<ProjectDetailPage />),
+        element: moduleRoute('programs', <ProjectDetailPage />),
         handle: { globalFilters: false } satisfies RouteHandle,
       },
       {
         path: 'programs/projects/:projectId/edit',
-        element: lazyRoute(<EditProjectPage />),
+        element: moduleRoute('programs', <EditProjectPage />),
         handle: { globalFilters: false } satisfies RouteHandle,
       },
       {
         path: 'stakeholders',
-        element: lazyRoute(<StakeholdersPage />),
+        element: moduleRoute('stakeholders', <StakeholdersPage />),
         handle: { globalFilters: false } satisfies RouteHandle,
       },
       {
         path: 'administration',
-        element: lazyRoute(<AdministrationPage />),
+        element: moduleRoute('administration', <AdministrationPage />),
         handle: { globalFilters: false } satisfies RouteHandle,
       },
       {
         path: 'data-submissions',
+        element: <RequireModule moduleKey="data-submissions"><Outlet /></RequireModule>,
         children: dataSubmissionRoutes,
         handle: { globalFilters: false } satisfies RouteHandle,
       },
       {
         path: 'reports',
-        element: lazyRoute(<ReportsPage />),
+        element: moduleRoute('reports', <ReportsPage />),
         handle: { globalFilters: false } satisfies RouteHandle,
       },
       {
         path: 'learning-log',
-        element: lazyRoute(<LearningLogPage />),
+        element: moduleRoute('learning-log', <LearningLogPage />),
         handle: { globalFilters: false } satisfies RouteHandle,
       },
       {
         path: 'state-disco',
+        element: <RequireModule moduleKey="state-disco"><Outlet /></RequireModule>,
         children: stateDiscoRoutes,
+        handle: { globalFilters: false } satisfies RouteHandle,
+      },
+      {
+        path: 'access-denied',
+        element: <main role="alert" className="rounded-card bg-surface p-8"><h1 className="text-2xl font-semibold">Access denied</h1><p className="mt-2">Your role does not permit this page.</p></main>,
         handle: { globalFilters: false } satisfies RouteHandle,
       },
       {

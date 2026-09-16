@@ -1,10 +1,13 @@
 import { FileSpreadsheet, Keyboard } from 'lucide-react'
 import { Link } from 'react-router'
+import { useQuery } from '@tanstack/react-query'
+import { userAccountSchema } from '@/api/schemas/administration'
 import { Breadcrumb } from '@/components/ui/breadcrumb'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { readAuthSession } from '@/features/auth/auth-session'
-import { findAccountById } from '@/features/auth/role-access'
+import { grantedRoles } from '@/features/auth/role-access'
+import { api } from '@/lib/api-client'
 import { useDataGaps, useObligations, useSubmissions } from '../api'
 import { ObligationActions } from '../components/obligation-actions'
 import { WorkflowStatusBadge } from '../components/workflow-status'
@@ -28,23 +31,30 @@ const FETCH_ALL = { pageSize: 100 }
  */
 export function InstitutionDashboardPage() {
   const session = readAuthSession()
-  const account = session ? findAccountById(session.user.id) : undefined
+  const { data: account } = useQuery({
+    queryKey: ['users', 'me'],
+    queryFn: () => api.get('/users/me', userAccountSchema),
+    enabled: !!session,
+  })
   const institution = account?.institution ?? null
+  const canReview = !!session && grantedRoles(session.user).some((role) =>
+    role === 'data-reviewer' || role === 'validator',
+  )
 
   const obligations = useObligations(FETCH_ALL)
   const submissions = useSubmissions(FETCH_ALL)
   const gaps = useDataGaps(FETCH_ALL)
 
   const myObligations = (obligations.data?.items ?? [])
-    .filter((row) => !institution || row.institution === institution)
+    .filter((row) => !!institution && row.institution === institution)
     .sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime())
 
   const mySubmissions = (submissions.data?.items ?? [])
-    .filter((row) => !institution || row.institution === institution)
+    .filter((row) => !!institution && row.institution === institution)
     .sort((a, b) => new Date(b.submittedAt ?? 0).getTime() - new Date(a.submittedAt ?? 0).getTime())
     .slice(0, 5)
 
-  const myGaps = (gaps.data?.items ?? []).filter((row) => !institution || row.institution === institution)
+  const myGaps = (gaps.data?.items ?? []).filter((row) => !!institution && row.institution === institution)
 
   const dueOrOverdue = myObligations.filter((row) => row.status.code === 'due' || row.status.code === 'overdue')
   const nextObligation = dueOrOverdue[0] ?? myObligations[0] ?? null
@@ -61,6 +71,11 @@ export function InstitutionDashboardPage() {
             ? `Signed in as ${account.name}. Obligations, recent submissions and data gaps for ${institution}.`
             : 'Sign in as an institutional data provider to see obligations, submissions and data gaps scoped to your institution.'}
         </p>
+        {canReview && (
+          <Link to="/data-submissions/validation" className="mt-2 inline-block text-sm font-medium text-link underline">
+            Open validation queue
+          </Link>
+        )}
       </div>
 
       {nextObligation && (

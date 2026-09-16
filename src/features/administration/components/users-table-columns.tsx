@@ -30,9 +30,9 @@ export const USERS_TABLE_COLUMNS: readonly Column<UserAccount>[] = [
   {
     id: 'role',
     header: 'System role',
-    sortValue: (user) => SYSTEM_ROLE_LABELS[user.role],
+    sortValue: (user) => (user.roles?.length ? user.roles : [user.role]).map((role) => SYSTEM_ROLE_LABELS[role]).join(', '),
     cell: (user) => (
-      <span className="whitespace-nowrap">{SYSTEM_ROLE_LABELS[user.role]}</span>
+      <span>{(user.roles?.length ? user.roles : [user.role]).map((role) => SYSTEM_ROLE_LABELS[role]).join(', ')}</span>
     ),
   },
   {

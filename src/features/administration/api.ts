@@ -1,8 +1,10 @@
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   administrationFilterOptionsSchema,
   administrationOverviewSchema,
   inviteUserResponseSchema,
+  securitySettingsSchema,
+  userAccountSchema,
   type InviteUserRequest,
   type AdministrationQuery,
 } from '@/api/schemas/administration'
@@ -73,4 +75,26 @@ export function useAdministration(
 
 export function inviteUser(input: InviteUserRequest) {
   return api.post('/administration/users/invite', input, inviteUserResponseSchema)
+}
+
+export function updateUserRoles(userId: string, roles: readonly string[]) {
+  return api.patch(`/administration/users/${encodeURIComponent(userId)}/roles`, { roles }, userAccountSchema)
+}
+
+export function useSecuritySettings() {
+  return useQuery({
+    queryKey: [...administrationKeys.all, 'security'],
+    queryFn: () => api.get('/administration/security', securitySettingsSchema),
+  })
+}
+
+export function useUpdateSecuritySettings() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (allowSelfReview: boolean) =>
+      api.put('/administration/security', { allowSelfReview }, securitySettingsSchema),
+    onSuccess: (settings) => {
+      queryClient.setQueryData([...administrationKeys.all, 'security'], settings)
+    },
+  })
 }

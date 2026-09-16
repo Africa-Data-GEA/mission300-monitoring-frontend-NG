@@ -31,6 +31,37 @@ export function canRoleReachModule(roleSlug: string, moduleKey: string): boolean
   return allowed === 'all' || allowed.includes(moduleKey)
 }
 
+export function grantedRoles(user: { role: string; roles?: readonly string[] }): readonly string[] {
+  return user.roles?.length ? user.roles : [user.role]
+}
+
+export function canUserReachModule(user: { role: string; roles?: readonly string[] }, moduleKey: string): boolean {
+  return grantedRoles(user).some((role) => canRoleReachModule(role, moduleKey))
+}
+
+export function landingPathForRole(roleSlug: string): string {
+  const destinations = [
+    ['executive-overview', '/dashboard'],
+    ['data-submissions', '/data-submissions'],
+    ['kpi-directory', '/kpis'],
+    ['reports', '/reports'],
+    ['programs', '/programs'],
+  ] as const
+  return destinations.find(([moduleKey]) => canRoleReachModule(roleSlug, moduleKey))?.[1]
+    ?? '/access-denied'
+}
+
+export function landingPathForUser(user: { role: string; roles?: readonly string[] }): string {
+  const destinations = [
+    ['executive-overview', '/dashboard'],
+    ['data-submissions', '/data-submissions'],
+    ['kpi-directory', '/kpis'],
+    ['reports', '/reports'],
+    ['programs', '/programs'],
+  ] as const
+  return destinations.find(([key]) => canUserReachModule(user, key))?.[1] ?? '/access-denied'
+}
+
 export function getRoleLabel(roleSlug: string): string {
   return administrationOverview.roles.find((entry) => entry.role === roleSlug)?.label ?? roleSlug
 }

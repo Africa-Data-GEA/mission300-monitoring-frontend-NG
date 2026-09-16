@@ -1,7 +1,7 @@
 import { Pencil } from 'lucide-react'
 import { useState } from 'react'
 import { readAuthSession } from '@/features/auth/auth-session'
-import { canRoleReachModule } from '@/features/auth/role-access'
+import { canUserReachModule } from '@/features/auth/role-access'
 import { useKpiProfile } from '@/features/kpi-explorer/api'
 import { KpiMetadataEditDialog } from '@/features/kpi-explorer/components/kpi-profile/kpi-metadata-edit-dialog'
 
@@ -16,7 +16,7 @@ import { KpiMetadataEditDialog } from '@/features/kpi-explorer/components/kpi-pr
 export function PillarKpiEditButton({ kpiId, name }: { kpiId: string; name: string }) {
   const [open, setOpen] = useState(false)
   const session = readAuthSession()
-  const canEdit = !session || canRoleReachModule(session.user.role, 'kpi-metadata')
+  const canEdit = !!session && canUserReachModule(session.user, 'kpi-metadata')
   const { data: profile } = useKpiProfile(open ? kpiId : null)
 
   if (!canEdit) return null

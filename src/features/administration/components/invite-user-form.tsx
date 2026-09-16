@@ -135,24 +135,23 @@ export function InviteUserForm({
 
           <FormField
             control={form.control}
-            name="role"
+            name="roles"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>System role</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <FormControl>
-                    <SelectTrigger className="h-11">
-                      <SelectValue />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
+                <FormLabel>Roles this user can perform</FormLabel>
+                <FormControl>
+                  <fieldset className="space-y-2 rounded-control border border-border-strong p-3" aria-label="Roles this user can perform">
                     {Object.entries(SYSTEM_ROLE_LABELS).map(([value, label]) => (
-                      <SelectItem key={value} value={value}>
+                      <label key={value} className="flex items-center gap-2 text-sm text-text-default">
+                        <input type="checkbox" checked={field.value.includes(value as InviteUserRequest['roles'][number])}
+                          onChange={(event) => field.onChange(event.target.checked
+                            ? [...field.value, value]
+                            : field.value.filter((role) => role !== value))} />
                         {label}
-                      </SelectItem>
+                      </label>
                     ))}
-                  </SelectContent>
-                </Select>
+                  </fieldset>
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}

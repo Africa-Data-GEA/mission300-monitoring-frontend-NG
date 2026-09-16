@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { Outlet, useMatches } from 'react-router'
+import { Outlet, useMatches, useNavigate } from 'react-router'
+import { AUTH_SESSION_CHANGED, readAuthSession } from '@/features/auth/auth-session'
 import { GlobalFiltersProvider } from '@/app/global-filters'
 import { prefetchRouteChunks } from '@/app/route-chunks'
 import { GlobalFilterBar } from './global-filter-bar'
@@ -14,6 +15,7 @@ import { Topbar } from './topbar'
  * phone rather than being hidden with no alternative.
  */
 export function AppShell() {
+  const navigate = useNavigate()
   const [isNavOpen, setNavOpen] = useState(false)
   const [filtersOpen, setFiltersOpen] = useState(false)
 
@@ -25,6 +27,14 @@ export function AppShell() {
   useEffect(() => {
     prefetchRouteChunks()
   }, [])
+
+  useEffect(() => {
+    const handleSessionChange = () => {
+      if (!readAuthSession()) navigate('/account/login', { replace: true })
+    }
+    window.addEventListener(AUTH_SESSION_CHANGED, handleSessionChange)
+    return () => window.removeEventListener(AUTH_SESSION_CHANGED, handleSessionChange)
+  }, [navigate])
 
   /*
    * A route opts out of the application-wide filter bar via
