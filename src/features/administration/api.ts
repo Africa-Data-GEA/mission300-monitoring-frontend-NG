@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   administrationFilterOptionsSchema,
   administrationOverviewSchema,
+  institutionsListSchema,
   inviteUserResponseSchema,
   securitySettingsSchema,
   userAccountSchema,
@@ -9,6 +10,17 @@ import {
   type AdministrationQuery,
 } from '@/api/schemas/administration'
 import { api } from '@/lib/api-client'
+
+/** Real institutions to offer in the invite form's picker — see
+ * institutionOptionSchema's own comment for why this replaced a hardcoded
+ * name list. */
+export function useInstitutionOptions() {
+  return useQuery({
+    queryKey: ['institutions', 'options'],
+    queryFn: () => api.get('/institutions', institutionsListSchema),
+    staleTime: 5 * 60 * 1000,
+  })
+}
 
 export const administrationKeys = {
   all: ['administration'] as const,

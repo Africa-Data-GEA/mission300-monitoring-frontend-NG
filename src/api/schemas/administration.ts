@@ -132,6 +132,25 @@ export const userAccountSchema = z.object({
   createdAt: z.iso.datetime(),
 })
 
+/**
+ * A real institution the invite form can offer, from GET /institutions —
+ * not the disconnected hardcoded name list this form used to render.
+ * Submitting `name` still matches inviteUserRequestSchema.institution
+ * (free text, matched case-insensitively server-side) exactly as before,
+ * but the value now always comes from a real row, so it can no longer
+ * create an orphan institution the moment someone types a shorthand the
+ * backend doesn't already have on file (e.g. "NERC" vs the stored
+ * "Nigerian Electricity Regulatory Commission (NERC)").
+ */
+export const institutionOptionSchema = z.object({
+  id: z.string().min(1),
+  name: z.string().min(1),
+})
+
+export const institutionsListSchema = z.array(institutionOptionSchema)
+
+export type InstitutionOption = z.infer<typeof institutionOptionSchema>
+
 export const inviteUserRequestSchema = z.object({
   name: z.string().trim().min(2, 'Enter the user name'),
   email: z.email('Enter a valid email address'),

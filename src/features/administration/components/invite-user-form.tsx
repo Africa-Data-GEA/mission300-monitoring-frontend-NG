@@ -3,6 +3,7 @@ import type { UseFormReturn } from 'react-hook-form'
 import {
   SCOPE_LEVEL_LABELS,
   SYSTEM_ROLE_LABELS,
+  type InstitutionOption,
   type InviteUserRequest,
 } from '@/api/schemas/administration'
 import { Button } from '@/components/ui/button'
@@ -22,18 +23,6 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 
-/** Institutions offered in the invite form. Kept local — this list is small
- * and specific to onboarding, unlike the full institution filter options. */
-const INSTITUTIONS = [
-  'EMRC',
-  'Federal Ministry of Power',
-  'Federal Ministry of Finance',
-  'NERC',
-  'Rural Electrification Agency',
-  'Transmission Company of Nigeria',
-  'Nigerian Independent System Operator',
-]
-
 const INPUT_CLASS =
   'h-11 w-full rounded-control border border-border-strong bg-surface px-3.5 text-base text-text-default placeholder:text-text-subtle'
 
@@ -42,10 +31,14 @@ export function InviteUserForm({
   form,
   onSubmit,
   serverError,
+  institutions,
+  institutionsLoading,
 }: {
   form: UseFormReturn<InviteUserRequest>
   onSubmit: () => void
   serverError: string
+  institutions: readonly InstitutionOption[]
+  institutionsLoading: boolean
 }) {
   return (
     <Form {...form}>
@@ -99,13 +92,15 @@ export function InviteUserForm({
                 <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger className="h-11">
-                      <SelectValue placeholder="Select institution" />
+                      <SelectValue
+                        placeholder={institutionsLoading ? 'Loading institutions…' : 'Select institution'}
+                      />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {INSTITUTIONS.map((item) => (
-                      <SelectItem key={item} value={item}>
-                        {item}
+                    {institutions.map((item) => (
+                      <SelectItem key={item.id} value={item.name}>
+                        {item.name}
                       </SelectItem>
                     ))}
                   </SelectContent>

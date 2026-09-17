@@ -1,4 +1,5 @@
 import { SideDialog } from '@/components/ui/side-dialog'
+import { useInstitutionOptions } from '../api'
 import { useInviteUser } from '../use-invite-user'
 import { InviteUserForm } from './invite-user-form'
 import { InviteUserSuccess } from './invite-user-success'
@@ -14,6 +15,7 @@ export function InviteUserDialog({
   open: boolean
 }) {
   const invitation = useInviteUser(onInvited)
+  const institutionOptions = useInstitutionOptions()
 
   return (
     <SideDialog
@@ -29,6 +31,8 @@ export function InviteUserDialog({
           form={invitation.form}
           onSubmit={invitation.submit}
           serverError={invitation.serverError}
+          institutions={institutionOptions.data ?? []}
+          institutionsLoading={institutionOptions.isLoading}
         />
       )}
     </SideDialog>
