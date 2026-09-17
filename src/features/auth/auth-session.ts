@@ -7,10 +7,28 @@ import {
 
 const AUTH_SESSION_KEY = 'm300-auth'
 const PENDING_ACCOUNT_KEY = 'm300-pending-account'
+export const AUTH_SESSION_CHANGED = 'm300-auth-session-changed'
+
+function notifySessionChanged() {
+  window.dispatchEvent(new Event(AUTH_SESSION_CHANGED))
+}
+
+function tokenExpiry(accessToken: string): number | null {
+  const payload = accessToken.split('.')[1]
+  if (!payload) return null
+  try {
+    const decoded = JSON.parse(atob(payload.replace(/-/g, '+').replace(/_/g, '/'))) as unknown
+    return typeof decoded === 'object' && decoded !== null && 'exp' in decoded &&
+      typeof decoded.exp === 'number' ? decoded.exp * 1000 : null
+  } catch {
+    return null
+  }
+}
 
 export function saveAuthSession(session: LoginResponse) {
   sessionStorage.setItem(AUTH_SESSION_KEY, JSON.stringify(session))
   sessionStorage.removeItem(PENDING_ACCOUNT_KEY)
+  notifySessionChanged()
 }
 
 /**
@@ -25,15 +43,22 @@ export function readAuthSession(): LoginResponse | null {
 
   try {
     const result = loginResponseSchema.safeParse(JSON.parse(stored))
-    if (!result.success) return null
+    if (!result.success) {
+      clearAuthSession()
+      return null
+    }
 
-    if (result.data.expiresAt && new Date(result.data.expiresAt).getTime() <= Date.now()) {
+    const expiry = result.data.expiresAt
+      ? new Date(result.data.expiresAt).getTime()
+      : tokenExpiry(result.data.accessToken)
+    if (expiry !== null && expiry <= Date.now()) {
       clearAuthSession()
       return null
     }
 
     return result.data
   } catch {
+    clearAuthSession()
     return null
   }
 }
@@ -61,4 +86,11 @@ export function clearPendingAccount() {
 export function clearAuthSession() {
   sessionStorage.removeItem(AUTH_SESSION_KEY)
   sessionStorage.removeItem(PENDING_ACCOUNT_KEY)
+  notifySessionChanged()
+}
+
+export function updateAuthUserName(name: string) {
+  const session = readAuthSession()
+  if (!session) return
+  saveAuthSession({ ...session, user: { ...session.user, name } })
 }

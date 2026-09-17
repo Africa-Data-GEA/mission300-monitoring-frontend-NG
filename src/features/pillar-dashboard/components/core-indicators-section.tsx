@@ -421,7 +421,19 @@ function GaugeCard({ indicator, showDiscoBreakdown }: { indicator: PillarCoreInd
 function TargetBarCard({ indicator, showDiscoBreakdown }: { indicator: PillarCoreIndicator; showDiscoBreakdown: boolean }) {
   const current = indicator.current ?? 0
   const target = indicator.target ?? 0
-  const percent = target > 0 ? Math.min(100, Math.round((current / target) * 1000) / 10) : null
+  // Mirrors HeadlineCard's own percentToTarget fix: for a lower-is-better
+  // indicator, current/target is not "progress" (a value already below a
+  // falling target reads as >100%) — progress is distance travelled down
+  // from the baseline instead.
+  const percent = (() => {
+    if (indicator.target === null || indicator.current === null) return null
+    if (indicator.direction === 'lower-is-better') {
+      if (indicator.baseline === null || indicator.baseline === indicator.target) return null
+      const travelled = (indicator.baseline - indicator.current) / (indicator.baseline - indicator.target)
+      return Math.max(0, Math.min(100, Math.round(travelled * 1000) / 10))
+    }
+    return target > 0 ? Math.min(100, Math.round((current / target) * 1000) / 10) : null
+  })()
   const trend = deriveTrend(indicator)
   const axisMax = Math.max(current, target) * 1.2 || 1
 

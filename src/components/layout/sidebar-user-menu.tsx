@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   BookOpen,
   ChevronUp,
@@ -15,8 +15,10 @@ import { dashboardToast } from '@/lib/dashboard-toast'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { SideDialog } from '@/components/ui/side-dialog'
 import { ADMIN_MENU_ITEMS } from '@/config/navigation'
-import { clearAuthSession, readAuthSession } from '@/features/auth/auth-session'
-import { canRoleReachModule, findAccountById, getRoleLabel } from '@/features/auth/role-access'
+import { clearAuthSession, readAuthSession, updateAuthUserName } from '@/features/auth/auth-session'
+import { userAccountSchema } from '@/api/schemas/administration'
+import { api } from '@/lib/api-client'
+import { canUserReachModule, findAccountById, getRoleLabel, grantedRoles } from '@/features/auth/role-access'
 
 interface SidebarUser {
   name: string
@@ -41,7 +43,7 @@ function deriveSidebarUser(): SidebarUser {
   return {
     name: session.user.name,
     email: session.user.email,
-    role: getRoleLabel(session.user.role),
+    role: grantedRoles(session.user).map(getRoleLabel).join(', '),
     institution: account?.institution ?? FALLBACK_USER.institution,
   }
 }
@@ -57,18 +59,38 @@ export function SidebarUserMenu() {
   const [helpOpen, setHelpOpen] = useState(false)
   const [guideOpen, setGuideOpen] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
+  const [profileError, setProfileError] = useState('')
+
+  useEffect(() => {
+    let active = true
+    void api.get('/users/me', userAccountSchema).then((profile) => {
+      if (!active) return
+      const updated = {
+        name: profile.name,
+        email: profile.email,
+        role: (profile.roles?.length ? profile.roles : [profile.role]).map(getRoleLabel).join(', '),
+        institution: profile.institution,
+      }
+      setUser(updated)
+      setDraft(updated)
+    }).catch(() => {
+      // Profile may not be available while connecting a partial backend.
+    })
+    return () => { active = false }
+  }, [])
 
   // Same role gate the sidebar itself used to apply to these as nav items —
   // see the comment on ADMIN_MENU_ITEMS in config/navigation.ts. No session
   // (e.g. a dev workflow that skipped /account/login) shows both rather than
   // neither, matching Sidebar's own fallback.
-  const roleSlug = readAuthSession()?.user.role
+  const session = readAuthSession()
   const adminMenuItems = ADMIN_MENU_ITEMS.filter(
-    (item) => !roleSlug || canRoleReachModule(roleSlug, item.moduleKey),
+    (item) => !!session && canUserReachModule(session.user, item.moduleKey),
   )
 
   function openProfile() {
     setDraft(user)
+    setProfileError('')
     setProfileOpen(true)
   }
 
@@ -171,14 +193,26 @@ export function SidebarUserMenu() {
           </div>
 
           <form
-            onSubmit={(event) => {
+            onSubmit={async (event) => {
               event.preventDefault()
+              setProfileError('')
               setIsSaving(true)
-              window.setTimeout(() => {
-                setUser(draft)
+              try {
+                const profile = await api.patch('/users/me', { name: draft.name.trim() }, userAccountSchema)
+                const updated = {
+                  name: profile.name,
+                  email: profile.email,
+                  role: (profile.roles?.length ? profile.roles : [profile.role]).map(getRoleLabel).join(', '),
+                  institution: profile.institution,
+                }
+                setUser(updated)
+                updateAuthUserName(profile.name)
                 setIsSaving(false)
                 setProfileOpen(false)
-              }, 600)
+              } catch (error) {
+                setProfileError(error instanceof Error ? error.message : 'Could not save your profile.')
+                setIsSaving(false)
+              }
             }}
             className="grid gap-4 sm:grid-cols-2"
           >
@@ -189,6 +223,7 @@ export function SidebarUserMenu() {
                 onChange={(event) => setDraft({ ...draft, name: event.target.value })}
                 className={inputClassName}
                 required
+                minLength={2}
               />
             </label>
             <label className="text-sm font-medium text-text-default">
@@ -196,9 +231,8 @@ export function SidebarUserMenu() {
               <input
                 type="email"
                 value={draft.email}
-                onChange={(event) => setDraft({ ...draft, email: event.target.value })}
-                className={inputClassName}
-                required
+                readOnly
+                className={`${inputClassName} bg-surface-sunken`}
               />
             </label>
             <label className="text-sm font-medium text-text-default">
@@ -209,10 +243,11 @@ export function SidebarUserMenu() {
               Institution
               <input
                 value={draft.institution}
-                onChange={(event) => setDraft({ ...draft, institution: event.target.value })}
-                className={inputClassName}
+                readOnly
+                className={`${inputClassName} bg-surface-sunken`}
               />
             </label>
+            {profileError && <p role="alert" className="text-sm text-status-at-risk sm:col-span-2">{profileError}</p>}
             <div className="mt-2 flex justify-end gap-2 border-t border-border-default pt-4 sm:col-span-2">
               <Button
                 type="button"

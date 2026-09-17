@@ -54,6 +54,7 @@ export const loginResponseSchema = z.object({
     name: z.string().min(1),
     email: z.email(),
     role: z.string().min(1).transform(normalizeRole),
+    roles: z.array(z.string().min(1).transform(normalizeRole)).optional(),
   }),
 })
 
@@ -62,6 +63,15 @@ export const forgotPasswordRequestSchema = z.object({
 })
 
 export const forgotPasswordResponseSchema = z.object({
+  message: z.string().min(1),
+})
+
+export const setPasswordRequestSchema = z.object({
+  token: z.string().min(1),
+  newPassword: z.string().min(8, 'Use at least 8 characters'),
+})
+
+export const setPasswordResponseSchema = z.object({
   message: z.string().min(1),
 })
 

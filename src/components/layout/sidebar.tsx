@@ -1,7 +1,7 @@
 import { Link } from 'react-router'
 import { NAVIGATION } from '@/config/navigation'
 import { readAuthSession } from '@/features/auth/auth-session'
-import { canRoleReachModule } from '@/features/auth/role-access'
+import { canUserReachModule } from '@/features/auth/role-access'
 import { useBrandConfig } from '@/features/branding/api'
 import { cn } from '@/lib/utils'
 import { NavDropdownItem } from './nav-dropdown-item'
@@ -29,7 +29,6 @@ export function Sidebar({
   onNavigate?: () => void
 }) {
   const session = readAuthSession()
-  const roleSlug = session?.user.role
   const { data: brand } = useBrandConfig()
 
   // No session (e.g. a dev workflow that never went through /account/login)
@@ -38,7 +37,7 @@ export function Sidebar({
   const visibleGroups = NAVIGATION.map((group) => ({
     ...group,
     items: group.items.filter(
-      (item) => !roleSlug || canRoleReachModule(roleSlug, item.moduleKey),
+      (item) => !!session && canUserReachModule(session.user, item.moduleKey),
     ),
   })).filter((group) => group.items.length > 0)
 

@@ -1,8 +1,8 @@
 import { render, screen } from '@testing-library/react'
 import { createMemoryRouter, RouterProvider } from 'react-router'
 import { afterEach, describe, expect, it } from 'vitest'
-import { RequireAuth } from '@/features/auth/require-auth'
-import { saveAuthSession } from '@/features/auth/auth-session'
+import { RequireAuth, RequireModule } from '@/features/auth/require-auth'
+import { readAuthSession, saveAuthSession } from '@/features/auth/auth-session'
 
 function renderProtectedRoute() {
   const router = createMemoryRouter(
@@ -67,5 +67,45 @@ describe('authentication integration', () => {
 
     expect(await screen.findByRole('heading', { name: 'Sign in' })).toBeInTheDocument()
     expect(sessionStorage.getItem('m300-auth')).toBeNull()
+  })
+
+  it('rejects a JWT whose exp claim has passed even without expiresAt', () => {
+    const payload = btoa(JSON.stringify({ exp: 1 }))
+    saveAuthSession({
+      accessToken: `header.${payload}.signature`,
+      user: { id: 'user-1', name: 'Test User', email: 'test@example.com', role: 'system-administrator' },
+    })
+    expect(readAuthSession()).toBeNull()
+    expect(sessionStorage.getItem('m300-auth')).toBeNull()
+  })
+
+  it('blocks a direct module URL outside the signed-in role', async () => {
+    saveAuthSession({
+      accessToken: 'valid-token',
+      user: { id: 'user-1', name: 'Test User', email: 'test@example.com', role: 'read-only-user' },
+    })
+    const router = createMemoryRouter([
+      { path: '/reports', element: <RequireModule moduleKey="reports"><h1>Private reports</h1></RequireModule> },
+      { path: '/access-denied', element: <h1>Access denied</h1> },
+    ], { initialEntries: ['/reports'] })
+    render(<RouterProvider router={router} />)
+    expect(await screen.findByRole('heading', { name: 'Access denied' })).toBeInTheDocument()
+    expect(router.state.location.pathname).toBe('/access-denied')
+  })
+
+  it('allows a module granted by a secondary role', () => {
+    saveAuthSession({
+      accessToken: 'valid-token',
+      user: {
+        id: 'user-1', name: 'Test User', email: 'test@example.com',
+        role: 'institutional-data-provider', roles: ['institutional-data-provider', 'oversight-user'],
+      },
+    })
+    const router = createMemoryRouter([
+      { path: '/reports', element: <RequireModule moduleKey="reports"><h1>Reports</h1></RequireModule> },
+      { path: '/access-denied', element: <h1>Access denied</h1> },
+    ], { initialEntries: ['/reports'] })
+    render(<RouterProvider router={router} />)
+    expect(screen.getByRole('heading', { name: 'Reports' })).toBeInTheDocument()
   })
 })

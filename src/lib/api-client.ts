@@ -68,10 +68,13 @@ export class ContractError extends Error {
 type RequestOptions = Omit<RequestInit, 'body'> & { body?: unknown }
 
 async function authenticatedDownload(path: string): Promise<Blob> {
-  // API-provided links include `/api`, while BASE_URL already points there.
-  // Static mock assets remain ordinary same-origin downloads.
-  const isApiDownload = path.startsWith('/api/')
-  const requestPath = isApiDownload ? path.slice('/api'.length) : path
+  // Mock-mode API links include `/api` (BASE_URL already points there);
+  // real backend mode has no such prefix on its routes, so every download
+  // is an API download there regardless of the path's shape. Only in mock/
+  // hybrid mode does an un-prefixed path mean a static mock asset instead.
+  const hasApiPrefix = path.startsWith('/api/')
+  const isApiDownload = !environment.usesBrowserMocks || hasApiPrefix
+  const requestPath = hasApiPrefix ? path.slice('/api'.length) : path
   const accessToken = isApiDownload ? readAuthSession()?.accessToken : null
   const response = isApiDownload
     ? environment.usesLocalRouter
@@ -80,6 +83,8 @@ async function authenticatedDownload(path: string): Promise<Blob> {
         })
       : await fetch(`${BASE_URL}${requestPath}`, {
           headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
+          cache: 'no-store',
+          referrerPolicy: 'no-referrer',
         })
     : await fetch(requestPath)
 
@@ -130,6 +135,8 @@ async function request<T>(
         ...rest,
         method,
         headers: resolvedHeaders,
+        cache: accessToken ? 'no-store' : rest.cache,
+        referrerPolicy: 'no-referrer',
         ...(resolvedBody === undefined ? {} : { body: resolvedBody }),
       })
 

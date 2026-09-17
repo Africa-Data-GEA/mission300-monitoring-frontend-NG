@@ -9,7 +9,7 @@ import { administrationOverview, administrationUsers } from '@/mocks/data/admini
  */
 const ROLE_MODULE_KEYS: Record<string, readonly string[] | 'all'> = {
   'system-administrator': 'all',
-  'institutional-data-provider': ['data-submissions', 'programs'],
+  'institutional-data-provider': ['institution-overview', 'data-submissions', 'programs'],
   'data-reviewer': ['data-submissions', 'kpi-directory'],
   validator: ['data-submissions', 'kpi-directory'],
   'dashboard-manager': [
@@ -29,6 +29,39 @@ export function canRoleReachModule(roleSlug: string, moduleKey: string): boolean
   const allowed = ROLE_MODULE_KEYS[roleSlug]
   if (!allowed) return false
   return allowed === 'all' || allowed.includes(moduleKey)
+}
+
+export function grantedRoles(user: { role: string; roles?: readonly string[] }): readonly string[] {
+  return user.roles?.length ? user.roles : [user.role]
+}
+
+export function canUserReachModule(user: { role: string; roles?: readonly string[] }, moduleKey: string): boolean {
+  return grantedRoles(user).some((role) => canRoleReachModule(role, moduleKey))
+}
+
+export function landingPathForRole(roleSlug: string): string {
+  const destinations = [
+    ['executive-overview', '/dashboard'],
+    ['institution-overview', '/overview'],
+    ['data-submissions', '/data-submissions'],
+    ['kpi-directory', '/kpis'],
+    ['reports', '/reports'],
+    ['programs', '/programs'],
+  ] as const
+  return destinations.find(([moduleKey]) => canRoleReachModule(roleSlug, moduleKey))?.[1]
+    ?? '/access-denied'
+}
+
+export function landingPathForUser(user: { role: string; roles?: readonly string[] }): string {
+  const destinations = [
+    ['executive-overview', '/dashboard'],
+    ['institution-overview', '/overview'],
+    ['data-submissions', '/data-submissions'],
+    ['kpi-directory', '/kpis'],
+    ['reports', '/reports'],
+    ['programs', '/programs'],
+  ] as const
+  return destinations.find(([key]) => canUserReachModule(user, key))?.[1] ?? '/access-denied'
 }
 
 export function getRoleLabel(roleSlug: string): string {

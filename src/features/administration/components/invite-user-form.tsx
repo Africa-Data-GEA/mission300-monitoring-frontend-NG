@@ -3,6 +3,7 @@ import type { UseFormReturn } from 'react-hook-form'
 import {
   SCOPE_LEVEL_LABELS,
   SYSTEM_ROLE_LABELS,
+  type InstitutionOption,
   type InviteUserRequest,
 } from '@/api/schemas/administration'
 import { Button } from '@/components/ui/button'
@@ -22,18 +23,6 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 
-/** Institutions offered in the invite form. Kept local — this list is small
- * and specific to onboarding, unlike the full institution filter options. */
-const INSTITUTIONS = [
-  'EMRC',
-  'Federal Ministry of Power',
-  'Federal Ministry of Finance',
-  'NERC',
-  'Rural Electrification Agency',
-  'Transmission Company of Nigeria',
-  'Nigerian Independent System Operator',
-]
-
 const INPUT_CLASS =
   'h-11 w-full rounded-control border border-border-strong bg-surface px-3.5 text-base text-text-default placeholder:text-text-subtle'
 
@@ -42,10 +31,14 @@ export function InviteUserForm({
   form,
   onSubmit,
   serverError,
+  institutions,
+  institutionsLoading,
 }: {
   form: UseFormReturn<InviteUserRequest>
   onSubmit: () => void
   serverError: string
+  institutions: readonly InstitutionOption[]
+  institutionsLoading: boolean
 }) {
   return (
     <Form {...form}>
@@ -99,13 +92,15 @@ export function InviteUserForm({
                 <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger className="h-11">
-                      <SelectValue placeholder="Select institution" />
+                      <SelectValue
+                        placeholder={institutionsLoading ? 'Loading institutions…' : 'Select institution'}
+                      />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {INSTITUTIONS.map((item) => (
-                      <SelectItem key={item} value={item}>
-                        {item}
+                    {institutions.map((item) => (
+                      <SelectItem key={item.id} value={item.name}>
+                        {item.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -135,24 +130,23 @@ export function InviteUserForm({
 
           <FormField
             control={form.control}
-            name="role"
+            name="roles"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>System role</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <FormControl>
-                    <SelectTrigger className="h-11">
-                      <SelectValue />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
+                <FormLabel>Roles this user can perform</FormLabel>
+                <FormControl>
+                  <fieldset className="space-y-2 rounded-control border border-border-strong p-3" aria-label="Roles this user can perform">
                     {Object.entries(SYSTEM_ROLE_LABELS).map(([value, label]) => (
-                      <SelectItem key={value} value={value}>
+                      <label key={value} className="flex items-center gap-2 text-sm text-text-default">
+                        <input type="checkbox" checked={field.value.includes(value as InviteUserRequest['roles'][number])}
+                          onChange={(event) => field.onChange(event.target.checked
+                            ? [...field.value, value]
+                            : field.value.filter((role) => role !== value))} />
                         {label}
-                      </SelectItem>
+                      </label>
                     ))}
-                  </SelectContent>
-                </Select>
+                  </fieldset>
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}

@@ -2,6 +2,7 @@ import {
   forgotPasswordResponseSchema,
   identifiedAccountSchema,
   loginResponseSchema,
+  setPasswordResponseSchema,
   type IdentifiedAccount,
   type LoginResponse,
 } from '@/api/schemas/auth'
@@ -24,4 +25,8 @@ export function requestPasswordReset(email: string): Promise<{ message: string }
     { email },
     forgotPasswordResponseSchema,
   )
+}
+
+export function setAccountPassword(token: string, newPassword: string): Promise<{ message: string }> {
+  return api.post('/auth/set-password', { token, newPassword }, setPasswordResponseSchema)
 }

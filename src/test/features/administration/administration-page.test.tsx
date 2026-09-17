@@ -5,6 +5,16 @@ import { AdministrationPage } from '@/features/administration/administration-pag
 import { renderWithProviders } from '@/test/render'
 
 describe('AdministrationPage', () => {
+  it('lets an administrator change the self-review policy', async () => {
+    const user = userEvent.setup()
+    renderWithProviders(<AdministrationPage />, { route: '/administration' })
+    await screen.findByRole('heading', { name: 'User Access & Administration' })
+    await user.click(screen.getByRole('tab', { name: /Roles & permissions/ }))
+    const checkbox = await screen.findByRole('checkbox', { name: 'Allow users to review their own submissions' })
+    await user.click(checkbox)
+    expect(await screen.findByText('Review policy saved.')).toBeInTheDocument()
+  })
+
   it('renders the administration sections as tabs without summary cards', async () => {
     const user = userEvent.setup()
     renderWithProviders(<AdministrationPage />, { route: '/administration' })
@@ -16,11 +26,8 @@ describe('AdministrationPage', () => {
     ).toBeInTheDocument()
 
     expect(screen.queryByText('Active users')).not.toBeInTheDocument()
-    // 5, not 4: Users, Roles & permissions, Access scope, Audit log, and
-    // Customization — the last one shows because no session is set up in
-    // this test, and "no session" shows every section, same convention as
-    // the main Sidebar (see role-access.ts).
-    expect(screen.getAllByRole('tab')).toHaveLength(5)
+    // Customization is visible only with a real administrator session.
+    expect(screen.getAllByRole('tab')).toHaveLength(4)
     expect(screen.getByRole('tab', { name: /Users/ })).toHaveAttribute(
       'aria-selected',
       'true',
@@ -108,9 +115,23 @@ describe('AdministrationPage', () => {
     await user.click(within(dialog).getByRole('combobox', { name: 'Institution' }))
     await user.click(screen.getByRole('option', { name: 'EMRC' }))
     await user.type(within(dialog).getByLabelText('Designation'), 'Monitoring Officer')
+    await user.click(within(dialog).getByRole('checkbox', { name: 'Institutional Data Provider' }))
+    await user.click(within(dialog).getByRole('checkbox', { name: 'Validator' }))
     await user.click(screen.getByRole('button', { name: 'Send invitation' }))
 
     expect(await screen.findByRole('heading', { name: 'Invitation sent' })).toBeInTheDocument()
     expect(screen.getByText(/invitee@example.gov.ng/i)).toBeInTheDocument()
+  })
+
+  it('edits an existing user’s assigned roles', async () => {
+    const user = userEvent.setup()
+    renderWithProviders(<AdministrationPage />, { route: '/administration' })
+    await screen.findByRole('heading', { name: 'User Access & Administration' })
+    await user.click(screen.getAllByRole('button', { name: /^Actions for / })[0]!)
+    await user.click(screen.getByRole('menuitem', { name: 'Edit roles' }))
+    const dialog = screen.getByRole('dialog', { name: /^Edit roles/ })
+    await user.click(within(dialog).getByRole('checkbox', { name: 'Validator' }))
+    await user.click(within(dialog).getByRole('button', { name: 'Save roles' }))
+    await waitFor(() => expect(screen.queryByRole('dialog', { name: /^Edit roles/ })).not.toBeInTheDocument())
   })
 })

@@ -2,6 +2,7 @@ import type { RoleDefinition } from '@/api/schemas/administration'
 import { Card } from '@/components/ui/card'
 import { PermissionMatrix } from './permission-matrix'
 import { RoleCatalogue } from './role-catalogue'
+import { SecurityPolicyControl } from './security-policy-control'
 
 /**
  * Section C — Roles and permissions.
@@ -25,6 +26,7 @@ export function RolesAndPermissions({
 
       <PermissionMatrix roles={roles} onViewUsers={onViewUsers} />
       <RoleCatalogue roles={roles} />
+      <SecurityPolicyControl />
     </Card>
   )
 }

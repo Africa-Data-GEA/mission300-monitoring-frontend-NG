@@ -3,7 +3,7 @@ import { Card } from '@/components/ui/card'
 import { ErrorState } from '@/components/ui/error-state'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { readAuthSession } from '@/features/auth/auth-session'
-import { canRoleReachModule } from '@/features/auth/role-access'
+import { canUserReachModule } from '@/features/auth/role-access'
 import { useAdministrationPage } from './use-administration-page'
 import { AdministrationFilters } from './components/administration-filters'
 import { AdministrationSkeleton } from './components/administration-skeleton'
@@ -14,6 +14,7 @@ import { RolesAndPermissions } from './components/roles-matrix'
 import { ScopeTable } from './components/scope-table'
 import { TabCount } from './components/tab-count'
 import { UsersTable } from './components/users-table'
+import { EditUserRolesDialog } from './components/edit-user-roles-dialog'
 
 /**
  * User Access and Administration — an admin console, not a single flat page.
@@ -37,7 +38,7 @@ import { UsersTable } from './components/users-table'
 export function AdministrationPage() {
   const page = useAdministrationPage()
   const session = readAuthSession()
-  const canCustomize = !session || canRoleReachModule(session.user.role, 'branding')
+  const canCustomize = !!session && canUserReachModule(session.user, 'branding')
 
   if (page.isPending) return <AdministrationSkeleton />
 
@@ -125,6 +126,7 @@ export function AdministrationPage() {
                 onReviewAccess={page.reviewUserAccess}
                 onReviewAudit={page.reviewUserAudit}
                 onInviteUser={page.openInvite}
+                onEditRoles={page.openRoleEditor}
               />
             </TabsContent>
 
@@ -171,6 +173,14 @@ export function AdministrationPage() {
         onInvited={page.refreshAfterInvite}
         open={page.inviteOpen}
       />
+      {page.rolesUser && (
+        <EditUserRolesDialog
+          key={page.rolesUser.id}
+          user={page.rolesUser}
+          onClose={page.closeRoleEditor}
+          onSaved={page.refreshAfterRoleEdit}
+        />
+      )}
     </div>
   )
 }
