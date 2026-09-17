@@ -17,6 +17,12 @@ const DashboardPage = lazy(() =>
   })),
 )
 
+const InstitutionOverviewPage = lazy(() =>
+  routeChunks.institutionOverview().then((module) => ({
+    default: module.InstitutionOverviewPage,
+  })),
+)
+
 const PublicGatewayPage = lazy(() =>
   routeChunks.publicGateway().then((module) => ({
     default: module.PublicGatewayPage,
@@ -231,6 +237,11 @@ export const router = createBrowserRouter([
         path: 'dashboard',
         element: moduleRoute('executive-overview', <DashboardPage />),
         handle: { globalFilters: true } satisfies RouteHandle,
+      },
+      {
+        path: 'overview',
+        element: moduleRoute('institution-overview', <InstitutionOverviewPage />),
+        handle: { globalFilters: false } satisfies RouteHandle,
       },
       {
         path: 'kpis',

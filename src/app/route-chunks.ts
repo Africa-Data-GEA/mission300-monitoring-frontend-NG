@@ -16,6 +16,7 @@
 
 export const routeChunks = {
   dashboard: () => import('@/features/dashboard/dashboard-page'),
+  institutionOverview: () => import('@/features/institution-overview/institution-overview-page'),
   kpiExplorer: () => import('@/features/kpi-explorer/kpi-explorer-page'),
   pillarDashboard: () => import('@/features/pillar-dashboard/pillar-dashboard-page'),
   pillarIndex: () => import('@/features/pillar-dashboard/pillar-index-page'),
@@ -50,6 +51,7 @@ export const routeChunks = {
  * waits behind it.
  */
 const PREFETCH_ORDER: (keyof typeof routeChunks)[] = [
+  'institutionOverview',
   'kpiExplorer',
   'programs',
   'pillarDashboard',

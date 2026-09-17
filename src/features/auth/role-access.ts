@@ -9,7 +9,7 @@ import { administrationOverview, administrationUsers } from '@/mocks/data/admini
  */
 const ROLE_MODULE_KEYS: Record<string, readonly string[] | 'all'> = {
   'system-administrator': 'all',
-  'institutional-data-provider': ['data-submissions', 'programs'],
+  'institutional-data-provider': ['institution-overview', 'data-submissions', 'programs'],
   'data-reviewer': ['data-submissions', 'kpi-directory'],
   validator: ['data-submissions', 'kpi-directory'],
   'dashboard-manager': [
@@ -42,6 +42,7 @@ export function canUserReachModule(user: { role: string; roles?: readonly string
 export function landingPathForRole(roleSlug: string): string {
   const destinations = [
     ['executive-overview', '/dashboard'],
+    ['institution-overview', '/overview'],
     ['data-submissions', '/data-submissions'],
     ['kpi-directory', '/kpis'],
     ['reports', '/reports'],
@@ -54,6 +55,7 @@ export function landingPathForRole(roleSlug: string): string {
 export function landingPathForUser(user: { role: string; roles?: readonly string[] }): string {
   const destinations = [
     ['executive-overview', '/dashboard'],
+    ['institution-overview', '/overview'],
     ['data-submissions', '/data-submissions'],
     ['kpi-directory', '/kpis'],
     ['reports', '/reports'],

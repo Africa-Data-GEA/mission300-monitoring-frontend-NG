@@ -65,6 +65,7 @@ export const NAVIGATION: readonly NavGroup[] = [
     label: 'Monitoring & Analysis',
     items: [
       { label: 'Executive Overview', to: '/dashboard', icon: Home, ready: true, moduleKey: 'executive-overview' },
+      { label: 'Overview', to: '/overview', icon: Home, ready: true, moduleKey: 'institution-overview' },
       {
         label: 'Pillar dashboards',
         to: '/pillars',
