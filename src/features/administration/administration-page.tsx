@@ -15,6 +15,7 @@ import { ScopeTable } from './components/scope-table'
 import { TabCount } from './components/tab-count'
 import { UsersTable } from './components/users-table'
 import { EditUserRolesDialog } from './components/edit-user-roles-dialog'
+import { EditUserInstitutionDialog } from './components/edit-user-institution-dialog'
 
 /**
  * User Access and Administration — an admin console, not a single flat page.
@@ -127,6 +128,7 @@ export function AdministrationPage() {
                 onReviewAudit={page.reviewUserAudit}
                 onInviteUser={page.openInvite}
                 onEditRoles={page.openRoleEditor}
+                onEditInstitution={page.openInstitutionEditor}
               />
             </TabsContent>
 
@@ -179,6 +181,14 @@ export function AdministrationPage() {
           user={page.rolesUser}
           onClose={page.closeRoleEditor}
           onSaved={page.refreshAfterRoleEdit}
+        />
+      )}
+      {page.institutionUser && (
+        <EditUserInstitutionDialog
+          key={page.institutionUser.id}
+          user={page.institutionUser}
+          onClose={page.closeInstitutionEditor}
+          onSaved={page.refreshAfterInstitutionEdit}
         />
       )}
     </div>

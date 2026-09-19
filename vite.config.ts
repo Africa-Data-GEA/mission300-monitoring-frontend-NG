@@ -1,9 +1,46 @@
 import { fileURLToPath, URL } from 'node:url'
+import { createRequire } from 'node:module'
 import { loadEnv } from 'vite'
 import { defineConfig, type Plugin } from 'vitest/config'
 import react, { reactCompilerPreset } from '@vitejs/plugin-react'
 import babel from '@rolldown/plugin-babel'
-import tailwindcss from '@tailwindcss/vite'
+
+/**
+ * pnpm can occasionally leave an optional native package without its
+ * package.json on Windows. Tailwind then silently falls back to its WASI
+ * scanner, which currently finds no source candidates on Windows and emits
+ * only the CSS reset. Point Tailwind at the already-installed native binary
+ * while its plugin module initializes, but only when normal resolution fails.
+ */
+async function loadTailwindPlugin() {
+  const previousNativeLibraryPath = process.env.NAPI_RS_NATIVE_LIBRARY_PATH
+
+  try {
+    if (process.platform === 'win32' && process.arch === 'x64') {
+      const projectRequire = createRequire(import.meta.url)
+      const viteRequire = createRequire(projectRequire.resolve('@tailwindcss/vite'))
+      const oxideEntry = viteRequire.resolve('@tailwindcss/oxide')
+      const oxideRequire = createRequire(oxideEntry)
+
+      try {
+        oxideRequire.resolve('@tailwindcss/oxide-win32-x64-msvc')
+      } catch {
+        process.env.NAPI_RS_NATIVE_LIBRARY_PATH = oxideRequire.resolve(
+          '@tailwindcss/oxide-win32-x64-msvc/tailwindcss-oxide.win32-x64-msvc.node',
+        )
+      }
+    }
+
+    const { default: tailwindcss } = await import('@tailwindcss/vite')
+    return tailwindcss
+  } finally {
+    if (previousNativeLibraryPath === undefined) {
+      delete process.env.NAPI_RS_NATIVE_LIBRARY_PATH
+    } else {
+      process.env.NAPI_RS_NATIVE_LIBRARY_PATH = previousNativeLibraryPath
+    }
+  }
+}
 
 /**
  * The app has no real backend in development — every /api call is meant to
@@ -44,9 +81,10 @@ function apiFallbackPlugin(apiProxyEnabled = false): Plugin {
 }
 
 // https://vite.dev/config/
-export default defineConfig(({ mode }) => {
+export default defineConfig(async ({ mode }) => {
   const env = loadEnv(mode, '.', '')
   const proxyTarget = env.VITE_API_PROXY_TARGET
+  const tailwindcss = await loadTailwindPlugin()
 
   return {
     plugins: [

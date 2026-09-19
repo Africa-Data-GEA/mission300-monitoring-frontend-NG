@@ -1,6 +1,7 @@
 import type { z } from 'zod'
 import { environment } from '@/config/environment'
-import { clearAuthSession, readAuthSession } from '@/features/auth/auth-session'
+import { clearAuthSession, readAuthSession, updateAccessToken } from '@/features/auth/auth-session'
+import { refreshAccessToken } from '@/features/auth/refresh-token'
 import { dispatchLocalRequest } from '@/mocks/local-router'
 
 /**
@@ -67,7 +68,7 @@ export class ContractError extends Error {
 
 type RequestOptions = Omit<RequestInit, 'body'> & { body?: unknown }
 
-async function authenticatedDownload(path: string): Promise<Blob> {
+async function authenticatedDownload(path: string, retried = false): Promise<Blob> {
   // Mock-mode API links include `/api` (BASE_URL already points there);
   // real backend mode has no such prefix on its routes, so every download
   // is an API download there regardless of the path's shape. Only in mock/
@@ -85,6 +86,7 @@ async function authenticatedDownload(path: string): Promise<Blob> {
           headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
           cache: 'no-store',
           referrerPolicy: 'no-referrer',
+          credentials: 'include',
         })
     : await fetch(requestPath)
 
@@ -93,6 +95,14 @@ async function authenticatedDownload(path: string): Promise<Blob> {
   }
 
   if (!response.ok) {
+    if (response.status === 401 && isApiDownload && !retried) {
+      const refreshed = await refreshAccessToken()
+      if (refreshed) {
+        updateAccessToken(refreshed)
+        return authenticatedDownload(path, true)
+      }
+    }
+
     const contentType = response.headers.get('content-type') ?? ''
     const payload: unknown = contentType.includes('json')
       ? await response.json().catch(() => undefined)
@@ -115,10 +125,12 @@ async function request<T>(
   path: string,
   schema: z.ZodType<T> | undefined,
   options: RequestOptions = {},
+  retried = false,
 ): Promise<T> {
   const { body, headers, method = 'GET', ...rest } = options
   const isFormData = typeof FormData !== 'undefined' && body instanceof FormData
-  const accessToken = path.startsWith('/auth/') ? null : readAuthSession()?.accessToken
+  const isAuthPath = path.startsWith('/auth/')
+  const accessToken = isAuthPath ? null : readAuthSession()?.accessToken
   const resolvedHeaders = {
     ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
     ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
@@ -137,6 +149,7 @@ async function request<T>(
         headers: resolvedHeaders,
         cache: accessToken ? 'no-store' : rest.cache,
         referrerPolicy: 'no-referrer',
+        credentials: 'include',
         ...(resolvedBody === undefined ? {} : { body: resolvedBody }),
       })
 
@@ -150,9 +163,23 @@ async function request<T>(
   }
 
   if (!response.ok) {
+    // A 401 on anything but /auth/* itself might just mean the access token
+    // expired mid-session — try one silent refresh-and-retry before giving
+    // up and logging the user out. use-token-refresh.ts is meant to catch
+    // this before it ever happens; this is the reactive fallback for
+    // whatever slips past it (a request in flight right as the token
+    // expired, a background tab whose timers were throttled, clock drift).
+    if (response.status === 401 && !isAuthPath && !retried) {
+      const refreshed = await refreshAccessToken()
+      if (refreshed) {
+        updateAccessToken(refreshed)
+        return request<T>(path, schema, options, true)
+      }
+    }
+
     // Try to surface the server's error payload; fall back to the status text.
     const payload = await response.json().catch(() => undefined)
-    if (response.status === 401 && !path.startsWith('/auth/')) {
+    if (response.status === 401 && !isAuthPath) {
       clearAuthSession()
     }
 

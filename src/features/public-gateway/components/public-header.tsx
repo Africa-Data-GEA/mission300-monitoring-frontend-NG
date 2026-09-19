@@ -19,7 +19,7 @@ export function PublicHeader() {
         <div className="mx-auto flex min-h-[4.5rem] max-w-[96rem] items-center gap-7 px-4 sm:px-6">
           <Link to="/" className="flex min-w-0 items-center gap-3.5">
             <img
-              src={brand?.logoUrl ?? '/Logos/geapp.png'}
+              src={brand?.logoUrl || '/Logos/m300-logo-navy.svg'}
               alt=""
               width={34}
               height={34}

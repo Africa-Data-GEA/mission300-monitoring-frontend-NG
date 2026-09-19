@@ -48,8 +48,10 @@ export const brandConfigSchema = z.object({
    * which drives buttons/links/accents. Applied only within the sidebar
    * (see Sidebar.tsx's `.dark` scoping), not site-wide. */
   sidebarColor: hexColorSchema,
-  /** A `data:` URL from the mock upload, or a static asset path as the default. */
-  logoUrl: z.string().min(1),
+  /** A `data:` URL from the mock upload, or a static asset path once an admin
+   * uploads one. Empty means no custom logo has been set - the sidebar and
+   * public header fall back to the platform's own built-in M300 mark. */
+  logoUrl: z.string(),
   fonts: brandFontsSchema,
   /** Display currency for monetary values — never hardcoded at a call site,
    * so extending the platform to another Compact country is a configuration

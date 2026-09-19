@@ -1,4 +1,4 @@
-import { keepPreviousData, useQuery } from '@tanstack/react-query'
+import { keepPreviousData, useQuery, type QueryClient } from '@tanstack/react-query'
 import { z } from 'zod'
 import { executiveOverviewSchema } from '@/api/schemas/executive-overview'
 import { api } from '@/lib/api-client'
@@ -62,6 +62,29 @@ function toSearchParams(query: ExecutiveOverviewQuery): string {
 
   const serialised = params.toString()
   return serialised ? `?${serialised}` : ''
+}
+
+/**
+ * Warms the default-filter Executive Overview query into the cache ahead of
+ * navigation, so the page's own useQuery below finds the data already there
+ * and skips the full-page skeleton entirely.
+ *
+ * `query` must match exactly what dashboard-page.tsx actually passes on
+ * first mount (`useGlobalFilters().filters`, i.e. DEFAULT_FILTER_VALUES
+ * until the user changes something) - the query key is the full filters
+ * object, so a mismatched shape here is a silent cache miss, not an error.
+ *
+ * Called from two places: right after a successful login (overlapping the
+ * fetch with the redirect itself, rather than waiting for AppShell/
+ * DashboardPage to mount before the request even starts), and from
+ * AppShell's existing idle-time chunk prefetch, so returning to /dashboard
+ * via the sidebar after visiting another page is instant too.
+ */
+export function prefetchExecutiveOverview(queryClient: QueryClient, query: ExecutiveOverviewQuery) {
+  return queryClient.prefetchQuery({
+    queryKey: dashboardKeys.executiveOverview(query),
+    queryFn: () => api.get(`/executive-overview${toSearchParams(query)}`, executiveOverviewSchema),
+  })
 }
 
 export function useExecutiveOverview(query: ExecutiveOverviewQuery = {}) {

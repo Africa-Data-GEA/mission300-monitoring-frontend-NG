@@ -1,10 +1,12 @@
 import { Link } from 'react-router'
 import type { InstitutionProgramme } from '@/api/schemas/institution-overview'
 import { Card } from '@/components/ui/card'
+import { ExecutionStatusBadge } from '@/features/programs/components/execution-status-badge'
+import { PILLAR_LABELS } from '@/types/domain'
 
 export function ProgrammeListCard({ programmes }: { programmes: readonly InstitutionProgramme[] }) {
   return (
-    <Card variant="well" className="p-4">
+    <Card className="p-4">
       <div className="flex items-center justify-between gap-3">
         <h2 className="text-sm font-semibold text-text-default">
           Programmes you lead
@@ -32,10 +34,10 @@ export function ProgrammeListCard({ programmes }: { programmes: readonly Institu
               <div>
                 <p className="text-sm font-medium text-text-default">{programme.name}</p>
                 <p className="mt-0.5 text-xs text-text-muted">
-                  {programme.projectCount} project{programme.projectCount === 1 ? '' : 's'} · {programme.pillar}
+                  {programme.projectCount} project{programme.projectCount === 1 ? '' : 's'} · {PILLAR_LABELS[programme.pillar]}
                 </p>
               </div>
-              <span className="text-xs font-medium text-text-muted">{programme.status.replace(/_/g, ' ')}</span>
+              <ExecutionStatusBadge status={programme.status} />
             </Link>
           ))}
         </div>

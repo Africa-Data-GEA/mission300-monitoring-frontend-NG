@@ -1,6 +1,7 @@
 import { Breadcrumb } from '@/components/ui/breadcrumb'
 import { ErrorState } from '@/components/ui/error-state'
 import { useInstitutionOverview } from './api'
+import { InstitutionOverviewSkeleton } from './components/institution-overview-skeleton'
 import { KpiPerformanceCard } from './components/kpi-performance-card'
 import { ObligationSummaryCard } from './components/obligation-summary-card'
 import { ProgrammeListCard } from './components/programme-list-card'
@@ -9,9 +10,7 @@ import { ProjectListCard } from './components/project-list-card'
 export function InstitutionOverviewPage() {
   const overview = useInstitutionOverview()
 
-  if (overview.isPending) {
-    return <p className="p-6 text-sm text-text-muted">Loading your institution's overview…</p>
-  }
+  if (overview.isPending) return <InstitutionOverviewSkeleton />
 
   if (overview.isError) {
     return (
@@ -28,7 +27,7 @@ export function InstitutionOverviewPage() {
   return (
     <div className="flex min-w-0 flex-col gap-4">
       <div>
-        <Breadcrumb items={[{ label: 'Overview' }]} />
+        <Breadcrumb items={[{ label: 'Monitoring & Analysis' }, { label: 'Overview' }]} />
         <h1 className="mt-2 text-3xl font-semibold tracking-tight text-text-default">{institution.name}</h1>
         <p className="mt-1 max-w-3xl text-sm text-text-muted">
           A summary of your institution's reporting compliance, KPI performance and delivery activity across the Compact.

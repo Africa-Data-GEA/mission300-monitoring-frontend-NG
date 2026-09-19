@@ -277,7 +277,7 @@ export const router = createBrowserRouter([
       },
       {
         path: 'programs/new',
-        element: moduleRoute('programs', <AddProgrammePage />),
+        element: moduleRoute('programme-admin', <AddProgrammePage />),
         handle: { globalFilters: false } satisfies RouteHandle,
       },
       {

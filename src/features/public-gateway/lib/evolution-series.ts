@@ -1,5 +1,5 @@
 import type { PillarId } from '@/api/schemas/common'
-import type { ExecutiveOverview } from '@/api/schemas/executive-overview'
+import type { PublicOverview } from '@/api/schemas/executive-overview'
 import type { EvolutionSeries } from '../components/evolution-chart'
 
 /** Units matching each national-performance metric's own formatValue in
@@ -85,7 +85,7 @@ function shortSource(source: string): string {
  * invented figure — but it lives here, in one visible place, rather than being
  * inferred inside the filter.
  */
-export function buildEvolutionSeries(data: ExecutiveOverview): EvolutionSeries[] {
+export function buildEvolutionSeries(data: PublicOverview): EvolutionSeries[] {
   return [
     ...data.nationalPerformance.map((metric) => ({
       id: metric.id,

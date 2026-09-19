@@ -149,8 +149,24 @@ function TargetJourney({ series }: { series: EvolutionSeries }) {
     )
   }
 
-  const observedStart = series.points[0]?.value ?? series.current
-  const baseline = series.baseline ?? observedStart
+  // A journey needs a real starting point. Falling back to the oldest point
+  // in whatever history window happened to be returned (e.g. generation
+  // capacity's rolling few quarters) would invent a "baseline" that drifts
+  // every period for reasons unrelated to real performance - the same
+  // fabrication this page's own baseline/target fields are designed never to
+  // do (see EvolutionSeries.target's own comment).
+  if (series.baseline === null) {
+    return (
+      <div className="mt-5 border-l-2 border-[#aebdc8] bg-[#f1f4f7] px-4 py-3">
+        <p className="text-[0.75rem] leading-5 font-semibold text-[#536472]">
+          Trend view only
+          <span className="ml-2 font-normal text-[#667684]">No approved baseline is published to measure progress from.</span>
+        </p>
+      </div>
+    )
+  }
+
+  const baseline = series.baseline
   const totalJourney =
     series.direction === 'lower-is-better' ? baseline - target : target - baseline
   const completedJourney =

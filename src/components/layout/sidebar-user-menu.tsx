@@ -16,6 +16,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { SideDialog } from '@/components/ui/side-dialog'
 import { ADMIN_MENU_ITEMS } from '@/config/navigation'
 import { clearAuthSession, readAuthSession, updateAuthUserName } from '@/features/auth/auth-session'
+import { logoutRequest } from '@/features/auth/api'
 import { userAccountSchema } from '@/api/schemas/administration'
 import { api } from '@/lib/api-client'
 import { canUserReachModule, findAccountById, getRoleLabel, grantedRoles } from '@/features/auth/role-access'
@@ -95,6 +96,10 @@ export function SidebarUserMenu() {
   }
 
   function logout() {
+    // Best-effort - the token is revoked server-side (WEB-008 fix) if this
+    // succeeds, but the local session is cleared and the user navigated
+    // away regardless of whether the request completes.
+    void logoutRequest().catch(() => undefined)
     clearAuthSession()
     dashboardToast.success('Signed out securely')
     navigate('/account/login', { replace: true })

@@ -1,5 +1,6 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
+  bulkValidationDecisionResponseSchema,
   dataGapListSchema,
   datasetListSchema,
   dataSubmissionFiltersSchema,
@@ -12,6 +13,7 @@ import {
   uploadDefinitionSchema,
   validationDecisionResponseSchema,
   validationQueueSchema,
+  type BulkValidationDecisionRequest,
   type DataSubmissionQuery,
   type ManualEntryRequest,
   type ValidationDecisionRequest,
@@ -172,6 +174,15 @@ export function useValidationDecision(id: string) {
   return useMutation({
     mutationFn: (input: ValidationDecisionRequest) =>
       api.post(`/data-submissions/validation/${id}/decisions`, input, validationDecisionResponseSchema),
+    onSuccess: () => client.invalidateQueries({ queryKey: submissionKeys.all }),
+  })
+}
+
+export function useBulkValidationDecision() {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (input: BulkValidationDecisionRequest) =>
+      api.post('/data-submissions/validation/bulk-decisions', input, bulkValidationDecisionResponseSchema),
     onSuccess: () => client.invalidateQueries({ queryKey: submissionKeys.all }),
   })
 }

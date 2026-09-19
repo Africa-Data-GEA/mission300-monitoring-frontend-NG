@@ -114,16 +114,24 @@ function compactOutcomeFigure(
     trend: card.trend,
     provenance: card.provenance,
     source: card.source,
-    track: {
-      min: card.scaleMin,
-      max: card.scaleMax,
-      current: card.current,
-      baseline: card.baseline,
-      target: card.target,
-      baselineLabel: card.baselineLabel,
-      targetLabel: card.targetLabel,
-      milestones: card.milestones,
-    },
+    // No approved value has ever been reported for this outcome yet
+    // (`reportingPeriod` is only ever "Not yet reported" when the backing
+    // KPI profile's `current` is null) - `card.current` is a contractual 0 in
+    // that case, not a real reading, so drawing a bullet track against it
+    // would show a filled bar implying real progress that was never made.
+    track:
+      card.reportingPeriod === 'Not yet reported'
+        ? null
+        : {
+            min: card.scaleMin,
+            max: card.scaleMax,
+            current: card.current,
+            baseline: card.baseline,
+            target: card.target,
+            baselineLabel: card.baselineLabel,
+            targetLabel: card.targetLabel,
+            milestones: card.milestones,
+          },
     sparkline: [],
     // No context sentence: the bullet track above already prints
     // `baselineLabel` and `targetLabel` as its own left/right axis labels —

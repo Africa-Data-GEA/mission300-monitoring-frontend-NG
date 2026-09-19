@@ -111,8 +111,24 @@ export const validationDecisionResponseSchema = z.object({
   published: z.array(kpiExtractionSchema),
 })
 
+export const bulkValidationDecisionRequestSchema = z.object({
+  submissionIds: z.array(z.string().min(1)).min(1),
+  decision: z.enum(['approved', 'provisional', 'returned', 'rejected']),
+  comments: z.string().trim().min(3),
+})
+
+export const bulkValidationDecisionResponseSchema = z.object({
+  decision: z.enum(['approved', 'provisional', 'returned', 'rejected']),
+  approvedCount: z.number(),
+  failedCount: z.number(),
+  succeeded: z.array(z.string()),
+  failed: z.array(z.object({ submissionId: z.string(), message: z.string() })),
+  message: z.string().min(1),
+})
+
 export type SubmissionListItem = z.infer<typeof submissionListItemSchema>
 export type ValidationQueueItem = z.infer<typeof validationQueueItemSchema>
 export type KpiExtraction = z.infer<typeof kpiExtractionSchema>
 export type SubmissionDetail = z.infer<typeof submissionDetailSchema>
 export type ValidationDecisionRequest = z.infer<typeof validationDecisionRequestSchema>
+export type BulkValidationDecisionRequest = z.infer<typeof bulkValidationDecisionRequestSchema>

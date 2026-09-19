@@ -51,22 +51,24 @@ export function ValidationDetailPage() {
               <VersionHistoryCard history={review.data.history} />
             </div>
 
-            <ReviewDecisionForm
-              submission={review.data}
-              pending={decision.isPending}
-              error={decision.error}
-              onSubmit={(input) =>
-                decision.mutate(input, {
-                  onSuccess: (result) =>
-                    navigate(result.nextUrl, {
-                      state:
-                        result.published.length > 0
-                          ? { publishedMessage: result.message }
-                          : undefined,
-                    }),
-                })
-              }
-            />
+            {review.data.permittedDecisions.length > 0 && (
+              <ReviewDecisionForm
+                submission={review.data}
+                pending={decision.isPending}
+                error={decision.error}
+                onSubmit={(input) =>
+                  decision.mutate(input, {
+                    onSuccess: (result) =>
+                      navigate(result.nextUrl, {
+                        state:
+                          result.published.length > 0
+                            ? { publishedMessage: result.message }
+                            : undefined,
+                      }),
+                  })
+                }
+              />
+            )}
           </div>
         )}
       </ListState>

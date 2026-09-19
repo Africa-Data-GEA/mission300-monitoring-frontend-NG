@@ -25,7 +25,7 @@ export function ReviewDecisionForm({
   onSubmit: (input: ValidationDecisionRequest) => void
 }) {
   const [decision, setDecision] =
-    useState<ValidationDecisionRequest['decision']>('approved')
+    useState<ValidationDecisionRequest['decision']>(submission.permittedDecisions[0] ?? 'approved')
   const [comments, setComments] = useState('')
 
   return (

@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router'
 import { Breadcrumb } from '@/components/ui/breadcrumb'
 import { Button } from '@/components/ui/button'
 import { ErrorState } from '@/components/ui/error-state'
+import { readAuthSession } from '@/features/auth/auth-session'
+import { canUserReachModule } from '@/features/auth/role-access'
 import { ProgramsFilters } from './components/programs-filters'
 import { ProgramsSkeleton } from './components/programs-skeleton'
 import { ProgramsTable } from './components/programs-table'
@@ -25,6 +27,8 @@ import { useProgramsPage } from './use-programs-page'
 export function ProgramsPage() {
   const page = useProgramsPage()
   const navigate = useNavigate()
+  const session = readAuthSession()
+  const canAddProgramme = !!session && canUserReachModule(session.user, 'programme-admin')
 
   if (page.isPending) return <ProgramsSkeleton />
 
@@ -51,10 +55,12 @@ export function ProgramsPage() {
             Programs
           </h1>
         </div>
-        <Button type="button" onClick={() => navigate('/programs/new')}>
-          <Plus aria-hidden="true" />
-          Add programme
-        </Button>
+        {canAddProgramme && (
+          <Button type="button" onClick={() => navigate('/programs/new')}>
+            <Plus aria-hidden="true" />
+            Add programme
+          </Button>
+        )}
       </div>
 
       {page.filters && (

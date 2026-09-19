@@ -70,7 +70,7 @@ export function KpiProfileDialog({
               </Button>
             </div>
           )}
-          <ValuesPanel profile={profile} />
+          <ValuesPanel profile={profile} canEdit={canEditMetadata} />
           <MetadataPanel profile={profile} />
           <ExternalStandardAlignmentPanel profile={profile} />
           <TraceabilityPanel profile={profile} />

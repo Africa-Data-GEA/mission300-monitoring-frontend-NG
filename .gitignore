@@ -38,5 +38,17 @@ mission300-monitoring-backend-NG/
 qa-screenshots/
 qa-findings.json
 
-# Local reference/handoff docs, not part of the app.
-docs/
+# Local reference/handoff docs, not part of the app - root-level only, so
+# this doesn't catch the real downloadable templates under public/.
+/docs/
+/tmp/
+/*.xlsx
+/*.html
+!/index.html
+/*.zip
+
+# Throwaway root-level QA/verification scripts (qa-*.mjs) - written and run
+# ad hoc against a live dev server during a session, not part of the app or
+# its test suite. Delete when done rather than committing; if one earns its
+# keep, move it into a real test file instead.
+/qa-*.mjs

@@ -25,7 +25,13 @@ function rolePage(roles: readonly string[], element: React.ReactNode) {
 }
 
 const PROVIDER = ['institutional-data-provider']
-const REVIEWERS = ['data-reviewer', 'validator']
+// Kept in sync with the REVIEW_ROLES lists in workflow-shell.tsx,
+// submissions-page.tsx and institution-dashboard-page.tsx, which decide
+// whether to *show* a validation-queue/detail link. system-administrator
+// has to be included here too, or an admin sees those links (correctly, per
+// the "all modules" sentinel in role-access.ts) but then gets bounced to
+// /access-denied by this guard when they click one.
+const REVIEWERS = ['data-reviewer', 'validator', 'system-administrator']
 
 function DataSubmissionsIndex() {
   const session = readAuthSession()

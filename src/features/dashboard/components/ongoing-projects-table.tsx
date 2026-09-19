@@ -8,6 +8,8 @@ import { SortableColumnHeader } from '@/components/ui/sortable-column-header'
 import { ExecutionStatusBadge } from '@/features/programs/components/execution-status-badge'
 import { PipelineReadinessBadge } from '@/features/programs/components/pipeline-readiness-badge'
 import { deleteProject } from '@/features/programs/lib/project-admin-api'
+import { readAuthSession } from '@/features/auth/auth-session'
+import { canUserReachModule } from '@/features/auth/role-access'
 import { formatDeadline } from '@/lib/format'
 import { cn } from '@/lib/utils'
 import type { OngoingProject } from '../types'
@@ -79,6 +81,8 @@ export function OngoingProjectsTable({
   onClearStatusFilter?: () => void
 }) {
   const navigate = useNavigate()
+  const session = readAuthSession()
+  const canManageProjects = !!session && canUserReachModule(session.user, 'programs')
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState('')
   const searchId = useId()
@@ -286,10 +290,12 @@ export function OngoingProjectsTable({
             ? `${filteredProjects.length} project${filteredProjects.length === 1 ? '' : 's'} found`
             : ''}
         </p>
-        <Button type="button" size="sm" onClick={() => navigate('/programs/projects/new')}>
-          <Plus aria-hidden="true" />
-          Add project
-        </Button>
+        {canManageProjects && (
+          <Button type="button" size="sm" onClick={() => navigate('/programs/projects/new')}>
+            <Plus aria-hidden="true" />
+            Add project
+          </Button>
+        )}
       </div>
 
       {deleteError && (
@@ -407,27 +413,29 @@ export function OngoingProjectsTable({
                   </span>
                 </td>
                 <td className="px-3 py-3">
-                  <div className="flex items-center gap-1">
-                    <Button
-                      type="button"
-                      size="icon"
-                      variant="ghost"
-                      onClick={() => navigate(`/programs/projects/${project.id}/edit`)}
-                      aria-label={`Edit ${project.name}`}
-                    >
-                      <Pencil aria-hidden="true" className="size-4" />
-                    </Button>
-                    <Button
-                      type="button"
-                      size="icon"
-                      variant="ghost"
-                      disabled={deletingId === project.id}
-                      onClick={() => void handleDelete(project)}
-                      aria-label={`Remove ${project.name}`}
-                    >
-                      <Trash2 aria-hidden="true" className="size-4" />
-                    </Button>
-                  </div>
+                  {canManageProjects && (
+                    <div className="flex items-center gap-1">
+                      <Button
+                        type="button"
+                        size="icon"
+                        variant="ghost"
+                        onClick={() => navigate(`/programs/projects/${project.id}/edit`)}
+                        aria-label={`Edit ${project.name}`}
+                      >
+                        <Pencil aria-hidden="true" className="size-4" />
+                      </Button>
+                      <Button
+                        type="button"
+                        size="icon"
+                        variant="ghost"
+                        disabled={deletingId === project.id}
+                        onClick={() => void handleDelete(project)}
+                        aria-label={`Remove ${project.name}`}
+                      >
+                        <Trash2 aria-hidden="true" className="size-4" />
+                      </Button>
+                    </div>
+                  )}
                 </td>
               </tr>
             ))}

@@ -43,7 +43,7 @@ export function PasswordLoginView({
           Back
         </button>
         <h1 className="text-3xl font-semibold text-text-default">
-          Welcome back, {account.displayName.split(' ')[0]}
+          Enter your password
         </h1>
         <button
           className="mt-3 inline-flex max-w-full items-center gap-2 rounded-pill border border-border-default bg-surface-sunken px-3 py-2 text-sm text-text-muted transition-colors hover:border-border-strong"
@@ -52,9 +52,7 @@ export function PasswordLoginView({
           title="Use a different account"
           type="button"
         >
-          <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-brand-100 font-semibold text-brand-800">
-            {account.displayName.charAt(0)}
-          </span>
+          <LockKeyhole aria-hidden="true" className="size-4 shrink-0 text-text-subtle" />
           <span className="truncate">{account.email}</span>
         </button>
         <Form {...form}>

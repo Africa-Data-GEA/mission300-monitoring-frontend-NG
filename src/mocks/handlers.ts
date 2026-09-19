@@ -21,6 +21,8 @@ import {
   kpiExplorerFilterOptions,
   kpiExplorerOverview,
   setKpiActive,
+  deleteKpiHistoryPoint,
+  editKpiHistoryPoint,
   setKpiCurrentValue,
   updateKpiMetadata,
 } from './data/kpi-explorer'
@@ -529,6 +531,56 @@ export const handlers = [
   }),
 
   /**
+   * PATCH /api/kpi-explorer/kpis/:id/history/:valueId — corrects a history
+   * point previously set via the admin override above. Rejects a point that
+   * came from an approved data submission, same guard as the real backend.
+   */
+  http.patch('/api/kpi-explorer/kpis/:id/history/:valueId', async ({ request, params }) => {
+    await delay(200)
+    const id = String(params.id)
+    const valueId = String(params.valueId)
+    const result = setKpiCurrentValueRequestSchema.safeParse(await request.json())
+    if (!result.success) {
+      return HttpResponse.json(
+        { message: result.error.issues[0]?.message ?? 'Invalid value.' },
+        { status: 400 },
+      )
+    }
+    const updated = editKpiHistoryPoint(id, valueId, result.data)
+    if (updated === null) {
+      return HttpResponse.json({ message: `History point ${valueId} not found.` }, { status: 404 })
+    }
+    if (updated === 'not-editable') {
+      return HttpResponse.json(
+        { message: 'This value came from an approved data submission - correct it through Data Submissions review, not here.' },
+        { status: 400 },
+      )
+    }
+    return HttpResponse.json(updated)
+  }),
+
+  /**
+   * DELETE /api/kpi-explorer/kpis/:id/history/:valueId — removes a history
+   * point previously set via the admin override above.
+   */
+  http.delete('/api/kpi-explorer/kpis/:id/history/:valueId', async ({ params }) => {
+    await delay(200)
+    const id = String(params.id)
+    const valueId = String(params.valueId)
+    const updated = deleteKpiHistoryPoint(id, valueId)
+    if (updated === null) {
+      return HttpResponse.json({ message: `History point ${valueId} not found.` }, { status: 404 })
+    }
+    if (updated === 'not-editable') {
+      return HttpResponse.json(
+        { message: 'This value came from an approved data submission - correct it through Data Submissions review, not here.' },
+        { status: 400 },
+      )
+    }
+    return HttpResponse.json(updated)
+  }),
+
+  /**
    * POST /api/kpi-explorer/kpis — registers a new indicator.
    *
    * Review asked for the ability to add extra KPIs, not only edit existing
@@ -696,6 +748,20 @@ export const handlers = [
         roles: user.roles?.length ? user.roles : [user.role],
       },
     })
+  }),
+
+  /**
+   * POST /api/auth/refresh — the real backend exchanges an httpOnly cookie
+   * for a new access token, invisible to and unreachable from mock mode
+   * (dispatchLocalRequest is in-process, no real cookies ever flow). Mock
+   * access tokens (`mock-token-<id>`) also carry no `exp` claim, so
+   * use-token-refresh.ts never schedules a proactive call here — this only
+   * exists so the endpoint isn't a 404 if something does call it, matching
+   * the real backend's shape for "no refresh session found".
+   */
+  http.post('/api/auth/refresh', async () => {
+    await delay(150)
+    return HttpResponse.json({ message: 'No refresh session found.' }, { status: 401 })
   }),
 
   http.post('/api/auth/forgot-password', async () => {

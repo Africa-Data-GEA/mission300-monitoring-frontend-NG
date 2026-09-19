@@ -383,6 +383,15 @@ export const executiveOverviewSchema = z.object({
 })
 
 /**
+ * GET /public/overview — the same national KPI figures as
+ * executiveOverviewSchema, minus `deliveryStatus` (ongoing projects and
+ * bottlenecks/exceptions), which stays behind authentication. This is what
+ * an anonymous visitor to the public gateway actually receives; the
+ * authenticated dashboard still reads the full executiveOverviewSchema.
+ */
+export const publicOverviewSchema = executiveOverviewSchema.omit({ deliveryStatus: true })
+
+/**
  * Query accepted by GET /api/executive-overview.
  *
  * Identical to the global filter values: the page adds no page-specific
@@ -409,4 +418,5 @@ export type ProjectStatusSummary = z.infer<
 >
 export type DeliveryStatusPanel = z.infer<typeof deliveryStatusPanelSchema>
 export type ExecutiveOverview = z.infer<typeof executiveOverviewSchema>
+export type PublicOverview = z.infer<typeof publicOverviewSchema>
 export type ExecutiveOverviewQuery = z.infer<typeof executiveOverviewQuerySchema>

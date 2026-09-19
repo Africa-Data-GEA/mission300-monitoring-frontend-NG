@@ -13,7 +13,7 @@ function notifySessionChanged() {
   window.dispatchEvent(new Event(AUTH_SESSION_CHANGED))
 }
 
-function tokenExpiry(accessToken: string): number | null {
+export function tokenExpiry(accessToken: string): number | null {
   const payload = accessToken.split('.')[1]
   if (!payload) return null
   try {
@@ -93,4 +93,25 @@ export function updateAuthUserName(name: string) {
   const session = readAuthSession()
   if (!session) return
   saveAuthSession({ ...session, user: { ...session.user, name } })
+}
+
+/**
+ * Patches in a freshly refreshed access token without touching `user` —
+ * called after a successful POST /auth/refresh, both proactively
+ * (use-token-refresh.ts) and reactively (api-client.ts's 401 retry). Reads
+ * the raw stored session directly rather than through readAuthSession(),
+ * since that function would itself reject an already-expired token before
+ * this ever gets a chance to replace it.
+ */
+export function updateAccessToken(accessToken: string) {
+  const stored = sessionStorage.getItem(AUTH_SESSION_KEY)
+  if (!stored) return
+  try {
+    const parsed = JSON.parse(stored) as Record<string, unknown>
+    sessionStorage.setItem(AUTH_SESSION_KEY, JSON.stringify({ ...parsed, accessToken, expiresAt: undefined }))
+    notifySessionChanged()
+  } catch {
+    // Corrupt stored session - nothing sensible to patch, leave it for
+    // readAuthSession()'s own parse failure handling to clear it.
+  }
 }

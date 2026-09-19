@@ -1,4 +1,4 @@
-import { History, Plus, ShieldCheck, UserCog } from 'lucide-react'
+import { Building2, History, Plus, ShieldCheck, UserCog } from 'lucide-react'
 import type { UserAccount } from '@/api/schemas/administration'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -18,6 +18,7 @@ export function UsersTable({
   onReviewAudit,
   onInviteUser,
   onEditRoles,
+  onEditInstitution,
 }: {
   users: readonly UserAccount[]
   page: number
@@ -28,6 +29,7 @@ export function UsersTable({
   onReviewAudit: (user: UserAccount) => void
   onInviteUser: () => void
   onEditRoles: (user: UserAccount) => void
+  onEditInstitution: (user: UserAccount) => void
 }) {
   return (
     <Card variant="well" className="p-2 sm:p-4">
@@ -53,6 +55,11 @@ export function UsersTable({
                   label: 'Edit roles',
                   icon: UserCog,
                   onSelect: () => onEditRoles(user),
+                },
+                {
+                  label: 'Edit institution',
+                  icon: Building2,
+                  onSelect: () => onEditInstitution(user),
                 },
                 {
                   label: 'Review access',

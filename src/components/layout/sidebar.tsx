@@ -62,18 +62,10 @@ export function Sidebar({
           className="flex items-center gap-2.5"
         >
           <img
-            alt=""
-            src={brand?.logoUrl ?? '/Logos/geapp.png'}
+            alt={`${brand?.countryName ?? 'Nigeria'} — Mission 300, Compact Progress Monitoring Platform`}
+            src={brand?.logoUrl || '/Logos/m300-logo-white.svg'}
             className="h-10 w-auto shrink-0 object-contain"
           />
-          <span className="min-w-0">
-            <span className="block text-sm font-semibold leading-tight text-text-default">
-              {brand?.countryName ?? 'Nigeria'} — Mission 300
-            </span>
-            <span className="mt-0.5 block text-2xs leading-tight text-text-muted">
-              Compact Progress Monitoring Platform
-            </span>
-          </span>
         </Link>
       </div>
 

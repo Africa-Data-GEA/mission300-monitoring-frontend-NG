@@ -3,6 +3,8 @@ import { useState } from 'react'
 import { Breadcrumb } from '@/components/ui/breadcrumb'
 import { Button } from '@/components/ui/button'
 import { ErrorState } from '@/components/ui/error-state'
+import { readAuthSession } from '@/features/auth/auth-session'
+import { canUserReachModule } from '@/features/auth/role-access'
 import { CatalogueTable } from './components/catalogue-table'
 import { CreateKpiDialog } from './components/create-kpi-dialog'
 import { Distributions } from './components/distributions/distributions'
@@ -25,6 +27,13 @@ import { useKpiExplorerPage } from './use-kpi-explorer-page'
 export function KpiExplorerPage() {
   const page = useKpiExplorerPage()
   const [createOpen, setCreateOpen] = useState(false)
+  const session = readAuthSession()
+  // Create/edit/retire all sit behind the same "kpi-metadata" module key,
+  // which only the system-administrator's 'all' sentinel satisfies (see
+  // role-access.ts and kpi-profile-dialog.tsx). Data reviewers/validators/
+  // dashboard managers can view this directory but must never see the
+  // registry-management controls only they'd hit a 403 on.
+  const canManageKpis = !!session && canUserReachModule(session.user, 'kpi-metadata')
 
   if (page.isPending) return <KpiExplorerSkeleton />
 
@@ -57,11 +66,14 @@ export function KpiExplorerPage() {
           </h1>
           {/* Registry management — review asked for the ability to add extra
               indicators and retire existing ones, not only edit them
-              (docs/M300 Monitoring Platform Feedback.pptx, slide 15). */}
-          <Button type="button" onClick={() => setCreateOpen(true)}>
-            <Plus aria-hidden="true" />
-            Add indicator
-          </Button>
+              (docs/M300 Monitoring Platform Feedback.pptx, slide 15).
+              System-administrator only — see canManageKpis above. */}
+          {canManageKpis && (
+            <Button type="button" onClick={() => setCreateOpen(true)}>
+              <Plus aria-hidden="true" />
+              Add indicator
+            </Button>
+          )}
         </div>
       </div>
 
@@ -96,7 +108,9 @@ export function KpiExplorerPage() {
         onClose={page.closeProfile}
       />
 
-      <CreateKpiDialog open={createOpen} onClose={() => setCreateOpen(false)} />
+      {canManageKpis && (
+        <CreateKpiDialog open={createOpen} onClose={() => setCreateOpen(false)} />
+      )}
     </div>
   )
 }

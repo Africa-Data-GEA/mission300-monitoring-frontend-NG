@@ -1,21 +1,33 @@
 import { useState } from 'react'
 import type { KpiProfile, SetKpiCurrentValueRequest } from '@/api/schemas/kpi-explorer'
-import { VALIDATION_LABELS, VALIDATION_STATUSES } from '@/api/schemas/kpi-explorer'
 import { Button } from '@/components/ui/button'
 import { SelectField } from '@/components/ui/select-field'
 import { SideDialog } from '@/components/ui/side-dialog'
 import { ApiError } from '@/lib/api-client'
 import { useSetKpiCurrentValue } from '../../api'
+import { buildQuarterOptions, buildYearOptions, detectPeriodKind, type PeriodKind } from '../../lib/period-options'
 
 const inputClass =
   'mt-1.5 h-10 w-full rounded-control border border-border-default bg-surface px-3 text-sm text-text-default outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100'
 
+const RESULTING_STATUS_LABELS: Record<SetKpiCurrentValueRequest['resultingStatus'], string> = {
+  confirmed: 'Confirmed',
+  provisional: 'Provisional',
+}
+
+const PERIOD_KIND_LABELS: Record<PeriodKind, string> = {
+  quarter: 'Quarter',
+  year: 'Year',
+}
+
+const QUARTER_OPTIONS = buildQuarterOptions()
+const YEAR_OPTIONS = buildYearOptions()
+
 function toDraft(profile: KpiProfile): SetKpiCurrentValueRequest {
   return {
     value: profile.current ?? 0,
-    currentLabel: profile.currentLabel,
     reportingPeriod: profile.reportingPeriod,
-    validationStatus: profile.validationStatus,
+    resultingStatus: profile.validationStatus === 'confirmed' ? 'confirmed' : 'provisional',
     note: '',
   }
 }
@@ -37,8 +49,26 @@ export function SetKpiCurrentValueDialog({
   onClose: () => void
 }) {
   const setCurrentValue = useSetKpiCurrentValue(profile.id)
-  const [draft, setDraft] = useState<SetKpiCurrentValueRequest>(() => toDraft(profile))
+  const [periodKind, setPeriodKind] = useState<PeriodKind>(() => detectPeriodKind(profile.reportingPeriod))
+  const [draft, setDraft] = useState<SetKpiCurrentValueRequest>(() => {
+    const draft = toDraft(profile)
+    const options = detectPeriodKind(profile.reportingPeriod) === 'quarter' ? QUARTER_OPTIONS : YEAR_OPTIONS
+    // A period outside the dropdown's own window (e.g. "Latest available",
+    // an old year, or free text from before this became a picker) has
+    // nothing to match - fall back to the most recent option rather than
+    // leaving the select showing nothing selected.
+    if (!options.includes(draft.reportingPeriod)) draft.reportingPeriod = options[0] ?? draft.reportingPeriod
+    return draft
+  })
   const [error, setError] = useState('')
+
+  const periodOptions = periodKind === 'quarter' ? QUARTER_OPTIONS : YEAR_OPTIONS
+
+  function changePeriodKind(kind: PeriodKind) {
+    setPeriodKind(kind)
+    const options = kind === 'quarter' ? QUARTER_OPTIONS : YEAR_OPTIONS
+    field('reportingPeriod', options[0] ?? '')
+  }
 
   function field<K extends keyof SetKpiCurrentValueRequest>(key: K, value: SetKpiCurrentValueRequest[K]) {
     setDraft((prev) => ({ ...prev, [key]: value }))
@@ -72,33 +102,42 @@ export function SetKpiCurrentValueDialog({
               className={inputClass}
             />
           </label>
-          <label className="text-sm font-medium text-text-default">
-            Reporting period
-            <input
-              value={draft.reportingPeriod}
-              onChange={(event) => field('reportingPeriod', event.target.value)}
-              placeholder="e.g. Q4 2025"
-              className={inputClass}
-            />
-          </label>
         </div>
 
-        <label className="text-sm font-medium text-text-default">
-          Display label
-          <input
-            value={draft.currentLabel}
-            onChange={(event) => field('currentLabel', event.target.value)}
-            placeholder='e.g. "38.31% (hydro only, NERC Q4 2025 report)"'
-            className={inputClass}
+        <div className="grid gap-4 sm:grid-cols-2">
+          <SelectField
+            label="Reporting period type"
+            value={periodKind}
+            options={(['quarter', 'year'] as const).map((kind) => ({ value: kind, label: PERIOD_KIND_LABELS[kind] }))}
+            onChange={(value) => changePeriodKind(value as PeriodKind)}
           />
-        </label>
+          <SelectField
+            label="Reporting period"
+            value={draft.reportingPeriod}
+            options={periodOptions.map((period) => ({ value: period, label: period }))}
+            onChange={(value) => field('reportingPeriod', value)}
+          />
+        </div>
+        <p className="-mt-3 text-xs text-text-muted">
+          The period this value applies to, picked from a fixed list rather than typed — it must match the
+          vocabulary the rest of the platform reads periods by (a quarter like "Q4 2025" or a plain year like
+          "2025").
+        </p>
 
         <SelectField
           label="Validation status"
-          value={draft.validationStatus}
-          options={VALIDATION_STATUSES.map((status) => ({ value: status, label: VALIDATION_LABELS[status] }))}
-          onChange={(value) => field('validationStatus', value as SetKpiCurrentValueRequest['validationStatus'])}
+          value={draft.resultingStatus}
+          options={(['confirmed', 'provisional'] as const).map((status) => ({
+            value: status,
+            label: RESULTING_STATUS_LABELS[status],
+          }))}
+          onChange={(value) => field('resultingStatus', value as SetKpiCurrentValueRequest['resultingStatus'])}
         />
+        <p className="-mt-3 text-xs text-text-muted">
+          Confirmed and provisional are the only two outcomes a value can have here — the same two an approved
+          submission can produce. There is no display label to set: it's always built from the value and this KPI's
+          unit, the same way an approved submission's value is.
+        </p>
 
         <label className="text-sm font-medium text-text-default">
           Note (optional)

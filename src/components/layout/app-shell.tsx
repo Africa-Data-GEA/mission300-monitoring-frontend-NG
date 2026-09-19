@@ -1,8 +1,12 @@
 import { useEffect, useState } from 'react'
 import { Outlet, useMatches, useNavigate } from 'react-router'
+import { useQueryClient } from '@tanstack/react-query'
 import { AUTH_SESSION_CHANGED, readAuthSession } from '@/features/auth/auth-session'
+import { useTokenRefresh } from '@/features/auth/use-token-refresh'
 import { GlobalFiltersProvider } from '@/app/global-filters'
 import { prefetchRouteChunks } from '@/app/route-chunks'
+import { prefetchExecutiveOverview } from '@/features/dashboard/api'
+import { DEFAULT_FILTER_VALUES } from '@/api/schemas/filters'
 import { GlobalFilterBar } from './global-filter-bar'
 import { Sidebar } from './sidebar'
 import { Topbar } from './topbar'
@@ -16,8 +20,11 @@ import { Topbar } from './topbar'
  */
 export function AppShell() {
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const [isNavOpen, setNavOpen] = useState(false)
   const [filtersOpen, setFiltersOpen] = useState(false)
+
+  useTokenRefresh()
 
   /*
    * Warm the other routes' chunks in the background once the shell is up, so
@@ -27,6 +34,16 @@ export function AppShell() {
   useEffect(() => {
     prefetchRouteChunks()
   }, [])
+
+  /*
+   * Also warm Executive Overview's own data (not just its JS chunk), so
+   * navigating there from elsewhere via the sidebar is instant too - the
+   * post-login redirect already does this for the very first visit, see
+   * use-password-login.ts.
+   */
+  useEffect(() => {
+    void prefetchExecutiveOverview(queryClient, DEFAULT_FILTER_VALUES)
+  }, [queryClient])
 
   useEffect(() => {
     const handleSessionChange = () => {

@@ -341,6 +341,22 @@ export const milestoneRecordSchema = z.object({
   validationStatus: validationStatusSchema,
 })
 
+export const createMilestoneRequestSchema = z.object({
+  name: z.string().trim().min(1, 'Name the milestone'),
+  leadInstitution: z.string().trim().min(1, 'Name the lead institution'),
+  expectedDate: z.iso.datetime(),
+  priority: registerPrioritySchema.optional(),
+  status: executionStatusSchema.optional(),
+  risk: z.string().trim().max(1000).optional(),
+  nextAction: z.string().trim().max(1000).optional(),
+  bottleneckCategory: bottleneckCategorySchema.nullable().optional(),
+})
+
+export const createMilestoneResponseSchema = z.object({
+  record: milestoneRecordSchema,
+  message: z.string().min(1),
+})
+
 /* ------------------------------------------------------------------ *
  * Filters, query and pagination
  * ------------------------------------------------------------------ */
@@ -394,6 +410,8 @@ export type UpsertProjectResponse = z.infer<typeof upsertProjectResponseSchema>
 export type CreateProgrammeRequest = z.infer<typeof createProgrammeRequestSchema>
 export type CreateProgrammeResponse = z.infer<typeof createProgrammeResponseSchema>
 export type MilestoneRecord = z.infer<typeof milestoneRecordSchema>
+export type CreateMilestoneRequest = z.infer<typeof createMilestoneRequestSchema>
+export type CreateMilestoneResponse = z.infer<typeof createMilestoneResponseSchema>
 export type ProgramsFilterOptions = z.infer<typeof programsFilterOptionsSchema>
 export type ProgramsQuery = z.infer<typeof programsQuerySchema>
 export type ProgramsPagination = z.infer<typeof programsPaginationSchema>

@@ -2,9 +2,10 @@ import type { KpiProfile } from '@/api/schemas/kpi-explorer'
 import { Sparkline } from '@/components/ui/sparkline'
 import { TrendIndicator } from '@/components/ui/trend-indicator'
 import { ProfileField } from '@/components/ui/profile-field'
+import { HistoryList } from './history-list'
 
 /** Current value, trend and the baseline/target/variance figures. */
-export function ValuesPanel({ profile }: { profile: KpiProfile }) {
+export function ValuesPanel({ profile, canEdit }: { profile: KpiProfile; canEdit: boolean }) {
   const hasValue = profile.current !== null
 
   return (
@@ -31,6 +32,8 @@ export function ValuesPanel({ profile }: { profile: KpiProfile }) {
         <ProfileField label="Target" value={profile.targetLabel} />
         <ProfileField label="Variance" value={profile.varianceLabel} />
       </dl>
+
+      <HistoryList kpiId={profile.id} history={profile.history} canEdit={canEdit} />
 
       {profile.targets.length > 0 && (
         <div className="mt-4">

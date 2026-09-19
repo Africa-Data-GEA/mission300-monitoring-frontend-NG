@@ -14,7 +14,7 @@ export function AccessChannelsChart({ channels }: { channels: readonly AccessCha
 
   if (channels.length === 0) return null
 
-  const withTarget = channels.filter((channel) => channel.target !== null)
+  const withTarget = channels.filter((channel) => channel.target !== null && channel.target > 0)
   const plotted = view === 'share' ? withTarget : channels
   if (plotted.length === 0) return null
 
@@ -25,7 +25,9 @@ export function AccessChannelsChart({ channels }: { channels: readonly AccessCha
             name: 'Share of target',
             data: plotted.map((channel) =>
               Number(
-                (channel.percentComplete ?? (channel.rawValue / (channel.target as number)) * 100).toFixed(1),
+                (
+                  channel.percentComplete ?? ((channel.rawValue / (channel.target as number)) * 100)
+                ).toFixed(1),
               ),
             ),
           },

@@ -10,6 +10,7 @@ import { DocumentsPanel } from './components/project-profile/documents-panel'
 import { OverviewPanel } from './components/project-profile/overview-panel'
 import { UpdatesPanel } from './components/project-profile/updates-panel'
 import { MilestoneSection } from './components/milestone-section'
+import { CreateMilestoneDialog } from './components/create-milestone-dialog'
 import { ProjectDetailSkeleton } from './components/project-detail-skeleton'
 import { useProjectDetailPage } from './use-project-detail-page'
 
@@ -81,6 +82,7 @@ export function ProjectDetailPage() {
         pageSize={page.milestones.pageSize}
         total={page.milestones.total}
         onPageChange={page.setMilestonePage}
+        onAddMilestone={page.openAddMilestone}
       />
 
       <BottleneckRegister
@@ -98,6 +100,13 @@ export function ProjectDetailPage() {
         onCreated={page.refreshAfterCreate}
         institutions={institutionOptions}
         defaultLinkedRecord={project.id}
+      />
+
+      <CreateMilestoneDialog
+        open={page.addMilestoneOpen}
+        onClose={page.closeAddMilestone}
+        onCreated={page.refreshAfterAddMilestone}
+        projectId={project.id}
       />
     </div>
   )

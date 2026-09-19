@@ -1,10 +1,12 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import {
+  createMilestoneResponseSchema,
   milestoneRecordSchema,
   programmeRecordSchema,
   programsFilterOptionsSchema,
   programsOverviewSchema,
   projectRecordSchema,
+  type CreateMilestoneRequest,
   type ProgramsPagination,
   type ProgramsQuery,
   type ProjectsQuery,
@@ -106,6 +108,14 @@ export function useProjectMilestones(projectId: string, page: number) {
     enabled: Boolean(projectId),
     placeholderData: keepPreviousData,
   })
+}
+
+export function createMilestone(projectId: string, input: CreateMilestoneRequest) {
+  return api.post(
+    `/programs/projects/${projectId}/milestones`,
+    input,
+    createMilestoneResponseSchema,
+  )
 }
 
 /** The bottlenecks linked to one project. */

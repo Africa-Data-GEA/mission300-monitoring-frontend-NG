@@ -5,6 +5,7 @@ export function useProjectDetailPage(projectId: string) {
   const [milestonePage, setMilestonePage] = useState(1)
   const [bottleneckPage, setBottleneckPage] = useState(1)
   const [createOpen, setCreateOpen] = useState(false)
+  const [addMilestoneOpen, setAddMilestoneOpen] = useState(false)
 
   const project = useProject(projectId)
   const milestones = useProjectMilestones(projectId, milestonePage)
@@ -24,5 +25,9 @@ export function useProjectDetailPage(projectId: string) {
     openCreate: () => setCreateOpen(true),
     closeCreate: () => setCreateOpen(false),
     refreshAfterCreate: () => void bottlenecks.refetch(),
+    addMilestoneOpen,
+    openAddMilestone: () => setAddMilestoneOpen(true),
+    closeAddMilestone: () => setAddMilestoneOpen(false),
+    refreshAfterAddMilestone: () => void milestones.refetch(),
   }
 }

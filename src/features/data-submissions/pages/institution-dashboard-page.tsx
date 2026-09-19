@@ -37,8 +37,12 @@ export function InstitutionDashboardPage() {
     enabled: !!session,
   })
   const institution = account?.institution ?? null
+  // Kept in sync with the REVIEW_ROLES lists in workflow-shell.tsx and
+  // submissions-page.tsx: a multi-role account (e.g. provider +
+  // system-administrator) still needs the validation-detail link here to
+  // work rather than silently rendering as plain, unlinked text.
   const canReview = !!session && grantedRoles(session.user).some((role) =>
-    role === 'data-reviewer' || role === 'validator',
+    role === 'data-reviewer' || role === 'validator' || role === 'system-administrator',
   )
 
   const obligations = useObligations(FETCH_ALL)
@@ -164,23 +168,41 @@ export function InstitutionDashboardPage() {
           <p className="mt-3 text-sm text-text-muted">No submissions yet.</p>
         ) : (
           <div className="mt-3 space-y-2">
-            {mySubmissions.map((row) => (
-              <Link
-                key={row.id}
-                to={`/data-submissions/validation/${row.id}`}
-                className="flex flex-wrap items-center justify-between gap-3 rounded-card border border-border-default bg-surface p-3 transition-colors hover:bg-surface-sunken"
-              >
-                <div>
-                  <p className="text-sm font-medium text-text-default">
-                    {row.dataset} · {row.reportingPeriod}
-                  </p>
-                  <p className="mt-0.5 text-xs text-text-muted">
-                    v{row.version} · {row.submittedAtLabel}
-                  </p>
+            {mySubmissions.map((row) => {
+              // The validation detail route is reviewer/validator-only
+              // (rolePage(REVIEWERS, ...) in routes.tsx) — a provider
+              // without that role sees this same row as a plain summary
+              // instead of a link that would just bounce to /access-denied.
+              const content = (
+                <>
+                  <div>
+                    <p className="text-sm font-medium text-text-default">
+                      {row.dataset} · {row.reportingPeriod}
+                    </p>
+                    <p className="mt-0.5 text-xs text-text-muted">
+                      v{row.version} · {row.submittedAtLabel}
+                    </p>
+                  </div>
+                  <WorkflowStatusBadge status={row.status} />
+                </>
+              )
+              return canReview ? (
+                <Link
+                  key={row.id}
+                  to={`/data-submissions/validation/${row.id}`}
+                  className="flex flex-wrap items-center justify-between gap-3 rounded-card border border-border-default bg-surface p-3 transition-colors hover:bg-surface-sunken"
+                >
+                  {content}
+                </Link>
+              ) : (
+                <div
+                  key={row.id}
+                  className="flex flex-wrap items-center justify-between gap-3 rounded-card border border-border-default bg-surface p-3"
+                >
+                  {content}
                 </div>
-                <WorkflowStatusBadge status={row.status} />
-              </Link>
-            ))}
+              )
+            })}
           </div>
         )}
       </Card>

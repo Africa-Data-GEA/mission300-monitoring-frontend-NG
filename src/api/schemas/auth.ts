@@ -4,20 +4,17 @@ export const identifyAccountRequestSchema = z.object({
   email: z.email('Enter a valid email address'),
 })
 
+/**
+ * Step 1's response is now just the echoed email (WEB-006 fix) — the
+ * backend used to also return displayName/institution here, but that
+ * personalized "Welcome back, {name}" before the password was even typed,
+ * which combined with the step returning a different status/body for a
+ * known-vs-unknown email made this an account-enumeration oracle. Personal
+ * details now only ever appear after a successful password verification
+ * (see loginResponseSchema below).
+ */
 export const identifiedAccountSchema = z.object({
   email: z.email(),
-  displayName: z.string().min(1),
-  /**
-   * Allowed to be empty. The Nigeria backend returns `""` for an account with
-   * no institution assigned yet, which is a legitimate state — an oversight
-   * user, or a provider whose institution has not been linked. Requiring a
-   * non-empty string here rejected the whole 200 response and failed sign-in
-   * at the email step with no way for the user to proceed.
-   *
-   * Nothing in the sign-in flow renders this field; it is carried so the
-   * password step can show who is signing in once a backend populates it.
-   */
-  institution: z.string(),
 })
 
 export const loginRequestSchema = z.object({
@@ -58,6 +55,13 @@ export const loginResponseSchema = z.object({
   }),
 })
 
+/** POST /auth/refresh's response - just a new access token. The refresh
+ * token itself never appears here; it lives only in the httpOnly cookie the
+ * browser sends automatically, never something JS reads or writes. */
+export const refreshResponseSchema = z.object({
+  accessToken: z.string().min(1),
+})
+
 export const forgotPasswordRequestSchema = z.object({
   email: z.email('Enter a valid email address'),
 })
@@ -72,6 +76,10 @@ export const setPasswordRequestSchema = z.object({
 })
 
 export const setPasswordResponseSchema = z.object({
+  message: z.string().min(1),
+})
+
+export const logoutResponseSchema = z.object({
   message: z.string().min(1),
 })
 

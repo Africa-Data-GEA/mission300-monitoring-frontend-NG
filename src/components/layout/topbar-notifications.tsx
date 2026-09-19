@@ -1,44 +1,15 @@
-import { useState } from 'react'
 import { Bell, CheckCheck } from 'lucide-react'
 import { Link } from 'react-router'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-
-const NOTIFICATIONS = [
-  {
-    id: 'notification-validation',
-    title: 'Metering submission awaiting validation',
-    description: 'A new quarterly submission is ready for review.',
-    time: '12 minutes ago',
-    to: '/data-submissions',
-  },
-  {
-    id: 'notification-project',
-    title: 'Tariff Order Implementation is delayed',
-    description: 'The project requires a ministerial funding decision.',
-    time: '2 hours ago',
-    to: '/programs/projects/PRJ-2025-033',
-  },
-  {
-    id: 'notification-kpi',
-    title: 'Private capital KPI requires validation',
-    description: 'Evidence has not yet been confirmed for publication.',
-    time: 'Yesterday',
-    to: '/kpis?kpi=M300-P3-006',
-  },
-] as const
-type NotificationId = (typeof NOTIFICATIONS)[number]['id']
+import { formatRelativeTime } from '@/lib/format'
+import { useMarkAllNotificationsRead, useMarkNotificationRead, useNotifications } from '@/features/notifications/api'
 
 export function TopbarNotifications() {
-  const [unread, setUnread] = useState(() => new Set(NOTIFICATIONS.map((item) => item.id)))
-  const unreadCount = unread.size
-
-  function markRead(id: NotificationId) {
-    setUnread((current) => {
-      const next = new Set(current)
-      next.delete(id)
-      return next
-    })
-  }
+  const { data } = useNotifications()
+  const markRead = useMarkNotificationRead()
+  const markAllRead = useMarkAllNotificationsRead()
+  const notifications = data?.items ?? []
+  const unreadCount = data?.unreadCount ?? 0
 
   return (
     <Popover>
@@ -65,8 +36,8 @@ export function TopbarNotifications() {
           </div>
           <button
             type="button"
-            disabled={unreadCount === 0}
-            onClick={() => setUnread(new Set())}
+            disabled={unreadCount === 0 || markAllRead.isPending}
+            onClick={() => markAllRead.mutate()}
             className="inline-flex items-center gap-1.5 text-xs font-medium text-link disabled:cursor-not-allowed disabled:opacity-50"
           >
             <CheckCheck className="size-3.5" aria-hidden="true" />
@@ -74,30 +45,35 @@ export function TopbarNotifications() {
           </button>
         </div>
 
-        <ul className="divide-y divide-border-default">
-          {NOTIFICATIONS.map((notification) => {
-            const isUnread = unread.has(notification.id)
-            return (
+        {notifications.length === 0 ? (
+          <p className="px-4 py-6 text-center text-sm text-text-muted">No notifications yet.</p>
+        ) : (
+          <ul className="divide-y divide-border-default">
+            {notifications.map((notification) => (
               <li key={notification.id}>
                 <Link
-                  to={notification.to}
-                  onClick={() => markRead(notification.id)}
+                  to={notification.link}
+                  onClick={() => {
+                    if (!notification.read) markRead.mutate(notification.id)
+                  }}
                   className="flex gap-3 px-4 py-3 transition-colors hover:bg-surface-sunken"
                 >
                   <span
                     aria-hidden="true"
-                    className={`mt-1.5 size-2 shrink-0 rounded-full ${isUnread ? 'bg-brand-600' : 'bg-border-strong'}`}
+                    className={`mt-1.5 size-2 shrink-0 rounded-full ${!notification.read ? 'bg-brand-600' : 'bg-border-strong'}`}
                   />
                   <span className="min-w-0 flex-1">
                     <span className="block text-sm font-medium text-text-default">{notification.title}</span>
                     <span className="mt-0.5 block text-xs text-text-muted">{notification.description}</span>
-                    <span className="mt-1 block text-2xs text-text-subtle">{notification.time}</span>
+                    <span className="mt-1 block text-2xs text-text-subtle">
+                      {formatRelativeTime(notification.createdAt)}
+                    </span>
                   </span>
                 </Link>
               </li>
-            )
-          })}
-        </ul>
+            ))}
+          </ul>
+        )}
       </PopoverContent>
     </Popover>
   )

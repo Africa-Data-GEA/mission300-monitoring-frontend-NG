@@ -93,6 +93,10 @@ export function updateUserRoles(userId: string, roles: readonly string[]) {
   return api.patch(`/administration/users/${encodeURIComponent(userId)}/roles`, { roles }, userAccountSchema)
 }
 
+export function updateUserInstitution(userId: string, institution: string) {
+  return api.patch(`/administration/users/${encodeURIComponent(userId)}/institution`, { institution }, userAccountSchema)
+}
+
 export function useSecuritySettings() {
   return useQuery({
     queryKey: [...administrationKeys.all, 'security'],

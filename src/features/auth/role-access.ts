@@ -6,6 +6,15 @@ import { administrationOverview, administrationUsers } from '@/mocks/data/admini
  * 'all' is the system-administrator sentinel; every other role lists the
  * exact nav sections its own `modules` array maps to. Update this if a
  * role's `modules` list changes or a nav item's `moduleKey` is added.
+ *
+ * `programme-admin` is a finer-grained key nested under `programs`: it gates
+ * only "Add programme" (a portfolio-level, cross-institution record — see
+ * mocks/data/programs.ts). institutional-data-provider reaches `programs`
+ * for its own institution's projects, milestones and bottlenecks (the old
+ * Implementation Register / Bottlenecks & Exceptions pages, per
+ * administration.ts's role definition), but is institution-scoped and never
+ * creates a programme itself. Same pattern as `kpi-metadata` under
+ * `kpi-directory`.
  */
 const ROLE_MODULE_KEYS: Record<string, readonly string[] | 'all'> = {
   'system-administrator': 'all',
@@ -17,6 +26,7 @@ const ROLE_MODULE_KEYS: Record<string, readonly string[] | 'all'> = {
     'pillar-dashboards',
     'state-disco',
     'programs',
+    'programme-admin',
     'kpi-directory',
     'reports',
     'learning-log',

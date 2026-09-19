@@ -40,7 +40,7 @@ const DEFAULT_BRAND_CONFIG: BrandConfig = {
   secondaryColor: '#ffca05',
   textColor: '#101828',
   sidebarColor: '#004972',
-  logoUrl: '/Logos/geapp.png',
+  logoUrl: '',
   currency: { code: 'NGN', symbol: '₦', locale: 'en-NG' },
   fonts: {
     h1: DEFAULT_FONT,

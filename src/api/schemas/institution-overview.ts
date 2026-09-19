@@ -1,5 +1,8 @@
 import { z } from 'zod'
 import { obligationSchema } from './data-submissions/obligations'
+import { improvementDirectionSchema, pillarIdSchema } from './common'
+import { executionStatusSchema, registerPrioritySchema } from './programs'
+import { lifecycleStageSchema } from './bottlenecks'
 
 export const institutionSummarySchema = z.object({
   id: z.string().min(1),
@@ -26,21 +29,21 @@ export const institutionKpiSchema = z.object({
   code: z.string().min(1),
   name: z.string().min(1),
   unit: z.string().min(1),
-  pillar: z.string().min(1),
+  pillar: pillarIdSchema,
   period: z.string().min(1),
   value: z.number(),
   target: z.number().nullable(),
   targetLabel: z.string().nullable(),
-  direction: z.enum(['HIGHER_IS_BETTER', 'LOWER_IS_BETTER']),
+  direction: improvementDirectionSchema,
   onTrack: z.boolean().nullable(),
 })
 
 export const institutionProgrammeSchema = z.object({
   id: z.string().min(1),
   name: z.string().min(1),
-  pillar: z.string().min(1),
-  status: z.string().min(1),
-  priority: z.string().min(1),
+  pillar: pillarIdSchema,
+  status: executionStatusSchema,
+  priority: registerPrioritySchema,
   startDate: z.iso.datetime(),
   endDate: z.iso.datetime(),
   projectCount: z.number().int().min(0),
@@ -50,9 +53,9 @@ export const institutionProjectSchema = z.object({
   id: z.string().min(1),
   name: z.string().min(1),
   programme: z.string().min(1),
-  pillar: z.string().min(1),
-  lifecycleStage: z.string().min(1),
-  currentStatus: z.string().min(1),
+  pillar: pillarIdSchema,
+  lifecycleStage: lifecycleStageSchema,
+  currentStatus: executionStatusSchema,
   startDate: z.iso.datetime(),
   endDate: z.iso.datetime().nullable(),
 })

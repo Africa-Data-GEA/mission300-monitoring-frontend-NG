@@ -4,7 +4,6 @@ import type {
   KpiExplorerOverview,
   KpiProfile,
   ReadinessTier,
-  ValidationStatus,
 } from '@/api/schemas/kpi-explorer'
 import type { PillarId } from '@/api/schemas/common'
 import type { KpiExtraction } from '@/api/schemas/data-submissions'
@@ -1159,11 +1158,26 @@ const CATALOGUE: KpiCatalogueRow[] = [
  * has one of these (see `M300-PX-001`'s SE4ALL alignment work) still states
  * it inline and wins over the backfilled default.
  */
-type RawKpiProfile = Omit<KpiProfile, 'targets' | 'externalStandardAlignment'> &
-  Partial<Pick<KpiProfile, 'targets' | 'externalStandardAlignment'>>
+type RawHistoryPoint = Omit<KpiProfile['history'][number], 'id' | 'editable'> &
+  Partial<Pick<KpiProfile['history'][number], 'id' | 'editable'>>
 
+type RawKpiProfile = Omit<KpiProfile, 'targets' | 'externalStandardAlignment' | 'history'> &
+  Partial<Pick<KpiProfile, 'targets' | 'externalStandardAlignment'>> & { history: RawHistoryPoint[] }
+
+/** Every hand-authored profile below predates id/editable on history points -
+ * all of them are seeded reference data, never a manual override, so both
+ * default here rather than being typed out on every array entry. */
 function withDefaults(profile: RawKpiProfile): KpiProfile {
-  return { targets: [], externalStandardAlignment: null, ...profile }
+  return {
+    targets: [],
+    externalStandardAlignment: null,
+    ...profile,
+    history: profile.history.map((point, index) => ({
+      id: `${profile.id}-history-${index}`,
+      editable: false,
+      ...point,
+    })),
+  }
 }
 
 const RAW_PROFILES: Record<string, RawKpiProfile> = {
@@ -4826,10 +4840,12 @@ export function publishKpiValue(
   profile.history = [
     ...profile.history,
     {
+      id: `${extraction.kpiId}-submission-${submissionId}`,
       period: extraction.reportingPeriod,
       value: extraction.value,
       validationStatus: resultingStatus,
       submissionId,
+      editable: false,
     },
   ]
 
@@ -4898,9 +4914,8 @@ export function setKpiCurrentValue(
   id: string,
   patch: {
     value: number
-    currentLabel: string
     reportingPeriod: string
-    validationStatus: ValidationStatus
+    resultingStatus: 'confirmed' | 'provisional'
     note?: string
   },
 ): KpiProfile | null {
@@ -4909,16 +4924,18 @@ export function setKpiCurrentValue(
 
   const updatedAt = new Date().toISOString()
   row.lastUpdated = updatedAt
-  row.validationStatus = patch.validationStatus
+  row.validationStatus = patch.resultingStatus
 
   const profile = PROFILES[id] ?? getKpiProfile(id)
   if (!profile) return null
 
   profile.current = patch.value
-  profile.currentLabel = patch.currentLabel
+  // Never stored as free text - always derived from value + unit, matching
+  // the real backend's toKpiProfile() exactly (kpi-explorer.mappers.ts).
+  profile.currentLabel = `${patch.value}${profile.unit ? ` ${profile.unit}` : ''}`
   profile.reportingPeriod = patch.reportingPeriod
-  profile.validationStatus = patch.validationStatus
-  profile.confidence = patch.validationStatus === 'confirmed' ? 'confirmed' : 'requires-validation'
+  profile.validationStatus = patch.resultingStatus
+  profile.confidence = patch.resultingStatus === 'confirmed' ? 'confirmed' : 'requires-validation'
   profile.validationDecision = patch.note
     ? `Manually set by an administrator: ${patch.note}`
     : 'Manually set by an administrator, outside the data submission workflow.'
@@ -4926,15 +4943,75 @@ export function setKpiCurrentValue(
   profile.history = [
     ...profile.history,
     {
+      id: `${id}-override-${Date.now()}`,
       period: patch.reportingPeriod,
       value: patch.value,
-      validationStatus: patch.validationStatus,
+      validationStatus: patch.resultingStatus,
       submissionId: null,
+      editable: true,
     },
   ]
 
   PROFILES[id] = profile
   return profile
+}
+
+/** Only a point created by setKpiCurrentValue() (editable: true) can be
+ * corrected or removed here - mirrors the real backend's
+ * findEditableHistoryPoint() guard against touching approved-submission
+ * history. Returns null if the KPI or the point itself doesn't exist, or
+ * the point isn't editable. */
+function findEditableHistoryPoint(id: string, valueId: string) {
+  const profile = PROFILES[id] ?? getKpiProfile(id)
+  if (!profile) return null
+  const point = profile.history.find((entry) => entry.id === valueId)
+  if (!point || !point.editable) return null
+  return { profile, point }
+}
+
+export function editKpiHistoryPoint(
+  id: string,
+  valueId: string,
+  patch: { value: number; reportingPeriod: string; resultingStatus: 'confirmed' | 'provisional'; note?: string },
+): KpiProfile | 'not-editable' | null {
+  const found = findEditableHistoryPoint(id, valueId)
+  if (!found) return profileExistsFor(id) ? 'not-editable' : null
+  const { profile, point } = found
+
+  point.period = patch.reportingPeriod
+  point.value = patch.value
+  point.validationStatus = patch.resultingStatus
+
+  const latest = profile.history.at(-1)
+  if (latest === point) {
+    profile.current = patch.value
+    profile.currentLabel = `${patch.value}${profile.unit ? ` ${profile.unit}` : ''}`
+    profile.reportingPeriod = patch.reportingPeriod
+    profile.validationStatus = patch.resultingStatus
+  }
+
+  PROFILES[id] = profile
+  return profile
+}
+
+export function deleteKpiHistoryPoint(id: string, valueId: string): KpiProfile | 'not-editable' | null {
+  const found = findEditableHistoryPoint(id, valueId)
+  if (!found) return profileExistsFor(id) ? 'not-editable' : null
+  const { profile } = found
+
+  profile.history = profile.history.filter((entry) => entry.id !== valueId)
+  const latest = profile.history.at(-1) ?? null
+  profile.current = latest?.value ?? null
+  profile.currentLabel = latest ? `${latest.value}${profile.unit ? ` ${profile.unit}` : ''}` : 'No data yet'
+  profile.reportingPeriod = latest?.period ?? ''
+  profile.validationStatus = latest?.validationStatus ?? 'future'
+
+  PROFILES[id] = profile
+  return profile
+}
+
+function profileExistsFor(id: string): boolean {
+  return Boolean(PROFILES[id] ?? getKpiProfile(id))
 }
 
 /**

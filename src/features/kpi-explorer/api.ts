@@ -139,3 +139,33 @@ export function useSetKpiCurrentValue(id: string) {
     },
   })
 }
+
+/**
+ * Corrects or removes a previously-set history point — only ever a point
+ * that itself came from useSetKpiCurrentValue above (`editable: true`); a
+ * point that arrived through an approved data submission is rejected by
+ * the backend rather than silently accepted here.
+ */
+export function useEditKpiHistoryPoint(id: string) {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: ({ valueId, ...input }: SetKpiCurrentValueRequest & { valueId: string }) =>
+      api.patch(`/kpi-explorer/kpis/${id}/history/${valueId}`, input, kpiProfileSchema),
+    onSuccess: (updated) => {
+      client.setQueryData(kpiExplorerKeys.profile(id), updated)
+      client.invalidateQueries({ predicate: (query) => query.queryKey[0] === 'kpi-explorer' && query.queryKey[1] === 'overview' })
+    },
+  })
+}
+
+export function useDeleteKpiHistoryPoint(id: string) {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (valueId: string) =>
+      api.delete(`/kpi-explorer/kpis/${id}/history/${valueId}`, kpiProfileSchema),
+    onSuccess: (updated) => {
+      client.setQueryData(kpiExplorerKeys.profile(id), updated)
+      client.invalidateQueries({ predicate: (query) => query.queryKey[0] === 'kpi-explorer' && query.queryKey[1] === 'overview' })
+    },
+  })
+}

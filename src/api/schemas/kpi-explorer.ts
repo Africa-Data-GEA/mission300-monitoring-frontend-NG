@@ -113,12 +113,17 @@ export const kpiCatalogueRowSchema = z.object({
 
 /** One point on the indicator's value history, for the trend chart. */
 export const kpiHistoryPointSchema = z.object({
+  id: z.string().min(1),
   period: z.string().min(1),
   value: z.number(),
   validationStatus: validationStatusSchema,
   /** The submission that published this point, where one did. Null for
    * points seeded before this traceability existed. */
   submissionId: z.string().nullable(),
+  /** True only for a point set via the "Set current value" admin override -
+   * a point that arrived through an approved data submission is never
+   * editable or deletable here, only through Data Submissions review. */
+  editable: z.boolean(),
 })
 
 /**
@@ -272,12 +277,19 @@ export const setKpiActiveRequestSchema = z.object({
  * (see publishKpiValue in mocks/data/kpi-explorer.ts) — for cases where an
  * administrator needs to record a figure without routing it through that
  * pipeline. Gated to system-administrator in the UI; see role-access.ts.
+ *
+ * Matches the backend's SetKpiCurrentValueDto exactly, including its two
+ * deliberate narrowings from the general KPI profile shape:
+ * - No `currentLabel` - the display label is always derived from
+ *   value + unit at read time, never stored as free text.
+ * - `resultingStatus` is confirmed/provisional only, not the full 5-value
+ *   validationStatusSchema vocabulary - those are the only two decisions an
+ *   approved submission can ever produce.
  */
 export const setKpiCurrentValueRequestSchema = z.object({
   value: z.number(),
-  currentLabel: z.string().trim().min(1, 'Describe the value, e.g. "38.31% (hydro only, NERC Q4 2025 report)"'),
   reportingPeriod: z.string().trim().min(1, 'State the reporting period, e.g. Q4 2025'),
-  validationStatus: validationStatusSchema,
+  resultingStatus: z.enum(['confirmed', 'provisional']),
   note: z.string().trim().max(500).optional(),
 })
 

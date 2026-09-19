@@ -148,7 +148,7 @@ export function BottlenecksPage() {
           setCreateOpen(false)
           void refetch()
         }}
-        institutions={options?.institutions ?? []}
+        institutions={(options?.institutions ?? []).filter((option) => option.value !== 'all')}
       />
     </div>
   )
