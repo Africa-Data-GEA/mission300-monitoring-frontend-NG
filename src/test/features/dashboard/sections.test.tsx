@@ -20,7 +20,7 @@ const {
 
 describe('Section A — headline cards', () => {
   it('renders exactly the four specified cards', () => {
-    render(<HeadlineCards cards={headlineCards} />)
+    renderWithRouter(<HeadlineCards cards={headlineCards} />)
 
     const section = screen.getByRole('region', { name: 'Headline metrics' })
     // Each card carries exactly one information trigger.
@@ -28,7 +28,7 @@ describe('Section A — headline cards', () => {
   })
 
   it('renders people with electricity access against its baseline and target', () => {
-    render(<HeadlineCards cards={headlineCards} />)
+    renderWithRouter(<HeadlineCards cards={headlineCards} />)
 
     expect(screen.getByText('People with electricity access')).toBeInTheDocument()
     expect(screen.getByText('137.3M')).toBeInTheDocument()
@@ -45,7 +45,7 @@ describe('Section A — headline cards', () => {
    */
   it('never claims a headline outcome has no approved trajectory', async () => {
     const user = userEvent.setup()
-    render(<HeadlineCards cards={headlineCards} />)
+    renderWithRouter(<HeadlineCards cards={headlineCards} />)
 
     const chart = screen.getByRole('img', {
       name: /People with electricity access/,
@@ -62,16 +62,16 @@ describe('Section A — headline cards', () => {
    * as current-period data.
    */
   it('always shows the source year on the access rate card', () => {
-    render(<HeadlineCards cards={headlineCards} />)
+    renderWithRouter(<HeadlineCards cards={headlineCards} />)
 
     expect(screen.getByText('70.0%')).toBeInTheDocument()
     expect(screen.getByText('2023')).toBeInTheDocument()
   })
 
   it('renders the generation capacity card with a sparkline', async () => {
-    render(<HeadlineCards cards={headlineCards} />)
+    renderWithRouter(<HeadlineCards cards={headlineCards} />)
 
-    expect(screen.getByText('5.4 GW')).toBeInTheDocument()
+    expect(screen.getByText('6.2 GW')).toBeInTheDocument()
     // The trend chart is an ApexCharts line chart (GenerationCapacityLineChart),
     // not the plain SVG Sparkline — it exposes itself accessibly as an img.
     expect(
@@ -88,7 +88,7 @@ describe('Section A — headline cards', () => {
   })
 
   it('renders clean cooking access against its baseline and target', () => {
-    render(<HeadlineCards cards={headlineCards} />)
+    renderWithRouter(<HeadlineCards cards={headlineCards} />)
 
     expect(screen.getByText('Clean cooking access')).toBeInTheDocument()
     expect(screen.getByText('26.0%')).toBeInTheDocument()
@@ -102,7 +102,7 @@ describe('Section A — headline cards', () => {
    * lower-is-better — otherwise "+1 vs Q2" would render green.
    */
   it('moves targets and baselines into the information popover, not the card', () => {
-    render(<HeadlineCards cards={headlineCards} />)
+    renderWithRouter(<HeadlineCards cards={headlineCards} />)
 
     // The target text must not be printed on the card face.
     expect(
@@ -113,7 +113,7 @@ describe('Section A — headline cards', () => {
   })
 
   it('exposes the target through the information popover', async () => {
-    render(<HeadlineCards cards={headlineCards} />)
+    renderWithRouter(<HeadlineCards cards={headlineCards} />)
 
     // fireEvent.click rather than userEvent.click: the popover's container
     // opens on hover, and userEvent's click simulates a pointer moving over
@@ -265,14 +265,20 @@ describe('Section C — national performance', () => {
 /* ---------------- Section D ---------------- */
 
 describe('Section D — delivery status and exceptions', () => {
+  const projectTotal = deliveryStatus.ongoingProjects.length
+  const projectPageSize = 5
+
   it('renders ongoing projects in a paginated table with drill-down links', () => {
     renderWithRouter(<DeliveryStatusSection panel={deliveryStatus} onProjectsChanged={() => {}} />)
 
     expect(screen.getAllByRole('table')).toHaveLength(2)
-    expect(screen.getByText(/Showing 1.*5 of 8 records/)).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: 'North East 330kV Line Upgrade' })).toHaveAttribute(
+    expect(
+      screen.getByText(new RegExp(`Showing 1.*${Math.min(projectPageSize, projectTotal)} of ${projectTotal} records`)),
+    ).toBeInTheDocument()
+    const firstPageProject = deliveryStatus.ongoingProjects[0]!
+    expect(screen.getByRole('link', { name: firstPageProject.name })).toHaveAttribute(
       'href',
-      '/programs/projects/PRJ-2025-011',
+      `/programs/projects/${firstPageProject.id}`,
     )
     expect(screen.getByRole('link', { name: 'Transmission Rehabilitation Programme' })).toHaveAttribute(
       'href',
@@ -287,8 +293,12 @@ describe('Section D — delivery status and exceptions', () => {
     const projectsPanel = within(screen.getByRole('tabpanel'))
     await user.click(projectsPanel.getByRole('button', { name: 'Next page' }))
 
-    expect(screen.getByText(/Showing 6.*8 of 8 records/)).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: 'Feeder Rehabilitation Lots, Lagos' })).toBeInTheDocument()
+    const secondPageLast = Math.min(projectPageSize * 2, projectTotal)
+    expect(
+      screen.getByText(new RegExp(`Showing ${projectPageSize + 1}.*${secondPageLast} of ${projectTotal} records`)),
+    ).toBeInTheDocument()
+    const secondPageProject = deliveryStatus.ongoingProjects[projectPageSize]!
+    expect(screen.getByRole('link', { name: secondPageProject.name })).toBeInTheDocument()
   })
 
   it('searches projects and paginates the filtered results', async () => {
@@ -313,7 +323,7 @@ describe('Section D — delivery status and exceptions', () => {
 
     expect(
       screen.getByRole('img', {
-        name: 'Delivery status distribution for 8 ongoing projects',
+        name: `Delivery status distribution for ${projectTotal} ongoing projects`,
       }),
     ).toBeInTheDocument()
   })

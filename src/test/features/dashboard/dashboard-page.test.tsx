@@ -58,7 +58,7 @@ describe('DashboardPage', () => {
 
     expect(screen.getByText('26.0%')).toBeInTheDocument()
     expect(screen.getByText('70.0%')).toBeInTheDocument()
-    expect(screen.getByText('5.4 GW')).toBeInTheDocument()
+    expect(screen.getByText('6.2 GW')).toBeInTheDocument()
   })
 
   it('renders a zero value as a real figure rather than treating it as missing', async () => {

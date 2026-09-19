@@ -2,8 +2,17 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { createMemoryRouter, RouterProvider } from 'react-router'
-import { describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { AppShell } from '@/components/layout/app-shell'
+import { saveAuthSession } from '@/features/auth/auth-session'
+
+// Both are fire-and-forget background warmers unrelated to what this file
+// tests (drawer/filter-bar behaviour), and their async/deferred nature (a
+// setTimeout, a queryClient.prefetchQuery) can otherwise resolve mid-test
+// and race with assertions. Stub them so this file only exercises AppShell's
+// own chrome.
+vi.mock('@/app/route-chunks', () => ({ prefetchRouteChunks: () => undefined }))
+vi.mock('@/features/dashboard/api', () => ({ prefetchExecutiveOverview: () => Promise.resolve() }))
 
 /**
  * AppShell mounts the global filter bar, which fetches its options, so the
@@ -29,6 +38,11 @@ function renderShell(route = '/') {
             handle: { globalFilters: true },
           },
           { path: 'other', element: <p>Other content</p> },
+          // The drawer's first real Sidebar link points at /dashboard -
+          // defined here so "follow a nav link" navigates successfully
+          // instead of 404ing (a wildcard sibling here would instead shadow
+          // the index route above, which is worse).
+          { path: 'dashboard', element: <p>Dashboard content</p> },
         ],
       },
     ],
@@ -43,6 +57,22 @@ function renderShell(route = '/') {
 }
 
 describe('AppShell', () => {
+  // Sidebar (rendered inside AppShell) filters nav items through
+  // canUserReachModule(session.user, item.moduleKey) - with no session,
+  // the nav renders empty, which breaks anything that queries a nav link.
+  beforeEach(() => {
+    saveAuthSession({
+      accessToken: 'mock-token-usr-011',
+      user: {
+        id: 'usr-011',
+        name: 'John Doe',
+        email: 'john@example.com',
+        role: 'system-administrator',
+      },
+    })
+  })
+  afterEach(() => sessionStorage.clear())
+
   it('renders the top bar', () => {
     renderShell()
 

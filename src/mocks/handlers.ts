@@ -2,6 +2,7 @@ import { http, HttpResponse, delay } from './local-router'
 import { PILLARS } from '@/api/schemas/common'
 import { buildExecutiveOverview, buildProjectStatusSummary } from './data/executive-overview'
 import { filterOptions } from './data/filters'
+import { getNotificationsFeed, markAllNotificationsRead, markNotificationRead } from './data/notifications'
 import {
   administrationAuditLog,
   administrationFilterOptions,
@@ -438,6 +439,42 @@ export const handlers = [
   http.get('/api/health', () =>
     HttpResponse.json({ status: 'ok', version: 'mock' }),
   ),
+
+  /**
+   * GET /api/institutions — the invite-user and edit-user-institution
+   * dialogs' picker (see src/features/administration/api.ts's
+   * useInstitutionOptions). Sourced from the real stakeholder institution
+   * register plus EMRC itself - EMRC is the platform's own operating body,
+   * not a tracked external stakeholder, so it isn't in stakeholderInstitutions
+   * but is still a real institution a user can be invited under (reviewers/
+   * administrators are typically EMRC staff).
+   */
+  http.get('/api/institutions', async () => {
+    await delay(150)
+    return HttpResponse.json([
+      { id: 'ins-emrc', name: 'EMRC' },
+      ...stakeholderInstitutions.map((institution) => ({ id: institution.id, name: institution.name })),
+    ])
+  }),
+
+  http.get('/api/notifications', async () => {
+    await delay(150)
+    return HttpResponse.json(getNotificationsFeed())
+  }),
+
+  http.patch('/api/notifications/:id/read', async ({ params }) => {
+    await delay(150)
+    const notification = markNotificationRead(String(params.id))
+    if (!notification) {
+      return HttpResponse.json({ message: `No notification found with id ${params.id}` }, { status: 404 })
+    }
+    return HttpResponse.json(notification)
+  }),
+
+  http.patch('/api/notifications/read-all', async () => {
+    await delay(150)
+    return HttpResponse.json({ count: markAllNotificationsRead() })
+  }),
 
   /**
    * GET /api/kpi-explorer/filters

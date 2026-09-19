@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { NAVIGATION, READY_PILLARS } from '@/config/navigation'
+import { ADMIN_MENU_ITEMS, NAVIGATION, READY_PILLARS } from '@/config/navigation'
 import { PILLARS, PILLAR_LABELS } from '@/types/domain'
 
 const allItems = NAVIGATION.flatMap((group) => group.items)
@@ -9,16 +9,23 @@ describe('NAVIGATION', () => {
    * The wireframe defined four groups; "Analytics" was added afterward on
    * stakeholder feedback to give the KPI Directory — a reference catalogue,
    * not a primary page — its own clearly-labelled section near the bottom
-   * rather than sitting inside Monitoring & Analysis.
+   * rather than sitting inside Monitoring & Analysis. Administration used to
+   * be a fifth group here, but Stakeholders/User access are account-
+   * management concerns an admin reaches occasionally, not primary
+   * navigation — they moved into the profile popover (ADMIN_MENU_ITEMS,
+   * rendered by SidebarUserMenu) instead.
    */
-  it('defines the five navigation groups', () => {
+  it('defines the four navigation groups', () => {
     expect(NAVIGATION.map((group) => group.label)).toEqual([
       'Monitoring & Analysis',
       'Delivery tracking',
       'Data operations',
       'Analytics',
-      'Administration',
     ])
+  })
+
+  it('moves Stakeholders and Administration into the profile popover menu instead', () => {
+    expect(ADMIN_MENU_ITEMS.map((item) => item.label)).toEqual(['Stakeholders', 'Administration'])
   })
 
   it('has no empty groups', () => {
@@ -68,14 +75,14 @@ describe('NAVIGATION', () => {
 
       expect(ready.map((item) => [item.label, item.to])).toEqual([
         ['Executive Overview', '/dashboard'],
+        ['Overview', '/overview'],
         ['Pillar dashboards', '/pillars'],
         ['State & DisCo', '/state-disco'],
         ['Programs', '/programs'],
         ['Data submissions', '/data-submissions'],
         ['Reports & exports', '/reports'],
+        ['Learning & decision log', '/learning-log'],
         ['KPI Directory', '/kpis'],
-        ['Stakeholders', '/stakeholders'],
-        ['User access', '/administration'],
       ])
     })
   })

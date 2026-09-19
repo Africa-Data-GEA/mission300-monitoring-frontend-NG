@@ -1,11 +1,29 @@
 import { screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { Sidebar } from '@/components/layout/sidebar'
 import { NAVIGATION } from '@/config/navigation'
+import { saveAuthSession } from '@/features/auth/auth-session'
 import { renderWithProviders as renderWithRouter } from '@/test/render'
 
 describe('Sidebar', () => {
+  // Sidebar filters every nav item through canUserReachModule(session.user,
+  // item.moduleKey) - with no session, everything is filtered out and the
+  // nav renders empty. system-administrator has the 'all' access sentinel,
+  // so every item in NAVIGATION is visible for these structural tests.
+  beforeEach(() => {
+    saveAuthSession({
+      accessToken: 'mock-token-usr-011',
+      user: {
+        id: 'usr-011',
+        name: 'John Doe',
+        email: 'john@example.com',
+        role: 'system-administrator',
+      },
+    })
+  })
+  afterEach(() => sessionStorage.clear())
+
   it('is exposed as the primary navigation landmark', () => {
     renderWithRouter(<Sidebar />)
 
@@ -15,14 +33,14 @@ describe('Sidebar', () => {
   it('renders the brand mark', () => {
     renderWithRouter(<Sidebar />)
 
-    expect(screen.getByAltText('gEApp')).toHaveClass('h-11')
+    expect(screen.getByAltText(/Mission 300/)).toHaveClass('h-10')
   })
 
   it('renders the signed-in user and role', () => {
     renderWithRouter(<Sidebar />)
 
     expect(screen.getByText('John Doe')).toBeInTheDocument()
-    expect(screen.getByText('Administrator')).toBeInTheDocument()
+    expect(screen.getByText('System Administrator')).toBeInTheDocument()
   })
 
   it('hides the decorative user initials from assistive technology', () => {
@@ -42,7 +60,10 @@ describe('Sidebar', () => {
 
     await user.click(screen.getByRole('button', { name: 'View and edit profile' }))
     expect(screen.getByRole('dialog', { name: 'Your profile' })).toBeInTheDocument()
-    expect(screen.getByLabelText('Full name')).toHaveValue('John Doe')
+    // The dialog's "Full name" field is seeded from the fetched account
+    // record (GET /api/users/me), not the session's own cached name - usr-011
+    // resolves to Grace Etim in the mock administration data.
+    expect(screen.getByLabelText('Full name')).toHaveValue('Grace Etim')
   })
 
   it('renders every navigation group heading', () => {
@@ -74,7 +95,7 @@ describe('Sidebar', () => {
 
       expect(
         screen.getByRole('link', { name: /Executive Overview/ }),
-      ).toHaveAttribute('href', '/')
+      ).toHaveAttribute('href', '/dashboard')
     })
 
     it('renders Reports & exports as a ready link', () => {
@@ -99,16 +120,19 @@ describe('Sidebar', () => {
         (item) => item.ready && !item.children,
       ).length
 
-      expect(screen.getAllByRole('link')).toHaveLength(readyCount)
+      // Scoped to the nav landmark: the header brand mark is also an <a>,
+      // but it isn't one of NAVIGATION's own items.
+      const nav = screen.getByRole('navigation', { name: 'Primary' })
+      expect(within(nav).getAllByRole('link')).toHaveLength(readyCount)
     })
   })
 
   describe('active state', () => {
     it('fills the current route with the brand green and reverses the text', () => {
-      renderWithRouter(<Sidebar />, { route: '/' })
+      renderWithRouter(<Sidebar />, { route: '/dashboard' })
 
       const active = screen.getByRole('link', { name: /Executive Overview/ })
-      expect(active).toHaveClass('bg-brand-800', 'text-text-inverse')
+      expect(active).toHaveClass('bg-chart-accent', 'text-brand-900')
     })
 
     /*
@@ -123,7 +147,7 @@ describe('Sidebar', () => {
       const inactive = screen.getByRole('link', { name: /Executive Overview/ })
       expect(inactive).toHaveClass('bg-surface-sunken/10')
       expect(inactive).not.toHaveClass('border')
-      expect(inactive).not.toHaveClass('bg-brand-800')
+      expect(inactive).not.toHaveClass('bg-chart-accent')
     })
 
     it('uses the inactive tint for other ready pages', () => {
@@ -143,7 +167,7 @@ describe('Sidebar', () => {
 
       expect(
         screen.getByRole('link', { name: /Executive Overview/ }),
-      ).not.toHaveClass('bg-brand-800')
+      ).not.toHaveClass('bg-chart-accent')
     })
   })
 

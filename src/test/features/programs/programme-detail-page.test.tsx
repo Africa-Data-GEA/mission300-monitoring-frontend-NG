@@ -3,11 +3,17 @@ import userEvent from '@testing-library/user-event'
 import { describe, expect, it } from 'vitest'
 import { ProgrammeDetailPage } from '@/features/programs/programme-detail-page'
 import { ProjectDetailPage } from '@/features/programs/project-detail-page'
-import { renderRoutesWithProviders, renderWithProviders } from '@/test/render'
+import { renderRoutesWithProviders } from '@/test/render'
 
 describe('ProgrammeDetailPage', () => {
   it('renders the programme header and its projects', async () => {
-    renderWithProviders(<ProgrammeDetailPage />, { route: '/programs/PRG-2025-001' })
+    // renderWithProviders' catch-all route can't supply useParams()'s
+    // programmeId - this page needs a real :programmeId route, same as the
+    // navigation test below.
+    renderRoutesWithProviders(
+      [{ path: 'programs/:programmeId', element: <ProgrammeDetailPage /> }],
+      { route: '/programs/PRG-2025-001' },
+    )
 
     expect(
       await screen.findByRole(

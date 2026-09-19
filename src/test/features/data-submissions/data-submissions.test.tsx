@@ -1,10 +1,28 @@
 import { screen, within } from '@testing-library/react'
-import { describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { ObligationsPage } from '@/features/data-submissions/pages/obligations-page'
 import { ValidationQueuePage } from '@/features/data-submissions/pages/validation-queue-page'
+import { saveAuthSession } from '@/features/auth/auth-session'
 import { renderWithProviders } from '@/test/render'
 
 describe('Data submission workflows', () => {
+  // ObligationActions hides Enter data/Upload for anyone without the
+  // institutional-data-provider role (a reviewer/validator sharing this
+  // table would otherwise see a button that only leads to access-denied) -
+  // with no session at all, both are hidden.
+  beforeEach(() => {
+    saveAuthSession({
+      accessToken: 'mock-token-usr-001',
+      user: {
+        id: 'usr-001',
+        name: 'Adebayo Ogunlesi',
+        email: 'a.ogunlesi@power.gov.ng',
+        role: 'institutional-data-provider',
+      },
+    })
+  })
+  afterEach(() => sessionStorage.clear())
+
   it('presents assigned obligations with separate entry methods', async () => {
     renderWithProviders(<ObligationsPage />, {
       route: '/data-submissions/obligations',

@@ -23,15 +23,16 @@ describe('Card', () => {
 
   describe('variants', () => {
     /*
-     * Cards carry no border and no shadow. Separation comes entirely from
-     * surface contrast — a white card on the grey page. Adding either back
-     * makes the dense layout read as heavy.
+     * The default variant carries a very light slate border so a card reads
+     * as its own surface even against another light background (on top of
+     * the existing surface-contrast separation) - see Card's own doc
+     * comment. It still carries no shadow: separation is border + surface
+     * contrast, not elevation.
      */
-    it('renders a default card with no border and no shadow', () => {
+    it('renders a default card with a light border and no shadow', () => {
       const { container } = render(<Card />)
 
-      expect(container.firstChild).toHaveClass('bg-surface')
-      expect(container.firstChild).not.toHaveClass('border')
+      expect(container.firstChild).toHaveClass('bg-surface', 'border', 'border-border-default')
       expect(container.firstChild).not.toHaveClass('shadow-card')
     })
 

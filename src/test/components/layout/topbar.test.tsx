@@ -2,7 +2,10 @@ import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it } from 'vitest'
 import { Topbar } from '@/components/layout/topbar'
-import { renderWithRouter } from '@/test/render'
+// Notifications are backend-connected (useNotifications, a real query) -
+// renderWithRouter alone has no QueryClientProvider, so it must be
+// renderWithProviders here even though these tests don't touch filters.
+import { renderWithProviders as renderWithRouter } from '@/test/render'
 
 describe('Topbar', () => {
   it('renders as a banner landmark', () => {
@@ -44,11 +47,11 @@ describe('Topbar', () => {
   })
 
   describe('notifications', () => {
-    it('conveys the unread count in its accessible name', () => {
+    it('conveys the unread count in its accessible name', async () => {
       renderWithRouter(<Topbar />)
 
       expect(
-        screen.getByRole('button', { name: /Notifications, 3 unread/ }),
+        await screen.findByRole('button', { name: /Notifications, 3 unread/ }),
       ).toBeInTheDocument()
     })
 
@@ -56,12 +59,12 @@ describe('Topbar', () => {
       const user = userEvent.setup()
       renderWithRouter(<Topbar />)
 
-      await user.click(screen.getByRole('button', { name: /Notifications, 3 unread/ }))
+      await user.click(await screen.findByRole('button', { name: /Notifications, 3 unread/ }))
       expect(screen.getByRole('heading', { name: 'Notifications' })).toBeInTheDocument()
       expect(screen.getByText('Metering submission awaiting validation')).toBeInTheDocument()
 
       await user.click(screen.getByRole('button', { name: 'Mark all as read' }))
-      expect(screen.getByRole('button', { name: /Notifications, 0 unread/ })).toBeInTheDocument()
+      expect(await screen.findByRole('button', { name: /Notifications, 0 unread/ })).toBeInTheDocument()
     })
   })
 

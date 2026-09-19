@@ -372,7 +372,14 @@ export const dataSubmissionHandlers = [
     }
     const form = await request.formData()
     const file = form.get('file')
-    if (!(file instanceof File)) {
+    // Duck-typed rather than `instanceof File`: undici's own multipart
+    // parsing (used when a real fetch() call reaches this handler, as
+    // opposed to dispatchLocalRequest's in-process path) can hand back a
+    // File from a different realm than this module's ambient global - same
+    // shape, different constructor identity, so instanceof false-negatives.
+    const isFileLike = (value: unknown): value is File =>
+      !!value && typeof value === 'object' && 'arrayBuffer' in value && 'size' in value && 'name' in value
+    if (!isFileLike(file)) {
       return HttpResponse.json({ message: 'Select a completed template to upload.' }, { status: 400 })
     }
     const sourceReference = String(form.get('sourceReference') ?? '').trim()

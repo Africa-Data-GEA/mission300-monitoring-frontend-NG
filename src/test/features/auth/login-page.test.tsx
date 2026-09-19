@@ -1,3 +1,4 @@
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { http, HttpResponse } from 'msw'
@@ -19,9 +20,18 @@ function renderLogin() {
     { initialEntries: ['/account/login'] },
   )
 
+  // usePasswordLogin prefetches Executive Overview data on a successful
+  // login (see use-password-login.ts) via useQueryClient(), so this needs a
+  // QueryClientProvider even though this file never asserts on query data.
+  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+
   return {
     router,
-    ...render(<RouterProvider router={router} />),
+    ...render(
+      <QueryClientProvider client={queryClient}>
+        <RouterProvider router={router} />
+      </QueryClientProvider>,
+    ),
   }
 }
 
@@ -48,7 +58,11 @@ describe('LoginPage', () => {
     await user.type(screen.getByLabelText('Email address'), 'g.etim@emrc.ng')
     await user.click(screen.getByRole('button', { name: 'Next' }))
 
-    expect(await screen.findByRole('heading', { name: 'Welcome back, Grace' })).toBeInTheDocument()
+    // No personalized "Welcome back, {name}" heading (WEB-006 fix): the
+    // identify step never returns a display name, only the echoed email -
+    // otherwise the response shape itself would leak whether an account
+    // exists before the password is even checked.
+    expect(await screen.findByRole('heading', { name: 'Enter your password' })).toBeInTheDocument()
     expect(router.state.location.pathname).toBe('/account/password')
     expect(screen.getByLabelText('Password')).toHaveFocus()
     expect(screen.getByText('g.etim@emrc.ng')).toBeInTheDocument()
