@@ -17,22 +17,18 @@ export function PublicHeader() {
     <header className="sticky top-0 z-50">
       <div className="border-b border-[#dce3e8] bg-white/95 text-text-default backdrop-blur-md">
         <div className="mx-auto flex min-h-[4.5rem] max-w-[96rem] items-center gap-7 px-4 sm:px-6">
-          <Link to="/" className="flex min-w-0 items-center gap-3.5">
+          <Link
+            to="/"
+            aria-label={`Mission 300 ${brand?.countryName ?? 'Nigeria'} — National Energy Compact`}
+            className="flex shrink-0 items-center"
+          >
             <img
-              src={brand?.logoUrl || '/Logos/m300-logo-navy.svg'}
-              alt=""
-              width={34}
-              height={34}
-              className="size-[2.125rem] shrink-0 object-contain"
+              src="/Logos/m300-logo-navy.svg"
+              alt={`Mission 300 ${brand?.countryName ?? 'Nigeria'} — National Energy Compact`}
+              width={151}
+              height={91}
+              className="h-12 w-auto shrink-0 object-contain"
             />
-            <span className="min-w-0 border-l border-[#dce3e8] pl-3.5">
-              <span className="block text-[1rem] leading-5 font-semibold tracking-[-0.01em] text-landing-navy">
-                Mission 300 {brand?.countryName ?? 'Nigeria'}
-              </span>
-              <span className="mt-0.5 block text-[0.6875rem] leading-4 tracking-[0.02em] text-text-muted">
-                National Energy Compact
-              </span>
-            </span>
           </Link>
 
           {/* Funding partners — AfDB and the World Bank back the Compact
