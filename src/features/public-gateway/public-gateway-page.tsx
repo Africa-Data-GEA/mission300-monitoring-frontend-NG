@@ -9,6 +9,7 @@ import { NationalStatementSkeleton } from './components/national-statement-skele
 import { PerformanceEvolution } from './components/performance-evolution'
 import { PublicFooter } from './components/public-footer'
 import { PublicHeader } from './components/public-header'
+import { SafeSection } from './components/safe-section'
 import { buildEvolutionSeries } from './lib/evolution-series'
 import { buildKpiFigures } from './lib/headline-figures'
 
@@ -67,35 +68,51 @@ export function PublicGatewayPage() {
 
         {data && (
           <>
-            <NationalStatement cards={data.headlineCards} />
+            <SafeSection render={() => <NationalStatement cards={data.headlineCards} />} />
 
-            <KpiStrip figures={buildKpiFigures(data.headlineCards)} />
+            <SafeSection
+              render={() => <KpiStrip figures={buildKpiFigures(data.headlineCards)} />}
+            />
 
-            <div className="mx-auto max-w-[96rem] px-4 pb-14 sm:px-6">
-              <AccessDelivery channels={data.accessDelivery} />
-            </div>
+            <SafeSection
+              render={() => (
+                <div className="mx-auto max-w-[96rem] px-4 pb-14 sm:px-6">
+                  <AccessDelivery channels={data.accessDelivery} />
+                </div>
+              )}
+            />
 
-            <PerformanceEvolution series={buildEvolutionSeries(data)} />
+            <SafeSection
+              render={() => <PerformanceEvolution series={buildEvolutionSeries(data)} />}
+            />
 
-            {stateCoverage.data && (
-              <DeliveryInMotion
-                rows={stateCoverage.data.rows}
-                asOf={data.headlineCards.peopleWithElectricityAccess.provenance.lastUpdated}
-              />
-            )}
-
-            <Institutions />
+            <SafeSection
+              render={() =>
+                stateCoverage.data ? (
+                  <DeliveryInMotion
+                    rows={stateCoverage.data.rows}
+                    asOf={data.headlineCards.peopleWithElectricityAccess.provenance.lastUpdated}
+                  />
+                ) : null
+              }
+            />
           </>
         )}
+
+        <SafeSection render={() => <Institutions />} />
       </main>
 
-      {data && (
-        <PublicFooter
-          lastUpdated={formatDate(
-            data.headlineCards.peopleWithElectricityAccess.provenance.lastUpdated,
-          )}
-        />
-      )}
+      <SafeSection
+        render={() => (
+          <PublicFooter
+            lastUpdated={
+              data
+                ? formatDate(data.headlineCards.peopleWithElectricityAccess.provenance.lastUpdated)
+                : undefined
+            }
+          />
+        )}
+      />
     </div>
   )
 }

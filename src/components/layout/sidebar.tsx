@@ -63,7 +63,7 @@ export function Sidebar({
         >
           <img
             alt={`${brand?.countryName ?? 'Nigeria'} — Mission 300, Compact Progress Monitoring Platform`}
-            src={brand?.logoUrl || '/Logos/m300-logo-white.svg'}
+            src="/Logos/m300-logo-white.svg"
             className="h-10 w-auto shrink-0 object-contain"
           />
         </Link>
