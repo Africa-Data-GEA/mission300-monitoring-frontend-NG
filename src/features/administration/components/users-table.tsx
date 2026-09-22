@@ -14,6 +14,7 @@ export function UsersTable({
   pageSize,
   total,
   onPageChange,
+  onPageSizeChange,
   onReviewAccess,
   onReviewAudit,
   onInviteUser,
@@ -25,6 +26,7 @@ export function UsersTable({
   pageSize: number
   total: number
   onPageChange: (page: number) => void
+  onPageSizeChange: (pageSize: number) => void
   onReviewAccess: (user: UserAccount) => void
   onReviewAudit: (user: UserAccount) => void
   onInviteUser: () => void
@@ -85,6 +87,7 @@ export function UsersTable({
         pageSize={pageSize}
         total={total}
         onPageChange={onPageChange}
+        onPageSizeChange={onPageSizeChange}
       />
     </Card>
   )

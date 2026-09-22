@@ -25,6 +25,36 @@ const RESULT_LABELS: Record<AuditResult, string> = {
   failure: 'Failure',
 }
 
+function humanizeAction(action: string): string {
+  if (/\s/.test(action)) return action
+  const words = action.replace(/[._-]+/g, ' ').trim()
+  return words.charAt(0).toUpperCase() + words.slice(1)
+}
+
+function prettyJson(value: string): string {
+  try {
+    return JSON.stringify(JSON.parse(value), null, 2)
+  } catch {
+    return value
+  }
+}
+
+function summarise(value: string): string {
+  try {
+    const parsed: unknown = JSON.parse(value)
+    if (parsed && typeof parsed === 'object') {
+      const record = parsed as Record<string, unknown>
+      const nested = record.row ?? record.user ?? record.savedReport ?? record
+      const source = nested && typeof nested === 'object' ? (nested as Record<string, unknown>) : record
+      const label = source.name ?? source.title ?? source.id
+      if (typeof label === 'string') return label
+    }
+  } catch {
+    return value
+  }
+  return value
+}
+
 const COLUMNS: readonly Column<AuditEvent>[] = [
   {
     id: 'timestamp',
@@ -55,7 +85,7 @@ const COLUMNS: readonly Column<AuditEvent>[] = [
     sortValue: (event) => event.action,
     cell: (event) => (
       <div className="min-w-0">
-        <p className="text-text-default">{event.action}</p>
+        <p className="text-text-default">{humanizeAction(event.action)}</p>
         <p className="truncate text-xs text-text-muted">{event.module}</p>
       </div>
     ),
@@ -81,13 +111,33 @@ const COLUMNS: readonly Column<AuditEvent>[] = [
         return <span className="text-xs text-text-subtle">—</span>
       }
 
+      const full = event.newValue ?? event.priorValue ?? ''
+
       return (
-        <span className="text-xs whitespace-nowrap text-text-muted">
-          {event.priorValue ?? 'none'}
-          <span aria-hidden="true"> → </span>
-          <span className="sr-only"> changed to </span>
-          <span className="text-text-default">{event.newValue ?? 'none'}</span>
-        </span>
+        <details className="max-w-xs text-xs text-text-muted">
+          <summary className="cursor-pointer truncate" title={summarise(full)}>
+            {event.priorValue ? `${summarise(event.priorValue)} → ` : ''}
+            {event.newValue ? summarise(event.newValue) : 'removed'}
+          </summary>
+          <div className="mt-2 space-y-2">
+            {event.priorValue && (
+              <div>
+                <p className="font-medium text-text-default">Before</p>
+                <pre className="max-h-48 overflow-auto rounded-control bg-surface-sunken p-2 font-mono text-[11px] whitespace-pre-wrap break-all">
+                  {prettyJson(event.priorValue)}
+                </pre>
+              </div>
+            )}
+            {event.newValue && (
+              <div>
+                <p className="font-medium text-text-default">After</p>
+                <pre className="max-h-48 overflow-auto rounded-control bg-surface-sunken p-2 font-mono text-[11px] whitespace-pre-wrap break-all">
+                  {prettyJson(event.newValue)}
+                </pre>
+              </div>
+            )}
+          </div>
+        </details>
       )
     },
   },
@@ -126,6 +176,7 @@ export function AuditLog({
   pageSize,
   total,
   onPageChange,
+  onPageSizeChange,
   onViewUser,
 }: {
   events: readonly AuditEvent[]
@@ -133,6 +184,7 @@ export function AuditLog({
   pageSize: number
   total: number
   onPageChange: (page: number) => void
+  onPageSizeChange: (pageSize: number) => void
   onViewUser: (event: AuditEvent) => void
 }) {
   return (
@@ -171,6 +223,7 @@ export function AuditLog({
         pageSize={pageSize}
         total={total}
         onPageChange={onPageChange}
+        onPageSizeChange={onPageSizeChange}
       />
     </Card>
   )

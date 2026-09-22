@@ -124,6 +124,7 @@ export function AdministrationPage() {
                 pageSize={data.users.pageSize}
                 total={data.users.total}
                 onPageChange={page.setUsersPage}
+                onPageSizeChange={page.changePageSize}
                 onReviewAccess={page.reviewUserAccess}
                 onReviewAudit={page.reviewUserAudit}
                 onInviteUser={page.openInvite}
@@ -146,6 +147,7 @@ export function AdministrationPage() {
                 pageSize={data.scopeAssignments.pageSize}
                 total={data.scopeAssignments.total}
                 onPageChange={page.setScopePage}
+                onPageSizeChange={page.changePageSize}
                 onViewUser={page.viewScopeUser}
               />
             </TabsContent>
@@ -157,6 +159,7 @@ export function AdministrationPage() {
                 pageSize={data.auditLog.pageSize}
                 total={data.auditLog.total}
                 onPageChange={page.setAuditPage}
+                onPageSizeChange={page.changePageSize}
                 onViewUser={page.viewAuditUser}
               />
             </TabsContent>

@@ -10,6 +10,8 @@ import {
   useUploadBrandLogo,
 } from '@/features/branding/api'
 import { ApiError } from '@/lib/api-client'
+import { SelectField } from '@/components/ui/select-field'
+import { AFRICAN_COUNTRIES } from '../lib/countries'
 import { FontPicker } from './font-picker'
 
 const HEADING_ROLES = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'] as const
@@ -76,6 +78,10 @@ function CustomizationForm({ brand }: { brand: BrandConfig }) {
   const resetBrand = useResetBrandConfig()
   const fileInputRef = useRef<HTMLInputElement>(null)
 
+  const countryOptions = (AFRICAN_COUNTRIES.includes(brand.countryName as never)
+    ? [...AFRICAN_COUNTRIES]
+    : [brand.countryName, ...AFRICAN_COUNTRIES]
+  ).map((name) => ({ value: name, label: name }))
   const [countryName, setCountryName] = useState(brand.countryName)
   const [primaryColor, setPrimaryColor] = useState(brand.primaryColor)
   const [secondaryColor, setSecondaryColor] = useState(brand.secondaryColor)
@@ -184,16 +190,15 @@ function CustomizationForm({ brand }: { brand: BrandConfig }) {
         </p>
 
         <div className="mt-5 grid gap-5 sm:grid-cols-2">
-          <label className="block sm:col-span-2">
-            <span className="mb-1.5 block text-sm font-medium text-text-default">Country name</span>
-            <input
-              type="text"
+          <div>
+            <SelectField
+              label="Country name"
               value={countryName}
-              onChange={(event) => setCountryName(event.target.value)}
-              placeholder="Nigeria"
-              className={inputClass}
+              options={countryOptions}
+              onChange={setCountryName}
+              placeholder="Select a country"
             />
-          </label>
+          </div>
 
           <ColorField label="Primary colour" value={primaryColor} onChange={setPrimaryColor} />
           <ColorField label="Secondary colour" value={secondaryColor} onChange={setSecondaryColor} />
