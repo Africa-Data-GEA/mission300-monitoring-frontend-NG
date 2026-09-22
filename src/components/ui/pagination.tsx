@@ -1,6 +1,9 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { Button } from './button'
 import { cn } from '@/lib/utils'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './select'
+
+const PAGE_SIZE_OPTIONS = [10, 50, 70, 100] as const
 
 /**
  * Page controls for a paginated table.
@@ -14,12 +17,16 @@ export function Pagination({
   pageSize,
   total,
   onPageChange,
+  onPageSizeChange,
+  pageSizeOptions = PAGE_SIZE_OPTIONS,
   className,
 }: {
   page: number
   pageSize: number
   total: number
   onPageChange: (page: number) => void
+  onPageSizeChange?: (pageSize: number) => void
+  pageSizeOptions?: readonly number[]
   className?: string
 }) {
   const pageCount = Math.max(1, Math.ceil(total / pageSize))
@@ -39,7 +46,30 @@ export function Pagination({
           : `Showing ${first}–${last} of ${total} records`}
       </p>
 
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2">
+        {onPageSizeChange && (
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-text-muted">Rows per page</span>
+            <Select
+              value={String(pageSize)}
+              onValueChange={(value) => onPageSizeChange(Number(value))}
+            >
+              <SelectTrigger aria-label="Rows per page" className="h-8 w-20">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {(pageSizeOptions.includes(pageSize)
+                  ? pageSizeOptions
+                  : [pageSize, ...pageSizeOptions]
+                ).map((size) => (
+                  <SelectItem key={size} value={String(size)}>
+                    {size}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
         <Button
           variant="secondary"
           size="sm"

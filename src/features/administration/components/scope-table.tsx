@@ -81,6 +81,7 @@ export function ScopeTable({
   pageSize,
   total,
   onPageChange,
+  onPageSizeChange,
   onViewUser,
 }: {
   assignments: readonly ScopeAssignment[]
@@ -88,6 +89,7 @@ export function ScopeTable({
   pageSize: number
   total: number
   onPageChange: (page: number) => void
+  onPageSizeChange: (pageSize: number) => void
   onViewUser: (assignment: ScopeAssignment) => void
 }) {
   return (
@@ -123,6 +125,7 @@ export function ScopeTable({
         pageSize={pageSize}
         total={total}
         onPageChange={onPageChange}
+        onPageSizeChange={onPageSizeChange}
       />
     </Card>
   )

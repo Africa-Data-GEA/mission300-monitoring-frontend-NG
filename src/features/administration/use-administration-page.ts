@@ -27,6 +27,7 @@ export function useAdministrationPage() {
   const [usersPage, setUsersPage] = useState(1)
   const [scopePage, setScopePage] = useState(1)
   const [auditPage, setAuditPage] = useState(1)
+  const [pageSize, setPageSize] = useState(10)
   const [activeTab, setActiveTab] = useState<AdministrationTab>('users')
   const [inviteOpen, setInviteOpen] = useState(false)
   const [rolesUser, setRolesUser] = useState<UserAccount | null>(null)
@@ -37,7 +38,7 @@ export function useAdministrationPage() {
     usersPage,
     scopePage,
     auditPage,
-    pageSize: 5,
+    pageSize,
   })
   const activeFilterCount = [
     query.institution !== 'all',
@@ -107,6 +108,12 @@ export function useAdministrationPage() {
     setUsersPage,
     setScopePage,
     setAuditPage,
+    changePageSize: (size: number) => {
+      setPageSize(size)
+      setUsersPage(1)
+      setScopePage(1)
+      setAuditPage(1)
+    },
     reviewUserAccess,
     reviewUserAudit,
     viewUsersForRole,
