@@ -31,11 +31,6 @@ export function OverviewPanel({ project }: { project: ProjectRecord }) {
         <ProfileField label="Funding structure" value={project.fundingStructure} />
         <ProfileField label="Funding size" value={currency.format(project.profile.budgetUsd)} />
         <ProfileField label="Disbursed" value={currency.format(project.profile.disbursedUsd)} />
-        <ProfileField label="Contractor" value={project.profile.contractor ?? 'Not yet appointed'} />
-        <ProfileField
-          label="Contact"
-          value={`${project.profile.contactName} · ${project.profile.contactEmail}`}
-        />
         <ProfileField label="Comment – issues/main risk/bottlenecks" value={project.comment || 'None'} block />
         <ProfileField label="Suggestion" value={project.suggestion || 'None'} block />
       </dl>

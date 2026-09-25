@@ -31,7 +31,7 @@ export function AddProgrammePage() {
         </p>
       </div>
 
-      <Card className="max-w-2xl p-4 sm:p-6">
+      <Card className="mx-auto w-full max-w-2xl p-4 sm:p-6">
         {upsert.successMessage && upsert.savedRecord ? (
           <CreateProgrammeSuccess
             message={upsert.successMessage}
