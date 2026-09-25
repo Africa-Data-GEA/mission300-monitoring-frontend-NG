@@ -102,7 +102,7 @@ function EditProjectForm({
         </p>
       </div>
 
-      <Card className="max-w-2xl p-4 sm:p-6">
+      <Card className="mx-auto w-full max-w-2xl p-4 sm:p-6">
         {upsert.successMessage ? (
           <UpsertProjectSuccess message={upsert.successMessage} onDone={onDone} />
         ) : (
