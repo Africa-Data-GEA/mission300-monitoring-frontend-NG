@@ -38,6 +38,12 @@ export function HeadlineCard({ card }: { card: PillarHeadlineCard }) {
   // A commitment stated as a rate of change rather than a level in this
   // indicator's unit — see `targetBasis` on kpiProfileSchema.
   const isGrowthRateTarget = card.targetBasis === 'growth-rate' && Boolean(card.targetBasisLabel)
+  const hasLevelTarget = card.target !== null
+  const unavailableProgressLabel = !hasLevelTarget
+    ? 'No confirmed target yet'
+    : card.rawValue === null
+      ? 'Target set · awaiting first report'
+      : 'Target set · progress unavailable'
 
   // The bare figure only — `card.value` carries a full descriptive label
   // (unit, method, reporting period) meant for the KPI profile it's sourced
@@ -110,7 +116,7 @@ export function HeadlineCard({ card }: { card: PillarHeadlineCard }) {
               barClassName="bg-chart-blue-dark"
               value={percentToTarget ?? 0}
               label={
-                percentToTarget !== null ? `${card.title} progress to target` : `${card.title} — no confirmed target yet`
+                percentToTarget !== null ? `${card.title} progress to target` : `${card.title} — ${unavailableProgressLabel}`
               }
             />
             {/* Stakeholder feedback asked for baseline/progress/%-to-target to be
@@ -119,7 +125,7 @@ export function HeadlineCard({ card }: { card: PillarHeadlineCard }) {
             <p className="text-2xs text-text-subtle">
               {percentToTarget !== null
                 ? `${Math.round(percentToTarget)}% to target${card.baseline !== null ? ` · baseline ${card.baseline.toLocaleString()}` : ''}`
-                : 'No confirmed target yet'}
+                : unavailableProgressLabel}
             </p>
           </>
         )}

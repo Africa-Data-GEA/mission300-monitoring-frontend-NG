@@ -19,6 +19,7 @@ function formatValue(value: number, unit: string): string {
   if (unit === '%') return `${formatted}%`
   if (unit === 'NGN Billion') return formatCurrency(`${formatted}bn`)
   if (unit === 'NGN/kWh') return formatCurrency(`${formatted}/kWh`)
+  if (unit === 'Number' || unit === 'Currency not stated') return formatted
   return `${formatted} ${unit}`
 }
 
@@ -33,6 +34,7 @@ function formatCompactValue(value: number, unit: string): string {
   if (unit === '%') return `${compact}%`
   if (unit === 'NGN Billion') return formatCurrency(`${compact}bn`)
   if (unit === 'NGN/kWh') return formatCurrency(`${compact}/kWh`)
+  if (unit === 'Number' || unit === 'Currency not stated') return compact
   return `${compact} ${unit}`
 }
 
@@ -52,6 +54,7 @@ function formatChartLabel(value: number, unit: string): string {
   if (unit === '%') return `${formatted}%`
   if (unit === 'NGN Billion') return formatCurrency(`${formatted}bn`, { svgSafe: true })
   if (unit === 'NGN/kWh') return formatCurrency(`${formatted}/kWh`, { svgSafe: true })
+  if (unit === 'Number' || unit === 'Currency not stated') return formatted
   return `${formatted} ${unit}`
 }
 
@@ -103,7 +106,7 @@ const MILESTONE_STAGE_ORDER: readonly MilestoneStage[] = ['not-started', 'in-pro
  */
 function MilestoneTrackerCard({ indicators }: { indicators: readonly PillarCoreIndicator[] }) {
   return (
-    <Card className="flex h-full flex-col p-4 sm:col-span-2">
+    <Card className="flex h-full flex-col p-4 sm:col-span-2 xl:col-span-4">
       <h3 className="text-sm font-medium text-text-default">Milestones and governance reforms</h3>
       <ul className="mt-3 flex flex-col divide-y divide-border-default">
         {indicators.map((indicator) => {
@@ -160,7 +163,8 @@ function CardTitleLink({ indicator }: { indicator: PillarCoreIndicator }) {
   return (
     <Link
       to={`/kpis?kpi=${indicator.kpiId}`}
-      className="text-sm text-text-muted underline-offset-2 hover:text-brand-700 hover:underline"
+      title={indicator.name}
+      className="line-clamp-2 min-h-9 text-sm text-text-muted underline-offset-2 hover:text-brand-700 hover:underline"
     >
       {indicator.name}
     </Link>
@@ -257,7 +261,7 @@ function StatCard({ indicator, showDiscoBreakdown }: { indicator: PillarCoreIndi
   const trend = deriveTrend(indicator)
 
   return (
-    <Card className="flex h-full flex-col p-4">
+    <Card className="flex h-full min-h-36 min-w-0 flex-col p-4">
       <div className="flex items-start justify-between gap-2">
         <CardTitleLink indicator={indicator} />
         <div className="flex shrink-0 items-center gap-1">
@@ -269,9 +273,15 @@ function StatCard({ indicator, showDiscoBreakdown }: { indicator: PillarCoreIndi
           <PillarKpiEditButton kpiId={indicator.kpiId} name={indicator.name} />
         </div>
       </div>
-      <p className="mt-2 text-2xl leading-none font-semibold tracking-tight text-text-default">
-        {indicator.current === null ? '—' : formatValue(indicator.current, indicator.unit)}
+      <p
+        title={indicator.current === null ? undefined : formatValue(indicator.current, indicator.unit)}
+        className="mt-2 text-3xl leading-none font-semibold tracking-tight text-text-default"
+      >
+        {indicator.current === null ? '—' : formatCompactValue(indicator.current, indicator.unit)}
       </p>
+      {indicator.unit === 'Currency not stated' && (
+        <p className="mt-auto pt-3 text-2xs text-text-subtle">Currency not specified by source</p>
+      )}
       {trend && (
         <div className="mt-2">
           <TrendIndicator trend={trend} />
@@ -644,7 +654,7 @@ export function CoreIndicatorsSection({
         Additional indicators tracked for this pillar. The four headline cards above are not repeated here.
       </p>
 
-      <div className="mt-3 grid grid-cols-1 items-stretch gap-3 sm:grid-cols-2">
+      <div className="mt-3 grid grid-cols-1 items-stretch gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {[...groups.entries()].map(([group, entries]) => {
           const known = entries.filter((entry) => entry.current !== null)
           const sameUnit = known.length >= 2 && known.every((entry) => entry.unit === known[0]?.unit)

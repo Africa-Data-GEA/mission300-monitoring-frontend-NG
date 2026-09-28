@@ -1,6 +1,8 @@
 import { screen, within } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 import { PillarDashboardPage } from '@/features/pillar-dashboard/pillar-dashboard-page'
+import { HeadlineCard } from '@/features/pillar-dashboard/components/headline-card'
+import { buildPillarDashboard } from '@/mocks/data/pillar-dashboard'
 import { renderRoutesWithProviders } from '@/test/render'
 
 /**
@@ -11,6 +13,18 @@ import { renderRoutesWithProviders } from '@/test/render'
  * "No confirmed target yet" reserved for indicators with no target at all.
  */
 describe('Headline card target basis', () => {
+  it('keeps a confirmed target visible when its first actual has not been reported', () => {
+    const card = buildPillarDashboard('private-sector-participation').headlineCards[0]!
+    renderRoutesWithProviders(
+      [{ path: '/', element: <HeadlineCard card={{ ...card, rawValue: null, value: 'No data yet', target: 15499.8 }} /> }],
+      { route: '/' },
+    )
+
+    expect(screen.getByText('No data yet')).toBeInTheDocument()
+    expect(screen.getByText('Target set · awaiting first report')).toBeInTheDocument()
+    expect(screen.queryByText('No confirmed target yet')).not.toBeInTheDocument()
+  })
+
   it('states the growth-rate commitment instead of reading as no target', async () => {
     renderRoutesWithProviders(
       [{ path: 'pillars/:pillar', element: <PillarDashboardPage /> }],
