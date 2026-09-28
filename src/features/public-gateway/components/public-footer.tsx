@@ -66,8 +66,8 @@ export function PublicFooter({ lastUpdated }: { lastUpdated?: string }) {
             <img alt="GEAPP" src="/reports/compact-progress/logo-geapp.png" className="h-6 w-auto shrink-0 object-contain" />
           </div>
           <div className="flex items-center gap-2">
-            <img alt="EMRC" src="/emrc.png" className="h-5 w-auto shrink-0 object-contain" />
-            <span className="text-[0.6875rem] leading-4 text-white/50">Platform built by EMRC</span>
+            <img alt="EMRC" src="/emrc.png" className="h-5 w-auto shrink-0 object-contain brightness-0 invert" />
+            <span className="text-[0.6875rem] leading-4 font-medium text-white">Powered by EMRC</span>
           </div>
         </div>
 
