@@ -78,10 +78,6 @@ function TargetBulletChart({ figure }: { figure: KpiFigure }) {
         ]}
         options={options}
       />
-      <div className="mt-1 flex items-start justify-between gap-5 text-[0.625rem] leading-4 text-[#667684]">
-        <span className="max-w-[48%]">{track.baselineLabel || 'Current output'}</span>
-        <span className="max-w-[48%] text-right font-semibold text-[#536472]">{track.targetLabel}</span>
-      </div>
     </div>
   )
 }
