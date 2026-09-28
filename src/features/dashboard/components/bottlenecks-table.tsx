@@ -1,6 +1,10 @@
-import { Search } from 'lucide-react'
+import { Search, Trash2 } from 'lucide-react'
 import { useId, useMemo, useState } from 'react'
 import { Link } from 'react-router'
+import { Button } from '@/components/ui/button'
+import { readAuthSession } from '@/features/auth/auth-session'
+import { grantedRoles } from '@/features/auth/role-access'
+import { deleteBottleneck } from '@/features/bottlenecks/api'
 import { Pagination } from '@/components/ui/pagination'
 import { SelectField } from '@/components/ui/select-field'
 import { SeverityBadge } from '@/components/ui/status-badge'
@@ -30,7 +34,35 @@ type SortKey = 'severity' | 'daysUnresolved' | 'institution' | 'category'
  * popover when they are the two fields that decide whether a row matters
  * (docs/M300 Monitoring Platform Feedback.pptx, slide 4).
  */
-export function BottlenecksTable({ exceptions }: { exceptions: readonly Bottleneck[] }) {
+export function BottlenecksTable({
+  exceptions,
+  onChanged,
+}: {
+  exceptions: readonly Bottleneck[]
+  onChanged: () => void
+}) {
+  const session = readAuthSession()
+  const canDelete = !!session && grantedRoles(session.user).some(
+    (role) => role === 'system-administrator' || role === 'dashboard-manager',
+  )
+  const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [deleteError, setDeleteError] = useState('')
+
+  async function handleDelete(row: Bottleneck) {
+    if (!window.confirm(
+      `Delete "${row.title}"? Its status history and escalation records will also be removed.`,
+    )) return
+    setDeleteError('')
+    setDeletingId(row.id)
+    try {
+      await deleteBottleneck(row.id)
+      onChanged()
+    } catch {
+      setDeleteError('This issue could not be deleted. Please try again.')
+    } finally {
+      setDeletingId(null)
+    }
+  }
   const searchId = useId()
   const [search, setSearch] = useState('')
   const [severity, setSeverity] = useState('all')
@@ -103,6 +135,9 @@ export function BottlenecksTable({ exceptions }: { exceptions: readonly Bottlene
 
   return (
     <div>
+      {deleteError && (
+        <p role="alert" className="mb-3 text-sm text-status-at-risk">{deleteError}</p>
+      )}
       <div className="mb-3 flex flex-wrap items-end gap-2.5 rounded-lg bg-surface-sunken p-3">
         <div className="min-w-0 flex-1 sm:max-w-xs">
           <label htmlFor={searchId} className="mb-1.5 block text-xs font-medium text-text-muted">
@@ -185,6 +220,7 @@ export function BottlenecksTable({ exceptions }: { exceptions: readonly Bottlene
               />
               <th className="px-3 py-2.5">What it is / follow-up</th>
               <th className="px-3 py-2.5">Reference</th>
+              {canDelete && <th className="px-3 py-2.5">Actions</th>}
             </tr>
           </thead>
           <tbody className="divide-y divide-border-default bg-surface-card">
@@ -224,6 +260,20 @@ export function BottlenecksTable({ exceptions }: { exceptions: readonly Bottlene
                   </span>
                 </td>
                 <td className="px-3 py-3 text-sm text-text-muted">{row.reference || '—'}</td>
+                {canDelete && (
+                  <td className="px-3 py-3">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      aria-label={`Delete issue: ${row.title}`}
+                      disabled={deletingId !== null}
+                      onClick={() => void handleDelete(row)}
+                    >
+                      <Trash2 className="size-4" aria-hidden="true" />
+                    </Button>
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>

@@ -128,7 +128,7 @@ export function DeliveryStatusSection({
           </div>
 
           <div className="mt-3">
-            <BottlenecksTable exceptions={panel.exceptions} />
+            <BottlenecksTable exceptions={panel.exceptions} onChanged={onProjectsChanged} />
           </div>
         </Card>
       </div>

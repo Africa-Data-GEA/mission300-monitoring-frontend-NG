@@ -77,6 +77,10 @@ export function createBottleneck(input: CreateBottleneckRequest) {
   return api.post('/bottlenecks', input, createBottleneckResponseSchema)
 }
 
+export function deleteBottleneck(id: string) {
+  return api.delete<void>(`/bottlenecks/${encodeURIComponent(id)}`)
+}
+
 /**
  * Updates a bottleneck's current status — previously there was no way to do
  * this at all once a bottleneck was raised. Invalidates every bottlenecks

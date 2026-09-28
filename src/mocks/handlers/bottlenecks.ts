@@ -30,6 +30,19 @@ function paginate<T>(items: T[], requestedPage: number, pageSize: number) {
 let nextRecordNumber = bottlenecksRegister.length + 1
 
 export const bottlenecksHandlers = [
+  http.delete('/api/bottlenecks/:id', ({ params }) => {
+    const id = String(params.id)
+    const index = bottlenecksRegister.findIndex((record) => record.id === id)
+    if (index < 0) return HttpResponse.json({ message: 'The bottleneck was not found.' }, { status: 404 })
+    const record = bottlenecksRegister[index]!
+    bottlenecksRegister.splice(index, 1)
+    for (let i = bottlenecksEscalations.length - 1; i >= 0; i--) {
+      if (bottlenecksEscalations[i]?.bottleneckId === id) bottlenecksEscalations.splice(i, 1)
+    }
+    for (const project of projects) project.bottlenecks = project.bottlenecks.filter((entry) => entry !== id)
+    recordAuditEvent({ action: 'Deleted bottleneck', module: 'Bottlenecks & Exceptions', recordId: id, priorValue: record.issue })
+    return new HttpResponse(null, { status: 204 })
+  }),
   /** GET /api/bottlenecks/filters — this module's own nine filters. */
   http.get('/api/bottlenecks/filters', () =>
     HttpResponse.json(bottlenecksFilterOptions),

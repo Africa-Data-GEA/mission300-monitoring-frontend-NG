@@ -1,4 +1,5 @@
 import { useGlobalFilters } from '@/app/global-filters'
+import { useQueryClient } from '@tanstack/react-query'
 import { Breadcrumb } from '@/components/ui/breadcrumb'
 import { ErrorState } from '@/components/ui/error-state'
 import { useExecutiveOverview } from './api'
@@ -27,6 +28,12 @@ import { RegionalPerformanceSection } from './components/regional-performance-se
  * which is a subset of the All Pillars payload.
  */
 export function DashboardPage() {
+  const queryClient = useQueryClient()
+  function refreshDelivery() {
+    for (const key of ['dashboard', 'bottlenecks', 'programs', 'pillar-dashboard']) {
+      void queryClient.invalidateQueries({ queryKey: [key] })
+    }
+  }
   // The filter bar lives in the shell; this page simply queries with whatever
   // the application-wide selection currently is.
   const { filters } = useGlobalFilters()
@@ -69,7 +76,7 @@ export function DashboardPage() {
         <AccessDeliverySection channels={data.accessDelivery} />
         <NationalPerformanceSection metrics={data.nationalPerformance} />
         <RegionalPerformanceSection />
-        <DeliveryStatusSection panel={data.deliveryStatus} onProjectsChanged={() => void refetch()} />
+        <DeliveryStatusSection panel={data.deliveryStatus} onProjectsChanged={refreshDelivery} />
       </div>
     </div>
   )
