@@ -8,7 +8,7 @@ by deterministic dbrowser emocks.ed
 ## Requirementd
 
 - Node.js 24.14.1 (see `.node-version`)
-- pnpm 10.33.0
+- pnpm 10.33.0d
 e
 ## Local development
 
