@@ -1,4 +1,5 @@
 import { formatDate } from '@/lib/format'
+import { useCurrency } from '@/lib/currency'
 import { usePublicOverview, usePublicStateCoverage } from './api'
 import { AccessDelivery } from './components/access-delivery'
 import { DeliveryInMotion } from './components/delivery-in-motion'
@@ -44,6 +45,7 @@ import { buildKpiFigures } from './lib/headline-figures'
  * which costs more trust than an honest gap.
  */
 export function PublicGatewayPage() {
+  useCurrency()
   const { data, isPending, isError } = usePublicOverview()
   const stateCoverage = usePublicStateCoverage()
 

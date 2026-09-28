@@ -14,7 +14,7 @@ import type {
   OngoingProject,
   ProjectStatusSummary,
 } from '@/features/dashboard/types'
-import { formatCurrency, USD } from '@/lib/currency'
+import { formatCurrency } from '@/lib/currency'
 import { bottlenecksRegister } from './bottlenecks'
 import { getKpiProfile } from './kpi-explorer'
 import { projects } from './programs'
@@ -335,10 +335,8 @@ const NATIONAL_PERFORMANCE_METRICS: {
     scaleMax: 15_500,
     expected: 2_400,
     caption: 'Tracked from the January 2025 baseline',
-    // Mobilised international private capital is quoted in USD by convention,
-    // whichever country the deployment serves — an explicit override rather
-    // than an accident of hardcoding.
-    formatValue: (v) => formatCurrency(`${(v / 1000).toFixed(1)}B`, { currency: USD }),
+    // Display formatting follows the configured platform currency.
+    formatValue: (v) => formatCurrency(`${(v / 1000).toFixed(1)}B`),
   },
 ]
 

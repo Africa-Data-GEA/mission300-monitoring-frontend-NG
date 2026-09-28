@@ -1,6 +1,7 @@
 import type { PillarId } from '@/api/schemas/common'
 import type { PublicOverview } from '@/api/schemas/executive-overview'
 import type { EvolutionSeries } from '../components/evolution-chart'
+import { getCurrency } from '@/lib/currency'
 
 /** Units matching each national-performance metric's own formatValue in
  * mocks/data/executive-overview.ts — kept here rather than parsed back out
@@ -10,8 +11,6 @@ const NATIONAL_PERFORMANCE_UNITS: Record<string, string> = {
   'metering-rate': '% of customers metered',
   'atcc-losses': '% aggregate technical, commercial & collection losses',
   'market-remittance': '% of market invoices remitted',
-  'tariff-shortfall': '₦ trillion, outstanding',
-  'private-capital': 'USD billion, cumulative',
 }
 
 /**
@@ -86,12 +85,18 @@ function shortSource(source: string): string {
  * inferred inside the filter.
  */
 export function buildEvolutionSeries(data: PublicOverview): EvolutionSeries[] {
+  const currency = getCurrency()
+  const units: Record<string, string> = {
+    ...NATIONAL_PERFORMANCE_UNITS,
+    'tariff-shortfall': `${currency.code} trillion, outstanding`,
+    'private-capital': `${currency.code} billion, cumulative`,
+  }
   return [
     ...data.nationalPerformance.map((metric) => ({
       id: metric.id,
       title: metric.title,
       value: metric.value,
-      unit: NATIONAL_PERFORMANCE_UNITS[metric.id] ?? '',
+      unit: units[metric.id] ?? '',
       pillar: metric.pillar as PillarId | null,
       points: metric.history,
       direction: metric.direction,

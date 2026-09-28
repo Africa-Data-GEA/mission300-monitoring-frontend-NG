@@ -13,6 +13,8 @@
  * configuration change, not a code change (docs/M300 Monitoring Platform
  * Feedback.pptx, slide 3).
  */
+import { useSyncExternalStore } from 'react'
+
 export interface CurrencyConfig {
   /** ISO 4217 code, e.g. "NGN". Used where a symbol will not render. */
   code: string
@@ -22,15 +24,30 @@ export interface CurrencyConfig {
   locale: string
 }
 
-const activeCurrency: CurrencyConfig = {
+let activeCurrency: CurrencyConfig = {
   code: 'NGN',
   symbol: '₦',
   locale: 'en-NG',
 }
 
+const currencyListeners = new Set<() => void>()
+const subscribeCurrency = (listener: () => void) => {
+  currencyListeners.add(listener)
+  return () => { currencyListeners.delete(listener) }
+}
+const getCurrencySnapshot = () => activeCurrency
+
+/** Re-render currency displays when the branding configuration changes. */
+export function useCurrency(): Readonly<CurrencyConfig> {
+  return useSyncExternalStore(subscribeCurrency, getCurrencySnapshot, getCurrencySnapshot)
+}
+
 /** Set by BrandProvider when the admin-configured currency changes. */
 export function setActiveCurrency(next: Partial<CurrencyConfig>): void {
-  Object.assign(activeCurrency, next)
+  const updated = { ...activeCurrency, ...next }
+  if (updated.code === activeCurrency.code && updated.symbol === activeCurrency.symbol && updated.locale === activeCurrency.locale) return
+  activeCurrency = updated
+  currencyListeners.forEach(listener => listener())
 }
 
 export function getCurrency(): Readonly<CurrencyConfig> {
@@ -49,17 +66,12 @@ export function getLocale(): string {
  * glyphs (the naira sign among them) do not render inside ApexCharts' SVG
  * text nodes and fall back to a bare letter, so charts pass `svgSafe: true`.
  *
- * `currency` overrides the active currency for a figure that is genuinely
- * reported in another one — mobilised international private capital, for
- * instance, is quoted in USD regardless of the host country.
+ * The symbol, code and locale come from the active branding configuration.
  */
 export function formatCurrency(
   amount: string,
-  { svgSafe = false, currency }: { svgSafe?: boolean; currency?: CurrencyConfig } = {},
+  { svgSafe = false }: { svgSafe?: boolean } = {},
 ): string {
-  const active = currency ?? activeCurrency
+  const active = activeCurrency
   return svgSafe ? `${active.code} ${amount}` : `${active.symbol}${amount}`
 }
-
-/** The US dollar, for figures reported in USD by convention rather than by locale. */
-export const USD: CurrencyConfig = { code: 'USD', symbol: '$', locale: 'en-US' }

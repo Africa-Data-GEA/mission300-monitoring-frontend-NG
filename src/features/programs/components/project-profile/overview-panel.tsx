@@ -1,15 +1,14 @@
 import { PROGRAM_TYPE_LABELS, type ProjectRecord } from '@/api/schemas/programs'
 import { ProfileField } from '@/components/ui/profile-field'
 import { formatDate } from '@/lib/format'
-
-const currency = new Intl.NumberFormat('en-US', {
-  style: 'currency',
-  currency: 'USD',
-  maximumFractionDigits: 0,
-})
+import { formatCurrency, useCurrency } from '@/lib/currency'
 
 /** Description, location, funding and timeline. */
 export function OverviewPanel({ project }: { project: ProjectRecord }) {
+  const currency = useCurrency()
+  const formatAmount = (value: number) => formatCurrency(
+    value.toLocaleString(currency.locale, { maximumFractionDigits: 0 }),
+  )
   return (
     <section className="rounded-control bg-surface-sunken p-4">
       <h3 className="text-sm font-semibold text-text-default">Overview</h3>
@@ -29,8 +28,8 @@ export function OverviewPanel({ project }: { project: ProjectRecord }) {
         />
         <ProfileField label="Funding sources" value={project.fundingSource ?? 'Not yet secured'} />
         <ProfileField label="Funding structure" value={project.fundingStructure} />
-        <ProfileField label="Funding size" value={currency.format(project.profile.budgetUsd)} />
-        <ProfileField label="Disbursed" value={currency.format(project.profile.disbursedUsd)} />
+        <ProfileField label="Funding size" value={formatAmount(project.profile.budgetUsd)} />
+        <ProfileField label="Disbursed" value={formatAmount(project.profile.disbursedUsd)} />
         <ProfileField label="Comment – issues/main risk/bottlenecks" value={project.comment || 'None'} block />
         <ProfileField label="Suggestion" value={project.suggestion || 'None'} block />
       </dl>
