@@ -69,15 +69,6 @@ export function NationalStatement({ cards }: { cards: HeadlineCards }) {
             have electricity access
           </h1>
 
-          {/*
-            One line, and every word in it is a figure. The previous version
-            added a second sentence explaining what the page does, which is the
-            kind of copy a reader skips and a designer keeps.
-          */}
-          <p className="mt-5 max-w-[36rem] text-[1.0625rem] leading-7 text-white/80">
-            Up from {headline.baselineLabel}. Target {headline.targetLabel}.
-          </p>
-
           <div className="mt-8 flex flex-wrap items-center gap-x-8 gap-y-4">
             <Link
               to="/progress"

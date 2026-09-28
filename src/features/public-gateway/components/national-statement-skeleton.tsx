@@ -18,10 +18,6 @@ export function NationalStatementSkeleton() {
             <div className="h-4 w-72 max-w-full bg-white/20" />
             <div className="mt-5 h-12 w-full max-w-[34rem] bg-white/20" />
             <div className="mt-3 h-12 w-full max-w-[24rem] bg-white/20" />
-            <div className="mt-6 space-y-2">
-              <div className="h-4 w-full max-w-[32rem] bg-white/10" />
-              <div className="h-4 w-full max-w-[28rem] bg-white/10" />
-            </div>
             <div className="mt-8 h-11 w-48 bg-white/20" />
           </div>
           <div className="w-full animate-pulse bg-surface p-6 lg:w-[22rem] lg:shrink-0">
