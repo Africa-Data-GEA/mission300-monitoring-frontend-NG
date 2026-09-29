@@ -16,15 +16,18 @@ const INPUT_CLASS =
 const TEXTAREA_CLASS =
   'min-h-24 w-full resize-y rounded-control border border-border-strong bg-surface px-3.5 py-3 text-base text-text-default placeholder:text-text-subtle'
 
-/** The "log a decision" form fields, presented inside CreateLearningLogEntryDialog. */
+/** The "log a decision" form fields, presented inside CreateLearningLogEntryDialog
+ * and EditLearningLogEntryDialog - the request shape is identical for both. */
 export function CreateLearningLogEntryForm({
   form,
   onSubmit,
   serverError,
+  isEditing = false,
 }: {
   form: UseFormReturn<CreateLearningLogEntryRequest>
   onSubmit: () => void
   serverError: string
+  isEditing?: boolean
 }) {
   return (
     <Form {...form}>
@@ -162,7 +165,13 @@ export function CreateLearningLogEntryForm({
         <div className="flex justify-end border-t border-border-default pt-5">
           <Button className="h-10 px-5" disabled={form.formState.isSubmitting} type="submit">
             <Send aria-hidden="true" />
-            {form.formState.isSubmitting ? 'Logging…' : 'Log entry'}
+            {form.formState.isSubmitting
+              ? isEditing
+                ? 'Saving…'
+                : 'Logging…'
+              : isEditing
+                ? 'Save changes'
+                : 'Log entry'}
           </Button>
         </div>
       </form>

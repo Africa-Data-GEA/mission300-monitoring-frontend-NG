@@ -13,7 +13,7 @@ export function StateDiscoShell({
   children,
 }: {
   title: string
-  description: string
+  description?: string
   children: ReactNode
 }) {
   return (
@@ -21,7 +21,7 @@ export function StateDiscoShell({
       <div>
         <Breadcrumb items={[{ label: 'Monitoring & Analysis' }, { label: 'State & DisCo Performance' }]} />
         <h1 className="mt-2 text-3xl font-semibold tracking-tight text-text-default">{title}</h1>
-        <p className="mt-1 max-w-3xl text-sm text-text-muted">{description}</p>
+        {description && <p className="mt-1 max-w-3xl text-sm text-text-muted">{description}</p>}
       </div>
       {children}
     </div>

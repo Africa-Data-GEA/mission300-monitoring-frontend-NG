@@ -19,18 +19,23 @@ describe('GlobalFilterBar', () => {
     ).toBeInTheDocument()
   })
 
-  it('shows only the three executive filters', async () => {
+  it('shows every filter the backend can actually apply', async () => {
     await renderBar()
 
     for (const name of [
       /Reporting period/,
       /Compact pillar/,
       /Institution/,
+      /Technology/,
+      /Priority/,
+      /Distribution Company/,
     ]) {
       expect(screen.getByRole('combobox', { name })).toBeInTheDocument()
     }
 
-    expect(screen.queryByRole('combobox', { name: /Priority/ })).not.toBeInTheDocument()
+    // geographicScope has no control - it's an aggregation-level toggle,
+    // not a narrowing filter (see GlobalFilterBar's own comment).
+    expect(screen.queryByRole('combobox', { name: /Geographic/ })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /More filters/ })).not.toBeInTheDocument()
   })
 

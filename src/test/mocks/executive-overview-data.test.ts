@@ -246,7 +246,9 @@ describe('executive overview mock payload', () => {
 
       expect(privateCapital).toBeDefined()
       expect(privateCapital?.current).toBeGreaterThanOrEqual(0)
-      expect(privateCapital?.value).toMatch(/\$.*B/)
+      // Currency-labelled with whatever the active branding config's symbol
+      // is (₦ by default - see lib/currency.ts) rather than a hardcoded $.
+      expect(privateCapital?.value).toMatch(/[₦$].*B/)
     })
 
     it('includes an unvalidated data source', () => {

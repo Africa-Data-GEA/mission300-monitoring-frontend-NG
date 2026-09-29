@@ -59,6 +59,16 @@ export const createLearningLogEntryResponseSchema = z.object({
   message: z.string().min(1),
 })
 
+/** Same shape as create - every field optional, since an update is a
+ * partial patch (e.g. just moving status from "proposed" to "decided"). */
+export const updateLearningLogEntryRequestSchema = createLearningLogEntryRequestSchema.partial()
+
+export const updateLearningLogEntryResponseSchema = createLearningLogEntryResponseSchema
+
+export const deleteLearningLogEntryResponseSchema = z.object({
+  message: z.string().min(1),
+})
+
 /** Response shape for GET /api/learning-log. */
 export const learningLogOverviewSchema = z.object({
   lastUpdated: z.iso.datetime(),
@@ -70,6 +80,9 @@ export type LearningLogArea = z.infer<typeof learningLogAreaSchema>
 export type LearningLogEntry = z.infer<typeof learningLogEntrySchema>
 export type CreateLearningLogEntryRequest = z.infer<typeof createLearningLogEntryRequestSchema>
 export type CreateLearningLogEntryResponse = z.infer<typeof createLearningLogEntryResponseSchema>
+export type UpdateLearningLogEntryRequest = z.infer<typeof updateLearningLogEntryRequestSchema>
+export type UpdateLearningLogEntryResponse = z.infer<typeof updateLearningLogEntryResponseSchema>
+export type DeleteLearningLogEntryResponse = z.infer<typeof deleteLearningLogEntryResponseSchema>
 export type LearningLogOverview = z.infer<typeof learningLogOverviewSchema>
 
 export const LEARNING_LOG_AREA_LABELS: Record<LearningLogArea, string> = {

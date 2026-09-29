@@ -45,9 +45,11 @@ export const dashboardKeys = {
 
 /**
  * Serialises only the filters Executive Overview's endpoint can actually
- * apply. The remaining global filters (priority, geographic scope,
- * distribution company) are deliberately not sent — see the note in
- * GlobalFilterBar on why they are not yet exposed as controls either.
+ * apply — everything except `geographicScope` (an aggregation-level toggle,
+ * not a narrowing filter; see GlobalFilterBar's own note on why it has no
+ * control). `technology` is sent even though nothing currently narrows on
+ * it, matching every other omitted-when-empty filter here - harmless until
+ * a technology field exists to filter by.
  *
  * Empty values are omitted so the query string stays readable and two
  * equivalent filter states produce the same URL.
@@ -55,7 +57,14 @@ export const dashboardKeys = {
 function toSearchParams(query: ExecutiveOverviewQuery): string {
   const params = new URLSearchParams()
 
-  for (const key of ['period', 'pillar', 'institution', 'technology'] as const) {
+  for (const key of [
+    'period',
+    'pillar',
+    'institution',
+    'technology',
+    'priority',
+    'distributionCompany',
+  ] as const) {
     const value = query[key]
     if (value) params.set(key, value)
   }

@@ -66,7 +66,9 @@ describe('DashboardPage', () => {
 
     await screen.findByRole('heading', { name: 'Executive Overview', level: 1 })
 
-    expect(screen.getByText('$0.2B')).toBeInTheDocument()
+    // Currency symbol comes from the active branding config (₦ by default -
+    // see lib/currency.ts), not a hardcoded $.
+    expect(screen.getByText('₦0.2B')).toBeInTheDocument()
   })
 
   describe('dynamic pillar behaviour', () => {

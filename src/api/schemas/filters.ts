@@ -40,7 +40,7 @@ export type DashboardFilterOptions = z.infer<typeof dashboardFilterOptionsSchema
 export type DashboardFilterValues = z.infer<typeof dashboardFilterValuesSchema>
 
 export const DEFAULT_FILTER_VALUES: DashboardFilterValues = {
-  period: 'q3-2025',
+  period: '2026',
   pillar: 'all',
   institution: 'all',
   priority: 'priority',

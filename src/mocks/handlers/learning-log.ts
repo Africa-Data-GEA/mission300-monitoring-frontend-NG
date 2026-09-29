@@ -105,4 +105,74 @@ export const learningLogHandlers = [
       message: `${entry.id} has been added to the learning log.`,
     })
   }),
+
+  /**
+   * PATCH /api/learning-log/:id
+   *
+   * Partial update - only the fields the client sent are changed.
+   */
+  http.patch('/api/learning-log/:id', async ({ request, params }) => {
+    await delay(300)
+
+    const entry = learningLogEntries.find((candidate) => candidate.id === params.id)
+    if (!entry) {
+      return HttpResponse.json({ message: 'The learning log entry was not found.' }, { status: 404 })
+    }
+
+    const body = (await request.json()) as Partial<{
+      title: string
+      area: string
+      decision: string
+      rationale: string
+      relatedRecord: string
+      reviewCycle: string
+      status: string
+    }>
+
+    if (body.title !== undefined) entry.title = body.title.trim()
+    if (body.area !== undefined) entry.area = body.area as LearningLogEntry['area']
+    if (body.decision !== undefined) entry.decision = body.decision.trim()
+    if (body.rationale !== undefined) entry.rationale = body.rationale.trim()
+    if (body.relatedRecord !== undefined) entry.relatedRecord = body.relatedRecord.trim() || null
+    if (body.reviewCycle !== undefined) entry.reviewCycle = body.reviewCycle.trim()
+    if (body.status !== undefined) entry.status = body.status as LearningLogEntry['status']
+
+    recordAuditEvent({
+      action: 'Updated a learning log entry',
+      module: 'Learning & Decision Log',
+      recordId: entry.id,
+      newValue: entry.title,
+      reference: entry.relatedRecord,
+    })
+
+    return HttpResponse.json({ entry, message: `${entry.id} has been updated.` })
+  }),
+
+  /**
+   * DELETE /api/learning-log/:id
+   */
+  http.delete('/api/learning-log/:id', async ({ params }) => {
+    await delay(300)
+
+    const index = learningLogEntries.findIndex((candidate) => candidate.id === params.id)
+    if (index === -1) {
+      return HttpResponse.json({ message: 'The learning log entry was not found.' }, { status: 404 })
+    }
+
+    const removed = learningLogEntries[index]
+    learningLogEntries.splice(index, 1)
+    if (!removed) {
+      return HttpResponse.json({ message: 'The learning log entry was not found.' }, { status: 404 })
+    }
+
+    recordAuditEvent({
+      action: 'Deleted a learning log entry',
+      module: 'Learning & Decision Log',
+      recordId: removed.id,
+      newValue: removed.title,
+      reference: removed.relatedRecord,
+    })
+
+    return HttpResponse.json({ message: `${removed.id} has been removed from the learning log.` })
+  }),
 ]

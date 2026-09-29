@@ -9,6 +9,16 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { useFilterOptions } from '@/features/filters/api'
 import { CUSTOM_PERIOD, DEFAULT_FILTER_VALUES } from '@/types/filters'
 
+/** The backend only understands period cutoffs at year/quarter granularity
+ * (see ExecutiveOverviewService's periodSortKey) - a true arbitrary date
+ * range isn't backed anywhere, so a picked range resolves to "as of the
+ * quarter its end date falls in" rather than promising day-level precision
+ * nothing behind it can honour. */
+function toQuarterPeriod(date: Date): string {
+  const quarter = Math.floor(date.getMonth() / 3) + 1
+  return `q${quarter}-${date.getFullYear()}`
+}
+
 /**
  * The application-wide filter bar.
  *
@@ -18,20 +28,31 @@ import { CUSTOM_PERIOD, DEFAULT_FILTER_VALUES } from '@/types/filters'
  * so every page's query reads the same values and a filtered view is a
  * shareable link.
  *
- * All seven specified filters are exposed here. Four of them (priority,
- * geographic scope, distribution company, technology) were already modelled
- * in the schema, the URL and the query but had no control to set them —
- * review feedback reported the filter panel as doing nothing (docs/M300
- * Monitoring Platform Feedback.pptx, slide 2).
+ * Six of the seven specified filters are exposed here: `period`, `pillar`,
+ * `institution` and `technology` narrow Executive Overview's delivery
+ * section directly; `priority` and `distributionCompany` now do too (see
+ * ExecutiveOverviewService.buildDeliveryStatus on the backend).
+ * `geographicScope` stays out — it's an aggregation-LEVEL toggle
+ * (national/state/DisCo), not a narrowing filter, and making it real means
+ * reshaping every headline card into a per-state/per-DisCo breakdown, not
+ * adding a control here.
  */
 export function GlobalFilterBar({ onClose }: { onClose?: () => void }) {
   const { filters, setFilter, reset } = useGlobalFilters()
   const { data: options, isPending } = useFilterOptions()
 
-  // Held locally, not in the URL: the preset periods are the shareable
-  // contract every page's query reads, and a half-selected range (from with
-  // no to) is not a valid period to fetch against.
+  // The picked range itself is held locally (react-day-picker's own shape,
+  // not a shareable URL value) - once both ends are picked, its "to" date
+  // is converted to the nearest quarter and written into `filters.period`
+  // (see toQuarterPeriod below), which IS what every page's query reads.
+  // A half-selected range (from with no "to" yet) intentionally does not
+  // touch filters.period.
   const [customRange, setCustomRange] = useState<DateRange | undefined>()
+
+  function handleCustomRangeChange(range: DateRange | undefined) {
+    setCustomRange(range)
+    if (range?.from && range?.to) setFilter('period', toQuarterPeriod(range.to))
+  }
 
   if (isPending || !options) {
     return <Skeleton className="h-16 w-full rounded-card" />
@@ -51,7 +72,7 @@ export function GlobalFilterBar({ onClose }: { onClose?: () => void }) {
         <div>
           <h2 className="text-sm font-semibold text-text-default">Dashboard filters</h2>
           <p className="mt-0.5 text-xs text-text-muted">
-            Narrow every module by period, pillar, institution, scope or technology.
+            Choose a reporting period, then narrow the view. Changes apply automatically across supported dashboards.
           </p>
         </div>
         <div className="flex shrink-0 items-center gap-2">
@@ -73,13 +94,13 @@ export function GlobalFilterBar({ onClose }: { onClose?: () => void }) {
         </div>
       </div>
 
-      <div className="flex flex-wrap items-end gap-2.5">
+      <div className="grid grid-cols-1 items-end gap-5 sm:grid-cols-2 xl:grid-cols-4 [&_button[role=combobox]]:h-11 [&_label]:mb-1">
         <SelectField
           label="Reporting period"
           value={filters.period}
           options={options.reportingPeriods}
           onChange={(period) => setFilter('period', period)}
-          className="w-full sm:w-40"
+          className="w-full"
         />
 
         {/* Only once "Custom range…" is chosen, so the bar stays compact by default. */}
@@ -87,7 +108,7 @@ export function GlobalFilterBar({ onClose }: { onClose?: () => void }) {
           <DateRangeField
             label="Custom range"
             value={customRange}
-            onChange={setCustomRange}
+            onChange={handleCustomRangeChange}
             className="w-full sm:w-64"
           />
         )}
@@ -97,7 +118,7 @@ export function GlobalFilterBar({ onClose }: { onClose?: () => void }) {
           value={filters.pillar}
           options={options.pillars}
           onChange={(pillar) => setFilter('pillar', pillar)}
-          className="w-full sm:w-44"
+          className="w-full"
         />
 
         <SelectField
@@ -105,7 +126,7 @@ export function GlobalFilterBar({ onClose }: { onClose?: () => void }) {
           value={filters.institution}
           options={options.institutions}
           onChange={(institution) => setFilter('institution', institution)}
-          className="w-full sm:w-48"
+          className="w-full"
         />
 
         <SelectField
@@ -113,19 +134,30 @@ export function GlobalFilterBar({ onClose }: { onClose?: () => void }) {
           value={filters.technology}
           options={options.technologies}
           onChange={(technology) => setFilter('technology', technology)}
-          className="w-full sm:w-44"
+          className="w-full"
+        />
+
+        <SelectField
+          label="Priority"
+          value={filters.priority}
+          options={options.priorities}
+          onChange={(priority) => setFilter('priority', priority)}
+          className="w-full"
+        />
+
+        <SelectField
+          label="Distribution Company"
+          value={filters.distributionCompany}
+          options={options.distributionCompanies}
+          onChange={(distributionCompany) => setFilter('distributionCompany', distributionCompany)}
+          className="w-full"
         />
 
         {/*
-          NOT YET EXPOSED: priority, geographicScope and distributionCompany.
-          All three are modelled in the schema, carried in the URL and passed
-          to the query already, but nothing in the payload can answer them —
-          `ongoingProjects` has no priority field, project locations are
-          regions ("North East", "Lagos State") with no DisCo mapping, and
-          geographic scope is an aggregation level rather than a filter.
-          Rendering them would reproduce the reported bug (a control that
-          changes nothing), so they stay out until the CDMU's filtering
-          requirements define what each should actually narrow.
+          NOT YET EXPOSED: geographicScope. It's an aggregation-LEVEL toggle
+          (national/state/DisCo), not a narrowing filter - every headline
+          card would need reshaping into a per-state/per-DisCo breakdown to
+          make it real, not just a control here.
         */}
       </div>
     </section>

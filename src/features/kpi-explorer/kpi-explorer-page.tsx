@@ -7,7 +7,6 @@ import { readAuthSession } from '@/features/auth/auth-session'
 import { canUserReachModule } from '@/features/auth/role-access'
 import { CatalogueTable } from './components/catalogue-table'
 import { CreateKpiDialog } from './components/create-kpi-dialog'
-import { Distributions } from './components/distributions/distributions'
 import { KpiExplorerFilters } from './components/kpi-explorer-filters'
 import { KpiExplorerSkeleton } from './components/kpi-explorer-skeleton'
 import { KpiProfileDialog } from './components/kpi-profile/kpi-profile-dialog'
@@ -94,11 +93,6 @@ export function KpiExplorerPage() {
         total={data.catalogue.total}
         onPageChange={page.setPage}
         onOpenProfile={page.openProfile}
-      />
-
-      <Distributions
-        byPillar={data.pillarDistribution}
-        byReadiness={data.readinessDistribution}
       />
 
       <KpiProfileDialog

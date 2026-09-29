@@ -1,10 +1,14 @@
+import { NotebookPen } from 'lucide-react'
 import { useState } from 'react'
+import type { LearningLogEntry } from '@/api/schemas/learning-log'
 import { Breadcrumb } from '@/components/ui/breadcrumb'
 import { Button } from '@/components/ui/button'
+import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import { ErrorState } from '@/components/ui/error-state'
 import { Skeleton } from '@/components/ui/skeleton'
-import { useLearningLog } from './api'
+import { useDeleteLearningLogEntry, useLearningLog } from './api'
 import { CreateLearningLogEntryDialog } from './components/create-learning-log-entry-dialog'
+import { EditLearningLogEntryDialog } from './components/edit-learning-log-entry-dialog'
 import { LearningLogTable } from './components/learning-log-table'
 
 /**
@@ -16,7 +20,10 @@ import { LearningLogTable } from './components/learning-log-table'
 export function LearningLogPage() {
   const [page, setPage] = useState(1)
   const [createOpen, setCreateOpen] = useState(false)
+  const [editEntry, setEditEntry] = useState<LearningLogEntry | null>(null)
+  const [deleteEntry, setDeleteEntry] = useState<LearningLogEntry | null>(null)
   const { data, isPending, isError, error, refetch } = useLearningLog(page)
+  const deleteMutation = useDeleteLearningLogEntry()
 
   if (isPending) return <Skeleton className="h-96 w-full rounded-card" />
 
@@ -30,19 +37,25 @@ export function LearningLogPage() {
     )
   }
 
+  async function confirmDelete() {
+    if (!deleteEntry) return
+    await deleteMutation.mutateAsync(deleteEntry.id)
+    setDeleteEntry(null)
+  }
+
   return (
     <div className="flex min-w-0 flex-col gap-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <Breadcrumb items={[{ label: 'Data operations' }, { label: 'Learning & decision log' }]} />
-          <h1 className="mt-2 text-3xl font-semibold tracking-tight text-text-default">
-            Learning &amp; decision log
-          </h1>
-          <p className="mt-1 max-w-3xl text-sm text-text-muted">
-            Course-correction decisions and their rationale — distinct from Bottlenecks &amp;
-            Exceptions, which tracks what&apos;s currently blocked, not why a methodology or
-            record changed.
-          </p>
+          <div className="mt-2 flex items-center gap-3">
+            <span className="flex size-10 shrink-0 items-center justify-center rounded-control bg-brand-50 text-brand-700">
+              <NotebookPen aria-hidden="true" className="size-5" />
+            </span>
+            <h1 className="text-3xl font-semibold tracking-tight text-text-default">
+              Learning &amp; decision log
+            </h1>
+          </div>
         </div>
         <Button type="button" onClick={() => setCreateOpen(true)}>
           Log a decision
@@ -55,6 +68,8 @@ export function LearningLogPage() {
         pageSize={data.entries.pageSize}
         total={data.entries.total}
         onPageChange={setPage}
+        onEdit={setEditEntry}
+        onDelete={setDeleteEntry}
       />
 
       <CreateLearningLogEntryDialog
@@ -64,6 +79,29 @@ export function LearningLogPage() {
           setCreateOpen(false)
           void refetch()
         }}
+      />
+
+      <EditLearningLogEntryDialog
+        entry={editEntry}
+        onClose={() => setEditEntry(null)}
+        onUpdated={() => {
+          setEditEntry(null)
+          void refetch()
+        }}
+      />
+
+      <ConfirmDialog
+        open={deleteEntry !== null}
+        title="Delete this entry?"
+        description={
+          deleteEntry
+            ? `"${deleteEntry.title}" will be permanently removed from the learning log. This can't be undone.`
+            : undefined
+        }
+        confirmLabel="Delete"
+        isPending={deleteMutation.isPending}
+        onConfirm={() => void confirmDelete()}
+        onCancel={() => setDeleteEntry(null)}
       />
     </div>
   )

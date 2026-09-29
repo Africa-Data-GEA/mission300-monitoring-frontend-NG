@@ -1,5 +1,6 @@
 import { useGlobalFilters } from '@/app/global-filters'
 import { useQueryClient } from '@tanstack/react-query'
+import { Loader2 } from 'lucide-react'
 import { Breadcrumb } from '@/components/ui/breadcrumb'
 import { ErrorState } from '@/components/ui/error-state'
 import { useExecutiveOverview } from './api'
@@ -61,16 +62,30 @@ export function DashboardPage() {
             { label: 'Executive Overview' },
           ]}
         />
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight text-text-default">
-          Executive Overview
-        </h1>
+        <div className="mt-2 flex items-center gap-2.5">
+          <h1 className="text-3xl font-semibold tracking-tight text-text-default">
+            Executive Overview
+          </h1>
+          {/* A visible cue to go with aria-busy below - filters changing the
+              query previously gave no feedback that anything was happening
+              until the (stale) cards silently swapped to new values. */}
+          {isFetching && (
+            <span className="flex items-center gap-1.5 text-xs font-medium text-text-muted">
+              <Loader2 aria-hidden="true" className="size-3.5 animate-spin" />
+              Updating…
+            </span>
+          )}
+        </div>
       </div>
 
       {/*
         Kept mounted while refetching so changing a filter does not blank the
-        page; the region is marked busy instead.
+        page; the region is marked busy and dimmed instead.
       */}
-      <div aria-busy={isFetching} className="flex flex-col gap-4">
+      <div
+        aria-busy={isFetching}
+        className="flex flex-col gap-4 transition-opacity duration-200 aria-busy:pointer-events-none aria-busy:opacity-60"
+      >
         <CprTargetsPanel targets={data.cprTargets} />
         <HeadlineCards cards={data.headlineCards} />
         <AccessDeliverySection channels={data.accessDelivery} />

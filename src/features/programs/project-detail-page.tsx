@@ -1,11 +1,14 @@
-import { Pencil } from 'lucide-react'
+import { ClipboardList, MapPin, Pencil } from 'lucide-react'
 import { Link, useParams } from 'react-router'
 import { Breadcrumb } from '@/components/ui/breadcrumb'
 import { Button } from '@/components/ui/button'
 import { ErrorState } from '@/components/ui/error-state'
+import { formatDate } from '@/lib/format'
+import { PILLAR_LABELS } from '@/types/domain'
 import { BottleneckRegister } from '@/features/bottlenecks/components/bottleneck-register'
 import { CreateBottleneckDialog } from '@/features/bottlenecks/components/create-bottleneck-dialog'
 import { useBottlenecksFilters } from '@/features/bottlenecks/api'
+import { ExecutionStatusBadge } from './components/execution-status-badge'
 import { DocumentsPanel } from './components/project-profile/documents-panel'
 import { OverviewPanel } from './components/project-profile/overview-panel'
 import { UpdatesPanel } from './components/project-profile/updates-panel'
@@ -55,21 +58,53 @@ export function ProjectDetailPage() {
         ]}
       />
 
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="text-3xl font-semibold tracking-tight text-text-default">
-            {project.name}
-          </h1>
-          <p className="mt-1 text-sm text-text-muted">
-            {project.id} · {project.programmeName} · {project.owner}
-          </p>
+      <div className="overflow-hidden rounded-card border border-border-default bg-surface">
+        <div className="flex flex-wrap items-start justify-between gap-4 bg-landing-deep-navy px-5 py-5 sm:px-7">
+          <div className="flex items-start gap-3.5">
+            <span className="flex size-11 shrink-0 items-center justify-center rounded-control bg-white/10 text-landing-gold">
+              <ClipboardList aria-hidden="true" className="size-5" />
+            </span>
+            <div>
+              <div className="flex flex-wrap items-center gap-2.5">
+                <h1 className="text-2xl font-semibold tracking-tight text-white sm:text-3xl">
+                  {project.name}
+                </h1>
+                <ExecutionStatusBadge status={project.currentStatus} />
+              </div>
+              <p className="mt-1 flex items-center gap-1.5 text-sm text-white/70">
+                <MapPin aria-hidden="true" className="size-3.5 shrink-0" />
+                {project.location} · {PILLAR_LABELS[project.pillar]}
+              </p>
+            </div>
+          </div>
+          <Button asChild size="sm" variant="secondary">
+            <Link to={`/programs/projects/${project.id}/edit`}>
+              <Pencil aria-hidden="true" />
+              Edit project
+            </Link>
+          </Button>
         </div>
-        <Button asChild size="sm" variant="secondary">
-          <Link to={`/programs/projects/${project.id}/edit`}>
-            <Pencil aria-hidden="true" />
-            Edit project
-          </Link>
-        </Button>
+
+        <dl className="grid grid-cols-2 gap-4 px-5 py-4 sm:grid-cols-4 sm:px-7">
+          <div>
+            <dt className="text-2xs font-medium tracking-wide text-text-subtle uppercase">Programme</dt>
+            <dd className="mt-0.5 truncate text-sm font-medium text-text-default">{project.programmeName}</dd>
+          </div>
+          <div>
+            <dt className="text-2xs font-medium tracking-wide text-text-subtle uppercase">Owner</dt>
+            <dd className="mt-0.5 truncate text-sm font-medium text-text-default">{project.owner}</dd>
+          </div>
+          <div>
+            <dt className="text-2xs font-medium tracking-wide text-text-subtle uppercase">End date</dt>
+            <dd className="mt-0.5 text-sm font-medium text-text-default">
+              {project.endDate ? formatDate(project.endDate) : 'Not set'}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-2xs font-medium tracking-wide text-text-subtle uppercase">ID</dt>
+            <dd className="mt-0.5 truncate text-sm font-medium text-text-default">{project.id}</dd>
+          </div>
+        </dl>
       </div>
 
       <OverviewPanel project={project} />

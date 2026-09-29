@@ -110,14 +110,15 @@ describe('useExecutiveOverview', () => {
         'pillar=last-mile-access',
         'institution=nerc',
         'technology=mini-grid',
+        'priority=all',
+        'distributionCompany=ikeja',
       ]) {
         expect(url, fragment).toContain(fragment)
       }
-      // Still not sent: nothing in the payload can answer these three yet —
-      // see the note in GlobalFilterBar on why they have no control either.
-      for (const excluded of ['priority', 'geographicScope', 'distributionCompany']) {
-        expect(url).not.toContain(excluded)
-      }
+      // Still not sent: geographicScope is an aggregation-level toggle, not
+      // a narrowing filter - see GlobalFilterBar's own note on why it has
+      // no control.
+      expect(url).not.toContain('geographicScope')
     })
 
     it('omits filters that are not set', async () => {
