@@ -1,15 +1,13 @@
 
-# M300 Nigeria Energy Compact Dashboardld
+# M300 Nigeria Energy Compact Dashboard
 
 Frontend for monitoring delivery of Nigeria's Mission 300 National Energy
-Compact. The application is currentsly a demonstration system: completed API
-modules can use thed NestJS ddemo backend while unfinishedw modules remain backed
-by deterministic dbrowser emocks.ed
-## Requirementd
+Compact. The active API is the NestJS service in `mission300-monitoring-backend-NG`.
+Local demonstrations can run with in-process mock handlers and data.
+## Requirements
 
 - Node.js 24.14.1 (see `.node-version`)
-- pnpm 10.33.0d
-e
+- pnpm 10.33.0
 ## Local development
 
 ```bash
@@ -25,13 +23,14 @@ backend. Environment variables are validated at startup.
 
 | Mode | Behaviour |
 | --- | --- |
-| `mock` | All `/api` requests are handled by MSW in the browser. |
-| `hybrid` | MSW handles unfinished modules and proxies supported modules to `VITE_SUBMISSIONS_BACKEND_URL`. |
-| `backend` | MSW is disabled and all requests use `VITE_API_BASE_URL`. |
+| `mock` | The API client dispatches requests to in-process mock handlers in the browser. |
+| `hybrid` | The in-process router forwards supported paths to `VITE_SUBMISSIONS_BACKEND_URL` and serves the rest from mocks. |
+| `backend` | All API requests use `VITE_API_BASE_URL`. |
 
 Use `hybrid` only for the demonstration deployment while backend coverage is
-incomplete. Production should move to `backend` mode when all endpoint
-contracts are implemented.
+incomplete. Production should use `backend` mode when all endpoint contracts
+are implemented. Node tests use MSW to intercept fetch requests; browser mock
+and hybrid modes do not register a service worker.
 
 ## Quality commands
 
@@ -44,7 +43,8 @@ pnpm check
 ```
 
 Pull requests and pushes to `main` run dependency audit, typecheck, lint, tests
-and a production build in GitHub Actions.
+and a mock-mode production build in GitHub Actions. A full browser-to-backend
+acceptance suite is still needed.
 
 ## Important architecture boundary
 
@@ -53,5 +53,6 @@ submission validation, approval transitions, aggregation, baselines and target
 progress are backend responsibilities. Browser mocks illustrate the expected
 contracts and must not be treated as an authoritative production data source.
 
-More detailed architecture, API, submission-flow and deployment documentation
-is maintained under [`docs/`](docs/).
+Older material under [`docs/`](docs/) includes contracts written for the
+previous PHP backend. Confirm routes and shapes against the active NestJS
+controllers and frontend schemas before implementing against those documents.

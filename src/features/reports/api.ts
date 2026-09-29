@@ -1,4 +1,5 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { z } from 'zod'
 import {
   generateReportResponseSchema,
   reportPreviewSchema,
@@ -64,7 +65,7 @@ export function useGenerateReport() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (config: ReportConfig) =>
+    mutationFn: (config: ReportConfig & { orientation?: 'portrait' | 'landscape'; excludedSections?: string[]; compactLayout?: boolean }) =>
       api.post<GenerateReportResponse>('/reports/generate', config, generateReportResponseSchema),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: reportsKeys.all })
@@ -80,6 +81,16 @@ export function useGenerateReport() {
  */
 export function previewReport(config: ReportConfig): Promise<ReportPreview> {
   return api.post('/reports/preview', config, reportPreviewSchema)
+}
+
+const savedPreviewSchema = z.object({
+  preview: reportPreviewSchema,
+  orientation: z.enum(['portrait', 'landscape']),
+  compactLayout: z.boolean().optional(),
+})
+
+export function fetchSavedReportPreview(id: string) {
+  return api.get(`/reports/saved/${id}/preview`, savedPreviewSchema)
 }
 
 /** Every tracked KPI's methodology, independent of the report builder's

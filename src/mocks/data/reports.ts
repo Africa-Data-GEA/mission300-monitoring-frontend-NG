@@ -574,17 +574,7 @@ export function createSavedReport(config: ReportConfig): SavedReport {
   const filtered = appliedFiltersFor(config)
   const signature = configSignature(config)
 
-  const existing = savedReports.find((report) => configSignature(report.config) === signature)
-  if (existing) {
-    existing.version += 1
-    existing.format = config.format
-    existing.filtersSummary = filtered.map((entry) => entry.value).join(' · ')
-    existing.validationStatusLabel = validationStatusLabelFor(config)
-    existing.fileReference = `${config.reportType}_${config.periods.join('-')}.${config.format}`
-    existing.lastGeneratedAt = now
-    existing.config = config
-    return existing
-  }
+  const version = Math.max(0, ...savedReports.filter((report) => configSignature(report.config) === signature).map((report) => report.version)) + 1
 
   savedReportSequence += 1
   const report: SavedReport = {
@@ -595,9 +585,9 @@ export function createSavedReport(config: ReportConfig): SavedReport {
     owner: 'You',
     filtersSummary: filtered.map((entry) => entry.value).join(' · '),
     validationStatusLabel: validationStatusLabelFor(config),
-    version: 1,
+    version,
     format: config.format,
-    fileReference: `${config.reportType}_${config.periods.join('-')}.${config.format}`,
+    fileReference: `${config.reportType}_${config.periods.join('-')}_v${version}.${config.format}`,
     createdAt: now,
     lastGeneratedAt: now,
     config,

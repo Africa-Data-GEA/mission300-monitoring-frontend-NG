@@ -36,6 +36,12 @@ export function BuilderSidebar({
   onToggleSection: (title: string) => void
   onDownload: (format: 'pdf' | 'xlsx') => void
 }) {
+  const supportsPeriods = ['pillar-performance', 'kpi-indicator', 'state-disco', 'submission-compliance', 'data-quality'].includes(config.reportType)
+  const supportsPillars = ['compact-progress', 'compact-review', 'pillar-performance', 'kpi-indicator', 'implementation', 'bottleneck', 'financial'].includes(config.reportType)
+  const supportsKpis = ['pillar-performance', 'kpi-indicator'].includes(config.reportType)
+  const supportsDisco = config.reportType === 'state-disco'
+  const supportsProgrammes = ['implementation', 'financial'].includes(config.reportType)
+
   function set<K extends keyof ReportConfig>(key: K, value: ReportConfig[K]) {
     onChangeConfig({ ...config, [key]: value })
   }
@@ -67,55 +73,50 @@ export function BuilderSidebar({
               KPI-indicator and pillar-performance report types build a real
               per-period comparison from it; see the schema comment on
               `periods` for why other report types don't. */}
-          <MultiSelectField
+          {supportsPeriods && <MultiSelectField
             label="Reporting period"
             values={config.periods}
             options={filterOptions.reportingPeriods}
             onChange={(values) => set('periods', values)}
-          />
-          <MultiSelectField
+            allValue="all"
+          />}
+          {supportsPillars && <MultiSelectField
             label="Compact pillar"
             values={config.pillars}
             options={filterOptions.pillars}
             onChange={(values) => set('pillars', values)}
             allValue="all"
-          />
-          <SelectField
+          />}
+          {supportsKpis && <SelectField
             label="KPI category"
             value={config.kpiCategory}
             options={filterOptions.kpiCategories}
             onChange={(value) => set('kpiCategory', value)}
-          />
-          <SelectField
-            label="State"
-            value={config.state}
-            options={filterOptions.states}
-            onChange={(value) => set('state', value)}
-          />
-          <SelectField
+          />}
+          {supportsDisco && <SelectField
             label="Distribution Company"
             value={config.distributionCompany}
             options={filterOptions.distributionCompanies}
             onChange={(value) => set('distributionCompany', value)}
-          />
-          <SelectField
+          />}
+          {supportsProgrammes && <SelectField
             label="Programme or agency"
             value={config.programmeOrAgency}
             options={filterOptions.programmesOrAgencies}
             onChange={(value) => set('programmeOrAgency', value)}
-          />
-          <SelectField
+          />}
+          {supportsKpis && <SelectField
             label="Validation status"
             value={config.validationStatus}
             options={filterOptions.validationStatuses}
             onChange={(value) => set('validationStatus', value)}
-          />
-          <SelectField
+          />}
+          {supportsKpis && <SelectField
             label="Readiness tier"
             value={config.readinessTier}
             options={filterOptions.readinessTiers}
             onChange={(value) => set('readinessTier', value)}
-          />
+          />}
         </div>
       )}
 

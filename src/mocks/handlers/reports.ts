@@ -1,5 +1,6 @@
 import { delay, http, HttpResponse } from '../local-router'
 import { reportConfigSchema } from '@/api/schemas/reports'
+import type { ReportPreview } from '@/api/schemas/reports'
 import {
   buildMethodologyReport,
   buildReportPreview,
@@ -28,6 +29,8 @@ function paginate<T>(items: T[], requestedPage: number, pageSize: number) {
     total: items.length,
   }
 }
+
+const savedSnapshots = new Map<string, { preview: ReportPreview; orientation: 'portrait' | 'landscape'; compactLayout: boolean }>()
 
 export const reportsHandlers = [
   /** GET /api/reports/filters */
@@ -90,15 +93,37 @@ export const reportsHandlers = [
   http.post('/api/reports/generate', async ({ request }) => {
     await delay(400)
 
-    const result = reportConfigSchema.safeParse(await request.json())
+    const body = await request.json() as Record<string, unknown>
+    const result = reportConfigSchema.safeParse(body)
     if (!result.success) {
       return HttpResponse.json({ message: 'Invalid report configuration.' }, { status: 400 })
     }
 
-    const preview = buildReportPreview(result.data)
+    const excluded = Array.isArray(body.excludedSections)
+      ? body.excludedSections.filter((title): title is string => typeof title === 'string')
+      : []
+    const fullPreview = buildReportPreview(result.data)
+    const preview = {
+      ...fullPreview,
+      sections: fullPreview.sections.filter((section) => !excluded.includes(section.title)),
+    }
     const savedReport = createSavedReport(result.data)
+    savedSnapshots.set(savedReport.id, {
+      preview,
+      orientation: body.orientation === 'landscape' ? 'landscape' : 'portrait',
+      compactLayout: body.compactLayout === true,
+    })
 
     return HttpResponse.json({ preview, savedReport })
+  }),
+
+  http.get('/api/reports/saved/:id/preview', ({ params }) => {
+    const id = String(params.id)
+    const saved = savedReports.find((report) => report.id === id)
+    if (!saved) return HttpResponse.json({ message: 'Saved report not found.' }, { status: 404 })
+    return HttpResponse.json(savedSnapshots.get(id) ?? {
+      preview: buildReportPreview(saved.config), orientation: 'portrait',
+    })
   }),
 
   /** GET /api/reports/methodology — every tracked KPI's definition and
@@ -113,6 +138,7 @@ export const reportsHandlers = [
     await delay(200)
 
     const removed = removeSavedReport(String(params.id))
+    savedSnapshots.delete(String(params.id))
     if (!removed) {
       return HttpResponse.json({ message: `No saved report found with id ${String(params.id)}` }, { status: 404 })
     }

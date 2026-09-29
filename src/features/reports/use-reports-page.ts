@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import toast from 'react-hot-toast'
 import type {
   CompactExportCard,
   ExportFormat,
@@ -8,7 +9,7 @@ import type {
 } from '@/api/schemas/reports'
 import {
   fetchMethodologyReport,
-  previewReport,
+  fetchSavedReportPreview,
   useDeleteSavedReport,
   useGenerateReport,
   useReportPreview,
@@ -21,11 +22,12 @@ import { downloadBlob } from './lib/download'
 import { buildReportWorkbook } from './lib/export-excel'
 import { buildReportPdf } from './lib/export-pdf'
 import type { Orientation } from './lib/types'
+import { environment } from '@/config/environment'
 
 export type { Orientation }
 
 const DEFAULT_CONFIG_BASE: Omit<ReportConfig, 'reportType'> = {
-  periods: ['q3-2025'],
+  periods: ['all'],
   pillars: ['all'],
   kpiCategory: 'all',
   state: 'all',
@@ -102,16 +104,16 @@ export function useReportsPage() {
   async function downloadFromBuilder(format: ExportFormat) {
     setDownloadingFormat(format)
     try {
-      const { preview: generated, savedReport } = await generateReport.mutateAsync({ ...config, format })
-      const filtered = {
-        ...generated,
-        sections: generated.sections.filter((section) => !excludedSections.has(section.title)),
-      }
+      const { preview: generated, savedReport } = await generateReport.mutateAsync({
+        ...config, format, orientation, excludedSections: [...excludedSections],
+      })
       const blob =
         format === 'pdf'
-          ? await buildReportPdf(filtered, { orientation })
-          : await buildReportWorkbook(filtered)
+          ? await buildReportPdf(generated, { orientation })
+          : await buildReportWorkbook(generated)
       downloadBlob(blob, savedReport.fileReference)
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'The report could not be downloaded.')
     } finally {
       setDownloadingFormat(null)
     }
@@ -124,6 +126,9 @@ export function useReportsPage() {
       const { preview: generated, savedReport } = await generateReport.mutateAsync({
         ...defaultConfig(card.reportType),
         format,
+        ...(card.id === 'compact-progress-report' && format === 'pdf' && environment.dataMode === 'mock'
+          ? { compactLayout: true }
+          : {}),
       })
       // The Compact Progress Report PDF is a bespoke, fixed layout matching
       // the real CPR's design/structure (see compact-progress-report-
@@ -132,12 +137,14 @@ export function useReportsPage() {
       // download is tracked in Saved Reports history the same as any other
       // export; only the PDF bytes themselves diverge.
       const blob =
-        card.id === 'compact-progress-report' && format === 'pdf'
+        card.id === 'compact-progress-report' && format === 'pdf' && environment.dataMode === 'mock'
           ? await buildCompactProgressReportPdf(buildCompactProgressReportData())
           : format === 'pdf'
             ? await buildReportPdf(generated, { orientation: 'portrait' })
             : await buildReportWorkbook(generated)
       downloadBlob(blob, savedReport.fileReference)
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'The export could not be downloaded.')
     } finally {
       setCompactExportKey(null)
     }
@@ -146,12 +153,16 @@ export function useReportsPage() {
   async function redownloadSavedReport(report: SavedReport) {
     setRedownloadingId(report.id)
     try {
-      const generated = await previewReport(report.config)
+      const { preview: generated, orientation: savedOrientation, compactLayout } = await fetchSavedReportPreview(report.id)
       const blob =
         report.format === 'pdf'
-          ? await buildReportPdf(generated, { orientation: 'portrait' })
+          ? compactLayout && environment.dataMode === 'mock'
+            ? await buildCompactProgressReportPdf(buildCompactProgressReportData())
+            : await buildReportPdf(generated, { orientation: savedOrientation })
           : await buildReportWorkbook(generated)
       downloadBlob(blob, report.fileReference)
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'The saved report could not be downloaded.')
     } finally {
       setRedownloadingId(null)
     }
@@ -170,6 +181,8 @@ export function useReportsPage() {
           ? await buildReportPdf(generated, { orientation: 'landscape' })
           : await buildReportWorkbook(generated)
       downloadBlob(blob, `kpi-methodology.${format}`)
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'The methodology could not be downloaded.')
     } finally {
       setDownloadingMethodology(null)
     }
@@ -179,6 +192,8 @@ export function useReportsPage() {
     setDeletingId(report.id)
     try {
       await deleteSavedReport.mutateAsync(report.id)
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'The saved report could not be deleted.')
     } finally {
       setDeletingId(null)
     }
