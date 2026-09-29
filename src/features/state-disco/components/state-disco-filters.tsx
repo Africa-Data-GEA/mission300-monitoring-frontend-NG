@@ -31,16 +31,8 @@ export function StateDiscoFilterBar({
    * the underlying rows later carry a metric or a source, they belong here
    * again — with a matching column.
    *
-   * `serviceBand` and `validationStatus` moved out of this shared bar
-   * entirely — see the local filter controls inside each relevant section on
-   * the page (Delivery & compliance, DisCo comparison, States). This page
-   * merged five originally-separate tabs into one scroll, and neither field
-   * applies to every one of them: Service band only ever meant anything on
-   * the Delivery table, Validation status applies to three of the four data
-   * tables but not Supply & tariff. Sitting in a page-wide bar, they looked
-   * global but silently only touched one section — a reader changing Service
-   * band would see Delivery narrow while DisCo comparison, sitting right
-   * above it, didn't move, with no indication why.
+   * `serviceBand` is absent while the Delivery section is hidden.
+   * `validationStatus` belongs to DisCo comparison and stays in that section.
    */
   const advanced = [
     ['view', 'View', options.views],
