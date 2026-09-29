@@ -1,7 +1,5 @@
-import { useState } from 'react'
 import { Card } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
-import { SelectField } from '@/components/ui/select-field'
 import {
   useDiscoComparison,
   useStateDiscoFilters,
@@ -26,9 +24,7 @@ export function StateDiscoPage() {
   const filters = useStateDiscoFilters()
   const overview = useStateDiscoOverview(state.query)
 
-  // Validation status only filters the DisCo comparison section.
-  const [comparisonValidation, setComparisonValidation] = useState('all')
-  const comparison = useDiscoComparison({ ...state.query, validationStatus: comparisonValidation })
+  const comparison = useDiscoComparison({ ...state.query, validationStatus: 'all' })
 
   const supplyTariff = useSupplyTariff(state.query)
 
@@ -69,18 +65,7 @@ export function StateDiscoPage() {
 
             {/* DisCo comparison */}
             <section>
-              <div className="flex flex-wrap items-end justify-between gap-2">
-                <h2 className="text-lg font-semibold">Distribution Company comparison</h2>
-                {filters.data && (
-                  <SelectField
-                    label="Validation status"
-                    value={comparisonValidation}
-                    options={filters.data.validationStatuses}
-                    onChange={setComparisonValidation}
-                    className="w-44"
-                  />
-                )}
-              </div>
+              <h2 className="text-lg font-semibold">Distribution Company comparison</h2>
               <div className="mt-3 grid gap-3 lg:grid-cols-2">
                 <DiscoComparisonChart
                   title="Energy received vs billed"

@@ -94,7 +94,11 @@ const styles = StyleSheet.create({
     borderRightWidth: 1,
     borderRightColor: BORDER,
   },
-  emptyNote: { padding: 8, color: MUTED, fontStyle: 'italic', fontSize: 8 },
+  // No italic variant is registered for Google Sans (see pdf-fonts.ts - only
+  // 400/500/600/700 upright weights have a real font file), so react-pdf
+  // can't resolve fontStyle: 'italic' and throws instead of rendering.
+  // Muted colour + small size still reads as de-emphasised text without it.
+  emptyNote: { padding: 8, color: MUTED, fontSize: 8 },
   footer: {
     position: 'absolute',
     bottom: 18,

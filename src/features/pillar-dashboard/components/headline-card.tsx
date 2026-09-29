@@ -1,4 +1,5 @@
 import { Link } from 'react-router'
+import { CircleCheck, Clock3 } from 'lucide-react'
 import type { PillarHeadlineCard } from '@/api/schemas/pillar-dashboard'
 import { Card } from '@/components/ui/card'
 import { InfoPopover } from '@/components/ui/info-popover'
@@ -12,6 +13,7 @@ import { PillarKpiEditButton } from './pillar-kpi-edit-button'
  * drills down to the same indicator's full profile in KPI Explorer.
  */
 export function HeadlineCard({ card }: { card: PillarHeadlineCard }) {
+  const isPrivateCapital = card.kpiId.startsWith('M300-P4-')
   /**
    * For a higher-is-better indicator, "% to target" is the share of the
    * target level reached — the reading this card has always shown.
@@ -59,7 +61,13 @@ export function HeadlineCard({ card }: { card: PillarHeadlineCard }) {
       : card.value
 
   return (
-    <Card className="flex h-full flex-col p-4">
+    <Card className={`flex h-full flex-col p-4 ${isPrivateCapital ? 'border-t-4 border-t-brand-700 bg-gradient-to-br from-surface to-surface-sunken' : ''}`}>
+      {isPrivateCapital && (
+        <div className="mb-4 flex items-center gap-2 text-xs font-medium text-text-muted">
+          {card.rawValue === null ? <Clock3 aria-hidden="true" className="size-4 text-amber-600" /> : <CircleCheck aria-hidden="true" className="size-4 text-teal-600" />}
+          {card.rawValue === null ? 'Awaiting first report' : 'Reported value'}
+        </div>
+      )}
       <div className="flex items-start justify-between gap-2">
         <Link
           to={`/kpis?kpi=${card.kpiId}`}
@@ -81,7 +89,7 @@ export function HeadlineCard({ card }: { card: PillarHeadlineCard }) {
         </div>
       </div>
 
-      <div className="mt-1">
+      <div className={isPrivateCapital ? 'mt-4' : 'mt-1'}>
         <span className="text-3xl leading-none font-semibold tracking-tight text-text-default">
           {displayValue}
         </span>
@@ -112,13 +120,14 @@ export function HeadlineCard({ card }: { card: PillarHeadlineCard }) {
           </p>
         ) : (
           <>
-            <ProgressBar
+            {(!isPrivateCapital || percentToTarget !== null) && <ProgressBar
               barClassName="bg-chart-blue-dark"
               value={percentToTarget ?? 0}
               label={
                 percentToTarget !== null ? `${card.title} progress to target` : `${card.title} — ${unavailableProgressLabel}`
               }
-            />
+            />}
+            {isPrivateCapital && card.targetLabel && <p className="text-xs font-medium text-text-muted">Target: {card.targetLabel}</p>}
             {/* Stakeholder feedback asked for baseline/progress/%-to-target to be
                 visible on the scorecard, not only inferable from the bar's fill
                 width — this states the percentage as text. */}

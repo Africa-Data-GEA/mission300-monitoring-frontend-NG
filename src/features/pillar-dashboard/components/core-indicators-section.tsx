@@ -13,6 +13,103 @@ import { PillarKpiEditButton } from './pillar-kpi-edit-button'
 
 const FONT_FAMILY = 'Google Sans, ui-sans-serif, system-ui, sans-serif'
 
+const CAPITAL_GROUPS = [
+  { title: 'Programme financing', description: 'Reported financing amounts. These measures can overlap and should not be added together.', ids: ['M300-PX-008', 'M300-PX-009', 'M300-PX-010', 'M300-PX-011'] },
+  { title: 'Commitments & expenditure', description: 'Compare reported commitments with disbursement and expenditure.', ids: ['M300-PX-012', 'M300-PX-013'] },
+  { title: 'Private capital since January 2025', description: 'Capital committed and capital deployed or disbursed.', ids: ['M300-P4-011', 'M300-P4-012'] },
+]
+
+function PrivateCapitalSection({ indicators }: { indicators: readonly PillarCoreIndicator[] }) {
+  const groupedIds = new Set(CAPITAL_GROUPS.flatMap((group) => group.ids))
+  const other = indicators.filter((entry) => !groupedIds.has(entry.kpiId))
+  const committed = indicators.find((entry) => entry.kpiId === 'M300-P4-011')
+  const deployed = indicators.find((entry) => entry.kpiId === 'M300-P4-012')
+  const planned = indicators.find((entry) => entry.kpiId === 'M300-P4-010')
+  const deployedShare = committed && deployed && committed.current !== null && deployed.current !== null && committed.current > 0 && committed.unit === deployed.unit
+    ? Math.min(100, Math.max(0, deployed.current / committed.current * 100))
+    : null
+  const summaryItems = [
+    { label: 'Committed since Jan 2025', entry: committed },
+    { label: 'Deployed or disbursed', entry: deployed },
+    { label: 'Signed delivery pipeline', entry: planned },
+  ].filter((item): item is { label: string; entry: PillarCoreIndicator } => Boolean(item.entry))
+
+  return (
+    <section aria-label="Private capital and delivery" className="space-y-4">
+      <div>
+        <p className="text-xs font-semibold uppercase tracking-widest text-brand-700">Capital & delivery</p>
+        <h2 className="mt-1 text-xl font-semibold text-text-default">From financing to last-mile access</h2>
+        <p className="mt-1 text-sm text-text-muted">Explore the funding behind delivery. Select an indicator to view its source and reporting detail.</p>
+      </div>
+      {summaryItems.length > 0 && (
+        <div className="rounded-card border border-border-default bg-surface p-4 shadow-sm">
+          <div className="grid gap-3 md:grid-cols-3">
+            {summaryItems.map(({ label, entry }) => (
+              <Link
+                key={entry.kpiId}
+                to={`/kpis?kpi=${entry.kpiId}`}
+                className="rounded-card bg-surface-sunken p-4 transition hover:bg-brand-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-700"
+              >
+                <span className="text-2xs font-semibold uppercase tracking-widest text-text-subtle">{label}</span>
+                <span className="mt-2 block text-2xl font-semibold tabular-nums text-text-default">
+                  {entry.current === null ? 'Awaiting report' : formatCompactValue(entry.current, entry.unit)}
+                </span>
+                <span className="mt-1 block text-xs text-text-muted">{entry.name}</span>
+              </Link>
+            ))}
+          </div>
+          {deployedShare !== null && (
+            <div className="mt-4 border-t border-border-default pt-4">
+              <div className="mb-2 flex items-center justify-between gap-3 text-xs text-text-muted">
+                <span>Capital moved into deployment</span>
+                <span className="font-semibold text-text-default">{Math.round(deployedShare * 10) / 10}%</span>
+              </div>
+              <div aria-hidden="true" className="h-2.5 overflow-hidden rounded-full bg-surface-sunken">
+                <div className="h-full rounded-full bg-teal-600" style={{ width: `${deployedShare}%` }} />
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+      <div className="grid gap-4 lg:grid-cols-2">
+        {CAPITAL_GROUPS.map((group, index) => {
+          const entries = group.ids.flatMap((id) => indicators.filter((entry) => entry.kpiId === id))
+          if (!entries.length) return null
+          return (
+            <Card key={group.title} className="overflow-hidden p-5">
+              <div className="mb-5 flex items-start gap-3">
+                <span aria-hidden="true" className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-brand-700 text-sm font-semibold text-white">0{index + 1}</span>
+                <div><h3 className="font-semibold text-text-default">{group.title}</h3><p className="mt-1 text-xs leading-relaxed text-text-muted">{group.description}</p></div>
+              </div>
+              <div className="space-y-5">
+                {entries.map((entry) => {
+                  const peers = entries.filter((peer) => peer.unit === entry.unit)
+                  const maximum = Math.max(0, ...peers.map((peer) => peer.current ?? 0))
+                  return (
+                    <div key={entry.kpiId}>
+                      <div className="mb-2 flex flex-col items-start justify-between gap-2 sm:flex-row sm:gap-4">
+                        <Link to={`/kpis?kpi=${entry.kpiId}`} className="text-sm text-text-muted underline-offset-4 hover:text-brand-700 hover:underline">{entry.name}</Link>
+                        <div className="flex shrink-0 items-center gap-1">
+                          <span title={entry.current === null ? undefined : formatValue(entry.current, entry.unit)} className="text-lg font-semibold tabular-nums text-text-default">{entry.current === null ? 'Awaiting report' : formatCompactValue(entry.current, entry.unit)}</span>
+                          <InfoPopover provenance={entry.provenance} label={entry.name} />
+                          <PillarKpiEditButton kpiId={entry.kpiId} name={entry.name} />
+                        </div>
+                      </div>
+                      {entry.current !== null && <div aria-hidden="true" className="h-2.5 overflow-hidden rounded-full bg-surface-sunken"><div className={`h-full rounded-full ${index === 1 ? 'bg-teal-600' : index === 2 ? 'bg-indigo-500' : 'bg-chart-blue-dark'}`} style={{ width: `${maximum > 0 ? Math.max(0, entry.current / maximum * 100) : 0}%` }} /></div>}
+                    </div>
+                  )
+                })}
+              </div>
+              <p className="mt-5 border-t border-border-default pt-3 text-2xs text-text-subtle">Bar lengths compare amounts in the same unit within this panel; they do not show target progress.</p>
+            </Card>
+          )
+        })}
+        {other.map((entry) => <div key={entry.kpiId} className="rounded-card border-l-4 border-teal-600"><StatCard indicator={entry} showDiscoBreakdown={false} /></div>)}
+      </div>
+    </section>
+  )
+}
+
 function formatValue(value: number, unit: string): string {
   const rounded = Number.isInteger(value) ? value : Math.round(value * 100) / 100
   const formatted = rounded.toLocaleString(getLocale())
@@ -613,6 +710,7 @@ export function CoreIndicatorsSection({
 }) {
   useCurrency()
   if (indicators.length === 0) return null
+  if (pillar === 'private-sector-participation') return <PrivateCapitalSection indicators={indicators} />
 
   // The DisCo-level split is only meaningful where the underlying metric is
   // genuinely disaggregated by DisCo (grid/utility metering, tariffs,

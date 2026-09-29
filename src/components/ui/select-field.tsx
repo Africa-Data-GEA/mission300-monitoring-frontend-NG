@@ -22,6 +22,7 @@ export function SelectField({
   onChange,
   placeholder = 'Select…',
   className,
+  disabled,
 }: {
   label: string
   value: string
@@ -29,6 +30,7 @@ export function SelectField({
   onChange: (value: string) => void
   placeholder?: string
   className?: string
+  disabled?: boolean
 }) {
   const labelId = useId()
   const triggerId = useId()
@@ -42,7 +44,7 @@ export function SelectField({
       >
         {label}
       </label>
-      <Select value={value} onValueChange={onChange}>
+      <Select value={value} onValueChange={onChange} disabled={disabled}>
         {/*
           Radix renders a button, not a native <select>, so the visible label is
           associated explicitly via aria-labelledby rather than htmlFor alone.

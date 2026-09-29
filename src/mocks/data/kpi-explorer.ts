@@ -5173,16 +5173,87 @@ export const kpiExplorerFilterOptions: KpiExplorerFilterOptions = {
   ],
 }
 
+/**
+ * Section A's 4 summary cards, computed over whatever rows are passed in.
+ * Mirrors the backend's buildSummaryCards (kpi-explorer.service.ts) - the
+ * live GET /api/kpi-explorer handler calls this with the FILTERED rows, so
+ * "Total indicators" tracks the same pillar/category/readiness/
+ * validationStatus/search narrowing as the catalogue table itself.
+ */
+export function buildKpiSummaryCards(rows: readonly (typeof CATALOGUE)[number][]) {
+  const total = rows.length
+  const core = rows.filter((r) => r.readiness === 'core').length
+  const supporting = rows.filter((r) => r.readiness === 'supporting').length
+  const future = rows.filter((r) => r.readiness === 'future').length
+  const withValue = rows.filter(
+    (r) => r.validationStatus === 'confirmed' || r.validationStatus === 'public-source',
+  ).length
+  const gaps = rows.filter((r) => r.validationStatus === 'future').length
+
+  return [
+    {
+      id: 'total-indicators',
+      title: 'Total indicators',
+      count: total,
+      breakdown: [] as { label: string; count: number }[],
+      provenance: {
+        definition: 'Count of active indicators in the approved catalogue.',
+        methodology: 'Count unique active Key Performance Indicator identifiers.',
+        source: 'Approved Mission 300 Key Performance Indicator Matrix.',
+        lastUpdated: '2025-10-14T09:12:00Z',
+      },
+    },
+    {
+      id: 'core-indicators',
+      title: 'Core / Tier 1 indicators',
+      count: core,
+      breakdown: [],
+      provenance: {
+        definition:
+          'Indicators classified as immediate Minimum Viable Dataset priorities.',
+        methodology: 'Count catalogue records classified Core or Tier 1.',
+        source: 'Approved Key Performance Indicator Matrix.',
+        lastUpdated: '2025-10-14T09:12:00Z',
+      },
+    },
+    {
+      id: 'supporting-indicators',
+      title: 'Supporting / Tier 2 indicators',
+      count: supporting,
+      breakdown: [{ label: 'Future', count: future }],
+      provenance: {
+        definition:
+          'Supporting indicators used where the source institution already maintains the data.',
+        methodology: 'Count catalogue records classified Supporting or Tier 2.',
+        source: 'Approved Key Performance Indicator Matrix.',
+        lastUpdated: '2025-10-14T09:12:00Z',
+      },
+    },
+    {
+      id: 'data-coverage',
+      title: 'Indicators with a value or data gap',
+      count: withValue,
+      breakdown: [
+        { label: 'With value', count: withValue },
+        { label: 'Data gap', count: gaps },
+      ],
+      provenance: {
+        definition: 'Catalogue coverage by current data availability.',
+        methodology:
+          'Count indicators with an approved current value separately from those marked as a data gap. Values requiring validation are not treated as confirmed.',
+        source:
+          'Key Performance Indicator value repository and validation workflow.',
+        lastUpdated: '2025-10-14T09:12:00Z',
+      },
+    },
+  ]
+}
+
 /** Derives the Section A/D aggregates from the catalogue so they never drift. */
 function buildOverview(): KpiExplorerOverview {
-  const total = CATALOGUE.length
   const core = CATALOGUE.filter((r) => r.readiness === 'core').length
   const supporting = CATALOGUE.filter((r) => r.readiness === 'supporting').length
   const future = CATALOGUE.filter((r) => r.readiness === 'future').length
-  const withValue = CATALOGUE.filter(
-    (r) => r.validationStatus === 'confirmed' || r.validationStatus === 'public-source',
-  ).length
-  const gaps = CATALOGUE.filter((r) => r.validationStatus === 'future').length
 
   const pillars = [
     'generation-network',
@@ -5206,63 +5277,7 @@ function buildOverview(): KpiExplorerOverview {
 
   return {
     lastUpdated: '2025-10-14T09:12:00Z',
-    summary: [
-      {
-        id: 'total-indicators',
-        title: 'Total indicators',
-        count: total,
-        breakdown: [],
-        provenance: {
-          definition: 'Count of active indicators in the approved catalogue.',
-          methodology: 'Count unique active Key Performance Indicator identifiers.',
-          source: 'Approved Mission 300 Key Performance Indicator Matrix.',
-          lastUpdated: '2025-10-14T09:12:00Z',
-        },
-      },
-      {
-        id: 'core-indicators',
-        title: 'Core / Tier 1 indicators',
-        count: core,
-        breakdown: [],
-        provenance: {
-          definition:
-            'Indicators classified as immediate Minimum Viable Dataset priorities.',
-          methodology: 'Count catalogue records classified Core or Tier 1.',
-          source: 'Approved Key Performance Indicator Matrix.',
-          lastUpdated: '2025-10-14T09:12:00Z',
-        },
-      },
-      {
-        id: 'supporting-indicators',
-        title: 'Supporting / Tier 2 indicators',
-        count: supporting,
-        breakdown: [{ label: 'Future', count: future }],
-        provenance: {
-          definition:
-            'Supporting indicators used where the source institution already maintains the data.',
-          methodology: 'Count catalogue records classified Supporting or Tier 2.',
-          source: 'Approved Key Performance Indicator Matrix.',
-          lastUpdated: '2025-10-14T09:12:00Z',
-        },
-      },
-      {
-        id: 'data-coverage',
-        title: 'Indicators with a value or data gap',
-        count: withValue,
-        breakdown: [
-          { label: 'With value', count: withValue },
-          { label: 'Data gap', count: gaps },
-        ],
-        provenance: {
-          definition: 'Catalogue coverage by current data availability.',
-          methodology:
-            'Count indicators with an approved current value separately from those marked as a data gap. Values requiring validation are not treated as confirmed.',
-          source:
-            'Key Performance Indicator value repository and validation workflow.',
-          lastUpdated: '2025-10-14T09:12:00Z',
-        },
-      },
-    ],
+    summary: buildKpiSummaryCards(CATALOGUE),
     catalogue: {
       items: CATALOGUE,
       page: 1,

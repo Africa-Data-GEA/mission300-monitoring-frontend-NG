@@ -4,7 +4,7 @@ import { formatDate } from '@/lib/format'
 /** Chronological progress notes for the project. */
 export function UpdatesPanel({ project }: { project: ProjectRecord }) {
   return (
-    <section className="rounded-control bg-surface-sunken p-4">
+    <section className="rounded-control border border-border-default bg-surface p-4">
       <h3 className="text-sm font-semibold text-text-default">Updates</h3>
 
       <ol className="mt-2 space-y-3">

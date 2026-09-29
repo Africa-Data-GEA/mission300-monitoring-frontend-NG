@@ -7,7 +7,7 @@ import { renderWithProviders } from '@/test/render'
 async function renderBar(route = '/') {
   renderWithProviders(<GlobalFilterBar />, { route })
   // Options are fetched, so wait for the bar to replace its skeleton.
-  return screen.findByRole('combobox', { name: /Reporting period/ })
+  return screen.findByRole('combobox', { name: /^Year/ })
 }
 
 describe('GlobalFilterBar', () => {
@@ -23,7 +23,8 @@ describe('GlobalFilterBar', () => {
     await renderBar()
 
     for (const name of [
-      /Reporting period/,
+      /^Year/,
+      /^Quarter/,
       /Compact pillar/,
       /Institution/,
       /Technology/,
@@ -101,6 +102,41 @@ describe('GlobalFilterBar', () => {
       expect(
         screen.getByRole('combobox', { name: /Institution/ }),
       ).toHaveTextContent('NERC')
+    })
+  })
+
+  describe('year/quarter tie', () => {
+    it('shows only the quarters that exist for the selected year', async () => {
+      await renderBar('/?period=q2-2025')
+
+      expect(screen.getByRole('combobox', { name: /^Year/ })).toHaveTextContent('2025')
+      expect(screen.getByRole('combobox', { name: /^Quarter/ })).toHaveTextContent('Q2')
+    })
+
+    it('rebuilds the period value when the quarter changes, keeping the year', async () => {
+      const user = userEvent.setup()
+      await renderBar('/?period=q2-2025')
+
+      await user.click(screen.getByRole('combobox', { name: /^Quarter/ }))
+      await user.click(await screen.findByRole('option', { name: 'Q1' }))
+
+      await waitFor(() => {
+        expect(screen.getByRole('combobox', { name: /^Quarter/ })).toHaveTextContent('Q1')
+      })
+      expect(screen.getByRole('combobox', { name: /^Year/ })).toHaveTextContent('2025')
+    })
+
+    it('choosing "Custom range…" from the quarter dropdown reveals the date picker', async () => {
+      const user = userEvent.setup()
+      await renderBar('/?period=q2-2025')
+
+      await user.click(screen.getByRole('combobox', { name: /^Quarter/ }))
+      await user.click(await screen.findByRole('option', { name: 'Custom range…' }))
+
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: /Custom range/ })).toBeInTheDocument()
+      })
+      expect(screen.getByRole('combobox', { name: /^Year/ })).toBeDisabled()
     })
   })
 

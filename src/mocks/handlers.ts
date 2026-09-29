@@ -16,6 +16,7 @@ import {
   stakeholderInstitutions,
 } from './data/stakeholders'
 import {
+  buildKpiSummaryCards,
   createKpi,
   getKpiProfile,
   kpiExplorerCatalogue,
@@ -678,10 +679,10 @@ export const handlers = [
    * pageSize.
    *
    * The mock applies search, pillar, category, readiness and validationStatus
-   * to the catalogue table so the filtering contract is demonstrable. The
-   * summary cards and distributions describe the FULL catalogue, not the
-   * filtered slice — the specification frames them as catalogue readiness, not
-   * a response to the current filter.
+   * to the catalogue table AND the summary cards (buildKpiSummaryCards),
+   * mirroring the real backend's filteredRows - so "Total indicators" etc.
+   * track the current view. The distributions still describe the FULL
+   * catalogue, unaffected by these filters.
    */
   http.get('/api/kpi-explorer', async ({ request }) => {
     await delay(300)
@@ -733,6 +734,7 @@ export const handlers = [
 
     return HttpResponse.json({
       ...kpiExplorerOverview,
+      summary: buildKpiSummaryCards(filtered),
       catalogue: paginate(filtered, page, pageSize),
     })
   }),

@@ -10,7 +10,7 @@ export function OverviewPanel({ project }: { project: ProjectRecord }) {
     value.toLocaleString(currency.locale, { maximumFractionDigits: 0 }),
   )
   return (
-    <section className="rounded-control bg-surface-sunken p-4">
+    <section className="rounded-control border border-border-default bg-surface p-4">
       <h3 className="text-sm font-semibold text-text-default">Overview</h3>
       <p className="mt-2 text-sm text-text-muted">{project.profile.description}</p>
 
