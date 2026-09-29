@@ -1,5 +1,5 @@
 
-# M300 Nigeria Energy Compact Dashboardl
+# M300 Nigeria Energy Compact Dashboardld
 
 Frontend for monitoring delivery of Nigeria's Mission 300 National Energy
 Compact. The application is currentsly a demonstration system: completed API
