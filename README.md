@@ -1,7 +1,7 @@
 
 # M300 Nigeria Energy Compact Dashboard
 
-Frontend for monitoring delivery of Nigeria's Mission 300 National Energy
+Frontend for monitoring delivery of Nigeria's Mission 300 National Energye
 Compact. The active API is the NestJS service in `mission300-monitoring-backend-NG`.
 Local demonstrations can run with in-process mock handlers and data.
 ## Requirements
