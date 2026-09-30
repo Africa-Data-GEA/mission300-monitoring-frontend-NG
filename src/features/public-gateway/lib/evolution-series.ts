@@ -33,8 +33,17 @@ export function periodToDate(period: string): number {
     const year = Number(quarter[2])
     return Date.UTC(year, (q - 1) * 3, 1)
   }
+  // End of year, not January 1st. A bare year is a full-year composite
+  // known as of that year's close, reported alongside/after that same
+  // year's own Q4 - not before Q1. Date.UTC(year, 0, 1) put it on the
+  // exact same date as "Q1 <year>" (both January 1st), so a quarterly
+  // reading and an annual one for the same year silently collided on this
+  // axis: two genuinely different points overlapping at one x, the later
+  // one drawn over the earlier, making the chart look like it had fewer
+  // readings than it really does and putting the "latest" marker in the
+  // middle of the timeline instead of at the end.
   const year = /^(\d{4})$/.exec(period)
-  if (year) return Date.UTC(Number(year[1]), 0, 1)
+  if (year) return Date.UTC(Number(year[1]), 11, 31)
   // Falls back to whatever Date can parse rather than throwing — a period
   // label this page has not seen yet should not take the chart down.
   const parsed = Date.parse(period)
