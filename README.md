@@ -7,7 +7,7 @@ Local demonstrations can run with in-process mock handlers and data.
 ## Requirements
 
 - Node.js 24.14.1 (see `.node-version`)
-- pnpm 10.33.0w
+- pnpm 10.33.0
 ## Local development
 
 ```bash
