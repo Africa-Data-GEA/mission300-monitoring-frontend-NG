@@ -4,6 +4,7 @@ import type {
 } from '@/api/schemas/state-disco'
 import { AdvancedFilterPopover } from '@/components/ui/advanced-filter-popover'
 import { SelectField } from '@/components/ui/select-field'
+import { ALL_PERIODS, buildPeriod, parsePeriod, useYearAndQuarterOptions } from '../lib/period-filter'
 
 export function StateDiscoFilterBar({
   options,
@@ -16,8 +17,31 @@ export function StateDiscoFilterBar({
   onChange: (query: Required<StateDiscoQuery>) => void
   onReset: () => void
 }) {
+  const { yearOptions, quartersByYear } = useYearAndQuarterOptions(options.reportingPeriods)
+  const isAllPeriods = query.reportingPeriod === ALL_PERIODS
+  const parsedPeriod = isAllPeriods ? null : parsePeriod(query.reportingPeriod)
+  const selectedYear = parsedPeriod?.year ?? ALL_PERIODS
+  const quartersForYear = quartersByYear.get(selectedYear) ?? []
+  const selectedQuarter = parsedPeriod?.quarter ?? quartersForYear[0]?.value ?? ''
+
+  // Picking a year keeps the current quarter only if that year actually has
+  // it, otherwise falls back to that year's first available quarter -
+  // matches the global filter bar's own Year/Quarter tie-together rule.
+  function handleYearChange(year: string) {
+    if (year === ALL_PERIODS) {
+      onChange({ ...query, reportingPeriod: ALL_PERIODS })
+      return
+    }
+    const quarters = quartersByYear.get(year) ?? []
+    const nextQuarter = quarters.find((quarter) => quarter.value === selectedQuarter)?.value ?? quarters[0]?.value
+    if (nextQuarter) onChange({ ...query, reportingPeriod: buildPeriod(year, nextQuarter as Parameters<typeof buildPeriod>[1]) })
+  }
+
+  function handleQuarterChange(quarter: string) {
+    onChange({ ...query, reportingPeriod: buildPeriod(selectedYear, quarter as Parameters<typeof buildPeriod>[1]) })
+  }
+
   const primary = [
-    ['reportingPeriod', 'Reporting period', options.reportingPeriods],
     ['distributionCompany', 'Distribution Company', options.distributionCompanies],
   ] as const
   /*
@@ -42,6 +66,10 @@ export function StateDiscoFilterBar({
 
   return (
     <div className="flex flex-wrap items-end gap-3 rounded-control bg-surface-sunken p-3">
+      <SelectField label="Year" value={selectedYear} options={yearOptions} onChange={handleYearChange} className="w-32" />
+      {!isAllPeriods && (
+        <SelectField label="Quarter" value={selectedQuarter} options={quartersForYear} onChange={handleQuarterChange} className="w-36" />
+      )}
       {primary.map(([key, label, values]) => (
         <SelectField key={key} label={label} value={query[key]} options={values} onChange={(value) => onChange({ ...query, [key]: value })} className="min-w-48" />
       ))}

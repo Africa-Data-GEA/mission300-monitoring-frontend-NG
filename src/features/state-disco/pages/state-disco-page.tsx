@@ -116,10 +116,9 @@ export function StateDiscoPage() {
                     },
                     { id: 'metering', header: 'Metering rate', cell: (row) => row.meteringRate, sortValue: (row) => numericSort(row.meteringRate) },
                     { id: 'remittance', header: 'Remittance', cell: (row) => row.remittancePerformance, sortValue: (row) => numericSort(row.remittancePerformance) },
-                    // Validation status is filterable, so it is readable here
-                    // as its own sortable column rather than only as small
-                    // print under the DisCo name.
-                    { id: 'validation', header: 'Validation', cell: (row) => row.validationLabel, sortValue: (row) => row.validationLabel },
+                    // Validation status still shows as small print under the
+                    // DisCo name (the "utility" column above) - removed as
+                    // its own column per feedback.
                   ]}
                   rows={comparison.data.rows}
                   getRowId={(row) => row.id}
