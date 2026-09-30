@@ -55,6 +55,19 @@ describe('PillarDashboardPage', () => {
     expect(within(table).getByText('Collection efficiency')).toBeInTheDocument()
   })
 
+  it('uses the standard supporting-indicator layout for Private-Sector Participation', async () => {
+    renderRoutesWithProviders(
+      [{ path: 'pillars/:pillar', element: <PillarDashboardPage /> }],
+      { route: '/pillars/private-sector-participation' },
+    )
+
+    expect(
+      await screen.findByRole('heading', { name: 'Private-Sector Participation' }),
+    ).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Supporting indicators' })).toBeInTheDocument()
+    expect(screen.queryByText('From financing to last-mile access')).not.toBeInTheDocument()
+  })
+
   it('shows a milestone tracker chart for a pillar whose only core indicator is a status-type KPI', async () => {
     renderRoutesWithProviders(
       [{ path: 'pillars/:pillar', element: <PillarDashboardPage /> }],
