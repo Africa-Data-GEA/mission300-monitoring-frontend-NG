@@ -11,6 +11,7 @@ describe('DashboardPage', () => {
     renderWithProviders(<DashboardPage />)
 
     expect(screen.getByLabelText('Loading Executive Overview')).toBeInTheDocument()
+    expect(screen.getByRole('status')).toHaveTextContent('Loading overview data')
   })
 
   it('renders the page title and breadcrumb', async () => {

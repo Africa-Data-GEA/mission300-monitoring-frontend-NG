@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router'
 import type { ProjectRecord, UpsertProjectRequest } from '@/api/schemas/programs'
 import { Breadcrumb } from '@/components/ui/breadcrumb'
 import { Card } from '@/components/ui/card'
+import { PageLoading } from '@/components/ui/page-loading'
 import { ErrorState } from '@/components/ui/error-state'
 import { ProjectForm } from '../components/project-admin/project-form'
 import { UpsertProjectSuccess } from '../components/project-admin/upsert-project-success'
@@ -46,7 +47,7 @@ export function EditProjectPage() {
     [programsData],
   )
 
-  if (project.isPending) return null
+  if (project.isPending) return <PageLoading label="Loading project form" />
 
   if (project.isError || !project.data) {
     return (

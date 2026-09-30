@@ -9,7 +9,14 @@ export function DashboardSkeleton() {
       aria-label="Loading Executive Overview"
       className="flex flex-col gap-4"
     >
-      <Skeleton className="h-9 w-64" />
+      <div>
+        <p className="text-3xl font-semibold tracking-tight text-text-default">
+          Executive Overview
+        </p>
+        <p className="mt-1 text-sm text-text-muted" role="status">
+          Loading overview data…
+        </p>
+      </div>
       <div className="grid gap-4 xl:grid-cols-4">
         {Array.from({ length: 4 }, (_, index) => (
           <Skeleton key={index} className="h-52 rounded-card" />

@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { ErrorState } from '@/components/ui/error-state'
-import { Skeleton } from '@/components/ui/skeleton'
+import { PageLoading } from '@/components/ui/page-loading'
 
 /**
  * Loading/error traffic-cop shared by the data-submissions list pages.
@@ -19,7 +19,7 @@ export function ListState({
   retry: () => void
   children: ReactNode
 }) {
-  if (pending) return <Skeleton className="h-96 w-full rounded-card" />
+  if (pending) return <PageLoading label="Loading workflow" />
 
   if (error) {
     return (

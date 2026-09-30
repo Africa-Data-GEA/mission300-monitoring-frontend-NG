@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router'
 import type { UpsertProjectRequest } from '@/api/schemas/programs'
 import { Breadcrumb } from '@/components/ui/breadcrumb'
 import { Card } from '@/components/ui/card'
+import { PageLoading } from '@/components/ui/page-loading'
 import { ProjectForm } from '../components/project-admin/project-form'
 import { UpsertProjectSuccess } from '../components/project-admin/upsert-project-success'
 import { usePrograms, useProgramme } from '../api'
@@ -60,7 +61,7 @@ export function AddProjectPage() {
   // Waits for the preset programme's pillar before mounting the form, so
   // react-hook-form's defaultValues aren't captured before that fetch
   // resolves — the form only reads defaultValues once, on first render.
-  if (presetProgrammeId && presetProgramme.isPending) return null
+  if (presetProgrammeId && presetProgramme.isPending) return <PageLoading label="Loading project form" />
 
   return (
     <div className="flex min-w-0 flex-col gap-4">

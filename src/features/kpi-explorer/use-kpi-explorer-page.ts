@@ -11,15 +11,15 @@ const DEFAULT_FILTERS: KpiFilterValues = {
   readiness: 'all',
   validationStatus: 'all',
   sourceInstitution: 'all',
-  reportingPeriod: 'q3-2025',
+  reportingPeriod: 'all',
   geography: 'national',
 }
 
 /**
  * Filters that count as "active" for the More-filters badge.
  *
- * Search and the two always-set fields (reporting period, geography) are
- * excluded so the badge reflects real narrowing rather than the defaults.
+ * Search is visible separately. A selected reporting period counts as an
+ * active filter because the default catalogue includes every period.
  */
 function countActiveFilters(filters: KpiFilterValues): number {
   return [
@@ -28,6 +28,7 @@ function countActiveFilters(filters: KpiFilterValues): number {
     filters.readiness !== 'all',
     filters.validationStatus !== 'all',
     filters.sourceInstitution !== 'all',
+    filters.reportingPeriod !== 'all',
     filters.geography !== 'national',
   ].filter(Boolean).length
 }

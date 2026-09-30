@@ -5,7 +5,7 @@ import { Breadcrumb } from '@/components/ui/breadcrumb'
 import { Button } from '@/components/ui/button'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import { ErrorState } from '@/components/ui/error-state'
-import { Skeleton } from '@/components/ui/skeleton'
+import { PageLoading } from '@/components/ui/page-loading'
 import { useDeleteLearningLogEntry, useLearningLog } from './api'
 import { CreateLearningLogEntryDialog } from './components/create-learning-log-entry-dialog'
 import { EditLearningLogEntryDialog } from './components/edit-learning-log-entry-dialog'
@@ -25,7 +25,7 @@ export function LearningLogPage() {
   const { data, isPending, isError, error, refetch } = useLearningLog(page)
   const deleteMutation = useDeleteLearningLogEntry()
 
-  if (isPending) return <Skeleton className="h-96 w-full rounded-card" />
+  if (isPending) return <PageLoading label="Loading learning log" />
 
   if (isError) {
     return (

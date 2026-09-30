@@ -4,7 +4,7 @@ import type { BottlenecksQuery } from '@/api/schemas/bottlenecks'
 import { Breadcrumb } from '@/components/ui/breadcrumb'
 import { ErrorState } from '@/components/ui/error-state'
 import { SelectField } from '@/components/ui/select-field'
-import { Skeleton } from '@/components/ui/skeleton'
+import { PageLoading } from '@/components/ui/page-loading'
 import { useBottlenecks, useBottlenecksFilters } from './api'
 import { BottleneckRegister } from './components/bottleneck-register'
 import { CreateBottleneckDialog } from './components/create-bottleneck-dialog'
@@ -49,7 +49,7 @@ export function BottlenecksPage() {
     escalationPage: 1,
   })
 
-  if (isPending) return <Skeleton className="h-96 w-full rounded-card" />
+  if (isPending) return <PageLoading label="Loading bottleneck register" />
 
   if (isError) {
     return (
