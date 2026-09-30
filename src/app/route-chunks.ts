@@ -33,6 +33,7 @@ export const routeChunks = {
   addProject: () => import('@/features/programs/pages/add-project-page'),
   editProject: () => import('@/features/programs/pages/edit-project-page'),
   addProgramme: () => import('@/features/programs/pages/add-programme-page'),
+  bulkUploadProjects: () => import('@/features/programs/pages/bulk-upload-projects-page'),
   // Landing pages of the two nested route groups (state-disco/routes.tsx and
   // data-submissions/routes.tsx declare their own lazy pages).
   stateDisco: () => import('@/features/state-disco/pages/state-disco-page'),

@@ -1,8 +1,12 @@
 import {
+  bulkUploadResultSchema,
   upsertProjectResponseSchema,
   type UpsertProjectRequest,
 } from '@/api/schemas/programs'
 import { api } from '@/lib/api-client'
+
+export const BULK_UPLOAD_TEMPLATE_URL = '/programs/bulk-upload/template'
+export const BULK_UPLOAD_TEMPLATE_FILE_NAME = 'programs-projects-template.xlsx'
 
 /**
  * Mock-only admin CRUD for a priority project — stakeholder feedback asked
@@ -22,4 +26,10 @@ export function updateProject(projectId: string, input: UpsertProjectRequest) {
 
 export function deleteProject(projectId: string) {
   return api.delete<{ message: string }>(`/programs/projects/${projectId}`)
+}
+
+export function bulkUploadProjects(file: File) {
+  const formData = new FormData()
+  formData.append('file', file)
+  return api.post('/programs/bulk-upload', formData, bulkUploadResultSchema)
 }

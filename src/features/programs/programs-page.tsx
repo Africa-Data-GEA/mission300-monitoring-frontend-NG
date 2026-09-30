@@ -1,4 +1,4 @@
-import { Plus } from 'lucide-react'
+import { Plus, Upload } from 'lucide-react'
 import { useNavigate } from 'react-router'
 import { Breadcrumb } from '@/components/ui/breadcrumb'
 import { Button } from '@/components/ui/button'
@@ -29,6 +29,10 @@ export function ProgramsPage() {
   const navigate = useNavigate()
   const session = readAuthSession()
   const canAddProgramme = !!session && canUserReachModule(session.user, 'programme-admin')
+  // Bulk upload creates/updates projects too - same institution-scoped
+  // access as the one-at-a-time "Add project" form (moduleRoute('programs',
+  // ...) on that route), not the admin-only "Add programme" gate above.
+  const canBulkUpload = !!session && canUserReachModule(session.user, 'programs')
 
   if (page.isPending) return <ProgramsSkeleton />
 
@@ -55,12 +59,20 @@ export function ProgramsPage() {
             Programs
           </h1>
         </div>
-        {canAddProgramme && (
-          <Button type="button" onClick={() => navigate('/programs/new')}>
-            <Plus aria-hidden="true" />
-            Add programme
-          </Button>
-        )}
+        <div className="flex flex-wrap gap-2">
+          {canBulkUpload && (
+            <Button type="button" variant="secondary" onClick={() => navigate('/programs/bulk-upload')}>
+              <Upload aria-hidden="true" />
+              Bulk upload
+            </Button>
+          )}
+          {canAddProgramme && (
+            <Button type="button" onClick={() => navigate('/programs/new')}>
+              <Plus aria-hidden="true" />
+              Add programme
+            </Button>
+          )}
+        </div>
       </div>
 
       {page.filters && (

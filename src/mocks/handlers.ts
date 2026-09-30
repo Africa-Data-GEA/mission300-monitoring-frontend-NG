@@ -77,6 +77,7 @@ import { learningLogHandlers } from './handlers/learning-log'
 import { pillarDashboardHandlers } from './handlers/pillar-dashboard'
 import { programsHandlers } from './handlers/programs'
 import { reportsHandlers } from './handlers/reports'
+import { searchHandlers } from './handlers/search'
 import { stateDiscoHandlers } from './handlers/state-disco'
 
 /**
@@ -436,6 +437,7 @@ export const handlers = [
   ...pillarDashboardHandlers,
   ...programsHandlers,
   ...reportsHandlers,
+  ...searchHandlers,
   ...stateDiscoHandlers,
   http.get('/api/health', () =>
     HttpResponse.json({ status: 'ok', version: 'mock' }),

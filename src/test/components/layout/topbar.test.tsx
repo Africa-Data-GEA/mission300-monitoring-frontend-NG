@@ -26,7 +26,7 @@ describe('Topbar', () => {
 
       expect(
         screen.getByRole('searchbox', {
-          name: /Search navigation, KPIs, programs and pillars/,
+          name: /Search pages, KPIs, programs and projects/,
         }),
       ).toBeInTheDocument()
     })

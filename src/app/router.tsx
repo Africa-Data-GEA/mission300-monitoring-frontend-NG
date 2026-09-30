@@ -119,6 +119,12 @@ const AddProgrammePage = lazy(() =>
   })),
 )
 
+const BulkUploadProjectsPage = lazy(() =>
+  routeChunks.bulkUploadProjects().then((module) => ({
+    default: module.BulkUploadProjectsPage,
+  })),
+)
+
 const LoginPage = lazy(() =>
   routeChunks.login().then((module) => ({
     default: module.LoginPage,
@@ -288,6 +294,11 @@ export const router = createBrowserRouter([
       {
         path: 'programs/projects/new',
         element: moduleRoute('programs', <AddProjectPage />),
+        handle: { globalFilters: false } satisfies RouteHandle,
+      },
+      {
+        path: 'programs/bulk-upload',
+        element: moduleRoute('programs', <BulkUploadProjectsPage />),
         handle: { globalFilters: false } satisfies RouteHandle,
       },
       {

@@ -10,6 +10,12 @@ async function renderBar(route = '/') {
   return screen.findByRole('combobox', { name: /^Year/ })
 }
 
+/** Pillar/institution/technology/priority/DisCo now live behind the "More
+ * filters" popover rather than as always-visible selects. */
+async function openMoreFilters(user: ReturnType<typeof userEvent.setup>) {
+  await user.click(screen.getByRole('button', { name: /More filters/ }))
+}
+
 describe('GlobalFilterBar', () => {
   it('is exposed as a labelled region', async () => {
     await renderBar()
@@ -20,24 +26,22 @@ describe('GlobalFilterBar', () => {
   })
 
   it('shows every filter the backend can actually apply', async () => {
+    const user = userEvent.setup()
     await renderBar()
 
-    for (const name of [
-      /^Year/,
-      /^Quarter/,
-      /Compact pillar/,
-      /Institution/,
-      /Technology/,
-      /Priority/,
-      /Distribution Company/,
-    ]) {
+    for (const name of [/^Year/, /^Quarter/]) {
+      expect(screen.getByRole('combobox', { name })).toBeInTheDocument()
+    }
+
+    await openMoreFilters(user)
+
+    for (const name of [/Compact pillar/, /Institution/, /Technology/, /Priority/, /Distribution Company/]) {
       expect(screen.getByRole('combobox', { name })).toBeInTheDocument()
     }
 
     // geographicScope has no control - it's an aggregation-level toggle,
     // not a narrowing filter (see GlobalFilterBar's own comment).
     expect(screen.queryByRole('combobox', { name: /Geographic/ })).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: /More filters/ })).not.toBeInTheDocument()
   })
 
   /*
@@ -54,7 +58,9 @@ describe('GlobalFilterBar', () => {
 
   describe('URL-backed selection', () => {
     it('reads the initial selection from the query string', async () => {
+      const user = userEvent.setup()
       await renderBar('/?pillar=clean-cooking')
+      await openMoreFilters(user)
 
       expect(
         screen.getByRole('combobox', { name: /Compact pillar/ }),
@@ -62,7 +68,9 @@ describe('GlobalFilterBar', () => {
     })
 
     it('falls back to defaults when the query string is empty', async () => {
+      const user = userEvent.setup()
       await renderBar('/')
+      await openMoreFilters(user)
 
       expect(
         screen.getByRole('combobox', { name: /Compact pillar/ }),
@@ -72,6 +80,7 @@ describe('GlobalFilterBar', () => {
     it('updates the selection when a filter changes', async () => {
       const user = userEvent.setup()
       await renderBar()
+      await openMoreFilters(user)
 
       await user.click(screen.getByRole('combobox', { name: /Compact pillar/ }))
       await user.click(
@@ -88,6 +97,7 @@ describe('GlobalFilterBar', () => {
     it('keeps the other filters when one changes', async () => {
       const user = userEvent.setup()
       await renderBar('/?institution=nerc')
+      await openMoreFilters(user)
 
       await user.click(screen.getByRole('combobox', { name: /Compact pillar/ }))
       await user.click(
@@ -102,6 +112,27 @@ describe('GlobalFilterBar', () => {
       expect(
         screen.getByRole('combobox', { name: /Institution/ }),
       ).toHaveTextContent('NERC')
+    })
+  })
+
+  describe('More filters popover', () => {
+    it('shows a count badge only once a secondary filter is non-default', async () => {
+      await renderBar('/?pillar=clean-cooking')
+
+      expect(screen.getByRole('button', { name: /More filters/ })).toHaveTextContent('1')
+    })
+
+    it('clears only the secondary filters, leaving the reporting period alone', async () => {
+      const user = userEvent.setup()
+      await renderBar('/?period=q2-2025&pillar=clean-cooking')
+      await openMoreFilters(user)
+
+      await user.click(screen.getByRole('button', { name: 'Clear' }))
+
+      await waitFor(() => {
+        expect(screen.getByRole('combobox', { name: /Compact pillar/ })).toHaveTextContent('All pillars')
+      })
+      expect(screen.getByRole('combobox', { name: /^Quarter/ })).toHaveTextContent('Q2')
     })
   })
 

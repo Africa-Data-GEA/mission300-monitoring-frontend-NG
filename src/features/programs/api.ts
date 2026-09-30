@@ -1,4 +1,4 @@
-import { keepPreviousData, useQuery } from '@tanstack/react-query'
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   createMilestoneResponseSchema,
   milestoneRecordSchema,
@@ -14,6 +14,7 @@ import {
 import { paginated } from '@/api/schemas/administration'
 import { bottleneckRecordSchema } from '@/api/schemas/bottlenecks'
 import { api } from '@/lib/api-client'
+import { bulkUploadProjects } from './lib/project-admin-api'
 
 export const programsKeys = {
   all: ['programs'] as const,
@@ -129,5 +130,16 @@ export function useProjectBottlenecks(projectId: string, page: number) {
       ),
     enabled: Boolean(projectId),
     placeholderData: keepPreviousData,
+  })
+}
+
+/** Uploads the completed programmes+projects Excel template. Invalidates the
+ * whole programs slice on success since a single file can create or update
+ * both programmes and projects across several programmes at once. */
+export function useBulkUploadProjects() {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: bulkUploadProjects,
+    onSuccess: () => client.invalidateQueries({ queryKey: programsKeys.all }),
   })
 }

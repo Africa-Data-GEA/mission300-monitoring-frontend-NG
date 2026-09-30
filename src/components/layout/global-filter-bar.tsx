@@ -1,14 +1,27 @@
-import { X } from 'lucide-react'
+import { SlidersHorizontal, X } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import type { DateRange } from 'react-day-picker'
 import { useGlobalFilters } from '@/app/global-filters'
 import { Button } from '@/components/ui/button'
 import { DateRangeField } from '@/components/ui/date-range-field'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { SelectField } from '@/components/ui/select-field'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useFilterOptions } from '@/features/filters/api'
 import { CUSTOM_PERIOD, DEFAULT_FILTER_VALUES } from '@/types/filters'
 import type { FilterOption } from '@/types/filters'
+
+/** The filters narrowed inside the "More filters" popover, kept separate
+ * from Year/Quarter (which stay inline - reporting period is the one
+ * choice every view is built around) so the bar reads as one clear
+ * primary control plus a secondary group, not seven equal-weight selects. */
+const SECONDARY_FILTER_KEYS = [
+  'pillar',
+  'institution',
+  'technology',
+  'priority',
+  'distributionCompany',
+] as const
 
 /** The backend only understands period cutoffs at year/quarter granularity
  * (see ExecutiveOverviewService's periodSortKey) - a true arbitrary date
@@ -39,9 +52,11 @@ const QUARTER_LABELS: Record<QuarterToken, string> = {
 
 function parsePeriod(period: string): { year: string; quarter: QuarterToken } | null {
   const quarterMatch = /^q([1-4])-(\d{4})$/i.exec(period)
-  if (quarterMatch) return { year: quarterMatch[2], quarter: `q${quarterMatch[1]}` as QuarterToken }
+  if (quarterMatch?.[1] && quarterMatch[2]) {
+    return { year: quarterMatch[2], quarter: `q${quarterMatch[1]}` as QuarterToken }
+  }
   const yearMatch = /^(\d{4})$/.exec(period)
-  if (yearMatch) return { year: yearMatch[1], quarter: 'fy' }
+  if (yearMatch?.[1]) return { year: yearMatch[1], quarter: 'fy' }
   return null
 }
 
@@ -92,9 +107,10 @@ function useYearAndQuarterOptions(reportingPeriods: readonly FilterOption[]) {
  * adding a control here.
  */
 export function GlobalFilterBar({ onClose }: { onClose?: () => void }) {
-  const { filters, setFilter, reset } = useGlobalFilters()
+  const { filters, setFilter, setFilters, reset } = useGlobalFilters()
   const { data: options, isPending } = useFilterOptions()
   const { yearOptions, quartersByYear } = useYearAndQuarterOptions(options?.reportingPeriods ?? [])
+  const [moreFiltersOpen, setMoreFiltersOpen] = useState(false)
 
   // The picked range itself is held locally (react-day-picker's own shape,
   // not a shareable URL value) - once both ends are picked, its "to" date
@@ -116,6 +132,9 @@ export function GlobalFilterBar({ onClose }: { onClose?: () => void }) {
   const isDirty = Object.entries(DEFAULT_FILTER_VALUES).some(
     ([key, value]) => filters[key as keyof typeof filters] !== value,
   )
+  const activeSecondaryCount = SECONDARY_FILTER_KEYS.filter(
+    (key) => filters[key] !== DEFAULT_FILTER_VALUES[key],
+  ).length
 
   const isCustomPeriod = filters.period === CUSTOM_PERIOD
   const parsedPeriod = isCustomPeriod ? null : parsePeriod(filters.period)
@@ -173,14 +192,14 @@ export function GlobalFilterBar({ onClose }: { onClose?: () => void }) {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 items-end gap-5 sm:grid-cols-2 xl:grid-cols-4 [&_button[role=combobox]]:h-11 [&_label]:mb-1">
+      <div className="flex flex-wrap items-end gap-3 [&_button[role=combobox]]:h-11 [&_label]:mb-1">
         <SelectField
           label="Year"
           value={selectedYear}
           options={yearOptions}
           onChange={handleYearChange}
           disabled={isCustomPeriod}
-          className="w-full"
+          className="w-32"
         />
 
         <SelectField
@@ -188,7 +207,7 @@ export function GlobalFilterBar({ onClose }: { onClose?: () => void }) {
           value={selectedQuarter}
           options={quarterOptions}
           onChange={handleQuarterChange}
-          className="w-full"
+          className="w-36"
         />
 
         {/* Only once "Custom range…" is chosen, so the bar stays compact by default. */}
@@ -201,52 +220,87 @@ export function GlobalFilterBar({ onClose }: { onClose?: () => void }) {
           />
         )}
 
-        <SelectField
-          label="Compact pillar"
-          value={filters.pillar}
-          options={options.pillars}
-          onChange={(pillar) => setFilter('pillar', pillar)}
-          className="w-full"
-        />
+        <Popover open={moreFiltersOpen} onOpenChange={setMoreFiltersOpen}>
+          <PopoverTrigger asChild>
+            <Button type="button" variant="secondary" size="md" className="h-11">
+              <SlidersHorizontal aria-hidden="true" />
+              More filters
+              {activeSecondaryCount > 0 && (
+                <span className="inline-flex size-5 items-center justify-center rounded-full bg-brand-700 text-2xs font-semibold text-white">
+                  {activeSecondaryCount}
+                </span>
+              )}
+            </Button>
+          </PopoverTrigger>
 
-        <SelectField
-          label="Institution"
-          value={filters.institution}
-          options={options.institutions}
-          onChange={(institution) => setFilter('institution', institution)}
-          className="w-full"
-        />
+          <PopoverContent className="w-80 sm:w-96">
+            <div className="mb-2 flex items-center justify-between">
+              <p className="text-sm font-semibold text-text-default">More filters</p>
+              {activeSecondaryCount > 0 && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    const cleared = { ...filters }
+                    for (const key of SECONDARY_FILTER_KEYS) cleared[key] = DEFAULT_FILTER_VALUES[key]
+                    setFilters(cleared)
+                  }}
+                  className="text-xs font-medium text-brand-700 hover:underline"
+                >
+                  Clear
+                </button>
+              )}
+            </div>
 
-        <SelectField
-          label="Technology"
-          value={filters.technology}
-          options={options.technologies}
-          onChange={(technology) => setFilter('technology', technology)}
-          className="w-full"
-        />
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 [&_label]:mb-1">
+              <SelectField
+                label="Compact pillar"
+                value={filters.pillar}
+                options={options.pillars}
+                onChange={(pillar) => setFilter('pillar', pillar)}
+                className="w-full"
+              />
 
-        <SelectField
-          label="Priority"
-          value={filters.priority}
-          options={options.priorities}
-          onChange={(priority) => setFilter('priority', priority)}
-          className="w-full"
-        />
+              <SelectField
+                label="Institution"
+                value={filters.institution}
+                options={options.institutions}
+                onChange={(institution) => setFilter('institution', institution)}
+                className="w-full"
+              />
 
-        <SelectField
-          label="Distribution Company"
-          value={filters.distributionCompany}
-          options={options.distributionCompanies}
-          onChange={(distributionCompany) => setFilter('distributionCompany', distributionCompany)}
-          className="w-full"
-        />
+              <SelectField
+                label="Technology"
+                value={filters.technology}
+                options={options.technologies}
+                onChange={(technology) => setFilter('technology', technology)}
+                className="w-full"
+              />
 
-        {/*
-          NOT YET EXPOSED: geographicScope. It's an aggregation-LEVEL toggle
-          (national/state/DisCo), not a narrowing filter - every headline
-          card would need reshaping into a per-state/per-DisCo breakdown to
-          make it real, not just a control here.
-        */}
+              <SelectField
+                label="Priority"
+                value={filters.priority}
+                options={options.priorities}
+                onChange={(priority) => setFilter('priority', priority)}
+                className="w-full"
+              />
+
+              <SelectField
+                label="Distribution Company"
+                value={filters.distributionCompany}
+                options={options.distributionCompanies}
+                onChange={(distributionCompany) => setFilter('distributionCompany', distributionCompany)}
+                className="w-full sm:col-span-2"
+              />
+            </div>
+
+            {/*
+              NOT YET EXPOSED: geographicScope. It's an aggregation-LEVEL toggle
+              (national/state/DisCo), not a narrowing filter - every headline
+              card would need reshaping into a per-state/per-DisCo breakdown to
+              make it real, not just a control here.
+            */}
+          </PopoverContent>
+        </Popover>
       </div>
     </section>
   )

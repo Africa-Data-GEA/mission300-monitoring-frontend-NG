@@ -318,6 +318,26 @@ export const createProgrammeResponseSchema = z.object({
 })
 
 /* ------------------------------------------------------------------ *
+ * Bulk upload (one Excel template, programmes + projects together)
+ * ------------------------------------------------------------------ */
+
+export const bulkUploadRowErrorSchema = z.object({
+  row: z.number(),
+  message: z.string(),
+})
+
+export const bulkUploadResultSchema = z.object({
+  totalRows: z.number(),
+  programmesCreated: z.number(),
+  programmesUpdated: z.number(),
+  projectsCreated: z.number(),
+  projectsUpdated: z.number(),
+  errorCount: z.number(),
+  errors: z.array(bulkUploadRowErrorSchema),
+  message: z.string(),
+})
+
+/* ------------------------------------------------------------------ *
  * Milestones (drill-down from a project)
  * ------------------------------------------------------------------ */
 
@@ -409,6 +429,7 @@ export type UpsertProjectRequest = z.infer<typeof upsertProjectRequestSchema>
 export type UpsertProjectResponse = z.infer<typeof upsertProjectResponseSchema>
 export type CreateProgrammeRequest = z.infer<typeof createProgrammeRequestSchema>
 export type CreateProgrammeResponse = z.infer<typeof createProgrammeResponseSchema>
+export type BulkUploadResult = z.infer<typeof bulkUploadResultSchema>
 export type MilestoneRecord = z.infer<typeof milestoneRecordSchema>
 export type CreateMilestoneRequest = z.infer<typeof createMilestoneRequestSchema>
 export type CreateMilestoneResponse = z.infer<typeof createMilestoneResponseSchema>
