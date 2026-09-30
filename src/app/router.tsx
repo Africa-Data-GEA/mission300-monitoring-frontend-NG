@@ -262,7 +262,7 @@ export const router = createBrowserRouter([
       {
         path: 'pillars/:pillar',
         element: moduleRoute('pillar-dashboards', <PillarDashboardPage />),
-        handle: { globalFilters: false } satisfies RouteHandle,
+        handle: { globalFilters: true } satisfies RouteHandle,
       },
       {
         path: 'programs',

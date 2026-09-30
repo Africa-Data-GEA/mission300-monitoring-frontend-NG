@@ -44,6 +44,11 @@ export function DiscoComparisonChart({
           chart: { type: 'bar', toolbar: { show: false }, fontFamily: FONT_FAMILY },
           plotOptions: { bar: { horizontal: true, borderRadius: 3, barHeight: '65%' } },
           colors: [CHART_BLUE.lightest, CHART_BLUE.dark],
+          // A brand-derived "lightest" colour can still read as near-white on
+          // this card's white background (see buildChartScale's own comment)
+          // - an outline keeps every bar legible as a shape regardless of how
+          // close its fill ends up to the surface behind it.
+          stroke: { show: true, width: 1, colors: ['var(--border-default)'] },
           dataLabels: { enabled: false },
           xaxis: {
             categories: rows.map((row) => row.name),

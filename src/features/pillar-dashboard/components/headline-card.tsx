@@ -7,6 +7,18 @@ import { TrendIndicator } from '@/components/ui/trend-indicator'
 import { getLocale } from '@/lib/currency'
 import { PillarKpiEditButton } from './pillar-kpi-edit-button'
 
+/** Same abbreviation threshold and no-space-before-"%" convention as
+ * CoreIndicatorsSection's formatValue/formatCompactValue, kept local since
+ * headline cards don't otherwise need currency/NGN unit handling. */
+function formatHeadlineValue(value: number, unit: string): string {
+  const formatted =
+    Math.abs(value) >= 100_000
+      ? new Intl.NumberFormat(getLocale(), { notation: 'compact', maximumFractionDigits: 1 }).format(value)
+      : value.toLocaleString(undefined, { maximumFractionDigits: 2 })
+  if (unit === '%') return `${formatted}%`
+  return `${formatted} ${unit}`
+}
+
 /**
  * One headline card, rendered straight from a real KpiProfile — the title
  * drills down to the same indicator's full profile in KPI Explorer.
@@ -46,17 +58,16 @@ export function HeadlineCard({ card }: { card: PillarHeadlineCard }) {
       ? 'Target set · awaiting first report'
       : 'Target set · progress unavailable'
 
-  // The bare figure only — `card.value` carries a full descriptive label
-  // (unit, method, reporting period) meant for the KPI profile it's sourced
-  // from, not for a compact headline card where that text just crowds the number.
-  // Large raw counts (population, connections) are abbreviated — a 10-digit
-  // number blown up at text-3xl reads as a layout bug next to sibling cards
-  // showing small percentages or counts in the tens of thousands.
+  // The figure plus its unit, not `card.value`'s full descriptive label
+  // (which also repeats method/reporting period) — that reads as crowded at
+  // this card's size, but the bare number without even a "%" or "MW" reads
+  // as flatly wrong, so the unit stays. Large raw counts (population,
+  // connections) are abbreviated — a 10-digit number blown up at text-3xl
+  // reads as a layout bug next to sibling cards showing small percentages or
+  // counts in the tens of thousands.
   const displayValue =
     card.rawValue !== null
-      ? Math.abs(card.rawValue) >= 100_000
-        ? new Intl.NumberFormat(getLocale(), { notation: 'compact', maximumFractionDigits: 1 }).format(card.rawValue)
-        : card.rawValue.toLocaleString(undefined, { maximumFractionDigits: 2 })
+      ? formatHeadlineValue(card.rawValue, card.unit)
       : card.value
 
   return (
@@ -86,6 +97,7 @@ export function HeadlineCard({ card }: { card: PillarHeadlineCard }) {
         <span className="text-3xl leading-none font-semibold tracking-tight text-text-default">
           {displayValue}
         </span>
+        {card.period && <span className="ml-1.5 text-2xs text-text-subtle">as of {card.period}</span>}
         {card.trend && (
           <div className="mt-1.5">
             <TrendIndicator trend={card.trend} />

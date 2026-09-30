@@ -283,6 +283,7 @@ function StatCard({ indicator, showDiscoBreakdown }: { indicator: PillarCoreIndi
       >
         {indicator.current === null ? '—' : formatCompactValue(indicator.current, indicator.unit)}
       </p>
+      {indicator.period && <p className="text-2xs text-text-subtle">as of {indicator.period}</p>}
       {indicator.unit === 'Currency not stated' && (
         <p className="mt-auto pt-3 text-2xs text-text-subtle">Currency not specified by source</p>
       )}
@@ -400,7 +401,7 @@ function GaugeCard({ indicator, showDiscoBreakdown }: { indicator: PillarCoreInd
           </span>
         </div>
       </div>
-      <div className="flex items-center gap-3 text-2xs text-text-subtle">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-2xs text-text-subtle">
         <span className="flex items-center gap-1">
           <span aria-hidden="true" className="size-1.5 rounded-full" style={{ background: CHART_BLUE.dark }} />
           Current
@@ -409,6 +410,7 @@ function GaugeCard({ indicator, showDiscoBreakdown }: { indicator: PillarCoreInd
           <span aria-hidden="true" className="size-1.5 rounded-full" style={{ background: CHART_BLUE.lightest }} />
           Target
         </span>
+        {indicator.period && <span>as of {indicator.period}</span>}
         <span className="ml-auto font-medium text-text-muted">{percent}% to target</span>
       </div>
       {trend && (
@@ -470,6 +472,7 @@ function TargetBarCard({ indicator, showDiscoBreakdown }: { indicator: PillarCor
         </p>
         {percent !== null && <span className="text-2xs font-medium text-text-subtle">{percent}% to target</span>}
       </div>
+      {indicator.period && <p className="text-2xs text-text-subtle">as of {indicator.period}</p>}
       <div className="mt-4 flex-1">
         <Chart
           type="bar"

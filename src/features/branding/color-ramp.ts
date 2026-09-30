@@ -127,6 +127,12 @@ const CHART_LIGHTNESS_STEPS: Record<keyof ChartScale, number> = {
 /**
  * Builds the 5-step chart colour scale (CHART_BLUE's shape) from one hex
  * colour, anchored at "dark" — the step most series colours read from.
+ *
+ * Capped at 90 lightness, not 97 like buildColorRamp's UI ramp: chart series
+ * always sit on a plain white card (see DiscoComparisonChart), so a pale or
+ * already-light admin secondary colour (e.g. a bright gold) must not push
+ * "lightest" close enough to white to become an invisible bar - a 50-step
+ * background swatch doesn't have that constraint, but a chart series does.
  */
 export function buildChartScale(primaryHex: string): ChartScale {
   const anchor = hexToHsl(primaryHex)
@@ -139,7 +145,7 @@ export function buildChartScale(primaryHex: string): ChartScale {
       continue
     }
     const delta = targetLightness - anchorLightness
-    const l = Math.min(97, Math.max(4, anchor.l + delta))
+    const l = Math.min(90, Math.max(4, anchor.l + delta))
     scale[step as keyof ChartScale] = hslToHex({ h: anchor.h, s: anchor.s, l })
   }
 

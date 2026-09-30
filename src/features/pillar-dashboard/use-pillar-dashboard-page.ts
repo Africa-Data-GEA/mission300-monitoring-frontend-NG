@@ -1,11 +1,13 @@
 import { pillarIdSchema, type PillarId } from '@/api/schemas/common'
+import { useGlobalFilters } from '@/app/global-filters'
 import { usePillarDashboard } from './api'
 
 export function usePillarDashboardPage(pillarParam: string) {
   const parsed = pillarIdSchema.safeParse(pillarParam)
   const pillar: PillarId | null = parsed.success ? parsed.data : null
+  const { filters } = useGlobalFilters()
 
-  const overview = usePillarDashboard(pillar)
+  const overview = usePillarDashboard(pillar, filters.period)
 
   return {
     pillar,

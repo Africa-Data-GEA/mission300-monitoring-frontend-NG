@@ -33,6 +33,10 @@ export const pillarHeadlineCardSchema = z.object({
   title: z.string().min(1),
   value: z.string().min(1),
   rawValue: z.number().nullable(),
+  unit: z.string().min(1),
+  /** Which reporting period `rawValue` is as of (e.g. "Q4 2025"). Null
+   * where there's no value yet to date. */
+  period: z.string().nullable(),
   /** Null where the indicator has no stated Compact baseline. */
   baseline: z.number().nullable(),
   baselineLabel: z.string(),
@@ -76,6 +80,9 @@ export const pillarCoreIndicatorSchema = z.object({
    * this instead of `current`/`target`, which stay null for binary KPIs. */
   currentLabel: z.string(),
   targetLabel: z.string(),
+  /** Which reporting period `current` is as of (e.g. "Q4 2025"). Null
+   * where there's no value yet to date. */
+  period: z.string().nullable(),
   direction: z.enum(['higher-is-better', 'lower-is-better']),
   /** Ordered oldest-to-newest reading values, for a sparkline. Empty where
    * no historical series is available yet (e.g. a pending milestone metric). */
