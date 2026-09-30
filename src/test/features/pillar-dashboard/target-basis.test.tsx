@@ -51,4 +51,20 @@ describe('Headline card target basis', () => {
       .closest('[data-slot="card"]') as HTMLElement
     expect(within(gridCard).getByText('No confirmed target yet')).toBeInTheDocument()
   }, 60_000)
+
+  it('does not claim a first report is pending when an access KPI has no value', () => {
+    const card = buildPillarDashboard('last-mile-access').headlineCards.find(
+      (item) => item.kpiId === 'M300-P2-003',
+    )!
+    renderRoutesWithProviders(
+      [{ path: '/', element: <HeadlineCard card={{ ...card, rawValue: null, value: 'No data yet' }} /> }],
+      { route: '/' },
+    )
+
+    const miniGridCard = screen
+      .getByRole('link', { name: 'Mini-Grid Customer Connections' })
+      .closest('[data-slot="card"]') as HTMLElement
+    expect(within(miniGridCard).getByText('No reported value yet')).toBeInTheDocument()
+    expect(within(miniGridCard).queryByText(/awaiting first report/i)).not.toBeInTheDocument()
+  })
 })

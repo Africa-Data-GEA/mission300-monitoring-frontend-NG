@@ -55,7 +55,7 @@ export function HeadlineCard({ card }: { card: PillarHeadlineCard }) {
   const unavailableProgressLabel = !hasLevelTarget
     ? 'No confirmed target yet'
     : card.rawValue === null
-      ? 'Target set · awaiting first report'
+      ? 'No reported value yet'
       : 'Target set · progress unavailable'
 
   // The figure plus its unit, not `card.value`'s full descriptive label
