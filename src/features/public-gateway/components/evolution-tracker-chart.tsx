@@ -11,6 +11,20 @@ const NAVY = '#065a89'
 const GOLD = '#ffb800'
 const GRID = '#d7e0e7'
 const SLATE = '#667684'
+// A full-year composite reading (e.g. an annual Compact Progress Report
+// figure) can land in the same series as quarterly readings from a
+// different pipeline entirely - see periodToDate/reportingPeriodKey, which
+// sort a bare year after that year's own quarters. Distinct from GOLD
+// (which marks the chronologically latest point, quarterly or not) so the
+// two meanings don't collide when the latest point happens to be annual.
+const ANNUAL = '#8a5a00'
+
+/** A bare "YYYY" period, as opposed to "Q# YYYY" or a monthly period -
+ * signals this one reading is a full-year composite, not part of the same
+ * quarterly cadence as its neighbours. */
+function isAnnualPeriod(period: string): boolean {
+  return /^\d{4}$/.test(period.trim())
+}
 
 export type EvolutionChartView = 'area' | 'bar'
 
@@ -23,6 +37,13 @@ export function EvolutionTrackerChart({
 }) {
   const chartId = `landing-tracker-${series.id}-${view}`
   const lastPointIndex = series.points.length - 1
+  const annualIndexes = series.points
+    .map((point, index) => (isAnnualPeriod(point.period) ? index : -1))
+    .filter((index) => index !== -1)
+  // Only worth calling out when the series actually mixes cadences - a
+  // KPI reported quarterly throughout, or annually throughout, has nothing
+  // to disambiguate.
+  const hasMixedCadence = annualIndexes.length > 0 && annualIndexes.length < series.points.length
   const options: ApexOptions = {
     chart: {
       id: chartId,
@@ -60,13 +81,31 @@ export function EvolutionTrackerChart({
       discrete:
         view === 'area'
           ? [
-              {
+              // Every annual reading gets its own marker, ringed in ANNUAL
+              // to flag "full-year composite, different pipeline than its
+              // quarterly neighbours" - independent of whether it's also
+              // the chronologically latest point.
+              ...annualIndexes.map((dataPointIndex) => ({
                 seriesIndex: 0,
-                dataPointIndex: lastPointIndex,
-                fillColor: GOLD,
-                strokeColor: '#ffffff',
-                size: 6,
-              },
+                dataPointIndex,
+                fillColor: dataPointIndex === lastPointIndex ? GOLD : '#ffffff',
+                strokeColor: ANNUAL,
+                size: dataPointIndex === lastPointIndex ? 7 : 5,
+              })),
+              // The latest point still gets its own gold marker when it's
+              // NOT annual - the existing "this is the current reading"
+              // convention, unchanged for an all-quarterly series.
+              ...(annualIndexes.includes(lastPointIndex)
+                ? []
+                : [
+                    {
+                      seriesIndex: 0,
+                      dataPointIndex: lastPointIndex,
+                      fillColor: GOLD,
+                      strokeColor: '#ffffff',
+                      size: 6,
+                    },
+                  ]),
             ]
           : [],
     },
@@ -96,7 +135,15 @@ export function EvolutionTrackerChart({
     tooltip: {
       style: { fontFamily: LANDING_FONT_FAMILY, fontSize: '12px' },
       x: { format: 'MMM yyyy' },
-      y: { formatter: (value: number) => formatSeriesValue(value, series) },
+      y: {
+        formatter: (value: number, opts) => {
+          const formatted = formatSeriesValue(value, series)
+          const index = opts?.dataPointIndex
+          return typeof index === 'number' && annualIndexes.includes(index)
+            ? `${formatted} (full-year figure)`
+            : formatted
+        },
+      },
     },
   }
 
@@ -113,13 +160,38 @@ export function EvolutionTrackerChart({
               data: series.points.map((point, index) => ({
                 x: periodToDate(point.period),
                 y: point.value,
-                ...(view === 'bar' ? { fillColor: index === lastPointIndex ? GOLD : NAVY } : {}),
+                ...(view === 'bar'
+                  ? {
+                      fillColor: annualIndexes.includes(index)
+                        ? ANNUAL
+                        : index === lastPointIndex
+                          ? GOLD
+                          : NAVY,
+                    }
+                  : {}),
               })),
             },
           ]}
           options={options}
         />
       </div>
+
+      {hasMixedCadence && (
+        <div className="mt-2 flex flex-wrap items-center gap-4 text-[0.6875rem] leading-4 text-[#667684]">
+          <span className="flex items-center gap-1.5">
+            <span aria-hidden="true" className="inline-block size-2 rounded-full" style={{ background: NAVY }} />
+            Quarterly reading
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span
+              aria-hidden="true"
+              className="inline-block size-2 rounded-full border-2"
+              style={{ borderColor: ANNUAL, background: '#ffffff' }}
+            />
+            Full-year figure — a separate, annual report, not a continuation of the quarterly trend
+          </span>
+        </div>
+      )}
 
       <TargetJourney series={series} />
 
