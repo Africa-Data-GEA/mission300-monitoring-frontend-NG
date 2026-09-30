@@ -8,7 +8,7 @@ Local demonstrations can run with in-process mock handlers and data.
 
 - Node.js 24.14.1 (see `.node-version`)
 - pnpm 10.33.0
-## Local development
+## Local developmente
 
 ```bash
 pnpm install
