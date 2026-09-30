@@ -28,8 +28,9 @@ export function deleteProject(projectId: string) {
   return api.delete<{ message: string }>(`/programs/projects/${projectId}`)
 }
 
-export function bulkUploadProjects(file: File) {
+export function bulkUploadProjects(file: File, dryRun: boolean) {
   const formData = new FormData()
   formData.append('file', file)
+  formData.append('dryRun', dryRun ? 'true' : 'false')
   return api.post('/programs/bulk-upload', formData, bulkUploadResultSchema)
 }

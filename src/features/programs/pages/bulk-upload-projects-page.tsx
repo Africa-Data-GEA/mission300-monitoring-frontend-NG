@@ -24,6 +24,7 @@ import { useBulkUploadProjects } from '../api'
 export function BulkUploadProjectsPage() {
   const navigate = useNavigate()
   const [file, setFile] = useState<File | null>(null)
+  const [previewOnly, setPreviewOnly] = useState(false)
   const [isDownloading, setIsDownloading] = useState(false)
   const [result, setResult] = useState<BulkUploadResult | null>(null)
   const upload = useBulkUploadProjects()
@@ -48,21 +49,26 @@ export function BulkUploadProjectsPage() {
     }
   }
 
-  function submitUpload() {
+  function submitUpload(dryRun: boolean) {
     if (!file) return
     setResult(null)
-    upload.mutate(file, {
-      onSuccess: (response) => {
-        setResult(response)
-        setFile(null)
-        if (response.errorCount === 0) dashboardToast.success(response.message)
+    upload.mutate(
+      { file, dryRun },
+      {
+        onSuccess: (response) => {
+          setResult(response)
+          // A preview's file stays selected, so "Confirm & upload" below can
+          // resubmit it for real without asking the person to re-pick it.
+          if (!dryRun) setFile(null)
+          if (response.errorCount === 0 && !dryRun) dashboardToast.success(response.message)
+        },
+        onError: (error) => {
+          dashboardToast.error(dryRun ? 'Preview failed' : 'Upload failed', {
+            description: error instanceof ApiError ? error.message : 'Please try again.',
+          })
+        },
       },
-      onError: (error) => {
-        dashboardToast.error('Upload failed', {
-          description: error instanceof ApiError ? error.message : 'Please try again.',
-        })
-      },
-    })
+    )
   }
 
   return (
@@ -123,19 +129,35 @@ export function BulkUploadProjectsPage() {
               />
               {file && <p className="mt-3 text-sm font-medium">{file.name}</p>}
             </div>
+
+            <label className="flex w-fit items-center gap-2 text-sm text-text-default">
+              <input
+                type="checkbox"
+                checked={previewOnly}
+                onChange={(event) => setPreviewOnly(event.target.checked)}
+                className="size-4 rounded border-border-default"
+              />
+              Preview only — check what would happen without saving anything
+            </label>
+
             <Button
               type="button"
               disabled={!file || upload.isPending}
-              onClick={submitUpload}
+              onClick={() => submitUpload(previewOnly)}
               className="w-fit"
             >
               {upload.isPending ? <LoaderCircle className="animate-spin" /> : <Upload />}
-              {upload.isPending ? 'Uploading…' : 'Upload'}
+              {upload.isPending ? (previewOnly ? 'Previewing…' : 'Uploading…') : previewOnly ? 'Preview' : 'Upload'}
             </Button>
           </section>
 
           {result && (
             <section className="flex flex-col gap-3 rounded-card border border-border-default p-4">
+              {result.dryRun && (
+                <div className="rounded-control bg-surface-sunken px-3 py-2 text-xs font-semibold tracking-wide text-text-muted uppercase">
+                  Preview — nothing has been saved yet
+                </div>
+              )}
               <div className="flex items-start gap-2">
                 {result.errorCount === 0 ? (
                   <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-status-on-track" aria-hidden="true" />
@@ -185,14 +207,30 @@ export function BulkUploadProjectsPage() {
                 </div>
               )}
 
-              <Button
-                type="button"
-                variant="secondary"
-                className="w-fit"
-                onClick={() => navigate('/programs')}
-              >
-                Back to Programs
-              </Button>
+              <div className="flex flex-wrap gap-2">
+                {result.dryRun && file && (
+                  <Button
+                    type="button"
+                    disabled={upload.isPending}
+                    onClick={() => {
+                      setPreviewOnly(false)
+                      submitUpload(false)
+                    }}
+                    className="w-fit"
+                  >
+                    {upload.isPending ? <LoaderCircle className="animate-spin" /> : <Upload />}
+                    Confirm & upload
+                  </Button>
+                )}
+                <Button
+                  type="button"
+                  variant="secondary"
+                  className="w-fit"
+                  onClick={() => navigate('/programs')}
+                >
+                  Back to Programs
+                </Button>
+              </div>
             </section>
           )}
         </div>

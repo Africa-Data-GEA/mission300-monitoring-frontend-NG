@@ -327,6 +327,7 @@ export const bulkUploadRowErrorSchema = z.object({
 })
 
 export const bulkUploadResultSchema = z.object({
+  dryRun: z.boolean(),
   totalRows: z.number(),
   programmesCreated: z.number(),
   programmesUpdated: z.number(),

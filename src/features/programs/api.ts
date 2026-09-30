@@ -139,7 +139,10 @@ export function useProjectBottlenecks(projectId: string, page: number) {
 export function useBulkUploadProjects() {
   const client = useQueryClient()
   return useMutation({
-    mutationFn: bulkUploadProjects,
-    onSuccess: () => client.invalidateQueries({ queryKey: programsKeys.all }),
+    mutationFn: ({ file, dryRun }: { file: File; dryRun: boolean }) => bulkUploadProjects(file, dryRun),
+    // A dry run never writes anything, so there's nothing to refetch for.
+    onSuccess: (result) => {
+      if (!result.dryRun) void client.invalidateQueries({ queryKey: programsKeys.all })
+    },
   })
 }
