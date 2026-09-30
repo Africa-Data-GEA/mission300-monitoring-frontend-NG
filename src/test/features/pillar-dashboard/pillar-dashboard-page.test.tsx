@@ -66,6 +66,8 @@ describe('PillarDashboardPage', () => {
     ).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Supporting indicators' })).toBeInTheDocument()
     expect(screen.queryByText('From financing to last-mile access')).not.toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: /Private capital committed since January 2025/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: /Private capital deployed or disbursed since January 2025/i })).not.toBeInTheDocument()
   })
 
   it('shows a milestone tracker chart for a pillar whose only core indicator is a status-type KPI', async () => {

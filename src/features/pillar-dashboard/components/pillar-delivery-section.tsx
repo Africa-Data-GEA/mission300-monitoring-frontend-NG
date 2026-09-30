@@ -238,9 +238,6 @@ export function PillarDeliverySection({
       <Card variant="well" className="p-2 sm:p-4">
         <div className="px-2 sm:px-0">
           <h2 className="text-lg font-semibold text-text-default">Programmes and projects</h2>
-          <p className="mt-1 text-xs text-text-muted">
-            Delivery records contributing to this pillar&apos;s aggregate performance.
-          </p>
         </div>
 
         <div className="mt-3 flex flex-wrap items-end gap-2.5 rounded-lg bg-surface-sunken p-3">

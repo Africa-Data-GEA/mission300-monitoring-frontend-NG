@@ -1,5 +1,4 @@
 import { Link } from 'react-router'
-import { CircleCheck, Clock3 } from 'lucide-react'
 import type { PillarHeadlineCard } from '@/api/schemas/pillar-dashboard'
 import { Card } from '@/components/ui/card'
 import { InfoPopover } from '@/components/ui/info-popover'
@@ -61,13 +60,7 @@ export function HeadlineCard({ card }: { card: PillarHeadlineCard }) {
       : card.value
 
   return (
-    <Card className={`flex h-full flex-col p-4 ${isPrivateCapital ? 'border-t-4 border-t-brand-700 bg-gradient-to-br from-surface to-surface-sunken' : ''}`}>
-      {isPrivateCapital && (
-        <div className="mb-4 flex items-center gap-2 text-xs font-medium text-text-muted">
-          {card.rawValue === null ? <Clock3 aria-hidden="true" className="size-4 text-amber-600" /> : <CircleCheck aria-hidden="true" className="size-4 text-teal-600" />}
-          {card.rawValue === null ? 'Awaiting first report' : 'Reported value'}
-        </div>
-      )}
+    <Card className="flex h-full flex-col p-4">
       <div className="flex items-start justify-between gap-2">
         <Link
           to={`/kpis?kpi=${card.kpiId}`}
@@ -80,7 +73,7 @@ export function HeadlineCard({ card }: { card: PillarHeadlineCard }) {
           <InfoPopover
             provenance={card.provenance}
             label={card.title}
-            details={[
+            details={isPrivateCapital ? [] : [
               { label: 'Baseline', value: card.baselineLabel || null },
               { label: 'Target', value: card.targetLabel },
             ]}
@@ -89,7 +82,7 @@ export function HeadlineCard({ card }: { card: PillarHeadlineCard }) {
         </div>
       </div>
 
-      <div className={isPrivateCapital ? 'mt-4' : 'mt-1'}>
+      <div className="mt-1">
         <span className="text-3xl leading-none font-semibold tracking-tight text-text-default">
           {displayValue}
         </span>
@@ -100,14 +93,9 @@ export function HeadlineCard({ card }: { card: PillarHeadlineCard }) {
         )}
       </div>
 
-      {/* Always renders the track, even with no confirmed target, so every
-          card in a row ends on the same bottom element — three cards with a
-          visible bar and one with silent empty space read as broken, not
-          "this one has no target yet". `items-end` + a fixed mt-3 guarantees
-          a real gap above the bar even in a short card, rather than relying
-          solely on mt-auto (which collapses to ~0 when there's little spare
-          height to distribute). */}
-      <div className="mt-3 flex flex-1 flex-col justify-end gap-1">
+      {/* Private-sector target and reporting-period claims are withheld until
+          their source is confirmed. Other pillars retain their target display. */}
+      {!isPrivateCapital && <div className="mt-3 flex flex-1 flex-col justify-end gap-1">
         {isGrowthRateTarget ? (
           /* A commitment exists but is expressed as a rate of change, so there
              is no level to measure progress against and no honest bar to draw.
@@ -120,14 +108,13 @@ export function HeadlineCard({ card }: { card: PillarHeadlineCard }) {
           </p>
         ) : (
           <>
-            {(!isPrivateCapital || percentToTarget !== null) && <ProgressBar
+            <ProgressBar
               barClassName="bg-chart-blue-dark"
               value={percentToTarget ?? 0}
               label={
                 percentToTarget !== null ? `${card.title} progress to target` : `${card.title} — ${unavailableProgressLabel}`
               }
-            />}
-            {isPrivateCapital && card.targetLabel && <p className="text-xs font-medium text-text-muted">Target: {card.targetLabel}</p>}
+            />
             {/* Stakeholder feedback asked for baseline/progress/%-to-target to be
                 visible on the scorecard, not only inferable from the bar's fill
                 width — this states the percentage as text. */}
@@ -138,7 +125,7 @@ export function HeadlineCard({ card }: { card: PillarHeadlineCard }) {
             </p>
           </>
         )}
-      </div>
+      </div>}
     </Card>
   )
 }

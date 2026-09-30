@@ -12,6 +12,7 @@ import { getDiscoBreakdown } from '../lib/disco-weights'
 import { PillarKpiEditButton } from './pillar-kpi-edit-button'
 
 const FONT_FAMILY = 'Google Sans, ui-sans-serif, system-ui, sans-serif'
+const UNCONFIRMED_PERIOD_KPI_IDS = new Set(['M300-P4-011', 'M300-P4-012'])
 
 function formatValue(value: number, unit: string): string {
   const rounded = Number.isInteger(value) ? value : Math.round(value * 100) / 100
@@ -592,7 +593,6 @@ function ComparisonBarCard({ title, indicators }: { title: string; indicators: r
           tooltip: { y: { formatter: (value: number) => formatChartLabel(value, unit) } },
         }}
       />
-      <p className="mt-2 text-2xs text-text-subtle">Click a bar to open its full KPI profile.</p>
     </Card>
   )
 }
@@ -613,6 +613,11 @@ export function CoreIndicatorsSection({
 }) {
   useCurrency()
   if (indicators.length === 0) return null
+  // These KPI names assert a January 2025 start date that has not been
+  // confirmed. Keep them out of this summary until the source is corrected.
+  const visibleIndicators = pillar === 'private-sector-participation'
+    ? indicators.filter((entry) => !UNCONFIRMED_PERIOD_KPI_IDS.has(entry.kpiId))
+    : indicators
   // The DisCo-level split is only meaningful where the underlying metric is
   // genuinely disaggregated by DisCo (grid/utility metering, tariffs,
   // collections). Private-sector capital, cross-border trade and national
@@ -623,8 +628,8 @@ export function CoreIndicatorsSection({
   // Milestone-type indicators (unit `status`) never carry a numeric
   // current/target — they get one consolidated tracker card instead of
   // being grouped and gauge/bar-charted like every other indicator.
-  const milestoneIndicators = indicators.filter((entry) => entry.unit === 'status')
-  const chartableIndicators = indicators.filter((entry) => entry.unit !== 'status')
+  const milestoneIndicators = visibleIndicators.filter((entry) => entry.unit === 'status')
+  const chartableIndicators = visibleIndicators.filter((entry) => entry.unit !== 'status')
 
   const groups = new Map<string, PillarCoreIndicator[]>()
   for (const entry of chartableIndicators) {
@@ -642,20 +647,9 @@ export function CoreIndicatorsSection({
 
   return (
     <Card variant="well" className="p-4">
-      {/*
-        Titled "Supporting indicators" and captioned explicitly, because
-        review read this section as a restatement of the four headline cards
-        (docs/M300 Monitoring Platform Feedback.pptx, slides 5 and 8–10). It
-        never was — buildPillarDashboard excludes the headline KPI ids from
-        `coreIndicators` — but nothing on screen said so, so the exclusion is
-        now stated rather than left to be inferred.
-      */}
       <h2 className="text-lg font-semibold text-text-default">
         Supporting indicators
       </h2>
-      <p className="mt-1 text-xs text-text-muted">
-        Additional indicators tracked for this pillar. The four headline cards above are not repeated here.
-      </p>
 
       <div className="mt-3 grid grid-cols-1 items-stretch gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {[...groups.entries()].map(([group, entries]) => {

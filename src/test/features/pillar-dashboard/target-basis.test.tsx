@@ -5,15 +5,10 @@ import { HeadlineCard } from '@/features/pillar-dashboard/components/headline-ca
 import { buildPillarDashboard } from '@/mocks/data/pillar-dashboard'
 import { renderRoutesWithProviders } from '@/test/render'
 
-/**
- * Review found the Electricity Access Rate card reading as though it had no
- * target, when the Compact commitment is simply expressed in another unit
- * (a growth rate, not a % level) — docs/M300 Monitoring Platform Feedback.pptx,
- * slide 6. The card must state that commitment rather than showing the bare
- * "No confirmed target yet" reserved for indicators with no target at all.
- */
+/** Verify the target display for each pillar only makes claims supported by
+ * its indicator data and reporting context. */
 describe('Headline card target basis', () => {
-  it('keeps a confirmed target visible when its first actual has not been reported', () => {
+  it('does not imply a target status for a private-capital reading that is missing', () => {
     const card = buildPillarDashboard('private-sector-participation').headlineCards[0]!
     renderRoutesWithProviders(
       [{ path: '/', element: <HeadlineCard card={{ ...card, rawValue: null, value: 'No data yet', target: 15499.8 }} /> }],
@@ -21,8 +16,8 @@ describe('Headline card target basis', () => {
     )
 
     expect(screen.getByText('No data yet')).toBeInTheDocument()
-    expect(screen.getByText('Target set · awaiting first report')).toBeInTheDocument()
-    expect(screen.queryByText('No confirmed target yet')).not.toBeInTheDocument()
+    expect(screen.queryByText('Target set · awaiting first report')).not.toBeInTheDocument()
+    expect(screen.queryByText(/15,499\.8/)).not.toBeInTheDocument()
   })
 
   it('states the growth-rate commitment instead of reading as no target', async () => {
