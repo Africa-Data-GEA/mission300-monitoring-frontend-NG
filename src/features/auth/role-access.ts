@@ -35,10 +35,22 @@ const ROLE_MODULE_KEYS: Record<string, readonly string[] | 'all'> = {
   'read-only-user': ['executive-overview'],
 }
 
+/**
+ * `institution-overview` is carved out of system-administrator's `'all'`
+ * sentinel: it's one Institutional Data Provider's own self-scoped view of
+ * their own institution's submissions, not a general admin page, and the
+ * backend already enforces exactly that (`@Roles("INSTITUTIONAL_DATA_PROVIDER")`
+ * on GET /institutions/me/overview, with no admin bypass). Letting `'all'`
+ * grant it here would show any other role the nav item and route only to
+ * hit a 403 the moment the page tried to load its data.
+ */
+const ADMIN_ALL_EXCLUDES = new Set(['institution-overview'])
+
 export function canRoleReachModule(roleSlug: string, moduleKey: string): boolean {
   const allowed = ROLE_MODULE_KEYS[roleSlug]
   if (!allowed) return false
-  return allowed === 'all' || allowed.includes(moduleKey)
+  if (allowed === 'all') return !ADMIN_ALL_EXCLUDES.has(moduleKey)
+  return allowed.includes(moduleKey)
 }
 
 export function grantedRoles(user: { role: string; roles?: readonly string[] }): readonly string[] {
