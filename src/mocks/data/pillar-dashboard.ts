@@ -6,7 +6,7 @@ import type {
 } from '@/api/schemas/pillar-dashboard'
 import { bottlenecksRegister } from './bottlenecks'
 import { getKpiProfile, kpiExplorerCatalogue } from './kpi-explorer'
-import { programmes, projects } from './programs'
+import { milestones, programmes, projects } from './programs'
 import { discoComparisonRows } from './state-disco'
 
 /**
@@ -143,6 +143,9 @@ export function buildPillarDashboard(pillar: PillarId): PillarDashboardOverview 
       .map((row) => buildCoreIndicator(row.id, row.sourceDataset)),
     deliveryStatus: { counts, total: statuses.length },
     bottlenecks,
+    // Real Milestone records for projects in this pillar - not the "any KPI
+    // whose unit is 'status'" stand-in the UI used to show under this name.
+    milestones: milestones.filter((m) => pillarProjects.some((p) => p.id === m.projectId)),
     programmes: pillarProgrammes,
     projects: pillarProjects,
     discoPerformance: pillar === 'financially-viable-utilities' ? discoComparisonRows : [],

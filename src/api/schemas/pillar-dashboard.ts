@@ -7,7 +7,7 @@ import {
   trendSchema,
 } from './common'
 import { discoComparisonRowSchema } from './state-disco'
-import { executionStatusSchema, programmeRecordSchema, projectRecordSchema } from './programs'
+import { executionStatusSchema, milestoneRecordSchema, programmeRecordSchema, projectRecordSchema } from './programs'
 import { kpiCatalogueRowSchema, validationStatusSchema } from './kpi-explorer'
 
 /**
@@ -114,6 +114,10 @@ export const pillarDashboardOverviewSchema = z.object({
   deliveryStatus: pillarDeliveryStatusSchema,
   /** Ranked top-5 open bottlenecks for this pillar. */
   bottlenecks: z.array(bottleneckRecordSchema).max(5),
+  /** Real Milestone records (programs.ts's own milestoneRecordSchema) for
+   * projects in this pillar - not a KPI standing in for one. Empty until
+   * someone actually creates a milestone against a project here. */
+  milestones: z.array(milestoneRecordSchema),
   /** Delivery records that contribute to this pillar's aggregate results. */
   programmes: z.array(programmeRecordSchema),
   projects: z.array(projectRecordSchema),

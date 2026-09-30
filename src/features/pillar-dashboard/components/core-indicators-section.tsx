@@ -101,17 +101,20 @@ const MILESTONE_STAGE_STYLES: Record<MilestoneStage, { label: string; dot: strin
 const MILESTONE_STAGE_ORDER: readonly MilestoneStage[] = ['not-started', 'in-progress', 'achieved']
 
 /**
- * Reform and governance milestones — the KPI Matrix's "Milestone" indicator
- * type (unit `status`, no numeric value ever). Per the pillar specs (e.g.
- * "use one reform tracker rather than separate cards for each milestone"),
- * these are consolidated into a single tracker card per pillar rather than
- * one tiny card each, and rather than being dropped to the plain KPI table
- * below just because they have no number to gauge or bar-chart.
+ * Governance/reform-status indicators — the KPI Matrix's `unit: 'status'`
+ * KPIs (e.g. "Audited Annual Financial Statements Published"). These are
+ * real KPIs, not Milestone records (see MilestonesSection, a completely
+ * separate real-data section on this same page) - named accordingly so the
+ * two don't read as the same thing. Per the pillar specs ("use one reform
+ * tracker rather than separate cards for each milestone"), they're
+ * consolidated into a single tracker card per pillar rather than one tiny
+ * card each, and rather than being dropped to the plain KPI table below
+ * just because they have no number to gauge or bar-chart.
  */
-function MilestoneTrackerCard({ indicators }: { indicators: readonly PillarCoreIndicator[] }) {
+function GovernanceStatusTrackerCard({ indicators }: { indicators: readonly PillarCoreIndicator[] }) {
   return (
     <Card className="flex h-full flex-col p-4 sm:col-span-2 xl:col-span-4">
-      <h3 className="text-sm font-medium text-text-default">Milestones and governance reforms</h3>
+      <h3 className="text-sm font-medium text-text-default">Governance & reform status</h3>
       <ul className="mt-3 flex flex-col divide-y divide-border-default">
         {indicators.map((indicator) => {
           const stage = deriveMilestoneStage(indicator.currentLabel)
@@ -691,7 +694,7 @@ export function CoreIndicatorsSection({
           )
         })}
 
-        {milestoneIndicators.length > 0 && <MilestoneTrackerCard indicators={milestoneIndicators} />}
+        {milestoneIndicators.length > 0 && <GovernanceStatusTrackerCard indicators={milestoneIndicators} />}
       </div>
     </Card>
   )

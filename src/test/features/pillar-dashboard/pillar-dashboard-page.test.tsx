@@ -81,7 +81,7 @@ describe('PillarDashboardPage', () => {
     ).toBeInTheDocument()
 
     expect(screen.getByRole('heading', { name: 'Supporting indicators' })).toBeInTheDocument()
-    const tracker = screen.getByRole('heading', { name: 'Milestones and governance reforms' })
+    const tracker = screen.getByRole('heading', { name: 'Governance & reform status' })
       .closest('[data-slot="card"]') as HTMLElement
     expect(tracker).toBeInTheDocument()
     expect(

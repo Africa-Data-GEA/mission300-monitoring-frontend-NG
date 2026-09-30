@@ -3,6 +3,7 @@ import { Breadcrumb } from '@/components/ui/breadcrumb'
 import { ErrorState } from '@/components/ui/error-state'
 import { CoreIndicatorsSection } from './components/core-indicators-section'
 import { HeadlineCardsSection } from './components/headline-cards-section'
+import { MilestonesSection } from './components/milestones-section'
 import { PillarDashboardSkeleton } from './components/pillar-dashboard-skeleton'
 import { PillarDeliverySection } from './components/pillar-delivery-section'
 import { usePillarDashboardPage } from './use-pillar-dashboard-page'
@@ -54,6 +55,8 @@ export function PillarDashboardPage() {
       <HeadlineCardsSection cards={data.headlineCards} />
 
       <CoreIndicatorsSection indicators={data.coreIndicators} pillar={data.pillar} />
+
+      <MilestonesSection milestones={data.milestones} />
 
       <PillarDeliverySection
         pillar={data.pillar}
