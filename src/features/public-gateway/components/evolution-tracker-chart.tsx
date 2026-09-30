@@ -33,7 +33,12 @@ export function EvolutionTrackerChart({
       parentHeightOffset: 0,
     },
     colors: [NAVY],
-    stroke: { curve: 'smooth', width: view === 'area' ? 2 : 0, lineCap: 'round' },
+    // Straight, not smoothed - same rule EvolutionChart already documents
+    // for its own line: a cubic-spline curve through sparse quarterly
+    // points (as few as 3 here) mathematically overshoots between and past
+    // them, drawing values that were never reported - visibly contradicting
+    // the real "latest reading" figure shown next to this chart.
+    stroke: { curve: 'straight', width: view === 'area' ? 2 : 0, lineCap: 'round' },
     fill:
       view === 'area'
         ? {
