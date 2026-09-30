@@ -6,7 +6,7 @@ Compact. The active API is the NestJS service in `mission300-monitoring-backend-
 Local demonstrations can run with in-process mock handlers and data.
 ## Requirements
 d
-- Node.js 24.14.1 (see `.node-version`)
+- Node.js 24.14.1 (see `.node-version`)w
 - pnpm 10.33.0
 ## Local developmente
 
