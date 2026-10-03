@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { publicOverviewSchema } from '@/api/schemas/executive-overview'
+import { publicOverviewSchema, publicProjectDeliverySchema } from '@/api/schemas/executive-overview'
 import { stateCoverageSchema } from '@/api/schemas/state-disco'
 import { api } from '@/lib/api-client'
 
@@ -24,6 +24,18 @@ export function usePublicOverview() {
     // field rather than as `undefined` inside the hero.
     queryFn: () => api.get('/public/overview', publicOverviewSchema),
     // Public traffic is read-heavy and the figures move quarterly at most.
+    staleTime: 5 * 60 * 1000,
+  })
+}
+
+/** Project/programme counts for the public landing page — aggregates only,
+ * from `GET /public/project-delivery`. Individual project records (and
+ * their delivery status) stay behind authentication; see
+ * publicProjectDeliverySchema. */
+export function usePublicProjectDelivery() {
+  return useQuery({
+    queryKey: [...publicGatewayKeys.all, 'project-delivery'] as const,
+    queryFn: () => api.get('/public/project-delivery', publicProjectDeliverySchema),
     staleTime: 5 * 60 * 1000,
   })
 }

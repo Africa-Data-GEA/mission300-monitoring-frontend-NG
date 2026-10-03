@@ -392,6 +392,29 @@ export const executiveOverviewSchema = z.object({
 export const publicOverviewSchema = executiveOverviewSchema.omit({ deliveryStatus: true })
 
 /**
+ * Aggregate-only project figures for the public landing page
+ * (`GET /public/project-delivery`).
+ *
+ * Counts and nothing else — deliberately not the `deliveryStatus` panel
+ * above, which carries per-project status (at risk / delayed / blocked),
+ * owner institutions and free-text risk commentary, and stays behind
+ * authentication. There is no project name, status or institution in this
+ * shape at all, so no future change to a project record can leak through
+ * it.
+ */
+export const publicProjectDeliverySchema = z.object({
+  totalProjects: z.number(),
+  totalProgrammes: z.number(),
+  byPillar: z.array(
+    z.object({
+      pillar: z.string().min(1),
+      label: z.string().min(1),
+      projects: z.number(),
+    }),
+  ),
+})
+
+/**
  * Query accepted by GET /api/executive-overview.
  *
  * Identical to the global filter values: the page adds no page-specific
@@ -419,4 +442,5 @@ export type ProjectStatusSummary = z.infer<
 export type DeliveryStatusPanel = z.infer<typeof deliveryStatusPanelSchema>
 export type ExecutiveOverview = z.infer<typeof executiveOverviewSchema>
 export type PublicOverview = z.infer<typeof publicOverviewSchema>
+export type PublicProjectDelivery = z.infer<typeof publicProjectDeliverySchema>
 export type ExecutiveOverviewQuery = z.infer<typeof executiveOverviewQuerySchema>

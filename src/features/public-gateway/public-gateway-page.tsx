@@ -4,6 +4,7 @@ import { usePublicOverview, usePublicStateCoverage } from './api'
 import { AccessDelivery } from './components/access-delivery'
 import { DeliveryInMotion } from './components/delivery-in-motion'
 import { Institutions } from './components/institutions'
+import { ProjectDelivery } from './components/project-delivery'
 import { KpiStrip } from './components/kpi-strip'
 import { NationalStatement } from './components/national-statement'
 import { NationalStatementSkeleton } from './components/national-statement-skeleton'
@@ -100,6 +101,11 @@ export function PublicGatewayPage() {
             />
           </>
         )}
+
+        {/* Fetches its own counts, so it renders independently of the
+            headline payload above - it stays out of the `data &&` block
+            deliberately. */}
+        <SafeSection render={() => <ProjectDelivery />} />
 
         <SafeSection render={() => <Institutions />} />
       </main>
