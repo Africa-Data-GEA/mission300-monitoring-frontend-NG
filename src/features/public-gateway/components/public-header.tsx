@@ -6,7 +6,6 @@ const NAV_ITEMS = [
   { label: 'Delivery', to: '#access-delivery' },
   { label: 'Progress', to: '#performance-evolution' },
   { label: 'States', to: '#delivery-in-motion' },
-  { label: 'About', to: '#institutions' },
 ] as const
 
 /** A restrained public masthead with direct navigation and one primary action. */
