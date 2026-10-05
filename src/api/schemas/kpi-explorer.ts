@@ -81,6 +81,16 @@ export const catalogueSummaryCardSchema = z.object({
  * Section B — Catalogue table row
  * ------------------------------------------------------------------ */
 
+/** An Institution record the indicator's free-text `sourceInstitution` was
+ * resolved onto. Empty where the source text names a publication or a
+ * collective ("DisCos") rather than one registered body - the raw
+ * `sourceInstitution` string stays authoritative for display. */
+export const resolvedSourceInstitutionSchema = z.object({
+  id: z.string().min(1),
+  name: z.string().min(1),
+  type: z.string().min(1),
+})
+
 export const kpiCatalogueRowSchema = z.object({
   /** Human-facing identifier, e.g. "M300-GEN-004". Shown for traceability. */
   id: z.string().min(1),
@@ -89,6 +99,7 @@ export const kpiCatalogueRowSchema = z.object({
   category: z.string().min(1),
   unit: z.string().min(1),
   sourceInstitution: z.string().min(1),
+  sourceInstitutions: z.array(resolvedSourceInstitutionSchema).default([]),
   /** The submitted dataset (Data Submissions & Validation) this indicator is
    * measured from, e.g. "Metering performance". Links the two modules so an
    * approved submission can be traced to the indicator it publishes to. */
@@ -220,6 +231,7 @@ export const updateKpiMetadataRequestSchema = z.object({
    * existing alignment (or lack of one) untouched. */
   externalStandardAlignment: externalStandardAlignmentSchema.nullable().optional(),
   sourceInstitution: z.string().min(1),
+  sourceInstitutions: z.array(resolvedSourceInstitutionSchema).default([]),
   sourceDataset: z.string().min(1),
   sourceReference: z.string(),
 })

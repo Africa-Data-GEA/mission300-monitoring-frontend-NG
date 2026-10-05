@@ -4,13 +4,17 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { Sidebar } from '@/components/layout/sidebar'
 import { NAVIGATION } from '@/config/navigation'
 import { saveAuthSession } from '@/features/auth/auth-session'
+import { canRoleReachModule } from '@/features/auth/role-access'
 import { renderWithProviders as renderWithRouter } from '@/test/render'
 
 describe('Sidebar', () => {
   // Sidebar filters every nav item through canUserReachModule(session.user,
   // item.moduleKey) - with no session, everything is filtered out and the
   // nav renders empty. system-administrator has the 'all' access sentinel,
-  // so every item in NAVIGATION is visible for these structural tests.
+  // which covers every item except the ones ADMIN_ALL_EXCLUDES carves back
+  // out (institution-overview is an Institutional Data Provider's own
+  // self-scoped page), so these structural tests assert against the items
+  // the role can actually reach rather than all of NAVIGATION.
   beforeEach(() => {
     saveAuthSession({
       accessToken: 'mock-token-usr-011',
@@ -23,6 +27,11 @@ describe('Sidebar', () => {
     })
   })
   afterEach(() => sessionStorage.clear())
+
+  const visibleItems = () =>
+    NAVIGATION.flatMap((group) => group.items).filter((item) =>
+      canRoleReachModule('system-administrator', item.moduleKey),
+    )
 
   it('is exposed as the primary navigation landmark', () => {
     renderWithRouter(<Sidebar />)
@@ -78,10 +87,22 @@ describe('Sidebar', () => {
     renderWithRouter(<Sidebar />)
 
     const nav = screen.getByRole('navigation', { name: 'Primary' })
-    for (const group of NAVIGATION) {
-      for (const item of group.items) {
-        expect(within(nav).getByText(item.label)).toBeInTheDocument()
-      }
+    for (const item of visibleItems()) {
+      expect(within(nav).getByText(item.label)).toBeInTheDocument()
+    }
+  })
+
+  it('hides a nav item the role cannot reach', () => {
+    renderWithRouter(<Sidebar />)
+
+    const hidden = NAVIGATION.flatMap((group) => group.items).filter(
+      (item) => !canRoleReachModule('system-administrator', item.moduleKey),
+    )
+    expect(hidden.length).toBeGreaterThan(0)
+
+    const nav = screen.getByRole('navigation', { name: 'Primary' })
+    for (const item of hidden) {
+      expect(within(nav).queryByText(item.label)).not.toBeInTheDocument()
     }
   })
 
@@ -116,7 +137,7 @@ describe('Sidebar', () => {
     it('links exactly the items marked ready', () => {
       renderWithRouter(<Sidebar />)
 
-      const readyCount = NAVIGATION.flatMap((group) => group.items).filter(
+      const readyCount = visibleItems().filter(
         (item) => item.ready && !item.children,
       ).length
 

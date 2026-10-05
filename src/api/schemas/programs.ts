@@ -144,6 +144,12 @@ export const programmeRecordSchema = z.object({
   id: z.string().min(1),
   name: z.string().min(1),
   leadInstitution: z.string().min(1),
+  /** The Institution record `leadInstitution` was resolved onto, or null where
+   * the free-text name does not match a registered institution. */
+  leadInstitutionRecord: z
+    .object({ id: z.string().min(1), name: z.string().min(1) })
+    .nullable()
+    .default(null),
   supportingInstitutions: z.array(z.string().min(1)),
   pillar: pillarIdSchema,
   objectives: z.string().min(1),
