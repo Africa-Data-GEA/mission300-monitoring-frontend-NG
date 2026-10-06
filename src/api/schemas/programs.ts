@@ -149,7 +149,7 @@ export const programmeRecordSchema = z.object({
   leadInstitutionRecord: z
     .object({ id: z.string().min(1), name: z.string().min(1) })
     .nullable()
-    .default(null),
+    .optional(),
   supportingInstitutions: z.array(z.string().min(1)),
   pillar: pillarIdSchema,
   objectives: z.string().min(1),
