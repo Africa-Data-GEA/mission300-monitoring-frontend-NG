@@ -20,6 +20,13 @@ export function ValuesPanel({ profile, canEdit }: { profile: KpiProfile; canEdit
         {profile.trend && <TrendIndicator trend={profile.trend} />}
       </div>
 
+      {profile.reportingPeriodCoverage && (
+        <p className="mt-1 text-xs text-text-muted">
+          {profile.reportingPeriod} covers {profile.reportingPeriodCoverage} only, so it is not compared with the
+          previous full quarter.
+        </p>
+      )}
+
       {profile.history.length >= 2 && (
         <Sparkline
           points={profile.history.map((point) => point.value)}

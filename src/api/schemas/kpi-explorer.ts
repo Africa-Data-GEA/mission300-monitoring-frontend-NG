@@ -127,6 +127,8 @@ export const kpiHistoryPointSchema = z.object({
   id: z.string().min(1),
   period: z.string().min(1),
   value: z.number(),
+  /** Months the value covers when the source period is incomplete, e.g. "Apr–May". */
+  coverageNote: z.string().nullable().default(null),
   validationStatus: validationStatusSchema,
   /** The submission that published this point, where one did. Null for
    * points seeded before this traceability existed. */
@@ -375,6 +377,8 @@ export const kpiProfileSchema = z.object({
   sourceDataset: z.string().min(1),
   sourceReference: z.string(),
   reportingPeriod: z.string(),
+  /** Months the latest value covers when its period is incomplete; null when complete. */
+  reportingPeriodCoverage: z.string().nullable().default(null),
   validationStatus: validationStatusSchema,
   validationDecision: z.string(),
   version: z.string(),
