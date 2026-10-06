@@ -99,7 +99,7 @@ export const kpiCatalogueRowSchema = z.object({
   category: z.string().min(1),
   unit: z.string().min(1),
   sourceInstitution: z.string().min(1),
-  sourceInstitutions: z.array(resolvedSourceInstitutionSchema).default([]),
+  sourceInstitutions: z.array(resolvedSourceInstitutionSchema).optional(),
   /** The submitted dataset (Data Submissions & Validation) this indicator is
    * measured from, e.g. "Metering performance". Links the two modules so an
    * approved submission can be traced to the indicator it publishes to. */
@@ -128,7 +128,7 @@ export const kpiHistoryPointSchema = z.object({
   period: z.string().min(1),
   value: z.number(),
   /** Months the value covers when the source period is incomplete, e.g. "Apr–May". */
-  coverageNote: z.string().nullable().default(null),
+  coverageNote: z.string().nullable().optional(),
   validationStatus: validationStatusSchema,
   /** The submission that published this point, where one did. Null for
    * points seeded before this traceability existed. */
@@ -233,7 +233,7 @@ export const updateKpiMetadataRequestSchema = z.object({
    * existing alignment (or lack of one) untouched. */
   externalStandardAlignment: externalStandardAlignmentSchema.nullable().optional(),
   sourceInstitution: z.string().min(1),
-  sourceInstitutions: z.array(resolvedSourceInstitutionSchema).default([]),
+  sourceInstitutions: z.array(resolvedSourceInstitutionSchema).optional(),
   sourceDataset: z.string().min(1),
   sourceReference: z.string(),
 })
@@ -378,7 +378,7 @@ export const kpiProfileSchema = z.object({
   sourceReference: z.string(),
   reportingPeriod: z.string(),
   /** Months the latest value covers when its period is incomplete; null when complete. */
-  reportingPeriodCoverage: z.string().nullable().default(null),
+  reportingPeriodCoverage: z.string().nullable().optional(),
   validationStatus: validationStatusSchema,
   validationDecision: z.string(),
   version: z.string(),
