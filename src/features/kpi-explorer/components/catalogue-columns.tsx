@@ -2,8 +2,6 @@ import { type KpiCatalogueRow } from '@/api/schemas/kpi-explorer'
 import { PILLAR_LABELS } from '@/types/domain'
 import { type Column } from '@/components/ui/data-table'
 import { formatDate } from '@/lib/format'
-import { ReadinessBadge } from './readiness-badge'
-import { ValidationBadge } from '@/components/ui/validation-badge'
 
 /**
  * Column definitions for the KPI catalogue table.
@@ -57,30 +55,9 @@ export function buildCatalogueColumns(
       cell: (row) => <span className="text-text-muted">{row.unit}</span>,
     },
     {
-      id: 'source',
-      header: 'Source',
-      className: 'min-w-44',
-      sortValue: (row) => row.sourceInstitution,
-      cell: (row) => (
-        <span className="text-text-muted">{row.sourceInstitution}</span>
-      ),
-    },
-    {
       id: 'frequency',
       header: 'Frequency',
       cell: (row) => <span className="text-text-muted">{row.frequency}</span>,
-    },
-    {
-      id: 'readiness',
-      header: 'Readiness',
-      sortValue: (row) => row.readiness,
-      cell: (row) => <ReadinessBadge tier={row.readiness} />,
-    },
-    {
-      id: 'validation',
-      header: 'Validation',
-      sortValue: (row) => row.validationStatus,
-      cell: (row) => <ValidationBadge status={row.validationStatus} />,
     },
     {
       id: 'updated',
