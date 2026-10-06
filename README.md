@@ -5,7 +5,7 @@ Frontend for monitoring delivery of Nigeria's Mission 300 National Energy
 Compact. The active API is the NestJS service in `mission300-monitoring-backend-NG`.E
 Local demonstrations can run with in-process mock handlers and data.
 ## Requirements
-- Node.js 24.14.1 (see `.node-version`)sw
+- Node.js 24.14.1 (see `.node-version`)swD
 - pnpm 10.33.0
 ## Local developmente
 
