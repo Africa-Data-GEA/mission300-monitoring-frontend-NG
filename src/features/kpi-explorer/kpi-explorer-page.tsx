@@ -100,6 +100,7 @@ export function KpiExplorerPage() {
         profile={page.profile}
         isPending={page.isProfilePending}
         onClose={page.closeProfile}
+        onOpenKpi={page.openProfileById}
       />
 
       {canManageKpis && (

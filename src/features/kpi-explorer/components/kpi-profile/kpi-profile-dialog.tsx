@@ -10,6 +10,7 @@ import { KpiMetadataEditDialog } from './kpi-metadata-edit-dialog'
 import { LinkedRecordsPanel } from './linked-records-panel'
 import { MetadataPanel } from './metadata-panel'
 import { ProfileSkeleton } from './profile-skeleton'
+import { RelatedIndicatorsPanel } from './related-indicators-panel'
 import { RetireKpiButton } from './retire-kpi-button'
 import { SetKpiCurrentValueDialog } from './set-kpi-current-value-dialog'
 import { TraceabilityPanel } from './traceability-panel'
@@ -28,11 +29,13 @@ export function KpiProfileDialog({
   profile,
   isPending,
   onClose,
+  onOpenKpi,
 }: {
   open: boolean
   profile: KpiProfile | undefined
   isPending: boolean
   onClose: () => void
+  onOpenKpi: (kpiId: string) => void
 }) {
   const [editOpen, setEditOpen] = useState(false)
   const [setValueOpen, setSetValueOpen] = useState(false)
@@ -74,6 +77,7 @@ export function KpiProfileDialog({
           <MetadataPanel profile={profile} />
           <ExternalStandardAlignmentPanel profile={profile} />
           <TraceabilityPanel profile={profile} />
+          <RelatedIndicatorsPanel profile={profile} onOpenKpi={onOpenKpi} />
           <LinkedRecordsPanel profile={profile} />
           {canEditMetadata && (
             <>

@@ -233,7 +233,6 @@ export const updateKpiMetadataRequestSchema = z.object({
    * existing alignment (or lack of one) untouched. */
   externalStandardAlignment: externalStandardAlignmentSchema.nullable().optional(),
   sourceInstitution: z.string().min(1),
-  sourceInstitutions: z.array(resolvedSourceInstitutionSchema).optional(),
   sourceDataset: z.string().min(1),
   sourceReference: z.string(),
 })
@@ -374,6 +373,11 @@ export const kpiProfileSchema = z.object({
 
   // Traceability panel.
   sourceInstitution: z.string().min(1),
+  sourceInstitutions: z.array(resolvedSourceInstitutionSchema).optional(),
+  /** Other indicators that record the same measurement: a matrix indicator and the one holding its data. */
+  relatedIndicators: z
+    .array(z.object({ id: z.string().min(1), name: z.string().min(1), relation: z.enum(['canonical', 'alias']) }))
+    .optional(),
   sourceDataset: z.string().min(1),
   sourceReference: z.string(),
   reportingPeriod: z.string(),

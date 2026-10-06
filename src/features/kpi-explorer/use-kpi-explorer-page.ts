@@ -72,13 +72,17 @@ export function useKpiExplorerPage() {
     setPage(1)
   }
 
-  function openProfile(row: KpiCatalogueRow) {
-    setSelectedId(row.id)
+  function openProfileById(id: string) {
+    setSelectedId(id)
     setSearchParams((current) => {
       const next = new URLSearchParams(current)
-      next.set('kpi', row.id)
+      next.set('kpi', id)
       return next
     })
+  }
+
+  function openProfile(row: KpiCatalogueRow) {
+    openProfileById(row.id)
   }
 
   function closeProfile() {
@@ -107,6 +111,7 @@ export function useKpiExplorerPage() {
     isProfilePending: profile.isPending,
     isProfileOpen: selectedId !== null,
     openProfile,
+    openProfileById,
     closeProfile,
   }
 }
