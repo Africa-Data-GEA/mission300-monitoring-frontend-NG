@@ -129,6 +129,8 @@ export const kpiHistoryPointSchema = z.object({
   value: z.number(),
   /** Months the value covers when the source period is incomplete, e.g. "Apr–May". */
   coverageNote: z.string().nullable().optional(),
+  /** The status name for a status indicator ("Achieved"), null for a numeric one. */
+  valueLabel: z.string().nullable().optional(),
   validationStatus: validationStatusSchema,
   /** The submission that published this point, where one did. Null for
    * points seeded before this traceability existed. */

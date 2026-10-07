@@ -6,6 +6,7 @@ import { SideDialog } from '@/components/ui/side-dialog'
 import { ApiError } from '@/lib/api-client'
 import { useSetKpiCurrentValue } from '../../api'
 import { buildQuarterOptions, buildYearOptions, detectPeriodKind, type PeriodKind } from '../../lib/period-options'
+import { isStatusUnit, STATUS_LEVELS } from '../../lib/status-values'
 
 const inputClass =
   'mt-1.5 h-10 w-full rounded-control border border-border-default bg-surface px-3 text-sm text-text-default outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100'
@@ -93,15 +94,24 @@ export function SetKpiCurrentValueDialog({
     >
       <div className="mx-auto flex max-w-2xl flex-col gap-5">
         <div className="grid gap-4 sm:grid-cols-2">
-          <label className="text-sm font-medium text-text-default">
-            Value
-            <input
-              type="number"
-              value={draft.value}
-              onChange={(event) => field('value', Number(event.target.value))}
-              className={inputClass}
+          {isStatusUnit(profile.unit) ? (
+            <SelectField
+              label="Status"
+              value={String(STATUS_LEVELS.some((level) => level.value === draft.value) ? draft.value : 0)}
+              options={STATUS_LEVELS.map((level) => ({ value: String(level.value), label: level.label }))}
+              onChange={(value) => field('value', Number(value))}
             />
-          </label>
+          ) : (
+            <label className="text-sm font-medium text-text-default">
+              Value
+              <input
+                type="number"
+                value={draft.value}
+                onChange={(event) => field('value', Number(event.target.value))}
+                className={inputClass}
+              />
+            </label>
+          )}
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">

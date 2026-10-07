@@ -78,7 +78,7 @@ export function HistoryList({
           >
             <span className="flex items-baseline gap-2">
               <span className="w-16 shrink-0 font-medium text-text-default">{point.period}</span>
-              <span className="text-text-muted">{point.value}</span>
+              <span className="text-text-muted">{point.valueLabel ?? point.value}</span>
               {point.coverageNote && (
                 <span className="rounded-control bg-surface-sunken px-1.5 py-0.5 text-xs text-text-muted">
                   Partial: {point.coverageNote}
