@@ -75,3 +75,13 @@ export function formatCurrency(
   const active = activeCurrency
   return svgSafe ? `${active.code} ${amount}` : `${active.symbol}${amount}`
 }
+
+/**
+ * Formats an amount that is in US dollars regardless of the active display
+ * currency. Source figures stated in USD (programme financing, private capital)
+ * must never be printed with the naira sign just because the platform's
+ * configured currency is naira: that shows a dollar amount as a naira one.
+ */
+export function formatUsd(amount: string): string {
+  return `US$${amount}`
+}

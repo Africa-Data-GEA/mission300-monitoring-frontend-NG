@@ -7,7 +7,7 @@ import { Card } from '@/components/ui/card'
 import { InfoPopover } from '@/components/ui/info-popover'
 import { TrendIndicator } from '@/components/ui/trend-indicator'
 import { CHART_BLUE } from '@/config/chart-colors'
-import { formatCurrency, getLocale, useCurrency } from '@/lib/currency'
+import { formatCurrency, formatUsd, getLocale, useCurrency } from '@/lib/currency'
 import { getDiscoBreakdown } from '../lib/disco-weights'
 import { PillarKpiEditButton } from './pillar-kpi-edit-button'
 
@@ -17,7 +17,7 @@ const UNCONFIRMED_PERIOD_KPI_IDS = new Set(['M300-P4-011', 'M300-P4-012'])
 function formatValue(value: number, unit: string): string {
   const rounded = Number.isInteger(value) ? value : Math.round(value * 100) / 100
   const formatted = rounded.toLocaleString(getLocale())
-  if (unit === 'USD') return formatCurrency(formatted)
+  if (unit === 'USD') return formatUsd(formatted)
   if (unit === '%') return `${formatted}%`
   if (unit === 'NGN Billion') return formatCurrency(`${formatted}bn`)
   if (unit === 'NGN/kWh') return formatCurrency(`${formatted}/kWh`)
@@ -33,7 +33,7 @@ function formatValue(value: number, unit: string): string {
  */
 function formatCompactValue(value: number, unit: string): string {
   const compact = new Intl.NumberFormat(getLocale(), { notation: 'compact', maximumFractionDigits: 1 }).format(value)
-  if (unit === 'USD') return formatCurrency(compact)
+  if (unit === 'USD') return formatUsd(compact)
   if (unit === '%') return `${compact}%`
   if (unit === 'NGN Billion') return formatCurrency(`${compact}bn`)
   if (unit === 'NGN/kWh') return formatCurrency(`${compact}/kWh`)
@@ -54,7 +54,7 @@ function formatChartLabel(value: number, unit: string): string {
   }
   const rounded = Number.isInteger(value) ? value : Math.round(value * 100) / 100
   const formatted = rounded.toLocaleString(getLocale())
-  if (unit === 'USD') return formatCurrency(formatted, { svgSafe: true })
+  if (unit === 'USD') return formatUsd(formatted)
   if (unit === '%') return `${formatted}%`
   if (unit === 'NGN Billion') return formatCurrency(`${formatted}bn`, { svgSafe: true })
   if (unit === 'NGN/kWh') return formatCurrency(`${formatted}/kWh`, { svgSafe: true })
