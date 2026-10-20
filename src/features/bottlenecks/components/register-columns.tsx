@@ -22,8 +22,12 @@ export const REGISTER_COLUMNS: readonly Column<BottleneckRecord>[] = [
     cell: (row) => (
       <div className="min-w-0">
         <p className="font-medium text-text-default">{row.issue}</p>
-        {row.linkedRecord && (
-          <p className="truncate text-xs text-text-muted">{row.linkedRecord}</p>
+        {row.link ? (
+          <p className="truncate text-xs text-text-muted">
+            {row.link.type === 'programme' ? 'Programme' : 'Project'}: {row.link.name}
+          </p>
+        ) : (
+          row.linkedRecord && <p className="truncate text-xs text-text-muted">{row.linkedRecord}</p>
         )}
       </div>
     ),

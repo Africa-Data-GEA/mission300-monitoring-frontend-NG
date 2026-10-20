@@ -88,11 +88,22 @@ export const manualEntryDefinitionSchema = z.object({
   institution: z.string().min(1),
   dataset: z.string().min(1),
   reportingPeriod: z.string().min(1),
+  frequency: z.string().optional(),
+  consolidated: z.boolean().optional(),
+  periods: z.array(z.string()).optional(),
+  institutions: z.array(z.string()).optional(),
   sections: z.array(entrySectionSchema),
 })
 
-export const manualEntryRequestSchema = z.object({
+export const manualEntryRowSchema = z.object({
+  period: z.string().optional(),
+  institution: z.string().optional(),
   values: z.record(z.string(), z.string()),
+})
+
+export const manualEntryRequestSchema = z.object({
+  values: z.record(z.string(), z.string()).optional(),
+  rows: z.array(manualEntryRowSchema).optional(),
   sourceReference: z.string(),
   notes: z.string(),
 })

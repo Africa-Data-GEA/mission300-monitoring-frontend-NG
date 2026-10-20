@@ -1,6 +1,7 @@
 import { Card } from '@/components/ui/card'
 import { ListState } from '../components/list-state'
 import { WorkflowShell } from '../components/workflow-shell'
+import { RejectedRowsCard } from '../components/rejected-rows-card'
 import { RequiredTemplateCard } from './required-template-card'
 import { UploadDropzone } from './upload-dropzone'
 import { useUploadPage } from './use-upload-page'
@@ -41,12 +42,14 @@ export function UploadPage() {
                 onNotesChange={page.setNotes}
               />
             </Card>
-            <RequiredTemplateCard
-              template={definition.data.template}
-              canSubmit={page.canSubmit}
-              isUploading={page.isUploading}
-              uploadError={page.uploadError}
-            />
+            <div className="flex flex-col gap-4">
+              <RequiredTemplateCard
+                template={definition.data.template}
+                canSubmit={page.canSubmit}
+                isUploading={page.isUploading}
+              />
+              <RejectedRowsCard problems={page.rowProblems} />
+            </div>
           </form>
         )}
       </ListState>

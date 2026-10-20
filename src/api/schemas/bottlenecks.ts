@@ -106,6 +106,11 @@ export const bottleneckRecordSchema = z.object({
   pillar: pillarIdSchema,
   /** The indicator, programme or project this bottleneck is linked to. */
   linkedRecord: z.string(),
+  /** The project or programme `linkedRecord` points to, resolved by the server. */
+  link: z
+    .object({ type: z.enum(['programme', 'project']), id: z.string().min(1), name: z.string().min(1) })
+    .nullable()
+    .optional(),
   institution: z.string().min(1),
   dateRaised: z.iso.datetime(),
   ageDays: z.number().int().min(0),
@@ -215,6 +220,9 @@ export const bottlenecksFilterOptionsSchema = z.object({
   institutions: z.array(filterOptionSchema),
   pillars: z.array(filterOptionSchema),
   linkedRecords: z.array(filterOptionSchema),
+  responsibleInstitutions: z.array(filterOptionSchema).optional(),
+  programmes: z.array(filterOptionSchema).optional(),
+  projects: z.array(filterOptionSchema).optional(),
   lifecycleStages: z.array(filterOptionSchema),
   escalationStatuses: z.array(filterOptionSchema),
   validationStatuses: z.array(filterOptionSchema),

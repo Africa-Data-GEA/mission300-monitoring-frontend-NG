@@ -2,13 +2,21 @@ import { useState } from 'react'
 import type { CreateKpiRequest } from '@/api/schemas/kpi-explorer'
 import { READINESS_LABELS, READINESS_TIERS } from '@/api/schemas/kpi-explorer'
 import { Button } from '@/components/ui/button'
+import { SelectField } from '@/components/ui/select-field'
 import { SideDialog } from '@/components/ui/side-dialog'
 import { ApiError } from '@/lib/api-client'
 import { PILLARS, PILLAR_LABELS } from '@/types/domain'
 import { useCreateKpi } from '../api'
+import { InstitutionSelect } from './institution-select'
 
 const fieldClass =
   'mt-1.5 h-10 w-full rounded-control border border-border-default bg-surface px-3 text-sm text-text-default outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100'
+
+const LABEL_CLASS = 'text-sm text-text-default'
+const TRIGGER_CLASS = 'h-10'
+
+const PILLAR_OPTIONS = PILLARS.map((pillar) => ({ value: pillar, label: PILLAR_LABELS[pillar] }))
+const READINESS_OPTIONS = READINESS_TIERS.map((tier) => ({ value: tier, label: READINESS_LABELS[tier] }))
 
 const EMPTY: CreateKpiRequest = {
   id: '',
@@ -45,6 +53,10 @@ export function CreateKpiDialog({ open, onClose }: { open: boolean; onClose: () 
   async function submit(event: React.FormEvent) {
     event.preventDefault()
     setError('')
+    if (!draft.sourceInstitution) {
+      setError('Select the responsible institution.')
+      return
+    }
     try {
       await createKpi.mutateAsync(draft)
       setDraft(EMPTY)
@@ -84,35 +96,23 @@ export function CreateKpiDialog({ open, onClose }: { open: boolean; onClose: () 
           />
         </label>
 
-        <label className="text-sm font-medium text-text-default">
-          Pillar
-          <select
-            value={draft.pillar}
-            onChange={(event) => set('pillar', event.target.value as CreateKpiRequest['pillar'])}
-            className={fieldClass}
-          >
-            {PILLARS.map((pillar) => (
-              <option key={pillar} value={pillar}>
-                {PILLAR_LABELS[pillar]}
-              </option>
-            ))}
-          </select>
-        </label>
+        <SelectField
+          label="Pillar"
+          value={draft.pillar}
+          options={PILLAR_OPTIONS}
+          onChange={(value) => set('pillar', value as CreateKpiRequest['pillar'])}
+          labelClassName={LABEL_CLASS}
+          triggerClassName={TRIGGER_CLASS}
+        />
 
-        <label className="text-sm font-medium text-text-default">
-          Readiness tier
-          <select
-            value={draft.readiness}
-            onChange={(event) => set('readiness', event.target.value as CreateKpiRequest['readiness'])}
-            className={fieldClass}
-          >
-            {READINESS_TIERS.map((tier) => (
-              <option key={tier} value={tier}>
-                {READINESS_LABELS[tier]}
-              </option>
-            ))}
-          </select>
-        </label>
+        <SelectField
+          label="Readiness tier"
+          value={draft.readiness}
+          options={READINESS_OPTIONS}
+          onChange={(value) => set('readiness', value as CreateKpiRequest['readiness'])}
+          labelClassName={LABEL_CLASS}
+          triggerClassName={TRIGGER_CLASS}
+        />
 
         <label className="text-sm font-medium text-text-default">
           Category
@@ -147,16 +147,13 @@ export function CreateKpiDialog({ open, onClose }: { open: boolean; onClose: () 
           />
         </label>
 
-        <label className="text-sm font-medium text-text-default">
-          Responsible institution
-          <input
-            value={draft.sourceInstitution}
-            onChange={(event) => set('sourceInstitution', event.target.value)}
-            placeholder="Transmission Company of Nigeria"
-            className={fieldClass}
-            required
-          />
-        </label>
+        <InstitutionSelect
+          label="Responsible institution"
+          value={draft.sourceInstitution}
+          onChange={(value) => set('sourceInstitution', value)}
+          labelClassName={LABEL_CLASS}
+          triggerClassName={TRIGGER_CLASS}
+        />
 
         <label className="text-sm font-medium text-text-default sm:col-span-2">
           Source dataset

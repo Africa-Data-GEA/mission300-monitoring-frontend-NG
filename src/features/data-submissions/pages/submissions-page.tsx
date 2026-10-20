@@ -1,4 +1,4 @@
-import { Eye } from 'lucide-react'
+import { Eye, FileSpreadsheet } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router'
 import type { SubmissionListItem, ValidationDecisionRequest } from '@/api/schemas/data-submissions'
@@ -76,6 +76,7 @@ export function SubmissionsPage() {
   // action would otherwise link everyone straight to /access-denied. Bulk
   // decisions carry the exact same role gate as recording one individually.
   const canOpenDetail = !!session && grantedRoles(session.user).some((role) => REVIEW_ROLES.includes(role))
+  const canCorrect = !!session && grantedRoles(session.user).includes('institutional-data-provider')
   const canBulkDecide =
     !!session && grantedRoles(session.user).some((role) => role === 'data-reviewer' || role === 'validator')
 
@@ -120,10 +121,22 @@ export function SubmissionsPage() {
               columns={columns}
               rows={list.data.items}
               getRowId={(row) => row.id}
-              rowActions={canOpenDetail ? (row) => (
-                <Button asChild size="icon" variant="ghost">
-                  <Link aria-label={`View ${row.id}`} to={`/data-submissions/validation/${row.id}`}><Eye /></Link>
-                </Button>
+              rowActions={canOpenDetail || canCorrect ? (row) => (
+                <div className="flex justify-end gap-1">
+                  {canCorrect && row.obligationId && row.availableActions.includes('correct') && (
+                    <Button asChild size="sm">
+                      <Link to={`/data-submissions/obligations/${row.obligationId}/upload`}>
+                        <FileSpreadsheet />
+                        Correct and resubmit
+                      </Link>
+                    </Button>
+                  )}
+                  {canOpenDetail && (
+                    <Button asChild size="icon" variant="ghost">
+                      <Link aria-label={`View ${row.id}`} to={`/data-submissions/validation/${row.id}`}><Eye /></Link>
+                    </Button>
+                  )}
+                </div>
               ) : undefined}
             />
             <Pagination {...list.data} onPageChange={state.setPage} />

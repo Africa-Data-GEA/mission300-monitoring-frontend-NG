@@ -2,6 +2,7 @@ import { useState } from 'react'
 import type { ValidationDecisionRequest } from '@/api/schemas/data-submissions'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 const labels: Record<ValidationDecisionRequest['decision'], string> = {
   approved: 'Approve',
@@ -31,16 +32,16 @@ export function BulkDecisionBar({
       <p className="text-sm font-medium text-text-default">
         {selectedCount} submission{selectedCount === 1 ? '' : 's'} selected
       </p>
-      <select
-        aria-label="Bulk decision"
-        value={decision}
-        onChange={(event) => setDecision(event.target.value as ValidationDecisionRequest['decision'])}
-        className="h-9 rounded-control border border-border-default bg-surface px-2 text-sm"
-      >
-        {Object.entries(labels).map(([value, label]) => (
-          <option key={value} value={value}>{label}</option>
-        ))}
-      </select>
+      <Select value={decision} onValueChange={(value) => setDecision(value as ValidationDecisionRequest['decision'])}>
+        <SelectTrigger aria-label="Bulk decision" className="w-56">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {Object.entries(labels).map(([value, label]) => (
+            <SelectItem key={value} value={value}>{label}</SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
       <input
         aria-label="Bulk decision comments"
         placeholder="Comments (required)"

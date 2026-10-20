@@ -69,7 +69,9 @@ export function DashboardToastCard({
       <span className="min-w-0 flex-1">
         <span className="block text-sm font-semibold leading-5 text-text-default">{title}</span>
         {description ? (
-          <span className="block text-xs leading-4 text-text-muted">{description}</span>
+          <span className="mt-0.5 block max-h-64 overflow-y-auto whitespace-pre-line text-xs leading-4 text-text-muted">
+            {description}
+          </span>
         ) : null}
       </span>
       <button

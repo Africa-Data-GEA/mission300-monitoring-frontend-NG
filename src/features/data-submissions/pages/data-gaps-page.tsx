@@ -1,4 +1,5 @@
 import { ExternalLink } from 'lucide-react'
+import { Link } from 'react-router'
 import type { DataGap } from '@/api/schemas/data-submissions'
 import type { Column } from '@/components/ui/data-table'
 import { Button } from '@/components/ui/button'
@@ -19,17 +20,14 @@ const columns: Column<DataGap>[] = [
     sortValue: (row) => row.kpiId,
   },
   { id: 'pillar', header: 'Pillar', cell: (row) => row.pillar },
-  {
-    id: 'scope', header: 'Scope',
-    cell: (row) => <><p>{row.institution}</p><p className="text-xs text-text-muted">{row.reportingPeriod}</p></>,
-  },
+  { id: 'frequency', header: 'Reporting', cell: (row) => row.reportingPeriod },
   { id: 'category', header: 'Gap category', cell: (row) => <><p>{row.category}</p><p className="text-xs text-text-muted">{row.readinessTier}</p></> },
   { id: 'owner', header: 'Owner', cell: (row) => row.owner },
   { id: 'action', header: 'Next action', cell: (row) => row.nextAction, className: 'min-w-64' },
   {
     id: 'status',
     header: 'Status',
-    cell: (row) => row.status ? <WorkflowStatusBadge status={row.status} /> : <span className="text-text-muted">Not supplied</span>,
+    cell: (row) => row.status ? <WorkflowStatusBadge status={row.status} /> : <span className="text-text-muted">No obligation</span>,
   },
 ]
 
@@ -38,10 +36,20 @@ export function DataGapsPage() {
   const filters = useSubmissionFilters()
   const list = useDataGaps(state.query)
   const error = filters.error ?? list.error
+  const canFilterByInstitution = (filters.data?.institutions.length ?? 0) > 2
 
   return (
     <WorkflowShell title="Data gaps" description="Trace missing or unusable KPI observations to an owner and next action.">
-      {filters.data && <WorkflowFilters options={filters.data} query={state.query} onChange={state.update} onReset={state.reset} />}
+      {filters.data && (
+        <WorkflowFilters
+          options={filters.data}
+          query={state.query}
+          onChange={state.update}
+          onReset={state.reset}
+          only={canFilterByInstitution ? ['institution', 'readinessTier'] : ['readinessTier']}
+          searchPlaceholder="KPI, code or owner"
+        />
+      )}
       <ListState pending={filters.isPending || list.isPending} error={error} retry={() => void list.refetch()}>
         {list.data && (
           <Card className="p-3">
@@ -51,7 +59,9 @@ export function DataGapsPage() {
               rows={list.data.items}
               getRowId={(row) => row.id}
               rowActions={(row) => row.availableActions.includes('view') && (
-                <Button aria-label={`Open ${row.kpiId} in KPI Explorer`} size="icon" variant="ghost"><ExternalLink /></Button>
+                <Button asChild size="icon" variant="ghost">
+                  <Link aria-label={`Open ${row.kpiId} in KPI Explorer`} to={`/kpis?kpi=${encodeURIComponent(row.kpiId)}`}><ExternalLink /></Link>
+                </Button>
               )}
             />
             <Pagination {...list.data} onPageChange={state.setPage} />

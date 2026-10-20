@@ -1,5 +1,6 @@
 import { SideDialog } from '@/components/ui/side-dialog'
 import type { FilterOption } from '@/types/filters'
+import { useBottlenecksFilters } from '../api'
 import { useCreateBottleneck } from '../use-create-bottleneck'
 import { CreateBottleneckForm } from './create-bottleneck-form'
 import { CreateBottleneckSuccess } from './create-bottleneck-success'
@@ -20,6 +21,7 @@ export function CreateBottleneckDialog({
   defaultLinkedRecord?: string
 }) {
   const creation = useCreateBottleneck(onCreated, defaultLinkedRecord)
+  const { data: options } = useBottlenecksFilters()
 
   return (
     <SideDialog
@@ -35,7 +37,11 @@ export function CreateBottleneckDialog({
           form={creation.form}
           onSubmit={creation.submit}
           serverError={creation.serverError}
-          institutions={institutions}
+          institutions={options?.responsibleInstitutions ?? institutions}
+          linkKind={creation.linkKind}
+          onLinkKindChange={creation.setLinkKind}
+          programmes={options?.programmes ?? []}
+          projects={options?.projects ?? []}
         />
       )}
     </SideDialog>

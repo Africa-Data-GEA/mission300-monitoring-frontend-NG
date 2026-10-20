@@ -7,19 +7,25 @@ import type {
 import { AdvancedFilterPopover } from '@/components/ui/advanced-filter-popover'
 import { SelectField } from '@/components/ui/select-field'
 
+type FilterKey = Exclude<keyof Required<DataSubmissionQuery>, "search" | "page" | "pageSize">
+
 export function WorkflowFilters({
   options,
   query,
   onChange,
   onReset,
+  only,
+  searchPlaceholder = "Submission, institution or dataset",
 }: {
   options: DataSubmissionFilters
   query: Required<DataSubmissionQuery>
   onChange: (query: Required<DataSubmissionQuery>) => void
   onReset: () => void
+  only?: readonly FilterKey[]
+  searchPlaceholder?: string
 }) {
   const searchId = useId()
-  const fields = [
+  const allFields = [
     ['institution', 'Institution', options.institutions],
     ['dataset', 'Dataset', options.datasets],
     ['reportingPeriod', 'Reporting period', options.reportingPeriods],
@@ -29,6 +35,7 @@ export function WorkflowFilters({
     ['readinessTier', 'Readiness tier', options.readinessTiers],
     ['overdueStatus', 'Overdue status', options.overdueStatuses],
   ] as const
+  const fields = only ? allFields.filter(([key]) => only.includes(key)) : allFields
   const activeCount = fields.filter(([key]) => query[key] !== 'all').length
 
   return (
@@ -43,7 +50,7 @@ export function WorkflowFilters({
               type="search"
               value={query.search}
               onChange={(event) => onChange({ ...query, search: event.target.value })}
-              placeholder="Submission, institution or dataset"
+              placeholder={searchPlaceholder}
               className="h-9 w-full rounded-control border border-border-default bg-surface pl-9 pr-3 text-sm"
             />
           </div>

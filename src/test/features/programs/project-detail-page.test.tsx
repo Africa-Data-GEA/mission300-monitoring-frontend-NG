@@ -40,7 +40,7 @@ describe('ProjectDetailPage', () => {
   })
 
   describe('raising a bottleneck scoped to this project', () => {
-    it('prefills the linked record with this project and shows a success message', async () => {
+    it('links the bottleneck to this project and shows a success message', async () => {
       const user = userEvent.setup()
       renderRoutesWithProviders(
         [{ path: 'programs/projects/:projectId', element: <ProjectDetailPage /> }],
@@ -51,7 +51,7 @@ describe('ProjectDetailPage', () => {
       await user.click(screen.getByRole('button', { name: 'Raise a bottleneck' }))
 
       const dialog = screen.getByRole('dialog', { name: 'Raise a bottleneck' })
-      expect(within(dialog).getByDisplayValue('PRJ-2025-011')).toBeInTheDocument()
+      expect(within(dialog).getAllByText('A project').length).toBeGreaterThan(0)
 
       await user.type(
         within(dialog).getByLabelText('Issue'),

@@ -8,12 +8,10 @@ export function RequiredTemplateCard({
   template,
   canSubmit,
   isUploading,
-  uploadError,
 }: {
   template: UploadDefinition['template']
   canSubmit: boolean
   isUploading: boolean
-  uploadError: Error | null
 }) {
   return (
     <Card className="h-fit p-4">
@@ -22,12 +20,6 @@ export function RequiredTemplateCard({
       <p className="text-xs text-text-muted">Version {template.version}</p>
 
       <TemplateDownloadButton template={template} />
-
-      {uploadError && (
-        <p className="mt-4 text-sm text-status-at-risk" role="alert">
-          {uploadError.message}
-        </p>
-      )}
 
       <Button className="mt-3 w-full" disabled={!canSubmit} type="submit">
         {isUploading ? 'Uploading…' : 'Upload and validate'}

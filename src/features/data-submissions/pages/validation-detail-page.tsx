@@ -41,7 +41,7 @@ export function ValidationDetailPage() {
                     columns={ISSUE_COLUMNS}
                     rows={review.data.issues}
                     getRowId={(row) => row.id}
-                    emptyMessage="The server reported no validation issues."
+                    emptyMessage="No format or range problems were found in the values below. This does not confirm they are correct: that is the reviewer's decision."
                   />
                 </div>
               </Card>

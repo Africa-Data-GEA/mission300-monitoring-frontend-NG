@@ -1,5 +1,6 @@
 import { SlidersHorizontal, X } from 'lucide-react'
 import { useMemo, useState } from 'react'
+import { useLocation } from 'react-router'
 import type { DateRange } from 'react-day-picker'
 import { useGlobalFilters } from '@/app/global-filters'
 import { Button } from '@/components/ui/button'
@@ -15,6 +16,8 @@ import type { FilterOption } from '@/types/filters'
  * from Year/Quarter (which stay inline - reporting period is the one
  * choice every view is built around) so the bar reads as one clear
  * primary control plus a secondary group, not seven equal-weight selects. */
+const PILLAR_PAGE_INERT_FILTERS = ['technology', 'priority', 'distributionCompany'] as const
+
 const SECONDARY_FILTER_KEYS = [
   'pillar',
   'institution',
@@ -111,6 +114,7 @@ export function GlobalFilterBar({ onClose }: { onClose?: () => void }) {
   const { data: options, isPending } = useFilterOptions()
   const { yearOptions, quartersByYear } = useYearAndQuarterOptions(options?.reportingPeriods ?? [])
   const [moreFiltersOpen, setMoreFiltersOpen] = useState(false)
+  const onPillarPage = useLocation().pathname.startsWith('/pillars/')
 
   // The picked range itself is held locally (react-day-picker's own shape,
   // not a shareable URL value) - once both ends are picked, its "to" date
@@ -133,6 +137,8 @@ export function GlobalFilterBar({ onClose }: { onClose?: () => void }) {
     ([key, value]) => filters[key as keyof typeof filters] !== value,
   )
   const activeSecondaryCount = SECONDARY_FILTER_KEYS.filter(
+    (key) => !(onPillarPage && (PILLAR_PAGE_INERT_FILTERS as readonly string[]).includes(key)),
+  ).filter(
     (key) => filters[key] !== DEFAULT_FILTER_VALUES[key],
   ).length
 
@@ -268,29 +274,46 @@ export function GlobalFilterBar({ onClose }: { onClose?: () => void }) {
                 className="w-full"
               />
 
-              <SelectField
-                label="Technology"
-                value={filters.technology}
-                options={options.technologies}
-                onChange={(technology) => setFilter('technology', technology)}
-                className="w-full"
-              />
+              {!onPillarPage && (
+                <>
+                  <SelectField
+                    label="Technology"
+                    value={filters.technology}
+                    options={options.technologies}
+                    onChange={(technology) => setFilter('technology', technology)}
+                    className="w-full"
+                  />
 
-              <SelectField
-                label="Priority"
-                value={filters.priority}
-                options={options.priorities}
-                onChange={(priority) => setFilter('priority', priority)}
-                className="w-full"
-              />
+                  <SelectField
+                    label="Priority"
+                    value={filters.priority}
+                    options={options.priorities}
+                    onChange={(priority) => setFilter('priority', priority)}
+                    className="w-full"
+                  />
 
-              <SelectField
-                label="Distribution Company"
-                value={filters.distributionCompany}
-                options={options.distributionCompanies}
-                onChange={(distributionCompany) => setFilter('distributionCompany', distributionCompany)}
-                className="w-full sm:col-span-2"
-              />
+                  <SelectField
+                    label="Distribution Company"
+                    value={filters.distributionCompany}
+                    options={options.distributionCompanies}
+                    onChange={(distributionCompany) => setFilter('distributionCompany', distributionCompany)}
+                    className="w-full sm:col-span-2"
+                  />
+                </>
+              )}
+            </div>
+
+            {onPillarPage && (
+              <p className="mt-3 text-xs text-text-muted">
+                On a pillar page the institution narrows the core indicators, programmes, projects and bottlenecks to
+                that institution. Headline cards stay national.
+              </p>
+            )}
+
+            <div className="mt-4 flex justify-end border-t border-border-default pt-3">
+              <Button type="button" size="sm" onClick={() => setMoreFiltersOpen(false)}>
+                View results
+              </Button>
             </div>
 
             {/*

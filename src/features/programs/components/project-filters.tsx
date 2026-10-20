@@ -2,6 +2,12 @@ import { Search } from 'lucide-react'
 import { useId } from 'react'
 import { EXECUTION_STATUSES, EXECUTION_STATUS_LABELS } from '@/api/schemas/programs'
 import type { ProjectsQuery } from '@/api/schemas/programs'
+import { SelectField } from '@/components/ui/select-field'
+
+const STATUS_OPTIONS = [
+  { value: 'all', label: 'All statuses' },
+  ...EXECUTION_STATUSES.map((status) => ({ value: status, label: EXECUTION_STATUS_LABELS[status] })),
+]
 
 /** Search and status filter for the projects table within a programme. */
 export function ProjectFilters({
@@ -12,7 +18,6 @@ export function ProjectFilters({
   onChange: (next: Required<ProjectsQuery>) => void
 }) {
   const searchId = useId()
-  const statusId = useId()
 
   return (
     <div className="flex flex-wrap items-end gap-2.5 rounded-control bg-surface-sunken p-2.5 sm:p-3">
@@ -36,24 +41,13 @@ export function ProjectFilters({
         </div>
       </div>
 
-      <div>
-        <label className="mb-1.5 block text-xs font-medium text-text-muted" htmlFor={statusId}>
-          Status
-        </label>
-        <select
-          id={statusId}
-          className="h-9 rounded-control border border-border-default bg-surface px-3 text-sm text-text-default"
-          onChange={(event) => onChange({ ...value, status: event.target.value })}
-          value={value.status}
-        >
-          <option value="all">All statuses</option>
-          {EXECUTION_STATUSES.map((status) => (
-            <option key={status} value={status}>
-              {EXECUTION_STATUS_LABELS[status]}
-            </option>
-          ))}
-        </select>
-      </div>
+      <SelectField
+        className="w-44"
+        label="Status"
+        onChange={(status) => onChange({ ...value, status })}
+        options={STATUS_OPTIONS}
+        value={value.status}
+      />
     </div>
   )
 }

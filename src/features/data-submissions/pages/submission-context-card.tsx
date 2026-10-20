@@ -2,22 +2,22 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 
 /** The sticky sidebar summarising what is being submitted, plus the save
- * action and any save error. */
+ * action. A refused save is shown as a toast. */
 export function SubmissionContextCard({
   institution,
   dataset,
   reportingPeriod,
   isSaving,
-  saveError,
+  wide,
 }: {
   institution: string
   dataset: string
   reportingPeriod: string
   isSaving: boolean
-  saveError: Error | null
+  wide?: boolean
 }) {
   return (
-    <Card className="h-fit p-4 xl:sticky xl:top-4">
+    <Card className={wide ? 'h-fit p-4' : 'h-fit p-4 xl:sticky xl:top-4'}>
       <h2 className="font-semibold text-text-default">Submission context</h2>
       <dl className="mt-3 space-y-3 text-sm">
         <div>
@@ -29,19 +29,13 @@ export function SubmissionContextCard({
           <dd>{dataset}</dd>
         </div>
         <div>
-          <dt className="text-text-muted">Period</dt>
+          <dt className="text-text-muted">{wide ? 'Rows' : 'Period'}</dt>
           <dd>{reportingPeriod}</dd>
         </div>
       </dl>
 
-      {saveError && (
-        <p className="mt-4 text-sm text-status-at-risk" role="alert">
-          {saveError.message}
-        </p>
-      )}
-
       <Button className="mt-5 w-full" disabled={isSaving} type="submit">
-        {isSaving ? 'Saving…' : 'Save draft'}
+        {isSaving ? 'Submitting…' : 'Submit for review'}
       </Button>
     </Card>
   )

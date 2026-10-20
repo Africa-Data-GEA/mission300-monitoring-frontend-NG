@@ -27,9 +27,8 @@ import {
 } from '@/components/ui/select'
 import { PILLARS, PILLAR_LABELS } from '@/types/domain'
 import type { FilterOption } from '@/types/filters'
-
-const INPUT_CLASS =
-  'h-11 w-full rounded-control border border-border-strong bg-surface px-3.5 text-base text-text-default placeholder:text-text-subtle'
+import { SearchableSelect } from '@/components/ui/searchable-select'
+import { BottleneckLinkField, type LinkKind } from './bottleneck-link-field'
 
 /** The "raise a bottleneck" form fields, presented inside CreateBottleneckDialog. */
 export function CreateBottleneckForm({
@@ -37,12 +36,20 @@ export function CreateBottleneckForm({
   onSubmit,
   serverError,
   institutions,
+  linkKind,
+  onLinkKindChange,
+  programmes,
+  projects,
 }: {
   form: UseFormReturn<CreateBottleneckRequest>
   onSubmit: () => void
   serverError: string
   /** Institutions offered in the picker, from this module's own filters. */
   institutions: readonly FilterOption[]
+  linkKind: LinkKind
+  onLinkKindChange: (kind: LinkKind) => void
+  programmes: readonly FilterOption[]
+  projects: readonly FilterOption[]
 }) {
   return (
     <Form {...form}>
@@ -173,44 +180,26 @@ export function CreateBottleneckForm({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Responsible institution</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <FormControl>
-                    <SelectTrigger className="h-11">
-                      <SelectValue placeholder="Select institution" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {institutions.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <SearchableSelect
+                  value={field.value}
+                  options={institutions}
+                  onChange={field.onChange}
+                  placeholder="Select institution"
+                  aria-label="Responsible institution"
+                  searchPlaceholder="Search institutions…"
+                  className="h-11"
+                />
                 <FormMessage />
               </FormItem>
             )}
           />
 
-          <FormField
-            control={form.control}
-            name="linkedRecord"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  Linked record{' '}
-                  <span className="font-normal text-text-muted">(optional)</span>
-                </FormLabel>
-                <FormControl>
-                  <input
-                    {...field}
-                    className={INPUT_CLASS}
-                    placeholder="e.g. IMP-2025-0142"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+          <BottleneckLinkField
+            form={form}
+            kind={linkKind}
+            onKindChange={onLinkKindChange}
+            programmes={programmes}
+            projects={projects}
           />
         </div>
 

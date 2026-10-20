@@ -6,6 +6,7 @@ import {
   type CreateBottleneckRequest,
 } from '@/api/schemas/bottlenecks'
 import { ApiError } from '@/lib/api-client'
+import type { LinkKind } from './components/bottleneck-link-field'
 import { createBottleneck } from './api'
 
 /**
@@ -19,6 +20,7 @@ import { createBottleneck } from './api'
 export function useCreateBottleneck(onCreated: () => void, defaultLinkedRecord = '') {
   const [serverError, setServerError] = useState('')
   const [successMessage, setSuccessMessage] = useState('')
+  const [linkKind, setLinkKind] = useState<LinkKind>(defaultLinkedRecord ? 'project' : 'pillar')
   const form = useForm<CreateBottleneckRequest>({
     resolver: zodResolver(createBottleneckRequestSchema),
     defaultValues: {
@@ -35,10 +37,15 @@ export function useCreateBottleneck(onCreated: () => void, defaultLinkedRecord =
 
   const submit = form.handleSubmit(async (values) => {
     setServerError('')
+    if (linkKind !== 'pillar' && !values.linkedRecord) {
+      form.setError('linkedRecord', { message: `Select a ${linkKind}` })
+      return
+    }
     try {
-      const response = await createBottleneck(values)
+      const response = await createBottleneck({ ...values, linkedRecord: linkKind === 'pillar' ? '' : values.linkedRecord })
       setSuccessMessage(response.message)
       form.reset()
+      setLinkKind('pillar')
       onCreated()
     } catch (error) {
       setServerError(
@@ -49,5 +56,5 @@ export function useCreateBottleneck(onCreated: () => void, defaultLinkedRecord =
     }
   })
 
-  return { form, serverError, submit, successMessage }
+  return { form, linkKind, setLinkKind, serverError, submit, successMessage }
 }

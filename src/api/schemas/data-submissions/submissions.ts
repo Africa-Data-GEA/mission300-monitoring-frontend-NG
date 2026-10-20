@@ -5,6 +5,7 @@ import {
 
 export const submissionListItemSchema = z.object({
   id: z.string().min(1),
+  obligationId: z.string().nullable().optional(),
   institution: z.string().min(1),
   dataset: z.string().min(1),
   reportingPeriod: z.string().min(1),

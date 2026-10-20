@@ -2,6 +2,7 @@ import type { InstitutionKpi } from '@/api/schemas/institution-overview'
 import { Card } from '@/components/ui/card'
 import { PILLAR_LABELS } from '@/types/domain'
 import { cn } from '@/lib/utils'
+import { KpiTargetBar } from './kpi-target-bar'
 
 const STATUS_STYLES: Record<'on-track' | 'off-track' | 'no-target', { label: string; className: string }> = {
   'on-track': { label: 'On track', className: 'bg-status-on-track-bg text-status-on-track' },
@@ -46,12 +47,8 @@ export function KpiPerformanceCard({ kpi }: { kpi: InstitutionKpi }) {
       </div>
 
       <div className="mt-auto pt-2">
-        <p className="text-xs text-text-muted">
-          {kpi.target !== null
-            ? `Target: ${kpi.targetLabel ?? kpi.target.toLocaleString()}`
-            : 'No approved target'}
-        </p>
-        <p className="mt-0.5 text-2xs text-text-subtle">{formatPeriod(kpi.period)}</p>
+        <KpiTargetBar kpi={kpi} status={status} />
+        <p className="mt-1.5 text-2xs text-text-subtle">{formatPeriod(kpi.period)}</p>
       </div>
     </Card>
   )

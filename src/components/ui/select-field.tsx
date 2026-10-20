@@ -7,6 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from './select'
+import { SearchableSelect } from './searchable-select'
 import type { FilterOption } from '@/types/filters'
 
 /**
@@ -22,6 +23,9 @@ export function SelectField({
   onChange,
   placeholder = 'Select…',
   className,
+  labelClassName,
+  triggerClassName,
+  searchable,
   disabled,
 }: {
   label: string
@@ -30,6 +34,9 @@ export function SelectField({
   onChange: (value: string) => void
   placeholder?: string
   className?: string
+  labelClassName?: string
+  triggerClassName?: string
+  searchable?: boolean
   disabled?: boolean
 }) {
   const labelId = useId()
@@ -40,26 +47,39 @@ export function SelectField({
       <label
         id={labelId}
         htmlFor={triggerId}
-        className="text-xs font-medium text-text-muted"
+        className={cn('text-xs font-medium text-text-muted', labelClassName)}
       >
         {label}
       </label>
-      <Select value={value} onValueChange={onChange} disabled={disabled}>
-        {/*
-          Radix renders a button, not a native <select>, so the visible label is
-          associated explicitly via aria-labelledby rather than htmlFor alone.
-        */}
-        <SelectTrigger id={triggerId} aria-labelledby={`${labelId} ${triggerId}`}>
-          <SelectValue placeholder={placeholder} />
-        </SelectTrigger>
-        <SelectContent>
-          {options.map((option) => (
-            <SelectItem key={option.value} value={option.value}>
-              {option.label}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+      {searchable ? (
+        <SearchableSelect
+          id={triggerId}
+          aria-labelledby={`${labelId} ${triggerId}`}
+          value={value}
+          options={options}
+          onChange={onChange}
+          placeholder={placeholder}
+          disabled={disabled}
+          className={triggerClassName}
+        />
+      ) : (
+        <Select value={value} onValueChange={onChange} disabled={disabled}>
+          {/*
+            Radix renders a button, not a native <select>, so the visible label is
+            associated explicitly via aria-labelledby rather than htmlFor alone.
+          */}
+          <SelectTrigger id={triggerId} aria-labelledby={`${labelId} ${triggerId}`} className={triggerClassName}>
+            <SelectValue placeholder={placeholder} />
+          </SelectTrigger>
+          <SelectContent>
+            {options.map((option) => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      )}
     </div>
   )
 }

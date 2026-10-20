@@ -6,6 +6,7 @@ import { SideDialog } from '@/components/ui/side-dialog'
 import { ApiError } from '@/lib/api-client'
 import { PILLARS, PILLAR_LABELS } from '@/types/domain'
 import { useUpdateKpiMetadata } from '../../api'
+import { InstitutionSelect } from '../institution-select'
 
 const inputClass =
   'mt-1.5 h-10 w-full rounded-control border border-border-default bg-surface px-3 text-sm text-text-default outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100'
@@ -346,14 +347,13 @@ export function KpiMetadataEditDialog({
         <div className="border-t border-border-default pt-5">
           <h3 className="text-sm font-semibold text-text-default">Source</h3>
           <div className="mt-3 grid gap-4 sm:grid-cols-2">
-            <label className="text-sm font-medium text-text-default">
-              Source institution
-              <input
-                value={draft.sourceInstitution}
-                onChange={(event) => field('sourceInstitution', event.target.value)}
-                className={inputClass}
-              />
-            </label>
+            <InstitutionSelect
+              label="Source institution"
+              value={draft.sourceInstitution}
+              onChange={(value) => field('sourceInstitution', value)}
+              labelClassName="text-sm text-text-default"
+              triggerClassName="h-10"
+            />
             <label className="text-sm font-medium text-text-default">
               Source dataset
               <input
