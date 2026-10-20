@@ -11,6 +11,8 @@ import { type Column, DataTable } from '@/components/ui/data-table'
 import { Pagination } from '@/components/ui/pagination'
 import { cn } from '@/lib/utils'
 
+const RELATED_LABELS = { kpi: 'KPI', programme: 'Programme', project: 'Project' } as const
+
 const STATUS_TONE: Record<LearningLogEntry['status'], string> = {
   proposed: 'bg-amber-50 text-amber-700',
   decided: 'bg-brand-50 text-brand-700',
@@ -32,6 +34,13 @@ function buildColumns(
         <div>
           <p className="font-medium text-text-default">{row.title}</p>
           <p className="mt-0.5 text-xs text-text-muted">{row.id}</p>
+          {row.related ? (
+            <p className="mt-0.5 text-xs text-text-muted">
+              {RELATED_LABELS[row.related.type]}: {row.related.name}
+            </p>
+          ) : row.relatedRecord ? (
+            <p className="mt-0.5 text-xs text-text-muted">{row.relatedRecord}</p>
+          ) : null}
         </div>
       ),
     },

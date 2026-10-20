@@ -2,6 +2,7 @@ import { delay, http, HttpResponse } from '../local-router'
 import type { LearningLogEntry } from '@/api/schemas/learning-log'
 import { recordAuditEvent } from '../data/audit-log'
 import { learningLogEntries } from '../data/learning-log'
+import { programmes, projects } from '../data/programs'
 
 function positiveInteger(value: string | null, fallback: number) {
   const parsed = Number(value)
@@ -30,6 +31,15 @@ export const learningLogHandlers = [
    * Newest first — a decision log reads as a timeline, not a stable-sorted
    * table.
    */
+  http.get('/api/learning-log/options', async () => {
+    await delay(100)
+    return HttpResponse.json({
+      kpis: [],
+      programmes: programmes.map((programme) => ({ value: programme.id, label: programme.name })),
+      projects: projects.map((project) => ({ value: project.id, label: project.name })),
+    })
+  }),
+
   http.get('/api/learning-log', async ({ request }) => {
     await delay(250)
 

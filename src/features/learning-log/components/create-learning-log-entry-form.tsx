@@ -7,10 +7,12 @@ import {
   DECISION_STATUSES,
   LEARNING_STATUSES,
   type CreateLearningLogEntryRequest,
+  type LearningLogOptions,
 } from '@/api/schemas/learning-log'
 import { Button } from '@/components/ui/button'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { DecisionFields } from './decision-fields'
+import { RelatedRecordField } from './related-record-field'
 import { LearningFields } from './learning-fields'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
@@ -24,11 +26,13 @@ export function CreateLearningLogEntryForm({
   onSubmit,
   serverError,
   isEditing = false,
+  options,
 }: {
   form: UseFormReturn<CreateLearningLogEntryRequest>
   onSubmit: () => void
   serverError: string
   isEditing?: boolean
+  options?: LearningLogOptions
 }) {
   const entryType = form.watch('entryType')
   const statusOptions = entryType === 'learning' ? LEARNING_STATUSES : DECISION_STATUSES
@@ -115,21 +119,7 @@ export function CreateLearningLogEntryForm({
             )}
           />
 
-          <FormField
-            control={form.control}
-            name="relatedRecord"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  Related record <span className="font-normal text-text-muted">(optional)</span>
-                </FormLabel>
-                <FormControl>
-                  <input {...field} className={INPUT_CLASS} placeholder="e.g. M300-P1-015" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <RelatedRecordField form={form} options={options} />
         </div>
 
         {entryType === 'learning' ? <LearningFields form={form} /> : <DecisionFields form={form} />}

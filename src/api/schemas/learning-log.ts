@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { paginated } from './administration'
+import { filterOptionSchema } from './filters'
 
 /**
  * Contract for the Learning & Decision Log.
@@ -52,6 +53,11 @@ export const learningLogEntrySchema = z.object({
   /** The KPI id, module, or record this decision affects, where there is
    * one. Null for a decision with no single affected record. */
   relatedRecord: z.string().nullable(),
+  /** The KPI, programme or project `relatedRecord` points to, resolved by the server. */
+  related: z
+    .object({ type: z.enum(['kpi', 'programme', 'project']), id: z.string().min(1), name: z.string().min(1) })
+    .nullable()
+    .optional(),
   /** e.g. "Q3 2026 review". Free text — review cycles aren't a closed
    * vocabulary anywhere else in the app either. */
   reviewCycle: z.string().min(1),
@@ -88,6 +94,12 @@ export const createLearningLogEntryRequestSchema = learningLogEntryFieldsSchema.
   }
 })
 
+export const learningLogOptionsSchema = z.object({
+  kpis: z.array(filterOptionSchema),
+  programmes: z.array(filterOptionSchema),
+  projects: z.array(filterOptionSchema),
+})
+
 export const createLearningLogEntryResponseSchema = z.object({
   entry: learningLogEntrySchema,
   message: z.string().min(1),
@@ -112,6 +124,7 @@ export const learningLogOverviewSchema = z.object({
 export type LearningLogStatus = z.infer<typeof learningLogStatusSchema>
 export type LearningLogArea = z.infer<typeof learningLogAreaSchema>
 export type LearningLogType = z.infer<typeof learningLogTypeSchema>
+export type LearningLogOptions = z.infer<typeof learningLogOptionsSchema>
 export type LearningLogEntry = z.infer<typeof learningLogEntrySchema>
 export type CreateLearningLogEntryRequest = z.infer<typeof createLearningLogEntryRequestSchema>
 export type CreateLearningLogEntryResponse = z.infer<typeof createLearningLogEntryResponseSchema>

@@ -6,11 +6,17 @@ import { Button } from '@/components/ui/button'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import { ErrorState } from '@/components/ui/error-state'
 import { PageLoading } from '@/components/ui/page-loading'
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { SelectField } from '@/components/ui/select-field'
 import { useDeleteLearningLogEntry, useLearningLog } from './api'
 import { CreateLearningLogEntryDialog } from './components/create-learning-log-entry-dialog'
 import { EditLearningLogEntryDialog } from './components/edit-learning-log-entry-dialog'
 import { LearningLogTable } from './components/learning-log-table'
+
+const TYPE_FILTER_OPTIONS = [
+  { value: 'all', label: 'All entries' },
+  { value: 'decision', label: 'Decisions' },
+  { value: 'learning', label: 'Learnings' },
+]
 
 /**
  * The Learning & Decision Log — added per the SE4ALL MRL alignment review
@@ -70,20 +76,17 @@ export function LearningLogPage() {
         </div>
       </div>
 
-      <Tabs
-        defaultValue="all"
-        value={typeFilter}
-        onValueChange={(value) => {
-          setTypeFilter(value)
-          setPage(1)
-        }}
-      >
-        <TabsList>
-          <TabsTrigger value="all">All</TabsTrigger>
-          <TabsTrigger value="decision">Decisions</TabsTrigger>
-          <TabsTrigger value="learning">Learnings</TabsTrigger>
-        </TabsList>
-      </Tabs>
+      <div className="w-full sm:w-56">
+        <SelectField
+          label="Show"
+          value={typeFilter}
+          options={TYPE_FILTER_OPTIONS}
+          onChange={(value) => {
+            setTypeFilter(value)
+            setPage(1)
+          }}
+        />
+      </div>
 
       <LearningLogTable
         entries={data.entries.items}

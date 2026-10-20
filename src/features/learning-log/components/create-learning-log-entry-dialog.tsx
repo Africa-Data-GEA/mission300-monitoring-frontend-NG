@@ -1,5 +1,6 @@
 import type { LearningLogType } from '@/api/schemas/learning-log'
 import { SideDialog } from '@/components/ui/side-dialog'
+import { useLearningLogOptions } from '../api'
 import { useCreateLearningLogForm } from '../use-create-learning-log-entry'
 import { CreateLearningLogEntryForm } from './create-learning-log-entry-form'
 import { CreateLearningLogEntrySuccess } from './create-learning-log-entry-success'
@@ -18,6 +19,7 @@ export function CreateLearningLogEntryDialog({
 }) {
   const creation = useCreateLearningLogForm(entryType, onCreated)
   const isLearning = entryType === 'learning'
+  const options = useLearningLogOptions()
 
   return (
     <SideDialog
@@ -33,7 +35,12 @@ export function CreateLearningLogEntryDialog({
       {creation.successMessage ? (
         <CreateLearningLogEntrySuccess message={creation.successMessage} onDone={onClose} />
       ) : (
-        <CreateLearningLogEntryForm form={creation.form} onSubmit={creation.submit} serverError={creation.serverError} />
+        <CreateLearningLogEntryForm
+          form={creation.form}
+          onSubmit={creation.submit}
+          serverError={creation.serverError}
+          options={options.data}
+        />
       )}
     </SideDialog>
   )

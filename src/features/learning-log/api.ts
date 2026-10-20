@@ -2,6 +2,7 @@ import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tansta
 import {
   createLearningLogEntryResponseSchema,
   deleteLearningLogEntryResponseSchema,
+  learningLogOptionsSchema,
   learningLogOverviewSchema,
   updateLearningLogEntryResponseSchema,
   type CreateLearningLogEntryRequest,
@@ -23,6 +24,14 @@ export function useLearningLog(page = 1, entryType = 'all', pageSize = 25) {
         learningLogOverviewSchema,
       ),
     placeholderData: keepPreviousData,
+  })
+}
+
+export function useLearningLogOptions() {
+  return useQuery({
+    queryKey: [...learningLogKeys.all, 'options'],
+    queryFn: () => api.get('/learning-log/options', learningLogOptionsSchema),
+    staleTime: 5 * 60 * 1000,
   })
 }
 

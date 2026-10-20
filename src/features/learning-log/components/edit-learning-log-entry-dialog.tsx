@@ -1,5 +1,6 @@
 import { SideDialog } from '@/components/ui/side-dialog'
 import type { LearningLogEntry } from '@/api/schemas/learning-log'
+import { useLearningLogOptions } from '../api'
 import { useEditLearningLogForm } from '../use-edit-learning-log-entry'
 import { CreateLearningLogEntryForm } from './create-learning-log-entry-form'
 import { CreateLearningLogEntrySuccess } from './create-learning-log-entry-success'
@@ -46,10 +47,17 @@ function EditLearningLogEntryDialogBody({
   onUpdated: () => void
 }) {
   const editing = useEditLearningLogForm(entry, onUpdated)
+  const options = useLearningLogOptions()
 
   return editing.successMessage ? (
     <CreateLearningLogEntrySuccess heading="Entry updated" message={editing.successMessage} onDone={onClose} />
   ) : (
-    <CreateLearningLogEntryForm form={editing.form} isEditing onSubmit={editing.submit} serverError={editing.serverError} />
+    <CreateLearningLogEntryForm
+      form={editing.form}
+      isEditing
+      onSubmit={editing.submit}
+      serverError={editing.serverError}
+      options={options.data}
+    />
   )
 }
