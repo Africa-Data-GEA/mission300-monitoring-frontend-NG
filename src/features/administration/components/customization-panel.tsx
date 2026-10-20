@@ -7,6 +7,7 @@ import {
   useResetBrandConfig,
   useUpdateBrandColors,
   useUpdateBrandFonts,
+  useUploadBrandCrest,
   useUploadBrandLogo,
 } from '@/features/branding/api'
 import { ApiError } from '@/lib/api-client'
@@ -15,6 +16,10 @@ import { AFRICAN_COUNTRIES } from '../lib/countries'
 import { FontPicker } from './font-picker'
 
 const HEADING_ROLES = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'] as const
+
+const TIME_ZONES = (
+  (Intl as unknown as { supportedValuesOf?: (key: string) => string[] }).supportedValuesOf?.('timeZone') ?? ['Africa/Lagos']
+).map((zone) => ({ value: zone, label: zone }))
 
 const inputClass =
   'h-10 w-full rounded-control border border-border-strong bg-surface px-3 text-sm text-text-default placeholder:text-text-subtle'
@@ -75,6 +80,9 @@ function CustomizationForm({ brand }: { brand: BrandConfig }) {
   const updateColors = useUpdateBrandColors()
   const updateFonts = useUpdateBrandFonts()
   const uploadLogo = useUploadBrandLogo()
+  const uploadCrest = useUploadBrandCrest()
+  const crestInputRef = useRef<HTMLInputElement>(null)
+  const [crestError, setCrestError] = useState('')
   const resetBrand = useResetBrandConfig()
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -83,6 +91,12 @@ function CustomizationForm({ brand }: { brand: BrandConfig }) {
     : [brand.countryName, ...AFRICAN_COUNTRIES]
   ).map((name) => ({ value: name, label: name }))
   const [countryName, setCountryName] = useState(brand.countryName)
+  const [officialName, setOfficialName] = useState(brand.officialName)
+  const [agencyName, setAgencyName] = useState(brand.agencyName)
+  const [timezone, setTimezone] = useState(brand.timezone)
+  const [currencyCode, setCurrencyCode] = useState(brand.currency.code)
+  const [currencySymbol, setCurrencySymbol] = useState(brand.currency.symbol)
+  const [currencyLocale, setCurrencyLocale] = useState(brand.currency.locale)
   const [primaryColor, setPrimaryColor] = useState(brand.primaryColor)
   const [secondaryColor, setSecondaryColor] = useState(brand.secondaryColor)
   const [textColor, setTextColor] = useState(brand.textColor)
@@ -126,6 +140,11 @@ function CustomizationForm({ brand }: { brand: BrandConfig }) {
   const isValidHex = (value: string) => /^#[0-9a-fA-F]{6}$/.test(value)
   const canSave =
     countryName.trim().length > 0 &&
+    officialName.trim().length > 0 &&
+    agencyName.trim().length > 0 &&
+    currencyCode.trim().length === 3 &&
+    currencySymbol.trim().length > 0 &&
+    currencyLocale.trim().length >= 2 &&
     isValidHex(primaryColor) &&
     isValidHex(secondaryColor) &&
     isValidHex(textColor) &&
@@ -136,12 +155,16 @@ function CustomizationForm({ brand }: { brand: BrandConfig }) {
     try {
       await updateColors.mutateAsync({
         countryName: countryName.trim(),
+        officialName: officialName.trim(),
+        agencyName: agencyName.trim(),
+        timezone,
+        currency: { code: currencyCode.trim().toUpperCase(), symbol: currencySymbol.trim(), locale: currencyLocale.trim() },
         primaryColor,
         secondaryColor,
         textColor,
         sidebarColor,
       })
-      setSaveMessage('Saved. The new colours are applied across the dashboard now.')
+      setSaveMessage('Saved. The new identity and colours are applied across the dashboard now.')
     } catch (error) {
       setSaveMessage(
         error instanceof ApiError ? error.message : 'Could not save the branding changes. Please try again.',
@@ -154,6 +177,12 @@ function CustomizationForm({ brand }: { brand: BrandConfig }) {
     try {
       const defaults = await resetBrand.mutateAsync()
       setCountryName(defaults.countryName)
+      setOfficialName(defaults.officialName)
+      setAgencyName(defaults.agencyName)
+      setTimezone(defaults.timezone)
+      setCurrencyCode(defaults.currency.code)
+      setCurrencySymbol(defaults.currency.symbol)
+      setCurrencyLocale(defaults.currency.locale)
       setPrimaryColor(defaults.primaryColor)
       setSecondaryColor(defaults.secondaryColor)
       setTextColor(defaults.textColor)
@@ -164,6 +193,19 @@ function CustomizationForm({ brand }: { brand: BrandConfig }) {
       setSaveMessage(
         error instanceof ApiError ? error.message : 'Could not reset branding. Please try again.',
       )
+    }
+  }
+
+  async function handleCrestChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0]
+    if (!file) return
+    setCrestError('')
+    try {
+      await uploadCrest.mutateAsync(file)
+    } catch (error) {
+      setCrestError(error instanceof ApiError ? error.message : 'Could not upload the crest. Please try again.')
+    } finally {
+      event.target.value = ''
     }
   }
 
@@ -200,11 +242,41 @@ function CustomizationForm({ brand }: { brand: BrandConfig }) {
             />
           </div>
 
+          <label className="block">
+            <span className="mb-1.5 block text-sm font-medium text-text-default">Official name</span>
+            <input className={inputClass} value={officialName} onChange={(event) => setOfficialName(event.target.value)} placeholder="e.g. Federal Republic of Nigeria" />
+          </label>
+          <label className="block">
+            <span className="mb-1.5 block text-sm font-medium text-text-default">Lead agency</span>
+            <input className={inputClass} value={agencyName} onChange={(event) => setAgencyName(event.target.value)} placeholder="e.g. Federal Ministry of Power" />
+          </label>
+          <SelectField label="Timezone" value={timezone} options={TIME_ZONES} onChange={setTimezone} placeholder="Select a timezone" searchable />
+          <div className="grid grid-cols-3 gap-3">
+            <label className="block">
+              <span className="mb-1.5 block text-sm font-medium text-text-default">Currency code</span>
+              <input className={inputClass} value={currencyCode} maxLength={3} onChange={(event) => setCurrencyCode(event.target.value.toUpperCase())} placeholder="NGN" />
+            </label>
+            <label className="block">
+              <span className="mb-1.5 block text-sm font-medium text-text-default">Symbol</span>
+              <input className={inputClass} value={currencySymbol} maxLength={4} onChange={(event) => setCurrencySymbol(event.target.value)} placeholder="₦" />
+            </label>
+            <label className="block">
+              <span className="mb-1.5 block text-sm font-medium text-text-default">Locale</span>
+              <input className={inputClass} value={currencyLocale} onChange={(event) => setCurrencyLocale(event.target.value)} placeholder="en-NG" />
+            </label>
+          </div>
+
           <ColorField label="Primary colour" value={primaryColor} onChange={setPrimaryColor} />
           <ColorField label="Secondary colour" value={secondaryColor} onChange={setSecondaryColor} />
           <ColorField label="Text colour" value={textColor} onChange={setTextColor} />
           <ColorField label="Sidebar colour" value={sidebarColor} onChange={setSidebarColor} />
         </div>
+
+        <p className="mt-4 rounded-control bg-surface-sunken p-3 text-xs text-text-muted">
+          The country, official name, agency, crest, currency and timezone appear across the dashboard, the public
+          pages, reports and emails. Institutions, KPIs, programmes and the data itself are loaded separately and do not
+          change with these settings.
+        </p>
 
         {saveMessage && (
           <p className="mt-4 text-sm text-text-muted" role="status">
@@ -226,7 +298,7 @@ function CustomizationForm({ brand }: { brand: BrandConfig }) {
             onClick={handleSave}
             disabled={!canSave || updateColors.isPending}
           >
-            {updateColors.isPending ? 'Saving…' : 'Save colours'}
+            {updateColors.isPending ? 'Saving…' : 'Save identity and colours'}
           </Button>
         </div>
       </Card>
@@ -253,6 +325,30 @@ function CustomizationForm({ brand }: { brand: BrandConfig }) {
           <Button type="button" onClick={handleSaveFonts} disabled={updateFonts.isPending}>
             {updateFonts.isPending ? 'Saving…' : 'Save typography'}
           </Button>
+        </div>
+      </Card>
+
+      <Card className="p-5">
+        <h3 className="text-base font-semibold text-text-default">National crest or flag</h3>
+        <p className="mt-1 text-sm text-text-muted">
+          Shown on the sign-in page, the public pages and in emails. Leave it unset to use the built-in default.
+        </p>
+
+        <div className="mt-4 flex items-center gap-4">
+          <div className="flex size-16 shrink-0 items-center justify-center rounded-control border border-border-default bg-surface-sunken p-2">
+            <img src={brand.crestUrl || '/Logos/geapp.png'} alt="Current crest" className="max-h-full max-w-full object-contain" />
+          </div>
+          <div>
+            <input ref={crestInputRef} type="file" accept="image/*" onChange={handleCrestChange} className="hidden" />
+            <Button type="button" variant="secondary" onClick={() => crestInputRef.current?.click()} disabled={uploadCrest.isPending}>
+              {uploadCrest.isPending ? 'Uploading…' : 'Upload crest or flag'}
+            </Button>
+            {crestError && (
+              <p className="mt-2 text-sm text-status-at-risk" role="alert">
+                {crestError}
+              </p>
+            )}
+          </div>
         </div>
       </Card>
 

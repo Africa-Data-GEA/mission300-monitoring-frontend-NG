@@ -17,6 +17,7 @@ export function useInviteUser(onInvited: () => void) {
       name: '',
       email: '',
       institution: '',
+      reviewsAllInstitutions: false,
       designation: '',
       roles: [],
       accessScope: 'institution',

@@ -30,8 +30,7 @@ export function useAdministrationPage() {
   const [pageSize, setPageSize] = useState(10)
   const [activeTab, setActiveTab] = useState<AdministrationTab>('users')
   const [inviteOpen, setInviteOpen] = useState(false)
-  const [rolesUser, setRolesUser] = useState<UserAccount | null>(null)
-  const [institutionUser, setInstitutionUser] = useState<UserAccount | null>(null)
+  const [editUser, setEditUser] = useState<UserAccount | null>(null)
 
   const filters = useAdministrationFilters()
   const overview = useAdministration(query, {
@@ -96,8 +95,7 @@ export function useAdministrationPage() {
     data: overview.data,
     activeTab,
     inviteOpen,
-    rolesUser,
-    institutionUser,
+    editUser,
     isPending: filters.isPending || overview.isPending,
     isError: overview.isError,
     error: overview.error ?? new Error('The administration data could not be loaded.'),
@@ -121,12 +119,9 @@ export function useAdministrationPage() {
     viewAuditUser,
     openInvite: () => setInviteOpen(true),
     closeInvite: () => setInviteOpen(false),
-    openRoleEditor: (user: UserAccount) => setRolesUser(user),
-    closeRoleEditor: () => setRolesUser(null),
-    openInstitutionEditor: (user: UserAccount) => setInstitutionUser(user),
-    closeInstitutionEditor: () => setInstitutionUser(null),
-    refreshAfterRoleEdit: () => void overview.refetch(),
-    refreshAfterInstitutionEdit: () => void overview.refetch(),
+    openUserEditor: (user: UserAccount) => setEditUser(user),
+    closeUserEditor: () => setEditUser(null),
+    refreshAfterUserEdit: () => void overview.refetch(),
     refreshAfterInvite: () => void overview.refetch(),
   }
 }

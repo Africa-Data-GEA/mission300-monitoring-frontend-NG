@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { filterOptionSchema } from './filters'
 
-export const institutionStatusSchema = z.enum(['active', 'pending-onboarding', 'inactive'])
+export const institutionStatusSchema = z.enum(['active', 'onboarding-in-progress', 'pending-onboarding', 'inactive'])
 export const institutionTypeSchema = z.enum([
   'ministry',
   'agency',
@@ -72,5 +72,15 @@ export interface StakeholdersQuery {
   coverage?: string
 }
 
+export const institutionWriteSchema = z.object({
+  name: z.string().trim().min(2),
+  type: z.string().trim().min(2).optional(),
+})
+
+export const stakeholderMutationResponseSchema = z.object({
+  message: z.string().min(1),
+}).passthrough()
+
 export type Institution = z.infer<typeof institutionSchema>
 export type CustodianAssignment = z.infer<typeof custodianAssignmentSchema>
+export type InstitutionWrite = z.infer<typeof institutionWriteSchema>

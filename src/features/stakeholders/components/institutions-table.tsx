@@ -1,9 +1,16 @@
-import { Database } from 'lucide-react'
+import { Pencil, Trash2 } from 'lucide-react'
 import type { Institution } from '@/api/schemas/stakeholders'
 import { DataTable, type Column } from '@/components/ui/data-table'
 import { RowActionMenu } from '@/components/ui/row-action-menu'
 import { formatDate } from '@/lib/format'
 import { TableShell } from './table-shell'
+
+const STATUS_LABELS: Record<string, string> = {
+  active: 'Active',
+  'onboarding-in-progress': 'Onboarding in progress',
+  'pending-onboarding': 'Pending onboarding',
+  inactive: 'Inactive',
+}
 
 const COLUMNS: readonly Column<Institution>[] = [
   {
@@ -44,7 +51,7 @@ const COLUMNS: readonly Column<Institution>[] = [
           item.status === 'active' ? 'text-status-on-track' : 'text-status-lagging'
         }
       >
-        {item.status === 'active' ? 'Active' : 'Pending onboarding'}
+        {STATUS_LABELS[item.status] ?? item.status}
       </span>
     ),
   },
@@ -63,10 +70,12 @@ const COLUMNS: readonly Column<Institution>[] = [
 /** Section B — the institution registry table. */
 export function InstitutionsTable({
   items,
-  onViewAssignments,
+  onEdit,
+  onDelete,
 }: {
   items: readonly Institution[]
-  onViewAssignments: (item: Institution) => void
+  onEdit?: (item: Institution) => void
+  onDelete?: (item: Institution) => void
 }) {
   return (
     <TableShell title="Institutions">
@@ -80,11 +89,8 @@ export function InstitutionsTable({
           <RowActionMenu
             label={`Actions for ${item.shortName}`}
             actions={[
-              {
-                label: 'View data assignments',
-                icon: Database,
-                onSelect: () => onViewAssignments(item),
-              },
+              ...(onEdit ? [{ label: 'Edit institution', icon: Pencil, onSelect: () => onEdit(item) }] : []),
+              ...(onDelete ? [{ label: 'Remove institution', icon: Trash2, onSelect: () => onDelete(item), tone: 'danger' as const }] : []),
               { label: 'Copy institution ID', copyText: item.id },
             ]}
           />

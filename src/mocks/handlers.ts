@@ -429,6 +429,17 @@ function auditCutoff(period: string) {
 const invitedUsers: UserAccount[] = []
 let allowSelfReview = false
 
+function displayInstitutionType(raw: string): typeof stakeholderInstitutions[number]['type'] {
+  const value = raw.toLowerCase()
+  if (value.includes('disco')) return 'disco'
+  if (value.includes('regulator')) return 'regulator'
+  if (value.includes('ministry')) return 'ministry'
+  if (value.includes('agency')) return 'agency'
+  if (value.includes('programme')) return 'programme-team'
+  if (value.includes('federal')) return 'agency'
+  return 'partner'
+}
+
 export const handlers = [
   ...bottlenecksHandlers,
   ...brandingHandlers,
@@ -852,6 +863,41 @@ export const handlers = [
    */
   http.get('/api/filters', () => HttpResponse.json(filterOptions)),
 
+  http.post('/api/stakeholders/institutions', async ({ request }) => {
+    const body = (await request.json()) as { name: string; type: string }
+    const institution = {
+      id: `ins-${Date.now()}`,
+      name: body.name,
+      shortName: body.name.split(/\s+/).map((word) => word[0]).join('').toUpperCase(),
+      type: displayInstitutionType(body.type),
+      status: 'pending-onboarding' as const,
+      coverage: 'Not specified',
+      roles: [],
+      datasets: [],
+      programmes: [],
+      lastUpdated: new Date().toISOString(),
+    }
+    stakeholderInstitutions.push(institution)
+    return HttpResponse.json({ institution, message: `${institution.name} added.` }, { status: 201 })
+  }),
+
+  http.patch('/api/stakeholders/institutions/:id', async ({ params, request }) => {
+    const institution = stakeholderInstitutions.find((item) => item.id === params.id)
+    if (!institution) return HttpResponse.json({ message: 'Unknown institution.' }, { status: 404 })
+    const body = (await request.json()) as { name?: string; type?: string }
+    if (body.name) institution.name = body.name
+    if (body.type) institution.type = displayInstitutionType(body.type)
+    institution.lastUpdated = new Date().toISOString()
+    return HttpResponse.json({ institution, message: `${institution.name} updated.` })
+  }),
+
+  http.delete('/api/stakeholders/institutions/:id', ({ params }) => {
+    const index = stakeholderInstitutions.findIndex((item) => item.id === params.id)
+    if (index < 0) return HttpResponse.json({ message: 'Unknown institution.' }, { status: 404 })
+    const [institution] = stakeholderInstitutions.splice(index, 1)
+    return HttpResponse.json({ message: `${institution?.name ?? 'Institution'} removed.` })
+  }),
+
   http.get('/api/stakeholders', async ({ request }) => {
     await delay(250)
     const params = new URL(request.url).searchParams
@@ -894,7 +940,7 @@ export const handlers = [
     return HttpResponse.json({
       summary: {
         activeInstitutions: stakeholderInstitutions.filter((item) => item.status === 'active').length,
-        dataCustodians: new Set(stakeholderCustodians.map((item) => item.custodian)).size,
+        dataCustodians: stakeholderInstitutions.filter((item) => item.datasets.length > 0).length,
         pendingOnboarding: stakeholderInstitutions.filter((item) => item.status === 'pending-onboarding').length,
       },
       institutions,
@@ -956,6 +1002,23 @@ export const handlers = [
       user,
       message: `An invitation was sent to ${user.email}.`,
     })
+  }),
+
+  http.patch('/api/administration/users/:id/access', async ({ request, params }) => {
+    const user = [...administrationUsers, ...invitedUsers].find((entry) => entry.id === params.id)
+    if (!user) return HttpResponse.json({ message: 'User account not found.' }, { status: 404 })
+    const body = (await request.json()) as { name?: string; email?: string; designation?: string; roles?: UserAccount['role'][]; institution?: string; reviewsAllInstitutions?: boolean }
+    if (!Array.isArray(body.roles) || !body.roles.length || new Set(body.roles).size !== body.roles.length) {
+      return HttpResponse.json({ message: 'Select at least one distinct role.' }, { status: 400 })
+    }
+    if (body.name) user.name = body.name
+    if (body.email) user.email = body.email
+    if (body.designation) user.designation = body.designation
+    user.role = body.roles[0] as UserAccount['role']
+    user.roles = body.roles
+    user.reviewsAllInstitutions = body.reviewsAllInstitutions === true
+    if (body.institution) user.institution = body.institution
+    return HttpResponse.json(user)
   }),
 
   http.patch('/api/administration/users/:id/roles', async ({ request, params }) => {

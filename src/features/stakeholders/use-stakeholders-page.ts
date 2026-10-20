@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import type { Institution, StakeholdersQuery } from '@/api/schemas/stakeholders'
+import type { StakeholdersQuery } from '@/api/schemas/stakeholders'
 import { useStakeholders } from './api'
 
 const DEFAULT_QUERY: Required<StakeholdersQuery> = {
@@ -13,11 +13,8 @@ const DEFAULT_QUERY: Required<StakeholdersQuery> = {
   coverage: 'all',
 }
 
-export type StakeholderTab = 'institutions' | 'custodians'
-
 export function useStakeholdersPage() {
   const [query, setQuery] = useState(DEFAULT_QUERY)
-  const [activeTab, setActiveTab] = useState<StakeholderTab>('institutions')
   const overview = useStakeholders(query)
   const activeFilterCount = [
     query.institutionType !== 'all',
@@ -29,19 +26,11 @@ export function useStakeholdersPage() {
     query.coverage !== 'all',
   ].filter(Boolean).length
 
-  function viewInstitutionAssignments(institution: Institution) {
-    setQuery((current) => ({ ...current, search: institution.shortName }))
-    setActiveTab('custodians')
-  }
-
   return {
     ...overview,
-    activeTab,
     activeFilterCount,
     query,
     changeQuery: setQuery,
     resetQuery: () => setQuery((current) => ({ ...DEFAULT_QUERY, search: current.search })),
-    changeTab: (value: string) => setActiveTab(value as StakeholderTab),
-    viewInstitutionAssignments,
   }
 }

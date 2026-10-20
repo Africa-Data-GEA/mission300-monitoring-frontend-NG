@@ -2,11 +2,12 @@ import { Send } from 'lucide-react'
 import type { UseFormReturn } from 'react-hook-form'
 import {
   SCOPE_LEVEL_LABELS,
-  SYSTEM_ROLE_LABELS,
+  REVIEWER_ONLY_ROLES,
   type InstitutionOption,
   type InviteUserRequest,
 } from '@/api/schemas/administration'
 import { Button } from '@/components/ui/button'
+import { RoleSelector } from './role-selector'
 import {
   Form,
   FormControl,
@@ -40,6 +41,10 @@ export function InviteUserForm({
   institutions: readonly InstitutionOption[]
   institutionsLoading: boolean
 }) {
+  const selectedRoles = form.watch('roles')
+  const reviewerOnly = selectedRoles.length > 0 && selectedRoles.every((role) => (REVIEWER_ONLY_ROLES as readonly string[]).includes(role))
+  const reviewsAll = reviewerOnly && form.watch('reviewsAllInstitutions') === true
+
   return (
     <Form {...form}>
       <form className="space-y-6" noValidate onSubmit={onSubmit}>
@@ -83,6 +88,7 @@ export function InviteUserForm({
             )}
           />
 
+          {!reviewsAll && (
           <FormField
             control={form.control}
             name="institution"
@@ -109,6 +115,27 @@ export function InviteUserForm({
               </FormItem>
             )}
           />
+          )}
+
+          {reviewerOnly && (
+            <label className="flex items-start gap-2 text-sm text-text-default md:col-span-2">
+              <input
+                type="checkbox"
+                className="mt-1"
+                checked={reviewsAll}
+                onChange={(event) => {
+                  form.setValue('reviewsAllInstitutions', event.target.checked)
+                  if (event.target.checked) form.setValue('institution', '')
+                }}
+              />
+              <span>
+                Reviews all institutions
+                <span className="block text-xs text-text-muted">
+                  For a platform-wide reviewer. Leave unticked to review one institution only.
+                </span>
+              </span>
+            </label>
+          )}
 
           <FormField
             control={form.control}
@@ -135,17 +162,7 @@ export function InviteUserForm({
               <FormItem>
                 <FormLabel>Roles this user can perform</FormLabel>
                 <FormControl>
-                  <fieldset className="space-y-2 rounded-control border border-border-strong p-3" aria-label="Roles this user can perform">
-                    {Object.entries(SYSTEM_ROLE_LABELS).map(([value, label]) => (
-                      <label key={value} className="flex items-center gap-2 text-sm text-text-default">
-                        <input type="checkbox" checked={field.value.includes(value as InviteUserRequest['roles'][number])}
-                          onChange={(event) => field.onChange(event.target.checked
-                            ? [...field.value, value]
-                            : field.value.filter((role) => role !== value))} />
-                        {label}
-                      </label>
-                    ))}
-                  </fieldset>
+                  <RoleSelector value={field.value} onChange={field.onChange} label="Roles this user can perform" />
                 </FormControl>
                 <FormMessage />
               </FormItem>

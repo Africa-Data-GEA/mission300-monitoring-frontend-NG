@@ -123,6 +123,7 @@ export const userAccountSchema = z.object({
   name: z.string().min(1),
   email: z.email(),
   institution: z.string().min(1),
+  reviewsAllInstitutions: z.boolean().optional(),
   designation: z.string(),
   role: systemRoleSchema,
   roles: z.array(systemRoleSchema).optional(),
@@ -154,11 +155,15 @@ export type InstitutionOption = z.infer<typeof institutionOptionSchema>
 export const inviteUserRequestSchema = z.object({
   name: z.string().trim().min(2, 'Enter the user name'),
   email: z.email('Enter a valid email address'),
-  institution: z.string().min(1, 'Select an institution'),
+  institution: z.string(),
+  reviewsAllInstitutions: z.boolean().optional(),
   designation: z.string().trim().min(2, 'Enter the designation'),
   roles: z.array(systemRoleSchema).min(1, 'Select at least one role'),
   accessScope: scopeLevelSchema,
   invitationMessage: z.string().max(500).optional(),
+}).refine((value) => value.reviewsAllInstitutions === true || value.institution.length > 0, {
+  message: 'Select an institution',
+  path: ['institution'],
 })
 
 export const inviteUserResponseSchema = z.object({
@@ -329,4 +334,6 @@ export const SCOPE_LEVEL_LABELS: Record<ScopeLevel, string> = {
 
 /** The permission set is ordered as the specification lists it. */
 export const PERMISSIONS = permissionSchema.options
+export const REVIEWER_ONLY_ROLES = ['data-reviewer', 'validator'] as const
+
 export const SYSTEM_ROLES = systemRoleSchema.options

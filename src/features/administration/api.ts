@@ -89,12 +89,11 @@ export function inviteUser(input: InviteUserRequest) {
   return api.post('/administration/users/invite', input, inviteUserResponseSchema)
 }
 
-export function updateUserRoles(userId: string, roles: readonly string[]) {
-  return api.patch(`/administration/users/${encodeURIComponent(userId)}/roles`, { roles }, userAccountSchema)
-}
-
-export function updateUserInstitution(userId: string, institution: string) {
-  return api.patch(`/administration/users/${encodeURIComponent(userId)}/institution`, { institution }, userAccountSchema)
+export function updateUserAccess(
+  userId: string,
+  body: { name?: string; email?: string; designation?: string; roles: readonly string[]; institution?: string; reviewsAllInstitutions?: boolean },
+) {
+  return api.patch(`/administration/users/${encodeURIComponent(userId)}/access`, body, userAccountSchema)
 }
 
 export function useSecuritySettings() {
