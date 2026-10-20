@@ -1,6 +1,7 @@
 import { useEffect, type ReactNode } from 'react'
 import { CHART_BLUE, setChartAccent } from '@/config/chart-colors'
 import { setActiveCurrency } from '@/lib/currency'
+import { setDisplayTimeZone } from '@/lib/format'
 import type { BrandFonts } from '@/api/schemas/branding'
 import { useBrandConfig } from './api'
 import { buildChartScale, buildColorRamp } from './color-ramp'
@@ -114,6 +115,8 @@ export function BrandProvider({ children }: { children: ReactNode }) {
     // Monetary formatters read this singleton rather than taking a prop, the
     // same way charts read CHART_BLUE — see src/lib/currency.ts.
     setActiveCurrency(data.currency)
+    setDisplayTimeZone(data.timezone)
+    document.title = `${data.countryName} Mission 300`
   }, [data])
 
   return children

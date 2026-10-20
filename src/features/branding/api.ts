@@ -49,6 +49,19 @@ export function useResetBrandConfig() {
   })
 }
 
+/** Uploads the national crest or flag image, replacing the current one. */
+export function useUploadBrandCrest() {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (file: File) => {
+      const formData = new FormData()
+      formData.append('file', file)
+      return api.post<BrandConfig>('/branding/crest', formData, brandConfigSchema)
+    },
+    onSuccess: (updated) => client.setQueryData(brandingKeys.config(), updated),
+  })
+}
+
 /** Uploads a new logo image, replacing the current one. */
 export function useUploadBrandLogo() {
   const client = useQueryClient()

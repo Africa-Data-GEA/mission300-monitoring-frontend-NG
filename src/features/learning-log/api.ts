@@ -11,14 +11,17 @@ import { api } from '@/lib/api-client'
 
 export const learningLogKeys = {
   all: ['learning-log'] as const,
-  overview: (page: number) => [...learningLogKeys.all, 'overview', page] as const,
+  overview: (page: number, type: string) => [...learningLogKeys.all, 'overview', page, type] as const,
 }
 
-export function useLearningLog(page = 1, pageSize = 25) {
+export function useLearningLog(page = 1, entryType = 'all', pageSize = 25) {
   return useQuery({
-    queryKey: learningLogKeys.overview(page),
+    queryKey: learningLogKeys.overview(page, entryType),
     queryFn: () =>
-      api.get(`/learning-log?page=${page}&pageSize=${pageSize}`, learningLogOverviewSchema),
+      api.get(
+        `/learning-log?page=${page}&pageSize=${pageSize}${entryType === 'all' ? '' : `&entryType=${entryType}`}`,
+        learningLogOverviewSchema,
+      ),
     placeholderData: keepPreviousData,
   })
 }

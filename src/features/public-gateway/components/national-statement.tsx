@@ -1,3 +1,4 @@
+import { useBrandIdentity } from '@/features/branding/use-brand-identity'
 import { Link } from 'react-router'
 import type { HeadlineCards } from '@/api/schemas/executive-overview'
 import { formatDate } from '@/lib/format'
@@ -31,6 +32,7 @@ import { HeroDataCard } from './hero-data-card'
  */
 export function NationalStatement({ cards }: { cards: HeadlineCards }) {
   const headline = cards.peopleWithElectricityAccess
+  const identity = useBrandIdentity()
 
   /*
    * Three rows, not five. A metadata card is only read if it can be taken in
@@ -54,7 +56,7 @@ export function NationalStatement({ cards }: { cards: HeadlineCards }) {
       <div className="relative mx-auto flex w-full max-w-[96rem] flex-col gap-10 px-4 py-12 sm:px-6 sm:py-16 lg:flex-row lg:items-start lg:gap-14">
         <div className="min-w-0 flex-1">
           <p className="text-[0.75rem] leading-4 font-medium tracking-[0.16em] text-white/70 uppercase">
-            Federal Republic of Nigeria
+            {identity.officialName}
           </p>
 
           <h1
@@ -65,7 +67,7 @@ export function NationalStatement({ cards }: { cards: HeadlineCards }) {
                 note in index.css. The surrounding sentence stays on the page's
                 normal type so it reads as one heading, not two fonts stitched
                 together. */}
-            <span className="font-landing-figure text-landing-gold tabular-nums">{headline.value}</span> Nigerians
+            <span className="font-landing-figure text-landing-gold tabular-nums">{headline.value}</span> people in {identity.country}
             have electricity access
           </h1>
 

@@ -32,6 +32,10 @@ const DEFAULT_FONT = 'Google Sans'
 
 const DEFAULT_BRAND_CONFIG: BrandConfig = {
   countryName: 'Nigeria',
+  officialName: 'Federal Republic of Nigeria',
+  agencyName: 'Federal Ministry of Power',
+  timezone: 'Africa/Lagos',
+  crestUrl: '',
   // CDMU Convening slide deck palette, per the site owner's request — a
   // deep navy primary and a single gold accent, not the earlier Nigeria
   // flag-green scheme. Still just the stored default: an admin can change

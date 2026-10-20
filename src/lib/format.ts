@@ -7,7 +7,17 @@ import { getLocale } from './currency'
  * Nigerian institutions, so timestamps render in Africa/Lagos unless a caller
  * says otherwise.
  */
-const DISPLAY_TIME_ZONE = 'Africa/Lagos'
+let displayTimeZone = 'Africa/Lagos'
+
+/** Set by BrandProvider from the saved branding, so dates follow the configured country. */
+export function setDisplayTimeZone(timeZone: string) {
+  try {
+    new Intl.DateTimeFormat('en', { timeZone })
+    displayTimeZone = timeZone
+  } catch {
+    displayTimeZone = 'Africa/Lagos'
+  }
+}
 
 export function formatDateTime(iso: string): string {
   const date = new Date(iso)
@@ -16,7 +26,7 @@ export function formatDateTime(iso: string): string {
   return new Intl.DateTimeFormat(getLocale(), {
     dateStyle: 'medium',
     timeStyle: 'short',
-    timeZone: DISPLAY_TIME_ZONE,
+    timeZone: displayTimeZone,
   }).format(date)
 }
 
@@ -26,7 +36,7 @@ export function formatDate(iso: string): string {
 
   return new Intl.DateTimeFormat(getLocale(), {
     dateStyle: 'medium',
-    timeZone: DISPLAY_TIME_ZONE,
+    timeZone: displayTimeZone,
   }).format(date)
 }
 

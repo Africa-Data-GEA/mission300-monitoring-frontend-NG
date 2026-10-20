@@ -1,3 +1,4 @@
+import { useBrandIdentity } from '@/features/branding/use-brand-identity'
 import { ArrowUpRight, Download } from 'lucide-react'
 import { Link } from 'react-router'
 
@@ -9,16 +10,17 @@ const FOOTER_LINKS = [
 ] as const
 
 export function PublicFooter({ lastUpdated }: { lastUpdated?: string }) {
+  const identity = useBrandIdentity()
   return (
     <footer className="mt-16 bg-landing-blue text-white">
       <div className="mx-auto max-w-[96rem] px-4 py-10 sm:px-6 sm:py-12">
         <div className="grid gap-10 lg:grid-cols-[1.3fr_1fr_auto] lg:items-start">
           <div>
             <p className="text-[1.125rem] leading-6 font-semibold tracking-tight">
-              Mission 300 Nigeria
+              Mission 300 {identity.country}
             </p>
             <p className="mt-2 max-w-[28rem] text-[0.8125rem] leading-5 text-white/70">
-              Federal Republic of Nigeria · Federal Ministry of Power
+              {identity.officialName} · {identity.agencyName}
             </p>
             <p className="mt-1 text-[0.75rem] leading-5 text-white/55">
               National Energy Compact{lastUpdated ? ` · updated ${lastUpdated}` : ''}

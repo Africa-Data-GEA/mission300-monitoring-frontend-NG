@@ -1,3 +1,4 @@
+import { useBrandIdentity } from '@/features/branding/use-brand-identity'
 const REPORTING_INSTITUTIONS = [
   {
     name: 'Nigerian Electricity Regulatory Commission',
@@ -33,6 +34,7 @@ const REPORTING_INSTITUTIONS = [
 
 /** Publisher-led accountability map using the institutions' actual marks. */
 export function Institutions() {
+  const identity = useBrandIdentity()
   return (
     <section id="institutions" aria-labelledby="institutions-heading" className="bg-[#f7f9fb] py-16 sm:py-20">
       <div className="mx-auto max-w-[96rem] px-4 sm:px-6">
@@ -46,8 +48,8 @@ export function Institutions() {
         <div className="mt-8 grid overflow-hidden bg-white lg:grid-cols-[17rem_minmax(0,1fr)]">
           <div className="flex min-h-[13rem] items-center justify-center bg-white p-7">
             <img
-              src="/Logos/geapp.png"
-              alt="Federal Republic of Nigeria coat of arms"
+              src={identity.crestUrl}
+              alt={`${identity.officialName} coat of arms`}
               className="max-h-32 max-w-40 object-contain mix-blend-multiply"
             />
           </div>
@@ -56,7 +58,7 @@ export function Institutions() {
               Lead publisher
             </p>
             <h3 className="mt-2 text-[1.5rem] leading-8 font-semibold tracking-tight">
-              Federal Ministry of Power
+              {identity.agencyName}
             </h3>
           </div>
         </div>

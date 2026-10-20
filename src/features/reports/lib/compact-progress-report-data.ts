@@ -92,7 +92,7 @@ const CROSS_TAB_STATUSES: readonly ExecutionStatus[] = [
   'completed',
 ]
 
-export function buildCompactProgressReportData(): CompactProgressReportData {
+export function buildCompactProgressReportData(countryName = 'Nigeria'): CompactProgressReportData {
   const { headlineCards, lastUpdated } = executiveOverview
 
   // SE4ALL MRL alignment (docs/se4all-mrl-alignment-renewable-private-capital.md):
@@ -217,7 +217,7 @@ export function buildCompactProgressReportData(): CompactProgressReportData {
     })
 
   return {
-    countryName: 'Nigeria',
+    countryName,
     reportingPeriod: 'Q1 2026',
     generatedAtLabel: new Date(lastUpdated).toLocaleDateString('en-GB', {
       day: '2-digit',

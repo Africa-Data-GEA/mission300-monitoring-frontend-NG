@@ -1,11 +1,12 @@
 import { NotebookPen } from 'lucide-react'
 import { useState } from 'react'
-import type { LearningLogEntry } from '@/api/schemas/learning-log'
+import type { LearningLogEntry, LearningLogType } from '@/api/schemas/learning-log'
 import { Breadcrumb } from '@/components/ui/breadcrumb'
 import { Button } from '@/components/ui/button'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import { ErrorState } from '@/components/ui/error-state'
 import { PageLoading } from '@/components/ui/page-loading'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useDeleteLearningLogEntry, useLearningLog } from './api'
 import { CreateLearningLogEntryDialog } from './components/create-learning-log-entry-dialog'
 import { EditLearningLogEntryDialog } from './components/edit-learning-log-entry-dialog'
@@ -15,14 +16,16 @@ import { LearningLogTable } from './components/learning-log-table'
  * The Learning & Decision Log — added per the SE4ALL MRL alignment review
  * (docs/se4all-mrl-alignment-renewable-private-capital.md). Bottlenecks &
  * Exceptions tracks what's currently blocked; this tracks course-correction
- * decisions themselves, which had no dedicated record anywhere before.
+ * decisions and the learnings behind them, which had no dedicated record
+ * anywhere before.
  */
 export function LearningLogPage() {
   const [page, setPage] = useState(1)
-  const [createOpen, setCreateOpen] = useState(false)
+  const [createType, setCreateType] = useState<LearningLogType | null>(null)
+  const [typeFilter, setTypeFilter] = useState('all')
   const [editEntry, setEditEntry] = useState<LearningLogEntry | null>(null)
   const [deleteEntry, setDeleteEntry] = useState<LearningLogEntry | null>(null)
-  const { data, isPending, isError, error, refetch } = useLearningLog(page)
+  const { data, isPending, isError, error, refetch } = useLearningLog(page, typeFilter)
   const deleteMutation = useDeleteLearningLogEntry()
 
   if (isPending) return <PageLoading label="Loading learning log" />
@@ -57,10 +60,30 @@ export function LearningLogPage() {
             </h1>
           </div>
         </div>
-        <Button type="button" onClick={() => setCreateOpen(true)}>
-          Log a decision
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button type="button" variant="secondary" onClick={() => setCreateType('learning')}>
+            Log a learning
+          </Button>
+          <Button type="button" onClick={() => setCreateType('decision')}>
+            Log a decision
+          </Button>
+        </div>
       </div>
+
+      <Tabs
+        defaultValue="all"
+        value={typeFilter}
+        onValueChange={(value) => {
+          setTypeFilter(value)
+          setPage(1)
+        }}
+      >
+        <TabsList>
+          <TabsTrigger value="all">All</TabsTrigger>
+          <TabsTrigger value="decision">Decisions</TabsTrigger>
+          <TabsTrigger value="learning">Learnings</TabsTrigger>
+        </TabsList>
+      </Tabs>
 
       <LearningLogTable
         entries={data.entries.items}
@@ -73,10 +96,12 @@ export function LearningLogPage() {
       />
 
       <CreateLearningLogEntryDialog
-        open={createOpen}
-        onClose={() => setCreateOpen(false)}
+        key={createType ?? 'closed'}
+        entryType={createType ?? 'decision'}
+        open={createType !== null}
+        onClose={() => setCreateType(null)}
         onCreated={() => {
-          setCreateOpen(false)
+          setCreateType(null)
           void refetch()
         }}
       />

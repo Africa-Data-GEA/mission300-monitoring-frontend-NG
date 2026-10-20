@@ -64,6 +64,21 @@ export const brandingHandlers = [
     return HttpResponse.json(resetBrandConfig())
   }),
 
+  /** POST /api/branding/crest — multipart upload, field `file`. */
+  http.post('/api/branding/crest', async ({ request }) => {
+    await delay(300)
+    const form = await request.formData()
+    const file = form.get('file')
+    if (!(file instanceof File)) {
+      return HttpResponse.json({ message: 'Select a crest or flag image to upload.' }, { status: 400 })
+    }
+    if (!file.type.startsWith('image/')) {
+      return HttpResponse.json({ message: 'The crest must be an image file.' }, { status: 400 })
+    }
+    const crestUrl = await fileToDataUrl(file)
+    return HttpResponse.json(setBrandConfig({ ...getBrandConfig(), crestUrl, updatedAt: new Date().toISOString() }))
+  }),
+
   /** POST /api/branding/logo — multipart upload, field `file`. */
   http.post('/api/branding/logo', async ({ request }) => {
     await delay(300)

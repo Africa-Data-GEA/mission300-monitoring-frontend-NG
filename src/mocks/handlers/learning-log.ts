@@ -37,7 +37,10 @@ export const learningLogHandlers = [
     const page = positiveInteger(params.get('page'), 1)
     const pageSize = Math.min(50, positiveInteger(params.get('pageSize'), 25))
 
-    const sorted = [...learningLogEntries].sort(
+    const type = params.get('entryType')
+    const sorted = [...learningLogEntries]
+      .filter((entry) => !type || (entry.entryType ?? 'decision') === type)
+      .sort(
       (a, b) => new Date(b.decidedAt).getTime() - new Date(a.decidedAt).getTime(),
     )
 
@@ -57,10 +60,15 @@ export const learningLogHandlers = [
     await delay(300)
 
     const body = (await request.json()) as {
+      entryType?: 'decision' | 'learning'
       title?: string
       area?: string
       decision?: string
       rationale?: string
+      context?: string
+      lesson?: string
+      recommendation?: string
+      evidence?: string
       relatedRecord?: string
       reviewCycle?: string
       status?: string
@@ -69,19 +77,28 @@ export const learningLogHandlers = [
     if (!body.title || body.title.trim().length < 3) {
       return HttpResponse.json({ message: 'Give the entry a title.' }, { status: 422 })
     }
-    if (!body.decision || body.decision.trim().length < 10) {
+    const isLearning = body.entryType === 'learning'
+    if (!isLearning && (!body.decision || body.decision.trim().length < 10)) {
       return HttpResponse.json(
         { message: 'Describe what was decided or proposed.' },
         { status: 422 },
       )
+    }
+    if (isLearning && (!body.lesson || body.lesson.trim().length < 10)) {
+      return HttpResponse.json({ message: 'Describe what was learned.' }, { status: 422 })
     }
 
     const entry: LearningLogEntry = {
       id: `LOG-2026-${String(nextEntryNumber).padStart(3, '0')}`,
       title: body.title.trim(),
       area: (body.area ?? 'other') as LearningLogEntry['area'],
-      decision: body.decision.trim(),
+      entryType: body.entryType ?? 'decision',
+      decision: body.decision?.trim() ?? '',
       rationale: body.rationale?.trim() ?? '',
+      context: body.context?.trim() ?? '',
+      lesson: body.lesson?.trim() ?? '',
+      recommendation: body.recommendation?.trim() ?? '',
+      evidence: body.evidence?.trim() ?? '',
       relatedRecord: body.relatedRecord?.trim() || null,
       reviewCycle: body.reviewCycle?.trim() || 'Unscheduled',
       status: (body.status ?? 'proposed') as LearningLogEntry['status'],

@@ -3,6 +3,7 @@ import { FileSpreadsheet } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { environment } from '@/config/environment'
 import { Card } from '@/components/ui/card'
+import { useBrandIdentity } from '@/features/branding/use-brand-identity'
 
 /**
  * Downloads the real "National Energy Compact Progress Report" workbook —
@@ -15,6 +16,7 @@ import { Card } from '@/components/ui/card'
  */
 export function NigeriaProgressReportSection() {
   const backendUrl = environment.hybridBackendUrl
+  const { country } = useBrandIdentity()
   const [isDownloading, setIsDownloading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -33,7 +35,7 @@ export function NigeriaProgressReportSection() {
       const url = URL.createObjectURL(blob)
       const link = document.createElement('a')
       link.href = url
-      link.download = 'National Energy Compact Progress Report - Nigeria.xlsx'
+      link.download = `National Energy Compact Progress Report - ${country}.xlsx`
       link.click()
       URL.revokeObjectURL(url)
     } catch (err) {

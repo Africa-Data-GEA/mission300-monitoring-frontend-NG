@@ -11,10 +11,15 @@ import { useUpdateLearningLogEntry } from './api'
 
 function toFormValues(entry: LearningLogEntry): CreateLearningLogEntryRequest {
   return {
+    entryType: entry.entryType ?? 'decision',
     title: entry.title,
     area: entry.area,
     decision: entry.decision,
     rationale: entry.rationale,
+    context: entry.context ?? '',
+    lesson: entry.lesson ?? '',
+    recommendation: entry.recommendation ?? '',
+    evidence: entry.evidence ?? '',
     relatedRecord: entry.relatedRecord ?? '',
     reviewCycle: entry.reviewCycle,
     status: entry.status,

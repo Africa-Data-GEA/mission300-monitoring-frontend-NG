@@ -4,19 +4,20 @@ import {
   LEARNING_LOG_AREA_LABELS,
   LEARNING_LOG_AREAS,
   LEARNING_LOG_STATUS_LABELS,
-  LEARNING_LOG_STATUSES,
+  DECISION_STATUSES,
+  LEARNING_STATUSES,
   type CreateLearningLogEntryRequest,
 } from '@/api/schemas/learning-log'
 import { Button } from '@/components/ui/button'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
+import { DecisionFields } from './decision-fields'
+import { LearningFields } from './learning-fields'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 const INPUT_CLASS =
   'h-11 w-full rounded-control border border-border-strong bg-surface px-3.5 text-base text-text-default placeholder:text-text-subtle'
-const TEXTAREA_CLASS =
-  'min-h-24 w-full resize-y rounded-control border border-border-strong bg-surface px-3.5 py-3 text-base text-text-default placeholder:text-text-subtle'
 
-/** The "log a decision" form fields, presented inside CreateLearningLogEntryDialog
+/** The "log a decision" or "log a learning" form fields, presented inside CreateLearningLogEntryDialog
  * and EditLearningLogEntryDialog - the request shape is identical for both. */
 export function CreateLearningLogEntryForm({
   form,
@@ -29,6 +30,9 @@ export function CreateLearningLogEntryForm({
   serverError: string
   isEditing?: boolean
 }) {
+  const entryType = form.watch('entryType')
+  const statusOptions = entryType === 'learning' ? LEARNING_STATUSES : DECISION_STATUSES
+
   return (
     <Form {...form}>
       <form className="space-y-6" noValidate onSubmit={onSubmit}>
@@ -85,7 +89,7 @@ export function CreateLearningLogEntryForm({
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {LEARNING_LOG_STATUSES.map((value) => (
+                    {statusOptions.map((value) => (
                       <SelectItem key={value} value={value}>
                         {LEARNING_LOG_STATUS_LABELS[value]}
                       </SelectItem>
@@ -128,33 +132,7 @@ export function CreateLearningLogEntryForm({
           />
         </div>
 
-        <FormField
-          control={form.control}
-          name="decision"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>What was decided or proposed</FormLabel>
-              <FormControl>
-                <textarea {...field} className={TEXTAREA_CLASS} placeholder="What changed, or what's being proposed" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="rationale"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Rationale</FormLabel>
-              <FormControl>
-                <textarea {...field} className={TEXTAREA_CLASS} placeholder="Why — what prompted this" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        {entryType === 'learning' ? <LearningFields form={form} /> : <DecisionFields form={form} />}
 
         {serverError && (
           <p className="text-sm text-status-at-risk" role="alert">

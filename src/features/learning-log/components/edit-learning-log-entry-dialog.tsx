@@ -18,10 +18,14 @@ export function EditLearningLogEntryDialog({
 }) {
   return (
     <SideDialog
-      description="Update this decision's details, or move it to its next status."
+      description={
+        entry?.entryType === 'learning'
+          ? "Update this learning's details, or move it to its next status."
+          : "Update this decision's details, or move it to its next status."
+      }
       onClose={onClose}
       open={entry !== null}
-      title="Edit decision"
+      title={entry?.entryType === 'learning' ? 'Edit learning' : 'Edit decision'}
     >
       {entry && <EditLearningLogEntryDialogBody entry={entry} onClose={onClose} onUpdated={onUpdated} />}
     </SideDialog>

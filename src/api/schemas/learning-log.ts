@@ -13,7 +13,14 @@ import { paginated } from './administration'
  * feedback"; this is that tracker, scoped small on purpose.
  */
 
-export const learningLogStatusSchema = z.enum(['proposed', 'decided', 'superseded'])
+export const learningLogStatusSchema = z.enum(['proposed', 'decided', 'superseded', 'captured', 'applied'])
+
+/** A decision records what was decided and why; a learning records what
+ * happened, what was learned and what to do differently. */
+export const learningLogTypeSchema = z.enum(['decision', 'learning'])
+
+export const DECISION_STATUSES = ['proposed', 'decided', 'superseded'] as const
+export const LEARNING_STATUSES = ['captured', 'applied', 'superseded'] as const
 
 /** What kind of thing this entry is about, so the log can be scanned by
  * subject without needing free-text search. */
@@ -29,10 +36,19 @@ export const learningLogEntrySchema = z.object({
   id: z.string().min(1),
   title: z.string().min(1),
   area: learningLogAreaSchema,
-  /** What was decided or proposed. */
-  decision: z.string().min(1),
-  /** Why — what prompted the review and what it changed or will change. */
-  rationale: z.string().min(1),
+  entryType: learningLogTypeSchema.optional(),
+  /** What was decided or proposed. Empty for a learning. */
+  decision: z.string(),
+  /** Why — what prompted the review and what it changed or will change. Empty for a learning. */
+  rationale: z.string(),
+  /** Learning: what happened or was observed. */
+  context: z.string().optional(),
+  /** Learning: what was learned. */
+  lesson: z.string().optional(),
+  /** Learning: what to do differently next time. */
+  recommendation: z.string().optional(),
+  /** Learning: the data or source that supports it. */
+  evidence: z.string().optional(),
   /** The KPI id, module, or record this decision affects, where there is
    * one. Null for a decision with no single affected record. */
   relatedRecord: z.string().nullable(),
@@ -44,14 +60,32 @@ export const learningLogEntrySchema = z.object({
   decidedAt: z.iso.datetime(),
 })
 
-export const createLearningLogEntryRequestSchema = z.object({
+const learningLogEntryFieldsSchema = z.object({
+  entryType: learningLogTypeSchema,
   title: z.string().trim().min(3, 'Give the entry a title'),
   area: learningLogAreaSchema,
-  decision: z.string().trim().min(10, 'Describe what was decided or proposed'),
-  rationale: z.string().trim().min(10, 'Describe why'),
+  decision: z.string().trim().optional(),
+  rationale: z.string().trim().optional(),
+  context: z.string().trim().optional(),
+  lesson: z.string().trim().optional(),
+  recommendation: z.string().trim().optional(),
+  evidence: z.string().trim().optional(),
   relatedRecord: z.string().trim().optional(),
   reviewCycle: z.string().trim().min(1, 'Name the review cycle'),
   status: learningLogStatusSchema,
+})
+
+export const createLearningLogEntryRequestSchema = learningLogEntryFieldsSchema.superRefine((value, ctx) => {
+  const need = (field: 'decision' | 'rationale' | 'context' | 'lesson', message: string) => {
+    if ((value[field] ?? '').length < 10) ctx.addIssue({ code: 'custom', path: [field], message })
+  }
+  if (value.entryType === 'decision') {
+    need('decision', 'Describe what was decided or proposed')
+    need('rationale', 'Describe why')
+  } else {
+    need('context', 'Describe what happened')
+    need('lesson', 'Describe what was learned')
+  }
 })
 
 export const createLearningLogEntryResponseSchema = z.object({
@@ -61,7 +95,7 @@ export const createLearningLogEntryResponseSchema = z.object({
 
 /** Same shape as create - every field optional, since an update is a
  * partial patch (e.g. just moving status from "proposed" to "decided"). */
-export const updateLearningLogEntryRequestSchema = createLearningLogEntryRequestSchema.partial()
+export const updateLearningLogEntryRequestSchema = learningLogEntryFieldsSchema.partial()
 
 export const updateLearningLogEntryResponseSchema = createLearningLogEntryResponseSchema
 
@@ -77,6 +111,7 @@ export const learningLogOverviewSchema = z.object({
 
 export type LearningLogStatus = z.infer<typeof learningLogStatusSchema>
 export type LearningLogArea = z.infer<typeof learningLogAreaSchema>
+export type LearningLogType = z.infer<typeof learningLogTypeSchema>
 export type LearningLogEntry = z.infer<typeof learningLogEntrySchema>
 export type CreateLearningLogEntryRequest = z.infer<typeof createLearningLogEntryRequestSchema>
 export type CreateLearningLogEntryResponse = z.infer<typeof createLearningLogEntryResponseSchema>
@@ -97,6 +132,13 @@ export const LEARNING_LOG_STATUS_LABELS: Record<LearningLogStatus, string> = {
   proposed: 'Proposed',
   decided: 'Decided',
   superseded: 'Superseded',
+  captured: 'Captured',
+  applied: 'Applied',
+}
+
+export const LEARNING_LOG_TYPE_LABELS: Record<LearningLogType, string> = {
+  decision: 'Decision',
+  learning: 'Learning',
 }
 
 export const LEARNING_LOG_AREAS = learningLogAreaSchema.options

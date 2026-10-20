@@ -1,3 +1,4 @@
+import { useBrandIdentity } from '@/features/branding/use-brand-identity'
 import { usePublicOverview } from './api'
 import { NationalStatementSkeleton } from './components/national-statement-skeleton'
 import { PublicHeader } from './components/public-header'
@@ -12,6 +13,7 @@ import { PublicHeader } from './components/public-header'
  */
 export function ProgressPage() {
   const { data, isPending, isError } = usePublicOverview()
+  const identity = useBrandIdentity()
 
   const cards = data?.headlineCards
   const rows = cards
@@ -64,7 +66,7 @@ export function ProgressPage() {
         {cards && (
           <>
             <p className="mt-6 max-w-[36rem] text-[1.1875rem] leading-7 text-text-muted">
-              Nigeria&rsquo;s position against the Mission 300 National Energy
+              {identity.country}&rsquo;s position against the Mission 300 National Energy
               Compact, as reported by the responsible institutions.
             </p>
 

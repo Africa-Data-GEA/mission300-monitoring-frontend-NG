@@ -2,6 +2,7 @@ import { Pencil, Trash2 } from 'lucide-react'
 import {
   LEARNING_LOG_AREA_LABELS,
   LEARNING_LOG_STATUS_LABELS,
+  LEARNING_LOG_TYPE_LABELS,
   type LearningLogEntry,
 } from '@/api/schemas/learning-log'
 import { Button } from '@/components/ui/button'
@@ -14,6 +15,8 @@ const STATUS_TONE: Record<LearningLogEntry['status'], string> = {
   proposed: 'bg-amber-50 text-amber-700',
   decided: 'bg-brand-50 text-brand-700',
   superseded: 'bg-surface-sunken text-text-muted',
+  captured: 'bg-sky-50 text-sky-700',
+  applied: 'bg-emerald-50 text-emerald-700',
 }
 
 function buildColumns(
@@ -39,9 +42,27 @@ function buildColumns(
       cell: (row) => LEARNING_LOG_AREA_LABELS[row.area],
     },
     {
-      id: 'decision',
-      header: 'Decision',
-      cell: (row) => <p className="max-w-md text-text-muted">{row.decision}</p>,
+      id: 'type',
+      header: 'Type',
+      sortValue: (row) => row.entryType ?? 'decision',
+      cell: (row) => (
+        <span className="inline-flex rounded-full bg-surface-sunken px-2.5 py-1 text-xs font-medium text-text-default">
+          {LEARNING_LOG_TYPE_LABELS[row.entryType ?? 'decision']}
+        </span>
+      ),
+    },
+    {
+      id: 'summary',
+      header: 'Decision or lesson',
+      cell: (row) =>
+        row.entryType === 'learning' ? (
+          <div className="max-w-md space-y-1">
+            <p className="text-text-default">{row.lesson}</p>
+            {row.recommendation ? <p className="text-xs text-text-muted">Next time: {row.recommendation}</p> : null}
+          </div>
+        ) : (
+          <p className="max-w-md text-text-muted">{row.decision}</p>
+        ),
     },
     {
       id: 'status',
@@ -119,7 +140,7 @@ export function LearningLogTable({
         columns={buildColumns(onEdit, onDelete)}
         rows={entries}
         getRowId={(row) => row.id}
-        emptyMessage="No decisions logged yet."
+        emptyMessage="Nothing logged yet."
       />
       <Pagination page={page} pageSize={pageSize} total={total} onPageChange={onPageChange} />
     </Card>

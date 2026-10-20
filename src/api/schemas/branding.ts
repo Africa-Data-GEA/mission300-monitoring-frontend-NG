@@ -41,6 +41,14 @@ export const brandCurrencySchema = z.object({
  */
 export const brandConfigSchema = z.object({
   countryName: z.string().min(1),
+  /** The formal name, e.g. "Federal Republic of Nigeria", used on the public pages. */
+  officialName: z.string().min(1),
+  /** The lead publishing agency shown on the public pages. */
+  agencyName: z.string().min(1),
+  /** IANA timezone dates and times are displayed in. */
+  timezone: z.string().min(1),
+  /** National crest or flag image. Empty means the built-in default. */
+  crestUrl: z.string(),
   primaryColor: hexColorSchema,
   secondaryColor: hexColorSchema,
   textColor: hexColorSchema,
@@ -62,6 +70,10 @@ export const brandConfigSchema = z.object({
 
 export const updateBrandColorsRequestSchema = z.object({
   countryName: z.string().min(1),
+  officialName: z.string().min(1).optional(),
+  agencyName: z.string().min(1).optional(),
+  timezone: z.string().min(1).optional(),
+  currency: brandCurrencySchema.optional(),
   primaryColor: hexColorSchema,
   secondaryColor: hexColorSchema,
   textColor: hexColorSchema,

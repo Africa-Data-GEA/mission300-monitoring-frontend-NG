@@ -1,3 +1,4 @@
+import { useBrandIdentity } from '@/features/branding/use-brand-identity'
 import { useMemo, useState } from 'react'
 import toast from 'react-hot-toast'
 import type {
@@ -50,6 +51,7 @@ function defaultConfig(reportType: ReportType): ReportConfig {
  * CPR/Compact quick exports and saved-report history underneath.
  */
 export function useReportsPage() {
+  const { country } = useBrandIdentity()
   const [config, setConfig] = useState<ReportConfig>(defaultConfig('compact-progress'))
   const [orientation, setOrientation] = useState<Orientation>('portrait')
   const [excludedSections, setExcludedSections] = useState<ReadonlySet<string>>(new Set())
@@ -138,7 +140,7 @@ export function useReportsPage() {
       // export; only the PDF bytes themselves diverge.
       const blob =
         card.id === 'compact-progress-report' && format === 'pdf' && environment.dataMode === 'mock'
-          ? await buildCompactProgressReportPdf(buildCompactProgressReportData())
+          ? await buildCompactProgressReportPdf(buildCompactProgressReportData(country))
           : format === 'pdf'
             ? await buildReportPdf(generated, { orientation: 'portrait' })
             : await buildReportWorkbook(generated)
@@ -157,7 +159,7 @@ export function useReportsPage() {
       const blob =
         report.format === 'pdf'
           ? compactLayout && environment.dataMode === 'mock'
-            ? await buildCompactProgressReportPdf(buildCompactProgressReportData())
+            ? await buildCompactProgressReportPdf(buildCompactProgressReportData(country))
             : await buildReportPdf(generated, { orientation: savedOrientation })
           : await buildReportWorkbook(generated)
       downloadBlob(blob, report.fileReference)
