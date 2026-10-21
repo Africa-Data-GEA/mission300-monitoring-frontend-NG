@@ -1,4 +1,3 @@
-import { NotebookPen } from 'lucide-react'
 import { useState } from 'react'
 import type { LearningLogEntry, LearningLogType } from '@/api/schemas/learning-log'
 import { Breadcrumb } from '@/components/ui/breadcrumb'
@@ -57,14 +56,9 @@ export function LearningLogPage() {
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <Breadcrumb items={[{ label: 'Data operations' }, { label: 'Learning & decision log' }]} />
-          <div className="mt-2 flex items-center gap-3">
-            <span className="flex size-10 shrink-0 items-center justify-center rounded-control bg-brand-50 text-brand-700">
-              <NotebookPen aria-hidden="true" className="size-5" />
-            </span>
-            <h1 className="text-3xl font-semibold tracking-tight text-text-default">
-              Learning &amp; decision log
-            </h1>
-          </div>
+          <h1 className="mt-2 text-3xl font-semibold tracking-tight text-text-default">
+            Learning &amp; decision log
+          </h1>
         </div>
         <div className="flex flex-wrap gap-2">
           <Button type="button" variant="secondary" onClick={() => setCreateType('learning')}>
