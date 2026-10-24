@@ -79,6 +79,7 @@ describe('NAVIGATION', () => {
         ['Pillar dashboards', '/pillars'],
         ['State & DisCo', '/state-disco'],
         ['Programs', '/programs'],
+        ['Reform actions', '/reform-actions'],
         ['Data submissions', '/data-submissions'],
         ['Reports & exports', '/reports'],
         ['Learning & decision log', '/learning-log'],

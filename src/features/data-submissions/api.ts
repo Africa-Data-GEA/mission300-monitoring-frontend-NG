@@ -5,6 +5,8 @@ import {
   datasetListSchema,
   dataSubmissionFiltersSchema,
   draftSavedSchema,
+  entryDraftSavedSchema,
+  entryDraftSchema,
   manualEntryDefinitionSchema,
   obligationListSchema,
   overdueListSchema,
@@ -60,6 +62,7 @@ export const submissionKeys = {
   list: (name: string, query: DataSubmissionQuery) =>
     ['data-submissions', name, query] as const,
   entry: (id: string) => ['data-submissions', 'entry', id] as const,
+  draft: (id: string) => ['data-submissions', 'draft', id] as const,
   upload: (id: string) => ['data-submissions', 'upload', id] as const,
   review: (id: string) => ['data-submissions', 'review', id] as const,
 }
@@ -129,6 +132,33 @@ export function useManualEntryDefinition(id: string) {
       return manualEntryDefinitionSchema.parse(withObligationContext(response, id, 'entry'))
     },
     enabled: Boolean(id),
+  })
+}
+
+export function useEntryDraft(id: string) {
+  return useQuery({
+    queryKey: submissionKeys.draft(id),
+    queryFn: () => api.get(`/data-submissions/obligations/${id}/entry/draft`, entryDraftSchema),
+    enabled: Boolean(id),
+    staleTime: Infinity,
+    gcTime: 0,
+  })
+}
+
+export function useSaveEntryDraft(id: string) {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (input: ManualEntryRequest) =>
+      api.put(`/data-submissions/obligations/${id}/entry/draft`, input, entryDraftSavedSchema),
+    onSuccess: () => client.invalidateQueries({ queryKey: submissionKeys.draft(id) }),
+  })
+}
+
+export function useDiscardEntryDraft(id: string) {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: () => api.delete(`/data-submissions/obligations/${id}/entry/draft`),
+    onSuccess: () => client.invalidateQueries({ queryKey: submissionKeys.draft(id) }),
   })
 }
 

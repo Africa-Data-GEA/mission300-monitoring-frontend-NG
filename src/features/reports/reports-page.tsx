@@ -75,8 +75,9 @@ export function ReportsPage() {
 
       <CompactExportsSection
         cards={page.compactExports}
+        periods={page.filterOptions?.reportingPeriods ?? []}
         exportingKey={page.compactExportKey}
-        onExport={(card, format) => void page.exportCompactCard(card, format)}
+        onExport={page.exportCompactCard}
       />
 
       <NigeriaProgressReportSection />

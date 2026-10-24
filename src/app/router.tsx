@@ -89,6 +89,12 @@ const LearningLogPage = lazy(() =>
   })),
 )
 
+const ReformActionsPage = lazy(() =>
+  routeChunks.reformActions().then((module) => ({
+    default: module.ReformActionsPage,
+  })),
+)
+
 const ProgrammeDetailPage = lazy(() =>
   routeChunks.programmeDetail().then((module) => ({
     default: module.ProgrammeDetailPage,
@@ -330,6 +336,11 @@ export const router = createBrowserRouter([
       {
         path: 'reports',
         element: moduleRoute('reports', <ReportsPage />),
+        handle: { globalFilters: false } satisfies RouteHandle,
+      },
+      {
+        path: 'reform-actions',
+        element: moduleRoute('reform-actions', <ReformActionsPage />),
         handle: { globalFilters: false } satisfies RouteHandle,
       },
       {

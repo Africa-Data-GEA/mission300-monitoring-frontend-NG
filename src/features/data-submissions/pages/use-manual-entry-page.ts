@@ -1,11 +1,17 @@
-import { useState, type FormEvent } from 'react'
+import { useMemo, useState, type FormEvent } from 'react'
 import { useNavigate, useParams } from 'react-router'
 import type { ManualEntryDefinition } from '@/api/schemas/data-submissions'
 import { destinationAfterSubmit } from '../lib/after-submit'
 import { gridPayload, newGridRow, rowsMissingChoices, type EntryGridRow } from '../lib/entry-grid'
 import { periodChoices } from '../lib/period-options'
-import { toastRefused, toastSubmitted } from '../lib/submit-toast'
-import { useManualEntryDefinition, useSaveManualEntry } from '../api'
+import { toastDraftDiscarded, toastDraftSaved, toastRefused, toastSubmitted } from '../lib/submit-toast'
+import {
+  useDiscardEntryDraft,
+  useEntryDraft,
+  useManualEntryDefinition,
+  useSaveEntryDraft,
+  useSaveManualEntry,
+} from '../api'
 
 function wantsGrid(definition: ManualEntryDefinition | undefined): boolean {
   return Boolean(definition && (definition.consolidated || (definition.periods?.length ?? 0) > 1))
@@ -23,11 +29,27 @@ export function useManualEntryPage() {
 
   const definition = useManualEntryDefinition(id)
   const save = useSaveManualEntry(id)
+  const draftQuery = useEntryDraft(id)
+  const saveDraft = useSaveEntryDraft(id)
+  const discardDraft = useDiscardEntryDraft(id)
+  const draft = draftQuery.data?.draft ?? null
 
-  const [values, setValues] = useState<Record<string, string>>({})
+  const [typedValues, setValues] = useState<Record<string, string> | null>(null)
   const [gridRows, setGridRows] = useState<EntryGridRow[] | null>(null)
-  const [sourceReference, setSourceReference] = useState('')
-  const [notes, setNotes] = useState('')
+  const [typedReference, setSourceReference] = useState<string | null>(null)
+  const [typedNotes, setNotes] = useState<string | null>(null)
+
+  const draftRows = useMemo(
+    () =>
+      draft?.rows?.map((row) => ({
+        ...newGridRow(row.period ?? '', row.institution ?? ''),
+        values: row.values,
+      })) ?? null,
+    [draft],
+  )
+  const values = typedValues ?? draft?.values ?? {}
+  const sourceReference = typedReference ?? draft?.sourceReference ?? ''
+  const notes = typedNotes ?? draft?.notes ?? ''
 
   const data = definition.data
   const grid = wantsGrid(data)
@@ -37,10 +59,10 @@ export function useManualEntryPage() {
       ? periodChoices(data.frequency ?? 'Quarterly', data.reportingPeriod)
       : (data.periods ?? [])
     : []
-  const rows = gridRows ?? (data ? [newGridRow(data.reportingPeriod)] : [])
+  const rows = gridRows ?? draftRows ?? (data ? [newGridRow(data.reportingPeriod)] : [])
 
   function setFieldValue(fieldId: string, value: string) {
-    setValues((current) => ({ ...current, [fieldId]: value }))
+    setValues({ ...values, [fieldId]: value })
   }
 
   function changeRow(key: string, patch: Partial<EntryGridRow>) {
@@ -64,6 +86,35 @@ export function useManualEntryPage() {
     setGridRows([...blank, ...missing.map((name) => newGridRow(period, name))])
   }
 
+  function currentPayload() {
+    return grid
+      ? { rows: gridPayload(rows, consolidated), sourceReference, notes }
+      : { values, sourceReference, notes }
+  }
+
+  async function saveAsDraft() {
+    try {
+      const result = await saveDraft.mutateAsync(currentPayload())
+      toastDraftSaved(result.message)
+    } catch (error) {
+      toastRefused(error)
+    }
+  }
+
+  async function discard() {
+    try {
+      await discardDraft.mutateAsync()
+    } catch (error) {
+      toastRefused(error)
+      return
+    }
+    setValues({})
+    setGridRows(null)
+    setSourceReference('')
+    setNotes('')
+    toastDraftDiscarded()
+  }
+
   async function submit(event: FormEvent) {
     event.preventDefault()
     if (grid) {
@@ -75,11 +126,7 @@ export function useManualEntryPage() {
     }
     let result
     try {
-      result = await save.mutateAsync(
-        grid
-          ? { rows: gridPayload(rows, consolidated), sourceReference, notes }
-          : { values, sourceReference, notes },
-      )
+      result = await save.mutateAsync(currentPayload())
     } catch (error) {
       toastRefused(error)
       return
@@ -104,6 +151,11 @@ export function useManualEntryPage() {
     notes,
     setNotes,
     isSaving: save.isPending,
+    draft,
+    isSavingDraft: saveDraft.isPending,
+    isDiscardingDraft: discardDraft.isPending,
+    saveDraft: () => void saveAsDraft(),
+    discardDraft: () => void discard(),
     submit: (event: FormEvent) => void submit(event),
   }
 }

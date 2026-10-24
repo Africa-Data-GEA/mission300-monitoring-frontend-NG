@@ -17,8 +17,10 @@ import {
   useReportsFilters,
   useReportsOverview,
 } from './api'
+import type { CompactReportParameters } from './lib/compact-report-parameters'
 import { buildCompactProgressReportData } from './lib/compact-progress-report-data'
 import { buildCompactProgressReportPdf } from './lib/build-compact-progress-report-pdf'
+import { loadLiveCompactProgressSource, loadMockCompactProgressSource } from './lib/compact-progress-report-source'
 import { downloadBlob } from './lib/download'
 import { buildReportWorkbook } from './lib/export-excel'
 import { buildReportPdf } from './lib/export-pdf'
@@ -121,12 +123,23 @@ export function useReportsPage() {
     }
   }
 
-  async function exportCompactCard(card: CompactExportCard, format: ExportFormat) {
+  async function compactReportData(parameters?: CompactReportParameters) {
+    const source =
+      environment.dataMode === 'mock' ? await loadMockCompactProgressSource() : await loadLiveCompactProgressSource()
+    return buildCompactProgressReportData(source, country, parameters)
+  }
+
+  async function exportCompactCard(
+    card: CompactExportCard,
+    format: ExportFormat,
+    parameters: CompactReportParameters,
+  ) {
     const key = `${card.id}:${format}`
     setCompactExportKey(key)
     try {
       const { preview: generated, savedReport } = await generateReport.mutateAsync({
         ...defaultConfig(card.reportType),
+        periods: [parameters.period],
         format,
         ...(card.id === 'compact-progress-report' && format === 'pdf' && environment.dataMode === 'mock'
           ? { compactLayout: true }
@@ -139,8 +152,8 @@ export function useReportsPage() {
       // download is tracked in Saved Reports history the same as any other
       // export; only the PDF bytes themselves diverge.
       const blob =
-        card.id === 'compact-progress-report' && format === 'pdf' && environment.dataMode === 'mock'
-          ? await buildCompactProgressReportPdf(buildCompactProgressReportData(country))
+        card.id === 'compact-progress-report' && format === 'pdf'
+          ? await buildCompactProgressReportPdf(await compactReportData(parameters))
           : format === 'pdf'
             ? await buildReportPdf(generated, { orientation: 'portrait' })
             : await buildReportWorkbook(generated)
@@ -158,8 +171,8 @@ export function useReportsPage() {
       const { preview: generated, orientation: savedOrientation, compactLayout } = await fetchSavedReportPreview(report.id)
       const blob =
         report.format === 'pdf'
-          ? compactLayout && environment.dataMode === 'mock'
-            ? await buildCompactProgressReportPdf(buildCompactProgressReportData(country))
+          ? compactLayout
+            ? await buildCompactProgressReportPdf(await compactReportData())
             : await buildReportPdf(generated, { orientation: savedOrientation })
           : await buildReportWorkbook(generated)
       downloadBlob(blob, report.fileReference)

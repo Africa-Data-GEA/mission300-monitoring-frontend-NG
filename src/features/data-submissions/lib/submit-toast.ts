@@ -10,6 +10,14 @@ export function toastSubmitted(message: string) {
   dashboardToast.success('Submission received', { description: message, duration: SUCCESS_TOAST_MS })
 }
 
+export function toastDraftSaved(message: string) {
+  dashboardToast.success('Draft saved', { description: message, duration: SUCCESS_TOAST_MS })
+}
+
+export function toastDraftDiscarded() {
+  dashboardToast.success('Draft discarded', { duration: SUCCESS_TOAST_MS })
+}
+
 export function toastRefused(error: unknown, hasRowDetails = false) {
   const full = error instanceof Error && error.message ? error.message : 'Something went wrong. Please try again.'
   const firstLine = full.split(LINE_BREAK)[0]

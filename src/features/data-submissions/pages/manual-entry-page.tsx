@@ -69,6 +69,11 @@ export function ManualEntryPage() {
                 page.grid ? `${page.rows.length} row${page.rows.length === 1 ? '' : 's'}` : definition.data.reportingPeriod
               }
               isSaving={page.isSaving}
+              draft={page.draft}
+              isSavingDraft={page.isSavingDraft}
+              isDiscardingDraft={page.isDiscardingDraft}
+              onSaveDraft={page.saveDraft}
+              onDiscardDraft={page.discardDraft}
               wide={page.grid}
             />
           </form>

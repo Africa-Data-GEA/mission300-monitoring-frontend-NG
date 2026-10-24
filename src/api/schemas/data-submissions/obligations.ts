@@ -108,6 +108,24 @@ export const manualEntryRequestSchema = z.object({
   notes: z.string(),
 })
 
+export const entryDraftSchema = z.object({
+  draft: z
+    .object({
+      values: z.record(z.string(), z.string()).nullable(),
+      rows: z.array(manualEntryRowSchema).nullable(),
+      sourceReference: z.string(),
+      notes: z.string(),
+      savedAt: z.string().min(1),
+      savedBy: z.string().min(1),
+    })
+    .nullable(),
+})
+
+export const entryDraftSavedSchema = z.object({
+  savedAt: z.string().min(1),
+  message: z.string().min(1),
+})
+
 export const uploadDefinitionSchema = z.object({
   obligationId: z.string().min(1),
   institution: z.string().min(1),
@@ -131,5 +149,6 @@ export type Obligation = z.infer<typeof obligationSchema>
 export type EntryField = z.infer<typeof entryFieldSchema>
 export type ManualEntryDefinition = z.infer<typeof manualEntryDefinitionSchema>
 export type ManualEntryRequest = z.infer<typeof manualEntryRequestSchema>
+export type EntryDraft = NonNullable<z.infer<typeof entryDraftSchema>['draft']>
 export type UploadDefinition = z.infer<typeof uploadDefinitionSchema>
 export type DraftSaved = z.infer<typeof draftSavedSchema>

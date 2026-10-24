@@ -1,8 +1,13 @@
 import { PILLARS, PILLAR_LABELS, type PillarId } from '@/api/schemas/common'
-import { EXECUTION_STATUS_LABELS, type ExecutionStatus } from '@/api/schemas/programs'
-import { executiveOverview } from '@/mocks/data/executive-overview'
-import { getKpiProfile } from '@/mocks/data/kpi-explorer'
-import { programmes, projects } from '@/mocks/data/programs'
+import { REFORM_STATUS_LABELS, type ReformStatus } from '@/api/schemas/reform-actions'
+import type { ExecutiveOverview } from '@/api/schemas/executive-overview'
+import type { KpiProfile } from '@/api/schemas/kpi-explorer'
+import {
+  cycleHeading,
+  formatAsOfDate,
+  formatReportMonth,
+  type CompactReportParameters,
+} from './compact-report-parameters'
 
 /**
  * Assembles the data the bespoke Compact Progress Report PDF needs, from the
@@ -52,7 +57,7 @@ export interface CompactProgressStatusRow {
 }
 
 export interface CompactProgressStatusTotal {
-  readonly status: ExecutionStatus
+  readonly status: string
   readonly label: string
   readonly count: number
 }
@@ -71,43 +76,73 @@ export interface CompactProgressReportData {
   readonly countryName: string
   readonly reportingPeriod: string
   readonly generatedAtLabel: string
+  readonly cycleLabel: string
+  readonly reportDateLabel: string
   readonly keyTargets: readonly CompactProgressKeyTarget[]
   readonly pillarTargets: readonly CompactProgressPillarTarget[]
   readonly pillars: readonly { readonly id: PillarId; readonly label: string }[]
   readonly statusByPillar: readonly CompactProgressStatusRow[]
   readonly statusTotals: readonly CompactProgressStatusTotal[]
+  readonly statusByPriority: {
+    readonly priority: readonly CompactProgressStatusTotal[]
+    readonly other: readonly CompactProgressStatusTotal[]
+  }
   readonly totalActions: number
   readonly totalPriorityActions: number
   readonly priorityActions: readonly CompactProgressPriorityAction[]
 }
 
-/** The five reform-action statuses this report cross-tabs by — every status
- * except `completed`'s absence would misreport progress, so all five are
- * always present in `statusTotals`, even at zero. */
-const CROSS_TAB_STATUSES: readonly ExecutionStatus[] = [
-  'on-track',
-  'at-risk',
-  'delayed',
-  'blocked',
-  'completed',
-]
+const STATUS_GROUPS = [
+  { status: 'completed', label: 'Completed' },
+  { status: 'in-progress', label: 'In progress' },
+  { status: 'delayed', label: 'Delayed' },
+] as const
 
-export function buildCompactProgressReportData(countryName = 'Nigeria'): CompactProgressReportData {
-  const { headlineCards, lastUpdated } = executiveOverview
+function groupOf(status: ReformStatus): string {
+  if (status === 'completed' || status === 'delayed') return status
+  return 'in-progress'
+}
 
-  // SE4ALL MRL alignment (docs/se4all-mrl-alignment-renewable-private-capital.md):
-  // the CPR must report the CPR-canonical figure, which is NOT the same
-  // number the day-to-day Executive Overview dashboard shows for either
-  // metric. Renewable share on the dashboard is generation-mix (GWh/GWh,
-  // M300-P1-004) — SE4ALL's CPR indicator is installed-capacity share
-  // (MW/MW, M300-P1-015). Private capital on the dashboard is the legacy
-  // manually-entered total (M300-P4-002) — SE4ALL's CPR indicator is the
-  // verified, exclusion-enforced ledger figure (M300-P4-008). Reading these
-  // two KPI Explorer profiles directly, rather than `nationalPerformance`,
-  // is what keeps the dashboard's own figures unchanged while fixing what
-  // the CPR itself reports.
-  const renewables = getKpiProfile('M300-P1-015')
-  const privateCapital = getKpiProfile('M300-P4-008')
+export interface CompactProgressSourceAction {
+  readonly pillar: PillarId
+  readonly status: ReformStatus
+  readonly isPriority: boolean
+}
+
+export interface CompactProgressSourcePriority {
+  readonly id: string
+  readonly pillar: PillarId
+  readonly commitment: string
+  readonly action: string
+  readonly deadline: string | null
+  readonly status: ReformStatus
+  readonly previousStatus: ReformStatus | null
+}
+
+export interface CompactProgressSource {
+  readonly overview: Pick<ExecutiveOverview, 'headlineCards' | 'lastUpdated'>
+  readonly renewables: Pick<KpiProfile, 'baselineLabel' | 'currentLabel' | 'targetLabel'> | undefined
+  readonly privateCapital: Pick<KpiProfile, 'baselineLabel' | 'currentLabel' | 'targetLabel'> | undefined
+  readonly actions: readonly CompactProgressSourceAction[]
+  readonly priorityActions: readonly CompactProgressSourcePriority[]
+}
+
+const NO_DATA_LABEL = 'No data provided yet'
+
+function reportedOrNoData(label: string | undefined): string {
+  if (!label || /^(no (current )?(value|data)|not (yet )?(tracked|reported)|-|—)/i.test(label.trim())) return NO_DATA_LABEL
+  return label
+}
+
+export function buildCompactProgressReportData(
+  source: CompactProgressSource,
+  countryName = 'Nigeria',
+  parameters?: CompactReportParameters,
+): CompactProgressReportData {
+  const { headlineCards, lastUpdated } = source.overview
+
+  const renewables = source.renewables
+  const privateCapital = source.privateCapital
 
   const keyTargets: CompactProgressKeyTarget[] = [
     {
@@ -125,17 +160,17 @@ export function buildCompactProgressReportData(countryName = 'Nigeria'): Compact
       targetLabel: headlineCards.cleanCookingAccess.targetLabel,
     },
     {
-      label: 'Renewable installed capacity share (CPR-canonical)',
-      unit: '% of installed capacity',
-      baselineLabel: renewables?.baselineLabel ?? 'Not tracked',
-      currentLabel: renewables?.currentLabel ?? 'Not tracked',
+      label: 'Share of renewable energy in national generation',
+      unit: '% of generation',
+      baselineLabel: reportedOrNoData(renewables?.baselineLabel),
+      currentLabel: reportedOrNoData(renewables?.currentLabel),
       targetLabel: renewables?.targetLabel ?? 'No approved target',
     },
     {
-      label: 'Private capital mobilized (CPR-canonical, verified ledger)',
+      label: 'Private capital mobilized',
       unit: 'USD Million',
       baselineLabel: privateCapital?.baselineLabel ?? 'TBC',
-      currentLabel: privateCapital?.currentLabel ?? 'No data provided yet',
+      currentLabel: reportedOrNoData(privateCapital?.currentLabel),
       targetLabel: privateCapital?.targetLabel ?? 'No approved target',
     },
   ]
@@ -156,26 +191,20 @@ export function buildCompactProgressReportData(countryName = 'Nigeria'): Compact
     {
       pillarId: 'generation-network',
       icon: 'renewables',
-      label: 'Renewable installed capacity share',
+      label: 'Renewables share',
       description: renewables?.targetLabel ? `Reach ${renewables.targetLabel}.` : 'No approved target on record.',
     },
     {
       pillarId: 'private-sector-participation',
       icon: 'private-capital',
-      label: 'Private capital mobilized (verified ledger)',
-      description: privateCapital?.targetLabel ? `Mobilize ${privateCapital.targetLabel}.` : 'No approved target on record.',
+      label: 'Private capital mobilized',
+      description: 'Mobilize at least USD 15.5 billion in private capital by 2030 to support last-mile electrification.',
     },
   ]
 
   const pillars = PILLARS.map((id) => ({ id, label: PILLAR_LABELS[id] }))
 
-  // Every programme AND project is one "action" against its pillar — the
-  // same population the pillar dashboards' own delivery-status counts read
-  // from (see buildPillarDashboard in mocks/data/pillar-dashboard.ts).
-  const allStatuses: { pillar: PillarId; status: ExecutionStatus; isPriority: boolean }[] = [
-    ...programmes.map((row) => ({ pillar: row.pillar, status: row.status, isPriority: row.priority === 'priority' })),
-    ...projects.map((row) => ({ pillar: row.pillar, status: row.currentStatus, isPriority: false })),
-  ]
+  const allStatuses = source.actions
 
   const statusByPillar: CompactProgressStatusRow[] = pillars.map(({ id, label }) => {
     const rows = allStatuses.filter((entry) => entry.pillar === id)
@@ -189,46 +218,47 @@ export function buildCompactProgressReportData(countryName = 'Nigeria'): Compact
     }
   })
 
-  const statusTotals: CompactProgressStatusTotal[] = CROSS_TAB_STATUSES.map((status) => ({
-    status,
-    label: EXECUTION_STATUS_LABELS[status],
-    count: allStatuses.filter((entry) => entry.status === status).length,
+  const statusTotals: CompactProgressStatusTotal[] = STATUS_GROUPS.map((group) => ({
+    ...group,
+    count: allStatuses.filter((entry) => groupOf(entry.status) === group.status).length,
   }))
 
-  const priorityActions: CompactProgressPriorityAction[] = programmes
-    .filter((row) => row.priority === 'priority')
-    .map((row) => {
-      const priorityProjects = projects.filter((project) => project.programmeId === row.id)
-      const project = priorityProjects[0]
-      const previousStatus = project?.statusHistory[project.statusHistory.length - 2]
-      return {
-        id: row.id,
-        pillarLabel: PILLAR_LABELS[row.pillar],
-        commitment: row.name,
-        actionText: row.objectives,
-        deadlineLabel: new Date(row.endDate).toLocaleDateString('en-GB', {
-          day: '2-digit',
-          month: 'short',
-          year: 'numeric',
-        }),
-        currentStatusLabel: EXECUTION_STATUS_LABELS[row.status],
-        previousStatusLabel: previousStatus ? EXECUTION_STATUS_LABELS[previousStatus.status] : 'N/A',
-      }
-    })
+  const countStatuses = (isPriority: boolean): CompactProgressStatusTotal[] =>
+    STATUS_GROUPS.map((group) => ({
+      ...group,
+      count: allStatuses.filter((entry) => entry.isPriority === isPriority && groupOf(entry.status) === group.status).length,
+    }))
+
+  const priorityActions: CompactProgressPriorityAction[] = source.priorityActions.map((row) => ({
+    id: row.id,
+    pillarLabel: PILLAR_LABELS[row.pillar],
+    commitment: row.commitment,
+    actionText: row.action,
+    deadlineLabel: row.deadline
+      ? new Date(row.deadline).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+      : 'TBC',
+    currentStatusLabel: REFORM_STATUS_LABELS[row.status],
+    previousStatusLabel: row.previousStatus ? REFORM_STATUS_LABELS[row.previousStatus] : 'N/A',
+  }))
 
   return {
     countryName,
-    reportingPeriod: 'Q1 2026',
-    generatedAtLabel: new Date(lastUpdated).toLocaleDateString('en-GB', {
-      day: '2-digit',
-      month: 'long',
-      year: 'numeric',
-    }),
+    reportingPeriod: parameters?.periodLabel ?? 'Q1 2026',
+    generatedAtLabel: parameters
+      ? formatAsOfDate(parameters.asOfDate)
+      : new Date(lastUpdated).toLocaleDateString('en-GB', {
+          day: '2-digit',
+          month: 'long',
+          year: 'numeric',
+        }),
+    cycleLabel: parameters ? cycleHeading(parameters) : 'Second cycle of data collection 2025',
+    reportDateLabel: parameters ? formatReportMonth(parameters.reportMonth) : '',
     keyTargets,
     pillarTargets,
     pillars,
     statusByPillar,
     statusTotals,
+    statusByPriority: { priority: countStatuses(true), other: countStatuses(false) },
     totalActions: allStatuses.length,
     totalPriorityActions: allStatuses.filter((entry) => entry.isPriority).length,
     priorityActions,

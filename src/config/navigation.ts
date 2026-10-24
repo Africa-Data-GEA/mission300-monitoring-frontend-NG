@@ -7,6 +7,7 @@ import {
   Home,
   LayoutGrid,
   MapPin,
+  ScrollText,
   type LucideIcon,
 } from 'lucide-react'
 import type { PillarId } from '@/api/schemas/common'
@@ -91,6 +92,7 @@ export const NAVIGATION: readonly NavGroup[] = [
     label: 'Delivery tracking',
     items: [
       { label: 'Programs', to: '/programs', icon: ClipboardList, ready: true, moduleKey: 'programs' },
+      { label: 'Reform actions', to: '/reform-actions', icon: ScrollText, ready: true, moduleKey: 'reform-actions' },
     ],
   },
   {

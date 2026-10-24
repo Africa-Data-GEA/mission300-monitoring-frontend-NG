@@ -27,11 +27,13 @@ const ROLE_MODULE_KEYS: Record<string, readonly string[] | 'all'> = {
     'state-disco',
     'programs',
     'programme-admin',
+    'reform-actions',
+    'reform-admin',
     'kpi-directory',
     'reports',
     'learning-log',
   ],
-  'oversight-user': ['executive-overview', 'pillar-dashboards', 'reports'],
+  'oversight-user': ['executive-overview', 'pillar-dashboards', 'reports', 'reform-actions'],
   'read-only-user': ['executive-overview'],
 }
 
