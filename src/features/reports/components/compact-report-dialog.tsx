@@ -6,38 +6,13 @@ import { SelectField } from '@/components/ui/select-field'
 import { SideDialog } from '@/components/ui/side-dialog'
 import type { FilterOption } from '@/types/filters'
 import {
-  CYCLE_OPTIONS,
-  dataYearOptions,
   defaultCompactReportParameters,
+  periodChoices,
   type CompactReportParameters,
 } from '../lib/compact-report-parameters'
 
-function DateInput({
-  label,
-  type,
-  value,
-  onChange,
-}: {
-  label: string
-  type: 'date' | 'month'
-  value: string
-  onChange: (value: string) => void
-}) {
-  return (
-    <label className="flex flex-col gap-1.5 text-sm font-medium text-text-default">
-      {label}
-      <input
-        className="h-10 rounded-control border border-border-default bg-surface px-3 text-sm text-text-default"
-        type={type}
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-      />
-    </label>
-  )
-}
-
-/** Asks for the reporting parameters of a Compact export before generating it,
- * so the report states which period, cycle and date it covers. */
+/** Asks for the two things the report needs before generating it: which
+ * reporting period it covers, and the date its figures are current as of. */
 export function CompactReportDialog({
   card,
   periods,
@@ -52,53 +27,49 @@ export function CompactReportDialog({
   onGenerate: (card: CompactExportCard, format: ExportFormat, parameters: CompactReportParameters) => void
 }) {
   const [parameters, setParameters] = useState(() => defaultCompactReportParameters(periods))
-  const periodOptions = periods.filter((option) => option.value !== 'all')
-  const set = (patch: Partial<CompactReportParameters>) => setParameters((current) => ({ ...current, ...patch }))
+  const choices = periodChoices(periods)
 
   return (
     <SideDialog
       open={card !== null}
       onClose={onClose}
       title={card ? `Generate ${card.title}` : 'Generate report'}
-      description="Choose what the report covers. These appear on its cover and headers."
+      description="Choose the period the report covers and the date its figures are current as of."
     >
-      <div className="flex max-w-xl flex-col gap-4 p-5 sm:p-7">
-        <SelectField
-          label="Reporting period"
-          value={parameters.period}
-          options={periodOptions.length > 0 ? periodOptions : [{ value: 'all', label: 'All periods' }]}
-          onChange={(value) =>
-            set({ period: value, periodLabel: periodOptions.find((option) => option.value === value)?.label ?? value })
-          }
-        />
-        <SelectField
-          label="Data collection cycle"
-          value={parameters.cycle}
-          options={CYCLE_OPTIONS}
-          onChange={(value) => set({ cycle: value })}
-        />
-        <SelectField
-          label="Progress achieved in"
-          value={parameters.dataYear}
-          options={dataYearOptions()}
-          onChange={(value) => set({ dataYear: value })}
-        />
-        <DateInput
-          label="Report month"
-          type="month"
-          value={parameters.reportMonth}
-          onChange={(value) => set({ reportMonth: value })}
-        />
-        <DateInput
-          label="Data as of"
-          type="date"
-          value={parameters.asOfDate}
-          onChange={(value) => set({ asOfDate: value })}
-        />
+      <div className="flex max-w-xl flex-col gap-5 p-5 sm:p-7">
+        <div className="flex flex-col gap-1.5">
+          <SelectField
+            label="Reporting period"
+            value={parameters.period}
+            options={choices.length > 0 ? choices : [{ value: 'all', label: 'All periods' }]}
+            onChange={(value) =>
+              setParameters((current) => ({
+                ...current,
+                period: value,
+                periodLabel: choices.find((option) => option.value === value)?.label ?? value,
+              }))
+            }
+          />
+          <p className="text-xs text-text-muted">The quarter the report covers. It appears on the cover and every page header.</p>
+        </div>
+
+        <div className="flex flex-col gap-1.5">
+          <label className="text-xs font-medium text-text-muted" htmlFor="compact-report-as-of">
+            Data as of
+          </label>
+          <input
+            id="compact-report-as-of"
+            className="h-10 rounded-control border border-border-strong bg-surface px-3 text-sm text-text-default"
+            type="date"
+            value={parameters.asOfDate}
+            onChange={(event) => setParameters((current) => ({ ...current, asOfDate: event.target.value }))}
+          />
+          <p className="text-xs text-text-muted">The date the figures are current as of. It is also used as the report month.</p>
+        </div>
 
         <div className="flex flex-wrap gap-2 pt-2">
           <Button
-            disabled={isGenerating || !card}
+            disabled={isGenerating || !card || !parameters.asOfDate}
             onClick={() => card && onGenerate(card, 'pdf', parameters)}
             type="button"
           >
@@ -106,7 +77,7 @@ export function CompactReportDialog({
             {isGenerating ? 'Generating…' : 'Generate PDF'}
           </Button>
           <Button
-            disabled={isGenerating || !card}
+            disabled={isGenerating || !card || !parameters.asOfDate}
             onClick={() => card && onGenerate(card, 'xlsx', parameters)}
             type="button"
             variant="secondary"

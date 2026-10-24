@@ -1,42 +1,31 @@
 export interface CompactReportParameters {
   readonly period: string
   readonly periodLabel: string
-  readonly cycle: string
-  readonly dataYear: string
-  readonly reportMonth: string
   readonly asOfDate: string
 }
 
-export const CYCLE_OPTIONS = [
-  { value: 'First', label: 'First cycle' },
-  { value: 'Second', label: 'Second cycle' },
-  { value: 'Third', label: 'Third cycle' },
-  { value: 'Fourth', label: 'Fourth cycle' },
-]
+const QUARTER_LABEL = /^Q[1-4] \d{4}$/
 
-export function dataYearOptions(now = new Date()) {
-  const latest = now.getFullYear()
-  return [latest - 2, latest - 1, latest, latest + 1].map((year) => ({ value: String(year), label: String(year) }))
+export function periodChoices(periods: readonly { value: string; label: string }[]) {
+  return periods.filter((option) => option.value !== 'all').reverse()
 }
 
 export function defaultCompactReportParameters(
   periods: readonly { value: string; label: string }[],
   now = new Date(),
 ): CompactReportParameters {
-  const first = periods.find((option) => option.value !== 'all')
+  const choices = periodChoices(periods)
+  const latest = choices.find((option) => QUARTER_LABEL.test(option.label)) ?? choices[0]
   return {
-    period: first?.value ?? 'all',
-    periodLabel: first?.label ?? 'All periods',
-    cycle: 'Second',
-    dataYear: String(now.getFullYear() - 1),
-    reportMonth: now.toISOString().slice(0, 7),
+    period: latest?.value ?? 'all',
+    periodLabel: latest?.label ?? 'All periods',
     asOfDate: now.toISOString().slice(0, 10),
   }
 }
 
-export function formatReportMonth(value: string): string {
-  const [year, month] = value.split('-').map(Number)
-  if (!year || !month) return value
+export function formatReportMonth(asOfDate: string): string {
+  const [year, month] = asOfDate.split('-').map(Number)
+  if (!year || !month) return asOfDate
   return new Date(year, month - 1, 1).toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })
 }
 
@@ -46,6 +35,6 @@ export function formatAsOfDate(value: string): string {
   return date.toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })
 }
 
-export function cycleHeading(parameters: Pick<CompactReportParameters, 'cycle' | 'dataYear'>): string {
-  return `${parameters.cycle} cycle of data collection ${parameters.dataYear}`
+export function cycleHeading(periodLabel: string): string {
+  return `${periodLabel} reporting cycle`
 }

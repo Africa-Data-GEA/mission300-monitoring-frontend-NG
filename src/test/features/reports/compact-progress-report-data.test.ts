@@ -79,15 +79,12 @@ describe('buildCompactProgressReportData', () => {
   it('carries the chosen reporting parameters onto the cover', () => {
     const parameters = {
       ...defaultCompactReportParameters([{ value: 'q1-2026', label: 'Q1 2026' }]),
-      cycle: 'Second',
-      dataYear: '2025',
-      reportMonth: '2026-04',
       asOfDate: '2026-05-05',
     }
     const data = buildCompactProgressReportData(source(), 'Nigeria', parameters)
     expect(data.reportingPeriod).toBe('Q1 2026')
-    expect(data.cycleLabel).toBe('Second cycle of data collection 2025')
-    expect(data.reportDateLabel).toBe('April 2026')
+    expect(data.cycleLabel).toBe('Q1 2026 reporting cycle')
+    expect(data.reportDateLabel).toBe('May 2026')
     expect(data.generatedAtLabel).toBe('05 May 2026')
   })
 })
