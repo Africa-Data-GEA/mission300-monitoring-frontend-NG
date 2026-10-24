@@ -2,6 +2,7 @@ import { Card } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import {
   useDiscoComparison,
+  usePerformanceTrends,
   useStateDiscoFilters,
   useStateDiscoOverview,
   useSupplyTariff,
@@ -10,12 +11,13 @@ import { DiscoComparisonChart } from '../components/charts/disco-comparison-char
 import { SupplyHoursChart } from '../components/charts/supply-hours-chart'
 import { PageState } from '../components/page-state'
 import { PerformanceCard } from '../components/performance-card'
+import { PerformanceTrendsSection } from '../components/performance-trends-section'
 import { StateDiscoFilterBar } from '../components/state-disco-filters'
 import { StateDiscoShell } from '../components/state-disco-shell'
 import { useStateDiscoQuery } from '../use-state-disco-query'
 
 function numericSort(value: string): number | null {
-  const parsed = Number.parseFloat(value.replace(/[^0-9.-]/g, ''))
+  const parsed = Number.parseFloat(value.replace(/\s*\(.*\)$/, '').replace(/[^0-9.-]/g, ''))
   return Number.isNaN(parsed) ? null : parsed
 }
 
@@ -27,6 +29,7 @@ export function StateDiscoPage() {
   const comparison = useDiscoComparison({ ...state.query, validationStatus: 'all' })
 
   const supplyTariff = useSupplyTariff(state.query)
+  const trends = usePerformanceTrends(state.query)
 
   const error = filters.error ?? overview.error ?? comparison.error ?? supplyTariff.error
   const pending = filters.isPending || overview.isPending || comparison.isPending || supplyTariff.isPending
@@ -62,6 +65,8 @@ export function StateDiscoPage() {
                 ))}
               </div>
             </section>
+
+            {trends.data && <PerformanceTrendsSection trends={trends.data} />}
 
             {/* DisCo comparison */}
             <section>

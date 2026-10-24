@@ -1,6 +1,7 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import {
   discoComparisonSchema,
+  performanceTrendsSchema,
   stateCoverageSchema,
   stateDetailSchema,
   stateDiscoFiltersSchema,
@@ -46,6 +47,8 @@ export const useStateDiscoOverview = (query: StateDiscoQuery) =>
   usePage('overview', '/state-disco/overview', query, stateDiscoOverviewSchema)
 export const useDiscoComparison = (query: StateDiscoQuery) =>
   usePage('comparison', '/state-disco/comparison', query, discoComparisonSchema)
+export const usePerformanceTrends = (query: StateDiscoQuery) =>
+  usePage('trends', '/state-disco/trends', { distributionCompany: query.distributionCompany }, performanceTrendsSchema)
 export const useSupplyTariff = (query: StateDiscoQuery) =>
   usePage('supply-tariff', '/state-disco/supply-tariff', query, supplyTariffSchema)
 export const useUtilityDelivery = (query: StateDiscoQuery) =>

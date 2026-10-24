@@ -43,7 +43,7 @@ export function DiscoComparisonChart({
         options={{
           chart: { type: 'bar', toolbar: { show: false }, fontFamily: FONT_FAMILY },
           plotOptions: { bar: { horizontal: true, borderRadius: 3, barHeight: '65%' } },
-          colors: [CHART_BLUE.lightest, CHART_BLUE.dark],
+          colors: [CHART_BLUE.base, CHART_BLUE.darkest],
           // A brand-derived "lightest" colour can still read as near-white on
           // this card's white background (see buildChartScale's own comment)
           // - an outline keeps every bar legible as a shape regardless of how

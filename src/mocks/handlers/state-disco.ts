@@ -2,6 +2,7 @@ import type { DeliveryRow } from '@/api/schemas/state-disco'
 import { delay, http, HttpResponse } from '../local-router'
 import {
   discoComparisonRows,
+  performanceTrendPoints,
   stateCoverageRows,
   stateDetails,
   stateDiscoFilters,
@@ -61,6 +62,18 @@ export const stateDiscoHandlers = [
     return HttpResponse.json({
       meta: stateDiscoOverview.meta,
       rows: filterByValidation(filterUtility(discoComparisonRows, request), request),
+    })
+  }),
+  http.get('/api/state-disco/trends', async () => {
+    await delay(100)
+    return HttpResponse.json({
+      meta: {
+        ...stateDiscoOverview.meta,
+        title: 'Performance trends',
+        description: 'Quarter-by-quarter metering, loss, collection and remittance performance.',
+      },
+      selectedUtility: stateDiscoOverview.selectedUtility,
+      points: performanceTrendPoints,
     })
   }),
   http.get('/api/state-disco/supply-tariff', async ({ request }) => {
