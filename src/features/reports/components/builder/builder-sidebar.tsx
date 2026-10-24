@@ -1,11 +1,11 @@
-import { FileSpreadsheet, FileText, LayoutGrid, RectangleHorizontal, RectangleVertical } from 'lucide-react'
+import { FileSpreadsheet, FileText, RectangleHorizontal, RectangleVertical } from 'lucide-react'
 import type { ReportConfig, ReportSection, ReportsFilterOptions, ReportType } from '@/api/schemas/reports'
 import { REPORT_TYPE_LABELS, REPORT_TYPES } from '@/api/schemas/reports'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { SelectField } from '@/components/ui/select-field'
 import { cn } from '@/lib/utils'
-import type { Orientation } from '../../use-reports-page'
+import type { Orientation } from '../../lib/types'
 import { MultiSelectField } from './multi-select-field'
 
 /** The full configuration sidebar for the Report Builder — report type,
@@ -48,16 +48,6 @@ export function BuilderSidebar({
 
   return (
     <aside className="flex w-full shrink-0 flex-col gap-4 rounded-card border border-border-default bg-surface p-4 lg:sticky lg:top-4 lg:max-h-[calc(100svh-2rem)] lg:w-80 lg:self-start lg:overflow-y-auto">
-      <div>
-        <h2 className="flex items-center gap-1.5 text-sm font-semibold text-text-default">
-          <LayoutGrid aria-hidden="true" className="size-4" />
-          Report configuration
-        </h2>
-        <p className="mt-1 text-xs text-text-muted">
-          Choose what this report covers. The preview on the right updates live.
-        </p>
-      </div>
-
       <SelectField
         label="Report type"
         value={config.reportType}

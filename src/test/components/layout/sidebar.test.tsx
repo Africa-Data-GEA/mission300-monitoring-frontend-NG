@@ -119,11 +119,27 @@ describe('Sidebar', () => {
       ).toHaveAttribute('href', '/dashboard')
     })
 
-    it('renders Reports & exports as a ready link', () => {
+    it('renders Reports & exports as a dropdown that reveals its four pages', async () => {
+      const user = userEvent.setup()
       renderWithRouter(<Sidebar />)
 
-      const reports = screen.getByRole('link', { name: /Reports & exports/ })
-      expect(reports).toHaveAttribute('href', '/reports')
+      const reports = screen.getByRole('button', { name: /Reports & exports/ })
+      expect(reports).toHaveAttribute('aria-expanded', 'false')
+
+      await user.click(reports)
+
+      expect(reports).toHaveAttribute('aria-expanded', 'true')
+      expect(screen.getByRole('link', { name: 'Report Builder' })).toHaveAttribute('href', '/reports/builder')
+      expect(screen.getByRole('link', { name: 'Compact & CPR export' })).toHaveAttribute('href', '/reports/exports')
+      expect(screen.getByRole('link', { name: 'KPI methodology export' })).toHaveAttribute('href', '/reports/methodology')
+      expect(screen.getByRole('link', { name: 'Saved reports' })).toHaveAttribute('href', '/reports/saved')
+    })
+
+    it('opens the Reports & exports dropdown on a reports page and marks that page active', () => {
+      renderWithRouter(<Sidebar />, { route: '/reports/saved' })
+
+      expect(screen.getByRole('button', { name: /Reports & exports/ })).toHaveAttribute('aria-expanded', 'true')
+      expect(screen.getByRole('link', { name: 'Saved reports' })).toHaveClass('bg-chart-accent')
     })
 
     it('keeps the unavailable-page description accessible for planned items', () => {
@@ -174,9 +190,9 @@ describe('Sidebar', () => {
     it('uses the inactive tint for other ready pages', () => {
       renderWithRouter(<Sidebar />)
 
-      const reports = screen.getByRole('link', { name: /Reports & exports/ })
-      expect(reports).toHaveClass('bg-surface-sunken/10')
-      expect(reports).not.toHaveClass('border')
+      const programs = screen.getByRole('link', { name: /Programs/ })
+      expect(programs).toHaveClass('bg-surface-sunken/10')
+      expect(programs).not.toHaveClass('border')
     })
 
     /*

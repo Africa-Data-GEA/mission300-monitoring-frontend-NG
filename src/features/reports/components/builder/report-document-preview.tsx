@@ -1,6 +1,6 @@
 import type { ReportPreview, ReportSection } from '@/api/schemas/reports'
 import { cn } from '@/lib/utils'
-import type { Orientation } from '../../use-reports-page'
+import type { Orientation } from '../../lib/types'
 
 /**
  * A live preview of the document that will be generated — styled as an

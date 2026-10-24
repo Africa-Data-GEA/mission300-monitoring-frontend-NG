@@ -5,6 +5,7 @@ import { AuthRouteFallback, RouteFallback } from '@/components/layout/route-fall
 import { routeChunks } from '@/app/route-chunks'
 import { RequireAuth, RequireModule } from '@/features/auth/require-auth'
 import { dataSubmissionRoutes } from '@/features/data-submissions/routes'
+import { reportRoutes } from '@/features/reports/routes'
 import { stateDiscoRoutes } from '@/features/state-disco/routes'
 
 /*
@@ -74,12 +75,6 @@ const ProgramsPage = lazy(() =>
 const BottlenecksPage = lazy(() =>
   routeChunks.bottlenecks().then((module) => ({
     default: module.BottlenecksPage,
-  })),
-)
-
-const ReportsPage = lazy(() =>
-  routeChunks.reports().then((module) => ({
-    default: module.ReportsPage,
   })),
 )
 
@@ -335,7 +330,8 @@ export const router = createBrowserRouter([
       },
       {
         path: 'reports',
-        element: moduleRoute('reports', <ReportsPage />),
+        element: <RequireModule moduleKey="reports"><Outlet /></RequireModule>,
+        children: reportRoutes,
         handle: { globalFilters: false } satisfies RouteHandle,
       },
       {

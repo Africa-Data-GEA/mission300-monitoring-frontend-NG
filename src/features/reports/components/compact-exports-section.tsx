@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { FileText } from 'lucide-react'
+import { ArrowUpRight, ClipboardList, FileText } from 'lucide-react'
 import type { CompactExportCard, ExportFormat } from '@/api/schemas/reports'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -18,7 +18,7 @@ import { CompactReportDialog } from './compact-report-dialog'
  * matching the real Compact Progress Report's design (see
  * compact-progress-report-document.tsx) rather than the generic builder
  * document every other export uses — see the branch in
- * `use-reports-page.ts`'s `exportCompactCard`.
+ * `use-compact-exports-page.ts`'s `exportCompactCard`.
  */
 export function CompactExportsSection({
   cards,
@@ -44,29 +44,30 @@ export function CompactExportsSection({
   }
 
   return (
-    <Card variant="well" className="p-3 sm:p-4">
-      <h2 className="text-lg font-semibold text-text-default">Compact &amp; CPR exports</h2>
-      <p className="mt-1 text-sm text-text-muted">
-        Fixed, official-format documents. Choose the reporting parameters, then generate as PDF or Excel.
-      </p>
-
-      <div className="mt-3 grid gap-3 sm:grid-cols-2">
+    <div>
+      <div className="grid gap-4 md:grid-cols-2">
         {cards.map((card) => (
-          <Card key={card.id} className="p-4">
-            <h3 className="text-sm font-semibold text-text-default">{card.title}</h3>
-            <p className="mt-1 text-xs text-text-muted">{card.definition}</p>
+          <Card key={card.id} className="flex flex-col overflow-hidden transition-shadow hover:shadow-md">
+            <div className="flex items-center justify-between border-b border-border-default bg-brand-700/5 px-5 py-4">
+              <div className="flex size-11 items-center justify-center rounded-xl bg-surface text-brand-700">
+                {card.id === 'implementation-register' ? <ClipboardList aria-hidden="true" className="size-6" /> : <FileText aria-hidden="true" className="size-6" />}
+              </div>
+              <span className="text-xs font-medium text-text-muted">Fixed report template</span>
+            </div>
+            <div className="flex flex-1 flex-col p-5">
+            <h3 className="text-lg font-semibold text-text-default">{card.title}</h3>
+            <p className="mt-2 flex-1 text-sm leading-relaxed text-text-muted">{card.definition}</p>
 
-            <div className="mt-3">
+            <div className="mt-6 border-t border-border-default pt-4">
               <Button
                 type="button"
-                size="sm"
-                variant="secondary"
                 disabled={exportingKey !== null}
                 onClick={() => setSelected(card)}
               >
-                <FileText aria-hidden="true" />
+                <ArrowUpRight aria-hidden="true" />
                 {exportingKey?.startsWith(`${card.id}:`) ? 'Generating…' : 'Generate report'}
               </Button>
+            </div>
             </div>
           </Card>
         ))}
@@ -82,6 +83,6 @@ export function CompactExportsSection({
           onGenerate={(card, format, parameters) => void generate(card, format, parameters)}
         />
       )}
-    </Card>
+    </div>
   )
 }

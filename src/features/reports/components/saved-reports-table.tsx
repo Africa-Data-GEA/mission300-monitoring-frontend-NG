@@ -82,9 +82,7 @@ export function SavedReportsTable({
 
   return (
     <Card variant="well" className="p-2 sm:p-4">
-      <h2 className="text-lg font-semibold text-text-default">Saved reports</h2>
-
-      <Card className="mt-2 min-w-0 overflow-hidden p-0 sm:mt-3 sm:p-1">
+      <Card className="min-w-0 overflow-hidden p-0 sm:p-1">
         <DataTable
           caption="Saved report configurations and generated-report history"
           columns={columns}

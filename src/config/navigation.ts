@@ -111,6 +111,12 @@ export const NAVIGATION: readonly NavGroup[] = [
         icon: FileBarChart,
         ready: true,
         moduleKey: 'reports',
+        children: [
+          { label: 'Report Builder', to: '/reports/builder', ready: true },
+          { label: 'Compact & CPR export', to: '/reports/exports', ready: true },
+          { label: 'KPI methodology export', to: '/reports/methodology', ready: true },
+          { label: 'Saved reports', to: '/reports/saved', ready: true },
+        ],
       },
       {
         label: 'Learning & decision log',

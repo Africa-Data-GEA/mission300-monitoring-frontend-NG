@@ -16,7 +16,7 @@ import './pdf-fonts'
  * Deliberately NOT the generic `ReportDocument` (report-document.tsx): this
  * layout isn't filterable and isn't built from generic tabular sections.
  * Reached only from the fixed "Compact Progress Report" quick-export card,
- * never the configurable builder — see `use-reports-page.ts`.
+ * never the configurable builder — see `use-compact-exports-page.ts`.
  */
 
 const SLIDE: [number, number] = [960, 540]
