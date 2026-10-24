@@ -24,7 +24,7 @@ export function EmailLoginView({
       <div className="auth-step-enter">
         <h1 className="text-3xl font-semibold text-text-default">Sign in</h1>
         <p className="mt-2 text-base text-text-muted">
-          Enter your work email to continue to the monitoring dashboard.
+          Enter your work email to continue to the Mission 300 Compact Monitoring Platform.
         </p>
         <Form {...form}>
           <form className="mt-7" noValidate onSubmit={onSubmit}>

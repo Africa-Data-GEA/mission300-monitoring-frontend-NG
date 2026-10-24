@@ -51,7 +51,7 @@ export function NigeriaProgressReportSection() {
         National Energy Compact Progress Report
       </h2>
       <p className="mt-1 text-sm text-text-muted">
-        The official GEAPP Reporting workbook — same design, sheets and Nigeria Actions
+        The official GEAPP Reporting workbook — same design, sheets and {country} Actions
         tracker — regenerated with the current Compact-outcome figures.
       </p>
 

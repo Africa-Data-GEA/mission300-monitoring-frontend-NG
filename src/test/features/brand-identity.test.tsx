@@ -15,6 +15,6 @@ function Probe() {
 describe('useBrandIdentity', () => {
   it('gives the saved identity, with the built-in crest when none is uploaded', async () => {
     renderWithProviders(<Probe />)
-    expect(await screen.findByText(/Nigeria\|Federal Republic of Nigeria\|Federal Ministry of Power\|\/Logos\/geapp\.png\|Nigeria Mission 300/)).toBeInTheDocument()
+    expect(await screen.findByText(/Nigeria\|Federal Republic of Nigeria\|Federal Ministry of Power\|\/Logos\/geapp\.png\|Mission 300 Compact Monitoring Platform · Nigeria/)).toBeInTheDocument()
   })
 })

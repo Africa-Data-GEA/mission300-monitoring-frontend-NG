@@ -1,4 +1,5 @@
 import { Link } from 'react-router'
+import { PLATFORM_NAME } from '@/config/platform'
 import { useBrandConfig } from '@/features/branding/api'
 
 const NAV_ITEMS = [
@@ -18,12 +19,12 @@ export function PublicHeader() {
         <div className="mx-auto flex min-h-[4.5rem] max-w-[96rem] items-center gap-7 px-4 sm:px-6">
           <Link
             to="/"
-            aria-label={`Mission 300 ${brand?.countryName ?? 'Nigeria'} — National Energy Compact`}
+            aria-label={`${PLATFORM_NAME} — ${brand?.countryName ?? 'Nigeria'}`}
             className="flex shrink-0 items-center"
           >
             <img
               src="/Logos/m300-logo-navy.svg"
-              alt={`Mission 300 ${brand?.countryName ?? 'Nigeria'} — National Energy Compact`}
+              alt={`${PLATFORM_NAME} — ${brand?.countryName ?? 'Nigeria'}`}
               width={151}
               height={91}
               className="h-12 w-auto shrink-0 object-contain"

@@ -17,7 +17,7 @@ describe('Topbar', () => {
   it('renders the product mark', () => {
     renderWithRouter(<Topbar />)
 
-    expect(screen.getByText('M300')).toBeInTheDocument()
+    expect(screen.getByText('Mission 300')).toBeInTheDocument()
   })
 
   describe('search', () => {

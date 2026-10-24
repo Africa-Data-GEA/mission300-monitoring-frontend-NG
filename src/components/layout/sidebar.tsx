@@ -2,6 +2,7 @@ import { Link } from 'react-router'
 import { NAVIGATION } from '@/config/navigation'
 import { readAuthSession } from '@/features/auth/auth-session'
 import { canUserReachModule } from '@/features/auth/role-access'
+import { PLATFORM_NAME } from '@/config/platform'
 import { useBrandConfig } from '@/features/branding/api'
 import { cn } from '@/lib/utils'
 import { NavDropdownItem } from './nav-dropdown-item'
@@ -62,7 +63,7 @@ export function Sidebar({
           className="flex items-center gap-2.5"
         >
           <img
-            alt={`${brand?.countryName ?? 'Nigeria'} — Mission 300, Compact Progress Monitoring Platform`}
+            alt={`${PLATFORM_NAME} — ${brand?.countryName ?? 'Nigeria'}`}
             src="/Logos/m300-logo-white.svg"
             className="h-10 w-auto shrink-0 object-contain"
           />

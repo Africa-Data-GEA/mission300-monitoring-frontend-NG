@@ -1,4 +1,5 @@
 import type { ReportPreview } from '@/api/schemas/reports'
+import { PLATFORM_NAME } from '@/config/platform'
 
 /** A safe Excel sheet name — max 31 chars, no []:*?/\ characters. */
 function sheetName(title: string, usedNames: Set<string>) {
@@ -21,7 +22,7 @@ function sheetName(title: string, usedNames: Set<string>) {
 export async function buildReportWorkbook(preview: ReportPreview): Promise<Blob> {
   const { default: ExcelJS } = await import('exceljs')
   const workbook = new ExcelJS.Workbook()
-  workbook.creator = 'M300 Dashboard'
+  workbook.creator = PLATFORM_NAME
   workbook.created = new Date()
 
   const metadataRows: [string, string][] = [

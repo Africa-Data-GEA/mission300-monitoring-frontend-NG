@@ -1,3 +1,4 @@
+import { PLATFORM_NAME } from '@/config/platform'
 import { useBrandConfig } from './api'
 
 export const DEFAULT_CREST = '/Logos/geapp.png'
@@ -15,6 +16,6 @@ export function useBrandIdentity() {
     officialName: data?.officialName ?? 'Federal Republic of Nigeria',
     agencyName: data?.agencyName ?? 'Federal Ministry of Power',
     crestUrl: data?.crestUrl ? data.crestUrl : DEFAULT_CREST,
-    title: `${country} Mission 300`,
+    title: `${PLATFORM_NAME} · ${country}`,
   }
 }

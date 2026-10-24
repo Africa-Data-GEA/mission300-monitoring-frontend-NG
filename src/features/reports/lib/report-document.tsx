@@ -1,5 +1,6 @@
 import { Document, Page, StyleSheet, Text, View } from '@react-pdf/renderer'
 import type { ReportPreview } from '@/api/schemas/reports'
+import { PLATFORM_NAME } from '@/config/platform'
 import './pdf-fonts'
 import type { Orientation } from './types'
 
@@ -181,7 +182,7 @@ function ClosingPage({ preview, orientation }: { preview: ReportPreview; orienta
 
       <Text
         style={styles.footer}
-        render={({ pageNumber, totalPages }) => `Mission 300 M&E Dashboard  ·  Page ${pageNumber} of ${totalPages}`}
+        render={({ pageNumber, totalPages }) => `${PLATFORM_NAME}  ·  Page ${pageNumber} of ${totalPages}`}
         fixed
       />
     </Page>
@@ -239,7 +240,7 @@ export function ReportDocument({
 
         <Text
           style={styles.footer}
-          render={({ pageNumber, totalPages }) => `Mission 300 M&E Dashboard  ·  Page ${pageNumber} of ${totalPages}`}
+          render={({ pageNumber, totalPages }) => `${PLATFORM_NAME}  ·  Page ${pageNumber} of ${totalPages}`}
           fixed
         />
       </Page>

@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router'
 import { useQueryClient } from '@tanstack/react-query'
 import { z } from 'zod'
+import { PLATFORM_NAME } from '@/config/platform'
 import { dashboardToast } from '@/lib/dashboard-toast'
 import { prefetchExecutiveOverview } from '@/features/dashboard/api'
 import { DEFAULT_FILTER_VALUES } from '@/api/schemas/filters'
@@ -53,7 +54,7 @@ export function usePasswordLogin() {
       // full-page skeleton never shows.
       if (landingPath === '/dashboard') void prefetchExecutiveOverview(queryClient, DEFAULT_FILTER_VALUES)
       dashboardToast.success(`Welcome back, ${session.user.name}`, {
-        description: 'You are now signed in to the M300 Monitoring Platform.',
+        description: 'You are now signed in to the ' + PLATFORM_NAME + '.',
       })
       navigate(landingPath, { replace: true })
     } catch (error) {

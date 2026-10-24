@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { PLATFORM_NAME } from '@/config/platform'
 import { useBrandIdentity } from '@/features/branding/use-brand-identity'
 
 export function AuthLayout({ children }: { readonly children: ReactNode }) {
@@ -8,7 +9,7 @@ export function AuthLayout({ children }: { readonly children: ReactNode }) {
       <section className="w-full max-w-[29rem] rounded-card bg-surface px-6 py-8 sm:px-8 sm:py-10">
         <div className="mb-10 flex items-center justify-center gap-6">
           <img
-            alt={`${identity.country} — Mission 300`}
+            alt={`${PLATFORM_NAME} — ${identity.country}`}
             className="h-auto w-28 object-contain"
             src="/Logos/m300-logo-navy.svg"
           />
@@ -21,7 +22,7 @@ export function AuthLayout({ children }: { readonly children: ReactNode }) {
         </div>
         {children}
         <p className="mt-10 border-t border-border-default pt-5 text-xs text-text-muted">
-          Mission 300 Progress Tracker
+          {PLATFORM_NAME}
         </p>
       </section>
     </main>

@@ -1,5 +1,6 @@
 import { useEffect, type ReactNode } from 'react'
 import { CHART_BLUE, setChartAccent } from '@/config/chart-colors'
+import { PLATFORM_NAME } from '@/config/platform'
 import { setActiveCurrency } from '@/lib/currency'
 import { setDisplayTimeZone } from '@/lib/format'
 import type { BrandFonts } from '@/api/schemas/branding'
@@ -116,7 +117,7 @@ export function BrandProvider({ children }: { children: ReactNode }) {
     // same way charts read CHART_BLUE — see src/lib/currency.ts.
     setActiveCurrency(data.currency)
     setDisplayTimeZone(data.timezone)
-    document.title = `${data.countryName} Mission 300`
+    document.title = `${PLATFORM_NAME} · ${data.countryName}`
   }, [data])
 
   return children

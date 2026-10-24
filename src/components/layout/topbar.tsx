@@ -44,7 +44,7 @@ export function Topbar({
       )}
 
       <span className="shrink-0 text-lg font-semibold tracking-tight text-text-default lg:hidden">
-        M300
+        Mission 300
       </span>
 
       <TopbarSearch />

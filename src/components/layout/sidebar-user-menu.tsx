@@ -274,7 +274,7 @@ export function SidebarUserMenu() {
         open={helpOpen}
         onClose={() => setHelpOpen(false)}
         title="Help centre"
-        description="Guidance and support for using the Mission 300 dashboard."
+        description="Guidance and support for using the Mission 300 Compact Monitoring Platform."
       >
         <div className="mx-auto grid max-w-3xl gap-4 sm:grid-cols-2">
           <button

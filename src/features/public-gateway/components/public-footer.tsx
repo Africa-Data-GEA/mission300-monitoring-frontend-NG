@@ -1,3 +1,4 @@
+import { PLATFORM_NAME } from '@/config/platform'
 import { useBrandIdentity } from '@/features/branding/use-brand-identity'
 import { ArrowUpRight, Download } from 'lucide-react'
 import { Link } from 'react-router'
@@ -17,7 +18,7 @@ export function PublicFooter({ lastUpdated }: { lastUpdated?: string }) {
         <div className="grid gap-10 lg:grid-cols-[1.3fr_1fr_auto] lg:items-start">
           <div>
             <p className="text-[1.125rem] leading-6 font-semibold tracking-tight">
-              Mission 300 {identity.country}
+              {PLATFORM_NAME}
             </p>
             <p className="mt-2 max-w-[28rem] text-[0.8125rem] leading-5 text-white/70">
               {identity.officialName} · {identity.agencyName}
@@ -74,7 +75,7 @@ export function PublicFooter({ lastUpdated }: { lastUpdated?: string }) {
         </div>
 
         <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-white/18 pt-5 text-[0.6875rem] leading-4 text-white/50">
-          <p>© 2026 Federal Ministry of Power</p>
+          <p>© 2026 {identity.agencyName}</p>
           <Link to="/account/login" className="font-medium text-white/70 hover:text-white">
             Reporting institution sign in
           </Link>
