@@ -4,13 +4,14 @@ import { PillarDashboardPage } from '@/features/pillar-dashboard/pillar-dashboar
 import { renderRoutesWithProviders } from '@/test/render'
 
 describe('PillarDashboardPage', () => {
-  it('navigates to the pillar selected in the global filters', async () => {
+  it('stays on the pillar in the address, whatever pillar the global filters hold', async () => {
     renderRoutesWithProviders(
       [{ path: 'pillars/:pillar', element: <PillarDashboardPage /> }],
       { route: '/pillars/generation-network?pillar=clean-cooking' },
     )
 
-    expect(await screen.findByRole('heading', { name: 'Clean Cooking' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Generation & Network' })).toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: 'Clean Cooking' })).not.toBeInTheDocument()
   })
 
   it('renders headline cards and linked delivery records for a pillar', async () => {

@@ -44,6 +44,16 @@ describe('GlobalFilterBar', () => {
     expect(screen.queryByRole('combobox', { name: /Geographic/ })).not.toBeInTheDocument()
   })
 
+  it('does not offer a pillar choice on a pillar page, where the page already is the pillar', async () => {
+    const user = userEvent.setup()
+    await renderBar('/pillars/generation-network')
+
+    await openMoreFilters(user)
+
+    expect(screen.getByRole('combobox', { name: /Institution/ })).toBeInTheDocument()
+    expect(screen.queryByRole('combobox', { name: /Compact pillar/ })).not.toBeInTheDocument()
+  })
+
   /*
    * The removed "Last Updated" block used to live here. Per-metric freshness
    * is still reachable through each information popover, which is where the

@@ -16,7 +16,7 @@ import type { FilterOption } from '@/types/filters'
  * from Year/Quarter (which stay inline - reporting period is the one
  * choice every view is built around) so the bar reads as one clear
  * primary control plus a secondary group, not seven equal-weight selects. */
-const PILLAR_PAGE_INERT_FILTERS = ['technology', 'priority', 'distributionCompany'] as const
+const PILLAR_PAGE_INERT_FILTERS = ['pillar', 'technology', 'priority', 'distributionCompany'] as const
 
 const SECONDARY_FILTER_KEYS = [
   'pillar',
@@ -258,13 +258,15 @@ export function GlobalFilterBar({ onClose }: { onClose?: () => void }) {
             </div>
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 [&_label]:mb-1">
-              <SelectField
-                label="Compact pillar"
-                value={filters.pillar}
-                options={options.pillars}
-                onChange={(pillar) => setFilter('pillar', pillar)}
-                className="w-full"
-              />
+              {!onPillarPage && (
+                <SelectField
+                  label="Compact pillar"
+                  value={filters.pillar}
+                  options={options.pillars}
+                  onChange={(pillar) => setFilter('pillar', pillar)}
+                  className="w-full"
+                />
+              )}
 
               <SelectField
                 label="Institution"
