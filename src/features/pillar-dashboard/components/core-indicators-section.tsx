@@ -7,6 +7,8 @@ import { Card } from '@/components/ui/card'
 import { InfoPopover } from '@/components/ui/info-popover'
 import { TrendIndicator } from '@/components/ui/trend-indicator'
 import { CHART_BLUE } from '@/config/chart-colors'
+import { AccessRateLineChart } from '@/features/dashboard/components/headline-cards/access-rate-line-chart'
+import { ReportingPeriodPill } from '@/features/dashboard/components/headline-cards/reporting-period-pill'
 import { formatCurrency, formatUsd, getLocale, useCurrency } from '@/lib/currency'
 import { getDiscoBreakdown } from '../lib/disco-weights'
 import { PillarKpiEditButton } from './pillar-kpi-edit-button'
@@ -15,7 +17,7 @@ const FONT_FAMILY = 'Google Sans, ui-sans-serif, system-ui, sans-serif'
 const UNCONFIRMED_PERIOD_KPI_IDS = new Set(['M300-P4-011', 'M300-P4-012'])
 
 function formatValue(value: number, unit: string): string {
-  const rounded = Number.isInteger(value) ? value : Math.round(value * 100) / 100
+  const rounded = Number.isInteger(value) ? value : Math.round(value * 10) / 10
   const formatted = rounded.toLocaleString(getLocale())
   if (unit === 'USD') return formatUsd(formatted)
   if (unit === '%') return `${formatted}%`
@@ -280,20 +282,17 @@ function StatCard({ indicator, showDiscoBreakdown }: { indicator: PillarCoreIndi
           <PillarKpiEditButton kpiId={indicator.kpiId} name={indicator.name} />
         </div>
       </div>
-      <p
-        title={indicator.current === null ? undefined : formatValue(indicator.current, indicator.unit)}
-        className="mt-2 text-3xl leading-none font-semibold tracking-tight text-text-default"
-      >
-        {indicator.current === null ? '—' : formatCompactValue(indicator.current, indicator.unit)}
-      </p>
-      {indicator.period && <p className="text-2xs text-text-subtle">as of {indicator.period}</p>}
+      <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1.5">
+        <p
+          title={indicator.current === null ? undefined : formatValue(indicator.current, indicator.unit)}
+          className="text-3xl leading-none font-semibold tracking-tight whitespace-nowrap text-text-default"
+        >
+          {indicator.current === null ? '—' : formatCompactValue(indicator.current, indicator.unit)}
+        </p>
+        {indicator.period && <ReportingPeriodPill period={indicator.period} />}
+      </div>
       {indicator.unit === 'Currency not stated' && (
-        <p className="mt-auto pt-3 text-2xs text-text-subtle">Currency not specified by source</p>
-      )}
-      {trend && (
-        <div className="mt-2">
-          <TrendIndicator trend={trend} />
-        </div>
+        <p className="mt-2 text-2xs text-text-subtle">Currency not specified by source</p>
       )}
       {/* A StatCard has far less content than its GaugeCard/TargetBarCard
           siblings in the same grid row, so it stretches to match their
@@ -302,7 +301,10 @@ function StatCard({ indicator, showDiscoBreakdown }: { indicator: PillarCoreIndi
           something on hover — the value at each period — rather than being
           a flat decorative squiggle, and reads as visually distinct from the
           bar and radial charts sitting next to it in the same grid. */}
-      {indicator.history.length >= 2 && (
+      {(indicator.sparkline?.length ?? 0) >= 2 && (
+        <AccessRateLineChart points={indicator.sparkline ?? []} label={indicator.name} unit={indicator.unit} />
+      )}
+      {!indicator.sparkline && indicator.history.length >= 2 && (
         <div className="mt-4 min-h-24 flex-1">
           <Chart
             type="area"
@@ -334,8 +336,13 @@ function StatCard({ indicator, showDiscoBreakdown }: { indicator: PillarCoreIndi
           />
         </div>
       )}
+      {trend && (
+        <div className="mt-auto pt-3">
+          <TrendIndicator trend={trend} />
+        </div>
+      )}
       {showDiscoBreakdown && (
-        <div className="mt-auto">
+        <div className={trend ? 'pt-2' : 'mt-auto'}>
           <DiscoBreakdownToggle indicator={indicator} />
         </div>
       )}
@@ -413,11 +420,11 @@ function GaugeCard({ indicator, showDiscoBreakdown }: { indicator: PillarCoreInd
           <span aria-hidden="true" className="size-1.5 rounded-full" style={{ background: CHART_BLUE.lightest }} />
           Target
         </span>
-        {indicator.period && <span>as of {indicator.period}</span>}
+        {indicator.period && <ReportingPeriodPill period={indicator.period} />}
         <span className="ml-auto font-medium text-text-muted">{percent}% to target</span>
       </div>
       {trend && (
-        <div className="mt-2">
+        <div className="mt-auto pt-3">
           <TrendIndicator trend={trend} />
         </div>
       )}
@@ -473,9 +480,9 @@ function TargetBarCard({ indicator, showDiscoBreakdown }: { indicator: PillarCor
         <p className="text-2xl leading-none font-semibold tracking-tight text-text-default">
           {formatValue(current, indicator.unit)}
         </p>
+        {indicator.period && <ReportingPeriodPill period={indicator.period} />}
         {percent !== null && <span className="text-2xs font-medium text-text-subtle">{percent}% to target</span>}
       </div>
-      {indicator.period && <p className="text-2xs text-text-subtle">as of {indicator.period}</p>}
       <div className="mt-4 flex-1">
         <Chart
           type="bar"
@@ -526,12 +533,12 @@ function TargetBarCard({ indicator, showDiscoBreakdown }: { indicator: PillarCor
         />
       </div>
       {trend && (
-        <div className="mt-2">
+        <div className="mt-auto pt-3">
           <TrendIndicator trend={trend} />
         </div>
       )}
       {showDiscoBreakdown && (
-        <div className="mt-auto pt-2">
+        <div className={trend ? 'pt-2' : 'mt-auto pt-2'}>
           <DiscoBreakdownToggle indicator={indicator} />
         </div>
       )}

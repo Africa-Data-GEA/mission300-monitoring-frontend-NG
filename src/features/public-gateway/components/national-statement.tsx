@@ -67,7 +67,7 @@ export function NationalStatement({ cards }: { cards: HeadlineCards }) {
                 note in index.css. The surrounding sentence stays on the page's
                 normal type so it reads as one heading, not two fonts stitched
                 together. */}
-            <span className="font-landing-figure text-landing-gold tabular-nums">{headline.value}</span> people in {identity.country}
+            <span className="font-landing-figure text-landing-gold tabular-nums">{headline.value}</span> people in {identity.country}{' '}
             have electricity access
           </h1>
 

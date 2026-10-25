@@ -5,15 +5,20 @@ const FONT_FAMILY = 'Google Sans, ui-sans-serif, system-ui, sans-serif'
 
 export function AccessRateLineChart({
   points,
+  label = 'Electricity access rate',
+  unit = '%',
 }: {
   points: readonly { period: string; value: number }[]
+  label?: string
+  unit?: string
 }) {
+  const suffix = unit === '%' ? '%' : unit ? ` ${unit}` : ''
   return (
-    <div role="img" aria-label="Electricity access rate trend" className="min-h-20">
+    <div role="img" aria-label={`${label} trend`} className="min-h-20">
       <Chart
         type="line"
         height={92}
-        series={[{ name: 'Access rate', data: points.map((point) => point.value) }]}
+        series={[{ name: label, data: points.map((point) => point.value) }]}
         options={{
           chart: {
             type: 'line',
@@ -49,7 +54,7 @@ export function AccessRateLineChart({
           grid: { show: false, padding: { left: 0, right: 0, top: 4, bottom: 0 } },
           tooltip: {
             y: {
-              formatter: (value: number) => `<strong>${value}%</strong>`,
+              formatter: (value: number) => `<strong>${value.toLocaleString(undefined, { maximumFractionDigits: 2 })}${suffix}</strong>`,
               title: { formatter: () => '' },
             },
           },

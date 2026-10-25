@@ -53,6 +53,8 @@ export const pillarHeadlineCardSchema = z.object({
    */
   direction: improvementDirectionSchema,
   trend: trendSchema.optional(),
+  /** The indicator's recent readings, oldest first, for the card's trend line. */
+  sparkline: z.array(z.object({ period: z.string(), value: z.number() })).optional(),
   validationStatus: validationStatusSchema,
   provenance: metricProvenanceSchema,
 })
@@ -87,6 +89,8 @@ export const pillarCoreIndicatorSchema = z.object({
   /** Ordered oldest-to-newest reading values, for a sparkline. Empty where
    * no historical series is available yet (e.g. a pending milestone metric). */
   history: z.array(z.number()),
+  /** The same readings with their reporting periods, for a dated trend line. */
+  sparkline: z.array(z.object({ period: z.string(), value: z.number() })).optional(),
   validationStatus: validationStatusSchema,
   provenance: metricProvenanceSchema,
 })
