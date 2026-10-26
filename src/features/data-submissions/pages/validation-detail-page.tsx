@@ -18,8 +18,12 @@ export function ValidationDetailPage() {
 
   return (
     <WorkflowShell
-      title={`Review ${id}`}
-      description="The backend supplies all checks, issues, history, and permitted decisions for this version."
+      title={review.data ? `Review: ${review.data.dataset}` : 'Review submission'}
+      description={
+        review.data
+          ? `${review.data.institution} · ${review.data.reportingPeriod}. Check the values below, then record a decision.`
+          : 'Check the values below, then record a decision.'
+      }
     >
       <ListState
         pending={review.isPending}

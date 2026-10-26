@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Pagination } from '@/components/ui/pagination'
-import { useSubmissionFilters, useValidationQueue } from '../api'
+import { usePrefetchSubmissionReview, useSubmissionFilters, useValidationQueue } from '../api'
 import { ListState } from '../components/list-state'
 import { WorkflowFilters } from '../components/workflow-filters'
 import { WorkflowShell } from '../components/workflow-shell'
@@ -35,6 +35,7 @@ export function ValidationQueuePage() {
   const state = useWorkflowQuery()
   const filters = useSubmissionFilters()
   const list = useValidationQueue(state.query)
+  const prefetchReview = usePrefetchSubmissionReview()
   const error = filters.error ?? list.error
   const location = useLocation()
   const publishedMessage =
@@ -59,7 +60,13 @@ export function ValidationQueuePage() {
               getRowId={(row) => row.id}
               rowActions={(row) => (
                 <Button asChild size="sm">
-                  <Link to={`/data-submissions/validation/${row.id}`}><ClipboardCheck />Review</Link>
+                  <Link
+                    to={`/data-submissions/validation/${row.id}`}
+                    onPointerEnter={() => prefetchReview(row.id)}
+                    onFocus={() => prefetchReview(row.id)}
+                  >
+                    <ClipboardCheck />Review
+                  </Link>
                 </Button>
               )}
             />

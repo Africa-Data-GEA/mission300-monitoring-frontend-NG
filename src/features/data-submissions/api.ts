@@ -191,12 +191,20 @@ export function useUploadSubmission(id: string) {
   })
 }
 
+const reviewQuery = (id: string) => ({
+  queryKey: submissionKeys.review(id),
+  queryFn: () => api.get(`/data-submissions/validation/${id}`, submissionDetailSchema),
+})
+
 export function useSubmissionReview(id: string) {
-  return useQuery({
-    queryKey: submissionKeys.review(id),
-    queryFn: () => api.get(`/data-submissions/validation/${id}`, submissionDetailSchema),
-    enabled: Boolean(id),
-  })
+  return useQuery({ ...reviewQuery(id), enabled: Boolean(id) })
+}
+
+/** Starts loading a submission's review as soon as the reviewer points at it,
+ * so the review page usually opens with its data already in hand. */
+export function usePrefetchSubmissionReview() {
+  const client = useQueryClient()
+  return (id: string) => void client.prefetchQuery({ ...reviewQuery(id), staleTime: 30_000 })
 }
 
 export function useValidationDecision(id: string) {
