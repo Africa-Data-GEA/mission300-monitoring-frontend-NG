@@ -211,8 +211,8 @@ export function ReportDocument({
         </View>
 
         {sections.map((section) => (
-          <View key={section.title} wrap={false}>
-            <Text style={styles.sectionTitle}>{section.title}</Text>
+          <View key={section.title}>
+            <Text style={styles.sectionTitle} minPresenceAhead={60}>{section.title}</Text>
             {section.rows.length === 0 ? (
               <Text style={styles.emptyNote}>No records match the applied filters.</Text>
             ) : (
@@ -225,7 +225,7 @@ export function ReportDocument({
                   ))}
                 </View>
                 {section.rows.map((row, rowIndex) => (
-                  <View style={styles.row} key={rowIndex}>
+                  <View style={styles.row} key={rowIndex} wrap={false}>
                     {row.map((cell, cellIndex) => (
                       <Text key={cellIndex} style={styles.cell}>
                         {cell}

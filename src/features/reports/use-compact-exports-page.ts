@@ -30,7 +30,6 @@ export function useCompactExportsPage() {
     try {
       const { preview: generated, savedReport } = await generateReport.mutateAsync({
         ...defaultReportConfig(card.reportType),
-        periods: [parameters.period],
         format,
         ...(card.id === 'compact-progress-report' && format === 'pdf' && environment.dataMode === 'mock'
           ? { compactLayout: true }

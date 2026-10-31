@@ -10,7 +10,7 @@ export function ReportBuilderPage() {
     <div className="flex flex-col gap-4">
       <ReportPageHeader
         title="Report Builder"
-        description="Configure a report on the left â€” the preview on the right updates live â€” then generate it as PDF or Excel."
+        description="Configure a report on the left — the preview on the right updates live — then generate it as PDF or Excel."
       />
 
       <ol aria-label="Report workflow" className="grid gap-3 sm:grid-cols-3">

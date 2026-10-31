@@ -269,7 +269,7 @@ function GlossaryPage({ data }: { data: CompactProgressReportData }) {
           </Text>
           <Text style={styles.bodyTextLight}>
             This report presents the latest {data.countryName}-reported data as of {data.generatedAtLabel} and
-            reflects the {data.cycleLabel.toLowerCase()}. The data is country-reported and based on national
+            reflects the {data.cycleLabel}. The data is country-reported and based on national
             methodologies, which may limit direct comparisons across countries.
           </Text>
         </View>
