@@ -8,6 +8,15 @@ import { StateCoverageRow } from './state-coverage-row'
 const ALL_ZONES = 'all'
 const PREVIEW_COUNT = 10
 
+const count = (value: string) => Number.parseInt(value.replace(/,/g, ''), 10) || 0
+
+const hasDeliveryData = (row: StateRow) =>
+  row.coverageBarPercent > 0 ||
+  count(row.miniGridConnections) > 0 ||
+  count(row.solarHomeSystems) > 0 ||
+  count(row.activeProjects) > 0 ||
+  count(row.activeProgrammes) > 0
+
 export function DeliveryInMotion({
   rows,
   asOf,
@@ -40,6 +49,24 @@ export function DeliveryInMotion({
   }, [rows, zone, query])
 
   if (rows.length === 0) return null
+
+  if (!rows.some(hasDeliveryData)) {
+    return (
+      <section aria-labelledby="delivery-in-motion" className="bg-landing-deep-navy py-16 text-white sm:py-20">
+        <div className="mx-auto max-w-[96rem] px-4 sm:px-6">
+          <h2
+            id="delivery-in-motion"
+            className="text-[1.875rem] leading-9 font-semibold tracking-tight text-white sm:text-[2.25rem] sm:leading-10"
+          >
+            Delivery by state
+          </h2>
+          <p className="mt-4 max-w-[40rem] text-[0.9375rem] leading-6 text-white/75">
+            State-level delivery data is still being collected. It will appear here once projects and connections have been reported for each state.
+          </p>
+        </div>
+      </section>
+    )
+  }
 
   const visible = expanded ? matched : matched.slice(0, PREVIEW_COUNT)
 

@@ -64,14 +64,11 @@ export function PublicFooter({ lastUpdated }: { lastUpdated?: string }) {
             own footer. */}
         <div className="mt-10 flex flex-wrap items-center justify-between gap-5 border-t border-white/18 pt-6">
           <div className="flex items-center gap-5">
-            <img alt="SEforALL" src="/seforall.svg" className="h-6 w-auto shrink-0 object-contain brightness-0 invert" />
-            <div className="h-5 w-px shrink-0 bg-white/18" aria-hidden="true" />
-            <img alt="GEAPP" src="/reports/compact-progress/logo-geapp.png" className="h-6 w-auto shrink-0 object-contain" />
+            <img alt="SEforALL" src="/seforall.svg" className="h-12 w-auto shrink-0 object-contain brightness-0 invert" />
+            <div className="h-8 w-px shrink-0 bg-white/18" aria-hidden="true" />
+            <img alt="GEAPP" src="/Logos/geapp-trimmed.png" className="h-10 w-auto shrink-0 object-contain" />
           </div>
-          <div className="flex items-center gap-2">
-            <img alt="EMRC" src="/emrc.png" className="h-5 w-auto shrink-0 object-contain brightness-0 invert" />
-            <span className="text-[0.6875rem] leading-4 font-medium text-white">Powered by EMRC</span>
-          </div>
+          <img alt="Powered by EMRC" src="/Logos/powered-by-emrc-white.png" className="h-7 w-auto shrink-0 object-contain" />
         </div>
 
         <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-white/18 pt-5 text-[0.6875rem] leading-4 text-white/50">
