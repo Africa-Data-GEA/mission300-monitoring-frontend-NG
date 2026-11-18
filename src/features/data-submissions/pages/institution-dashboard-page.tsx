@@ -10,6 +10,7 @@ import { grantedRoles } from '@/features/auth/role-access'
 import { api } from '@/lib/api-client'
 import { useDataGaps, useObligations, useSubmissions } from '../api'
 import { ObligationActions } from '../components/obligation-actions'
+import { TruncationNotice } from '../components/truncation-notice'
 import { WorkflowStatusBadge } from '../components/workflow-status'
 
 const FETCH_ALL = { pageSize: 100 }
@@ -152,6 +153,8 @@ export function InstitutionDashboardPage() {
             ))}
           </div>
         )}
+
+        <TruncationNotice shown={obligations.data?.items.length ?? 0} total={obligations.data?.total ?? 0} />
       </Card>
 
       <Card variant="well" className="p-4">
@@ -205,6 +208,8 @@ export function InstitutionDashboardPage() {
             })}
           </div>
         )}
+
+        <TruncationNotice shown={submissions.data?.items.length ?? 0} total={submissions.data?.total ?? 0} />
       </Card>
 
       <Card variant="well" className="p-4">
@@ -238,6 +243,8 @@ export function InstitutionDashboardPage() {
             ))}
           </div>
         )}
+
+        <TruncationNotice shown={gaps.data?.items.length ?? 0} total={gaps.data?.total ?? 0} />
       </Card>
     </div>
   )

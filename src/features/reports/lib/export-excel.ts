@@ -49,15 +49,14 @@ export async function buildReportWorkbook(preview: ReportPreview): Promise<Blob>
     sheet.addRows([section.columns, ...section.rows])
     sheet.getRow(1).font = { bold: true }
     sheet.views = [{ state: 'frozen', ySplit: 1 }]
-    sheet.columns = section.columns.map((column, index) => ({
-      width: Math.min(
-        60,
-        Math.max(
-          String(column).length + 2,
-          ...section.rows.map((row) => String(row[index] ?? '').length + 2),
-        ),
-      ),
-    }))
+    sheet.columns = section.columns.map((column, index) => {
+      let width = String(column).length + 2
+      for (const row of section.rows) {
+        const length = String(row[index] ?? '').length + 2
+        if (length > width) width = length
+      }
+      return { width: Math.min(60, width) }
+    })
   }
 
   const buffer = await workbook.xlsx.writeBuffer()
