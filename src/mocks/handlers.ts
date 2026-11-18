@@ -76,6 +76,7 @@ import { dataSubmissionHandlers } from './handlers/data-submissions'
 import { learningLogHandlers } from './handlers/learning-log'
 import { pillarDashboardHandlers } from './handlers/pillar-dashboard'
 import { programsHandlers } from './handlers/programs'
+import { reportScheduleHandlers } from './handlers/report-schedules'
 import { reportsHandlers } from './handlers/reports'
 import { searchHandlers } from './handlers/search'
 import { stateDiscoHandlers } from './handlers/state-disco'
@@ -447,6 +448,7 @@ export const handlers = [
   ...learningLogHandlers,
   ...pillarDashboardHandlers,
   ...programsHandlers,
+  ...reportScheduleHandlers,
   ...reportsHandlers,
   ...searchHandlers,
   ...stateDiscoHandlers,

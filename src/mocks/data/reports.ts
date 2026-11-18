@@ -118,6 +118,16 @@ export const reportCatalogue: ReportCatalogueCard[] = [
       'Summarise expected, received, overdue, approved, returned, rejected and missing records by selected period.',
     dataSource: 'Submission and Validation Registers.',
   },
+  {
+    reportType: 'executive-brief',
+    category: REPORT_TYPE_CATEGORY['executive-brief'],
+    title: REPORT_TYPE_LABELS['executive-brief'],
+    definition:
+      'A standardised one-page summary of headline indicators, pillar progress, bottlenecks and priority actions for ministers and senior stakeholders.',
+    methodology:
+      'Reads the latest approved value of each headline indicator, counts projects and open bottlenecks per pillar, and lists the most severe bottlenecks and the priority reform actions that are not yet complete.',
+    dataSource: 'Key Performance Indicator repository, Implementation Register, Bottleneck Register and Reform Action Register.',
+  },
 ]
 
 export const compactExportCards: CompactExportCard[] = [
@@ -523,6 +533,8 @@ function sectionsFor(reportType: ReportType, config: ReportConfig) {
       return [complianceSection()]
     case 'data-quality':
       return [dataQualitySection()]
+    case 'executive-brief':
+      return [kpiSection(config, 'Headline indicators'), bottleneckSection(config)]
   }
 }
 

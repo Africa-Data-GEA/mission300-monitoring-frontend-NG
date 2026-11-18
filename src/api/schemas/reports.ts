@@ -24,6 +24,7 @@ export const reportCategorySchema = z.enum([
   'performance',
   'delivery',
   'data-governance',
+  'executive',
 ])
 
 export const reportTypeSchema = z.enum([
@@ -37,6 +38,7 @@ export const reportTypeSchema = z.enum([
   'financial',
   'submission-compliance',
   'data-quality',
+  'executive-brief',
 ])
 
 export const exportFormatSchema = z.enum(['pdf', 'xlsx'])
@@ -55,6 +57,7 @@ export const REPORT_TYPE_CATEGORY: Record<
   financial: 'delivery',
   'submission-compliance': 'data-governance',
   'data-quality': 'data-governance',
+  'executive-brief': 'executive',
 }
 
 /* ------------------------------------------------------------------ *
@@ -239,6 +242,7 @@ export const REPORT_CATEGORY_LABELS: Record<ReportCategory, string> = {
   performance: 'Performance reporting',
   delivery: 'Delivery reporting',
   'data-governance': 'Data-governance reporting',
+  executive: 'Executive reporting',
 }
 
 export const REPORT_TYPE_LABELS: Record<ReportType, string> = {
@@ -252,4 +256,5 @@ export const REPORT_TYPE_LABELS: Record<ReportType, string> = {
   financial: 'Financial report',
   'submission-compliance': 'Submission-compliance report',
   'data-quality': 'Data-quality report',
+  'executive-brief': 'Executive brief (one page)',
 }

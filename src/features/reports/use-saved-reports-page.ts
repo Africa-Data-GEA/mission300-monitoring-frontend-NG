@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import toast from 'react-hot-toast'
 import type { SavedReport } from '@/api/schemas/reports'
 import { useBrandIdentity } from '@/features/branding/use-brand-identity'
-import { fetchSavedReportPreview, useDeleteSavedReport, useReportsOverview } from './api'
+import { downloadSavedReportPdf, fetchSavedReportPreview, useDeleteSavedReport, useReportsOverview } from './api'
 import { buildCompactProgressReportPdf } from './lib/build-compact-progress-report-pdf'
 import { downloadBlob } from './lib/download'
 import { buildReportWorkbook } from './lib/export-excel'
@@ -28,6 +28,10 @@ export function useSavedReportsPage() {
   async function redownloadSavedReport(report: SavedReport) {
     setRedownloadingId(report.id)
     try {
+      if (report.reportType === 'executive-brief' && report.format === 'pdf') {
+        downloadBlob(await downloadSavedReportPdf(report.id), report.fileReference)
+        return
+      }
       const { preview: generated, orientation: savedOrientation, compactLayout } = await fetchSavedReportPreview(report.id)
       const blob =
         report.format === 'pdf'

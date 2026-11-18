@@ -89,6 +89,10 @@ const savedPreviewSchema = z.object({
   compactLayout: z.boolean().optional(),
 })
 
+export function downloadSavedReportPdf(id: string): Promise<Blob> {
+  return api.download(`/reports/saved/${id}/pdf`)
+}
+
 export function fetchSavedReportPreview(id: string) {
   return api.get(`/reports/saved/${id}/preview`, savedPreviewSchema)
 }

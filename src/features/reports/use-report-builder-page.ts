@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import toast from 'react-hot-toast'
 import type { ExportFormat, ReportConfig, ReportType } from '@/api/schemas/reports'
-import { useGenerateReport, useReportPreview, useReportsFilters } from './api'
+import { downloadSavedReportPdf, useGenerateReport, useReportPreview, useReportsFilters } from './api'
 import { defaultReportConfig } from './lib/default-report-config'
 import { downloadBlob } from './lib/download'
 import { buildReportWorkbook } from './lib/export-excel'
@@ -48,7 +48,9 @@ export function useReportBuilderPage() {
       })
       const blob =
         format === 'pdf'
-          ? await buildReportPdf(generated, { orientation })
+          ? config.reportType === 'executive-brief'
+            ? await downloadSavedReportPdf(savedReport.id)
+            : await buildReportPdf(generated, { orientation })
           : await buildReportWorkbook(generated)
       downloadBlob(blob, savedReport.fileReference)
     } catch (error) {

@@ -6,6 +6,7 @@ import { RouteFallback } from '@/components/layout/route-fallback'
 const ReportBuilderPage = lazy(() => import('./pages/report-builder-page').then((module) => ({ default: module.ReportBuilderPage })))
 const CompactExportsPage = lazy(() => import('./pages/compact-exports-page').then((module) => ({ default: module.CompactExportsPage })))
 const KpiMethodologyPage = lazy(() => import('./pages/kpi-methodology-page').then((module) => ({ default: module.KpiMethodologyPage })))
+const ReportSchedulesPage = lazy(() => import('./pages/report-schedules-page').then((module) => ({ default: module.ReportSchedulesPage })))
 const SavedReportsPage = lazy(() => import('./pages/saved-reports-page').then((module) => ({ default: module.SavedReportsPage })))
 
 function page(element: React.ReactNode) {
@@ -18,4 +19,5 @@ export const reportRoutes: RouteObject[] = [
   { path: 'exports', element: page(<CompactExportsPage />) },
   { path: 'methodology', element: page(<KpiMethodologyPage />) },
   { path: 'saved', element: page(<SavedReportsPage />) },
+  { path: 'schedules', element: page(<ReportSchedulesPage />) },
 ]
