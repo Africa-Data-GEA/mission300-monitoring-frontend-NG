@@ -10,8 +10,8 @@ export function AuthLayout({ children }: { readonly children: ReactNode }) {
         <div className="mb-10 flex items-center justify-center gap-6">
           <img
             alt={`${PLATFORM_NAME} — ${identity.country}`}
-            className="h-auto w-28 object-contain"
-            src="/Logos/m300-logo-navy.svg"
+            className="h-auto w-32 object-contain"
+            src="/Logos/m300-logo-on-light.png"
           />
           <div className="h-10 w-px shrink-0 bg-border-default" aria-hidden="true" />
           <img

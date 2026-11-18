@@ -64,8 +64,8 @@ export function Sidebar({
         >
           <img
             alt={`${PLATFORM_NAME} — ${brand?.countryName ?? 'Nigeria'}`}
-            src="/Logos/m300-logo-white.svg"
-            className="h-10 w-auto shrink-0 object-contain"
+            src="/Logos/m300-logo-on-dark.png"
+            className="h-12 w-auto shrink-0 object-contain"
           />
         </Link>
       </div>

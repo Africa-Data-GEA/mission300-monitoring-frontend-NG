@@ -23,11 +23,11 @@ export function PublicHeader() {
             className="flex shrink-0 items-center"
           >
             <img
-              src="/Logos/m300-logo-navy.svg"
+              src="/Logos/m300-logo-on-light.png"
               alt={`${PLATFORM_NAME} — ${brand?.countryName ?? 'Nigeria'}`}
               width={151}
               height={91}
-              className="h-12 w-auto shrink-0 object-contain"
+              className="h-14 w-auto shrink-0 object-contain"
             />
           </Link>
 
