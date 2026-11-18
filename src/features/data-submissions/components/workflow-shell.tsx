@@ -6,9 +6,13 @@ import { grantedRoles } from '@/features/auth/role-access'
 import { cn } from '@/lib/utils'
 
 const REVIEW_ROLES = ['data-reviewer', 'validator', 'system-administrator']
+const PROVIDER_ROLE = 'institutional-data-provider'
 
 const links = [
-  { to: '/data-submissions', label: 'Overview', end: true },
+  // The index route only renders a page for providers (see DataSubmissionsIndex
+  // in routes.tsx); everyone else is redirected to their landing tab, so for
+  // them this link would just reload the page they are already on.
+  { to: '/data-submissions', label: 'Overview', end: true, providerOnly: true },
   { to: '/data-submissions/obligations', label: 'Reporting obligations' },
   { to: '/data-submissions/submissions', label: 'Submission history' },
   // Only the validation-queue route requires a reviewer/validator role (see
@@ -28,7 +32,10 @@ export function WorkflowShell({ title, description, actions, children }: {
 }) {
   const session = readAuthSession()
   const canReview = !!session && grantedRoles(session.user).some((role) => REVIEW_ROLES.includes(role))
-  const visibleLinks = links.filter((link) => !link.reviewOnly || canReview)
+  const isProvider = !!session && grantedRoles(session.user).includes(PROVIDER_ROLE)
+  const visibleLinks = links.filter(
+    (link) => (!link.reviewOnly || canReview) && (!link.providerOnly || isProvider),
+  )
 
   return (
     <div className="flex min-w-0 flex-col gap-4">

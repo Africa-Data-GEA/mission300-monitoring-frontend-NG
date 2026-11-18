@@ -1,4 +1,4 @@
-import { Eye, FileSpreadsheet } from 'lucide-react'
+import { Eye, FileSpreadsheet, PencilLine } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router'
 import type { SubmissionListItem, ValidationDecisionRequest } from '@/api/schemas/data-submissions'
@@ -125,8 +125,8 @@ export function SubmissionsPage() {
                 <div className="flex justify-end gap-1">
                   {canCorrect && row.obligationId && row.availableActions.includes('correct') && (
                     <Button asChild size="sm">
-                      <Link to={`/data-submissions/obligations/${row.obligationId}/upload`}>
-                        <FileSpreadsheet />
+                      <Link to={`/data-submissions/obligations/${row.obligationId}/${row.method === 'manual-entry' ? 'entry' : 'upload'}`}>
+                        {row.method === 'manual-entry' ? <PencilLine /> : <FileSpreadsheet />}
                         Correct and resubmit
                       </Link>
                     </Button>

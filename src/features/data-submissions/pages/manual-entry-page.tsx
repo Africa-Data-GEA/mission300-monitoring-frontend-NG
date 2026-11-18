@@ -1,5 +1,6 @@
 import { EntryGrid } from '../components/entry-grid'
 import { ListState } from '../components/list-state'
+import { ReturnedEntryNotice } from '../components/returned-entry-notice'
 import { SourceReferenceCard } from '../components/source-reference-card'
 import { WorkflowShell } from '../components/workflow-shell'
 import { EntrySections } from './entry-sections'
@@ -28,6 +29,7 @@ export function ManualEntryPage() {
         error={definition.error}
         retry={() => void definition.refetch()}
       >
+        {page.returned && <ReturnedEntryNotice returned={page.returned} />}
         {definition.data && (
           <form
             className={page.grid ? 'space-y-4' : 'grid gap-4 xl:grid-cols-[1fr_20rem]'}

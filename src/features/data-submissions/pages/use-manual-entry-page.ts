@@ -33,6 +33,7 @@ export function useManualEntryPage() {
   const saveDraft = useSaveEntryDraft(id)
   const discardDraft = useDiscardEntryDraft(id)
   const draft = draftQuery.data?.draft ?? null
+  const returned = draft ? null : (draftQuery.data?.returned ?? null)
 
   const [typedValues, setValues] = useState<Record<string, string> | null>(null)
   const [gridRows, setGridRows] = useState<EntryGridRow[] | null>(null)
@@ -47,9 +48,9 @@ export function useManualEntryPage() {
       })) ?? null,
     [draft],
   )
-  const values = typedValues ?? draft?.values ?? {}
-  const sourceReference = typedReference ?? draft?.sourceReference ?? ''
-  const notes = typedNotes ?? draft?.notes ?? ''
+  const values = typedValues ?? draft?.values ?? returned?.values ?? {}
+  const sourceReference = typedReference ?? draft?.sourceReference ?? returned?.sourceReference ?? ''
+  const notes = typedNotes ?? draft?.notes ?? returned?.notes ?? ''
 
   const data = definition.data
   const grid = wantsGrid(data)
@@ -152,6 +153,7 @@ export function useManualEntryPage() {
     setNotes,
     isSaving: save.isPending,
     draft,
+    returned,
     isSavingDraft: saveDraft.isPending,
     isDiscardingDraft: discardDraft.isPending,
     saveDraft: () => void saveAsDraft(),
