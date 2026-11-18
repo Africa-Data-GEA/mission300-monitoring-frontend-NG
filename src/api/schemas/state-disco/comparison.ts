@@ -23,8 +23,11 @@ export const discoComparisonRowSchema = z.object({
   validationLabel: z.string().min(1),
 })
 
+export const energyBasisSchema = z.enum(['VOLUME', 'VALUE'])
+
 export const discoComparisonSchema = z.object({
   meta: pageMetaSchema,
+  energyBasis: energyBasisSchema.default('VOLUME'),
   rows: z.array(discoComparisonRowSchema),
 })
 

@@ -73,7 +73,7 @@ export function StateDiscoPage() {
               <h2 className="text-lg font-semibold">Distribution Company comparison</h2>
               <div className="mt-3 grid gap-3 lg:grid-cols-2">
                 <DiscoComparisonChart
-                  title="Energy received vs billed"
+                  title={comparison.data.energyBasis === 'VALUE' ? 'Value of energy received vs billed' : 'Energy received vs billed'}
                   rows={comparison.data.rows}
                   primaryLabel="Received"
                   secondaryLabel="Billed"
