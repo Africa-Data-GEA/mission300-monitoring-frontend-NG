@@ -1,3 +1,5 @@
+import { Link } from 'react-router'
+import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Pagination } from '@/components/ui/pagination'
@@ -21,6 +23,9 @@ export function ObligationsPage() {
       title="Reporting obligations"
       description="Start an assigned return using guided entry or the controlled upload template."
     >
+      <Button asChild size="sm" variant="secondary" className="mb-3 w-fit">
+        <Link to="/data-submissions/workbook">Upload one workbook for all datasets</Link>
+      </Button>
       {filters.data && (
         <WorkflowFilters
           options={filters.data}

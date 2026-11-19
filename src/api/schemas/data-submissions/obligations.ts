@@ -164,3 +164,22 @@ export type EntryDraft = NonNullable<z.infer<typeof entryDraftSchema>['draft']>
 export type ReturnedEntry = NonNullable<z.infer<typeof entryDraftSchema>['returned']>
 export type UploadDefinition = z.infer<typeof uploadDefinitionSchema>
 export type DraftSaved = z.infer<typeof draftSavedSchema>
+
+export const workbookUploadResultSchema = z.object({
+  status: z.enum(['complete', 'partial', 'failed']),
+  batchId: z.string().nullable(),
+  message: z.string().min(1),
+  accepted: z.array(z.object({ sheet: z.string(), dataset: z.string(), submissions: z.number() })),
+  skipped: z.array(z.object({ sheet: z.string(), dataset: z.string(), reason: z.string() })),
+  rejected: z.array(
+    z.object({
+      sheet: z.string(),
+      dataset: z.string(),
+      message: z.string(),
+      problems: z.array(z.unknown()).optional(),
+    }),
+  ),
+  unmatchedSheets: z.array(z.string()),
+})
+
+export type WorkbookUploadResult = z.infer<typeof workbookUploadResultSchema>

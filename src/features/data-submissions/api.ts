@@ -5,6 +5,7 @@ import {
   datasetListSchema,
   dataSubmissionFiltersSchema,
   draftSavedSchema,
+  workbookUploadResultSchema,
   entryDraftSavedSchema,
   entryDraftSchema,
   manualEntryDefinitionSchema,
@@ -192,6 +193,15 @@ export function useUploadSubmission(id: string) {
   return useMutation({
     mutationFn: (formData: FormData) =>
       api.post(`/data-submissions/obligations/${id}/upload`, formData, draftSavedSchema),
+    onSuccess: () => client.invalidateQueries({ queryKey: submissionKeys.all }),
+  })
+}
+
+export function useWorkbookUpload() {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (formData: FormData) =>
+      api.post('/data-submissions/workbook-upload', formData, workbookUploadResultSchema),
     onSuccess: () => client.invalidateQueries({ queryKey: submissionKeys.all }),
   })
 }

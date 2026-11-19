@@ -8,6 +8,7 @@ import { grantedRoles } from '@/features/auth/role-access'
 
 const InstitutionDashboardPage = lazy(() => import('./pages/institution-dashboard-page').then((module) => ({ default: module.InstitutionDashboardPage })))
 const ObligationsPage = lazy(() => import('./pages/obligations-page').then((module) => ({ default: module.ObligationsPage })))
+const WorkbookUploadPage = lazy(() => import('./pages/workbook-upload-page').then((module) => ({ default: module.WorkbookUploadPage })))
 const SubmissionsPage = lazy(() => import('./pages/submissions-page').then((module) => ({ default: module.SubmissionsPage })))
 const ManualEntryPage = lazy(() => import('./pages/manual-entry-page').then((module) => ({ default: module.ManualEntryPage })))
 const UploadPage = lazy(() => import('./pages/upload-page').then((module) => ({ default: module.UploadPage })))
@@ -48,6 +49,7 @@ export const dataSubmissionRoutes: RouteObject[] = [
   { path: 'obligations', element: page(<ObligationsPage />) },
   { path: 'obligations/:obligationId/entry', element: rolePage(PROVIDER, <ManualEntryPage />) },
   { path: 'obligations/:obligationId/upload', element: rolePage(PROVIDER, <UploadPage />) },
+  { path: 'workbook', element: rolePage(PROVIDER, <WorkbookUploadPage />) },
   { path: 'submissions', element: page(<SubmissionsPage />) },
   { path: 'validation', element: rolePage(REVIEWERS, <ValidationQueuePage />) },
   { path: 'validation/batches/:batchId', element: rolePage(REVIEWERS, <ValidationQueuePage />) },

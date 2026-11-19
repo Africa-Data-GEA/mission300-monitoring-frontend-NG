@@ -1,0 +1,113 @@
+import { Download, LoaderCircle, Upload } from 'lucide-react'
+import { useState, type FormEvent } from 'react'
+import type { WorkbookUploadResult } from '@/api/schemas/data-submissions'
+import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
+import { api } from '@/lib/api-client'
+import { dashboardToast } from '@/lib/dashboard-toast'
+import { useWorkbookUpload } from '../api'
+import { WorkbookResultsCard } from '../components/workbook-results-card'
+import { WorkflowShell } from '../components/workflow-shell'
+
+export function WorkbookUploadPage() {
+  const upload = useWorkbookUpload()
+  const [file, setFile] = useState<File | null>(null)
+  const [sourceReference, setSourceReference] = useState('')
+  const [notes, setNotes] = useState('')
+  const [result, setResult] = useState<WorkbookUploadResult | null>(null)
+  const [downloading, setDownloading] = useState(false)
+
+  async function download() {
+    setDownloading(true)
+    try {
+      const blob = await api.download('/data-submissions/workbook-template')
+      const url = URL.createObjectURL(blob)
+      const anchor = document.createElement('a')
+      anchor.href = url
+      anchor.download = 'M300-submission-workbook.xlsx'
+      anchor.click()
+      URL.revokeObjectURL(url)
+    } catch (error) {
+      dashboardToast.error('Download failed', { description: error instanceof Error ? error.message : 'Please try again.' })
+    } finally {
+      setDownloading(false)
+    }
+  }
+
+  async function submit(event: FormEvent) {
+    event.preventDefault()
+    if (!file) return
+    const body = new FormData()
+    body.append('file', file)
+    body.append('sourceReference', sourceReference)
+    body.append('notes', notes)
+    try {
+      const outcome = await upload.mutateAsync(body)
+      setResult(outcome)
+      if (outcome.status === 'complete') dashboardToast.success('Workbook submitted', { description: outcome.message })
+      else if (outcome.status === 'partial') dashboardToast.warning('Some sheets were refused', { description: outcome.message })
+      else dashboardToast.error('No sheet was submitted', { description: outcome.message })
+    } catch (error) {
+      dashboardToast.error('Upload failed', { description: error instanceof Error ? error.message : 'Please try again.' })
+    }
+  }
+
+  return (
+    <WorkflowShell
+      title="Upload submission workbook"
+      description="One workbook, one sheet per dataset. Sheets that pass are submitted; sheets with errors are refused and named so you can fix them and upload the same workbook again."
+    >
+      <div className="grid gap-4 lg:grid-cols-[1fr_24rem]">
+        <Card className="p-5">
+          <form onSubmit={(event) => void submit(event)}>
+            <Button type="button" variant="secondary" disabled={downloading} onClick={() => void download()}>
+              {downloading ? <LoaderCircle className="animate-spin" /> : <Download />}
+              Download workbook template
+            </Button>
+            <div className="mt-5 rounded-card border border-dashed border-border-strong bg-surface-sunken p-8 text-center">
+              <Upload className="mx-auto size-8 text-text-muted" aria-hidden="true" />
+              <label className="mt-3 block font-medium" htmlFor="workbook-file">Choose the completed workbook</label>
+              <p className="mt-1 text-sm text-text-muted">.xlsx; maximum 20 MB. Leave a sheet empty to skip it.</p>
+              <input
+                id="workbook-file"
+                type="file"
+                required
+                accept=".xlsx"
+                onChange={(event) => {
+                  setResult(null)
+                  setFile(event.target.files?.[0] ?? null)
+                }}
+                className="mx-auto mt-4 block max-w-full text-sm"
+              />
+              {file && <p className="mt-3 text-sm font-medium">{file.name}</p>}
+            </div>
+            <label className="mt-5 block text-sm font-medium" htmlFor="workbook-source">
+              Source reference *
+              <input
+                id="workbook-source"
+                required
+                value={sourceReference}
+                onChange={(event) => setSourceReference(event.target.value)}
+                className="mt-1.5 h-10 w-full rounded-control border border-border-default px-3"
+              />
+            </label>
+            <label className="mt-4 block text-sm font-medium" htmlFor="workbook-notes">
+              Notes
+              <textarea
+                id="workbook-notes"
+                value={notes}
+                onChange={(event) => setNotes(event.target.value)}
+                className="mt-1.5 min-h-24 w-full rounded-control border border-border-default px-3 py-2"
+              />
+            </label>
+            <Button className="mt-5" type="submit" disabled={!file || upload.isPending}>
+              {upload.isPending ? <LoaderCircle className="animate-spin" /> : <Upload />}
+              Upload workbook
+            </Button>
+          </form>
+        </Card>
+        {result && <WorkbookResultsCard result={result} />}
+      </div>
+    </WorkflowShell>
+  )
+}
