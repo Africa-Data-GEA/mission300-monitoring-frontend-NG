@@ -45,6 +45,9 @@ export const validationQueueItemSchema = submissionListItemSchema.extend({
   ageLabel: z.string().min(1),
   automatedCheck: workflowStatusSchema,
   issueCount: z.number().int().min(0),
+  batchId: z.string().min(1).optional(),
+  batchCount: z.number().int().min(2).optional(),
+  submissionIds: z.array(z.string().min(1)).optional(),
 })
 
 export const validationQueueSchema = pageOf(validationQueueItemSchema)

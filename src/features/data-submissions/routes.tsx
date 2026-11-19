@@ -50,6 +50,7 @@ export const dataSubmissionRoutes: RouteObject[] = [
   { path: 'obligations/:obligationId/upload', element: rolePage(PROVIDER, <UploadPage />) },
   { path: 'submissions', element: page(<SubmissionsPage />) },
   { path: 'validation', element: rolePage(REVIEWERS, <ValidationQueuePage />) },
+  { path: 'validation/batches/:batchId', element: rolePage(REVIEWERS, <ValidationQueuePage />) },
   { path: 'validation/:submissionId', element: rolePage(REVIEWERS, <ValidationDetailPage />) },
   { path: 'overdue', element: page(<OverduePage />) },
   { path: 'gaps', element: page(<DataGapsPage />) },

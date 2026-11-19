@@ -1,6 +1,6 @@
-import { ClipboardCheck } from 'lucide-react'
+import { ArrowLeft, ClipboardCheck, Layers } from 'lucide-react'
 import { useState } from 'react'
-import { Link, useLocation } from 'react-router'
+import { Link, useLocation, useParams } from 'react-router'
 import type { ValidationDecisionRequest, ValidationQueueItem } from '@/api/schemas/data-submissions'
 import type { Column } from '@/components/ui/data-table'
 import { Button } from '@/components/ui/button'
@@ -18,7 +18,9 @@ import { WorkflowStatusBadge } from '../components/workflow-status'
 import { useWorkflowQuery } from '../use-workflow-query'
 import { PublishConfirmationBanner } from './publish-confirmation-banner'
 
-function buildColumns(selected: ReadonlySet<string>, toggle: (id: string) => void): Column<ValidationQueueItem>[] {
+const idsOf = (row: ValidationQueueItem) => row.submissionIds ?? [row.id]
+
+function buildColumns(selected: ReadonlySet<string>, toggle: (ids: string[]) => void): Column<ValidationQueueItem>[] {
   return [
   {
     id: 'select',
@@ -27,8 +29,8 @@ function buildColumns(selected: ReadonlySet<string>, toggle: (id: string) => voi
       <input
         type="checkbox"
         aria-label={`Select ${row.dataset} for ${row.institution} for bulk decision`}
-        checked={selected.has(row.id)}
-        onChange={() => toggle(row.id)}
+        checked={idsOf(row).every((id) => selected.has(id))}
+        onChange={() => toggle(idsOf(row))}
         className="size-4"
       />
     ),
@@ -38,7 +40,12 @@ function buildColumns(selected: ReadonlySet<string>, toggle: (id: string) => voi
   // the submission's own review page.
   {
     id: 'submission', header: 'Submission',
-    cell: (row) => <p className="font-medium">{row.dataset}</p>,
+    cell: (row) => (
+      <>
+        <p className="font-medium">{row.dataset}</p>
+        {row.batchCount && <p className="text-xs text-text-muted">One upload, {row.batchCount} submissions</p>}
+      </>
+    ),
     sortValue: (row) => row.dataset,
   },
   { id: 'institution', header: 'Institution', cell: (row) => row.institution, sortValue: (row) => row.institution },
@@ -53,20 +60,23 @@ function buildColumns(selected: ReadonlySet<string>, toggle: (id: string) => voi
 export function ValidationQueuePage() {
   const state = useWorkflowQuery()
   const filters = useSubmissionFilters()
-  const list = useValidationQueue(state.query)
+  const { batchId } = useParams()
+  const list = useValidationQueue(state.query, batchId)
   const prefetchReview = usePrefetchSubmissionReview()
   const error = filters.error ?? list.error
   const location = useLocation()
   const bulkDecision = useBulkValidationDecision()
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const items = list.data?.items ?? []
-  const passedIds = items.filter((row) => row.automatedCheck.code === 'pass' && row.issueCount === 0).map((row) => row.id)
+  const passedIds = items
+    .filter((row) => row.automatedCheck.code === 'pass' && row.issueCount === 0)
+    .flatMap(idsOf)
 
-  function toggle(id: string) {
+  function toggle(ids: string[]) {
     setSelected((current) => {
       const next = new Set(current)
-      if (next.has(id)) next.delete(id)
-      else next.add(id)
+      const allSelected = ids.every((id) => next.has(id))
+      ids.forEach((id) => (allSelected ? next.delete(id) : next.add(id)))
       return next
     })
   }
@@ -97,7 +107,15 @@ export function ValidationQueuePage() {
       : null
 
   return (
-    <WorkflowShell title="Validation queue" description="Review server validation results and record a controlled publication decision.">
+    <WorkflowShell
+      title={batchId ? 'Upload review' : 'Validation queue'}
+      description={batchId ? 'Every submission created by one upload. Decide them together or one by one.' : 'Review server validation results and record a controlled publication decision.'}
+    >
+      {batchId && (
+        <Button asChild size="sm" variant="secondary" className="mb-3">
+          <Link to="/data-submissions/validation"><ArrowLeft />All uploads</Link>
+        </Button>
+      )}
       {publishedMessage && <PublishConfirmationBanner message={publishedMessage} />}
       {filters.data && <WorkflowFilters options={filters.data} query={state.query} onChange={state.update} onReset={state.reset} />}
       {selected.size > 0 && (
@@ -113,11 +131,11 @@ export function ValidationQueuePage() {
         {list.data && (
           <Card className="p-3">
             <QueueSelectionBar
-              pageCount={items.length}
+              pageCount={items.flatMap(idsOf).length}
               passedCount={passedIds.length}
               selectedCount={selected.size}
               pageSize={state.query.pageSize}
-              onSelectPage={() => addToSelection(items.map((row) => row.id))}
+              onSelectPage={() => addToSelection(items.flatMap(idsOf))}
               onSelectPassed={() => addToSelection(passedIds)}
               onPageSizeChange={(pageSize) => state.update({ ...state.query, pageSize })}
             />
@@ -126,7 +144,13 @@ export function ValidationQueuePage() {
               columns={buildColumns(selected, toggle)}
               rows={list.data.items}
               getRowId={(row) => row.id}
-              rowActions={(row) => (
+              rowActions={(row) => row.batchId ? (
+                <Button asChild size="sm">
+                  <Link to={`/data-submissions/validation/batches/${row.batchId}`}>
+                    <Layers />Open upload
+                  </Link>
+                </Button>
+              ) : (
                 <Button asChild size="sm">
                   <Link
                     to={`/data-submissions/validation/${row.id}`}

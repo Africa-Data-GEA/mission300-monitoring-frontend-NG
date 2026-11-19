@@ -115,8 +115,13 @@ export const useObligations = (query: DataSubmissionQuery) =>
 export const useSubmissions = (query: DataSubmissionQuery) =>
   useWorkflowList('submissions', '/data-submissions/submissions', query, submissionListSchema)
 
-export const useValidationQueue = (query: DataSubmissionQuery) =>
-  useWorkflowList('validation', '/data-submissions/validation', query, validationQueueSchema)
+export const useValidationQueue = (query: DataSubmissionQuery, batchId?: string) =>
+  useWorkflowList(
+    batchId ? `validation-batch-${batchId}` : 'validation',
+    batchId ? `/data-submissions/validation/batches/${batchId}` : '/data-submissions/validation',
+    query,
+    validationQueueSchema,
+  )
 
 export const useOverdueSubmissions = (query: DataSubmissionQuery) =>
   useWorkflowList('overdue', '/data-submissions/overdue', query, overdueListSchema)
