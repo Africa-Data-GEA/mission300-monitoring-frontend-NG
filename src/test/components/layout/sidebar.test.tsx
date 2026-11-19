@@ -42,7 +42,7 @@ describe('Sidebar', () => {
   it('renders the brand mark', () => {
     renderWithRouter(<Sidebar />)
 
-    expect(screen.getByAltText(/Mission 300/)).toHaveClass('h-10')
+    expect(screen.getByAltText(/Mission 300/)).toHaveClass('h-12')
   })
 
   it('renders the signed-in user and role', () => {
@@ -119,7 +119,7 @@ describe('Sidebar', () => {
       ).toHaveAttribute('href', '/dashboard')
     })
 
-    it('renders Reports & exports as a dropdown that reveals its four pages', async () => {
+    it('renders Reports & exports as a dropdown that reveals its pages', async () => {
       const user = userEvent.setup()
       renderWithRouter(<Sidebar />)
 
@@ -132,14 +132,15 @@ describe('Sidebar', () => {
       expect(screen.getByRole('link', { name: 'Report Builder' })).toHaveAttribute('href', '/reports/builder')
       expect(screen.getByRole('link', { name: 'Compact & CPR export' })).toHaveAttribute('href', '/reports/exports')
       expect(screen.getByRole('link', { name: 'KPI methodology export' })).toHaveAttribute('href', '/reports/methodology')
-      expect(screen.getByRole('link', { name: 'Saved reports' })).toHaveAttribute('href', '/reports/saved')
+      expect(screen.getByRole('link', { name: 'Scheduled briefs' })).toHaveAttribute('href', '/reports/schedules')
+      expect(screen.queryByRole('link', { name: 'Saved reports' })).not.toBeInTheDocument()
     })
 
     it('opens the Reports & exports dropdown on a reports page and marks that page active', () => {
-      renderWithRouter(<Sidebar />, { route: '/reports/saved' })
+      renderWithRouter(<Sidebar />, { route: '/reports/schedules' })
 
       expect(screen.getByRole('button', { name: /Reports & exports/ })).toHaveAttribute('aria-expanded', 'true')
-      expect(screen.getByRole('link', { name: 'Saved reports' })).toHaveClass('bg-chart-accent')
+      expect(screen.getByRole('link', { name: 'Scheduled briefs' })).toHaveClass('bg-chart-accent')
     })
 
     it('keeps the unavailable-page description accessible for planned items', () => {
