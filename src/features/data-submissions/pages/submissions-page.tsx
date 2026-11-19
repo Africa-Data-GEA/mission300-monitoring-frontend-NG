@@ -78,7 +78,7 @@ export function SubmissionsPage() {
   const canOpenDetail = !!session && grantedRoles(session.user).some((role) => REVIEW_ROLES.includes(role))
   const canCorrect = !!session && grantedRoles(session.user).includes('institutional-data-provider')
   const canBulkDecide =
-    !!session && grantedRoles(session.user).some((role) => role === 'data-reviewer' || role === 'validator')
+    !!session && grantedRoles(session.user).some((role) => REVIEW_ROLES.includes(role))
 
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const bulkDecision = useBulkValidationDecision()
