@@ -1,5 +1,4 @@
 import toast from 'react-hot-toast'
-import { DashboardToastCard, type ToastTone } from '@/components/ui/dashboard-toast'
 
 export interface DashboardToastOptions {
   description?: string
@@ -7,29 +6,24 @@ export interface DashboardToastOptions {
   id?: string
 }
 
-function showToast(tone: ToastTone, title: string, options: DashboardToastOptions = {}) {
-  const duration = options.duration ?? (tone === 'loading' ? Number.POSITIVE_INFINITY : 5_000)
-  return toast.custom(
-    (instance) => (
-      <DashboardToastCard
-        description={options.description}
-        instance={instance}
-        title={title}
-        tone={tone}
-      />
-    ),
-    { duration, id: options.id },
-  )
+function message(title: string, options: DashboardToastOptions = {}) {
+  return options.description ? `${title}\n${options.description}` : title
+}
+
+function settings(options: DashboardToastOptions = {}) {
+  return { duration: options.duration, id: options.id, style: { whiteSpace: 'pre-line' as const } }
 }
 
 export const dashboardToast = {
   success: (title: string, options?: DashboardToastOptions) =>
-    showToast('success', title, options),
-  error: (title: string, options?: DashboardToastOptions) => showToast('error', title, options),
+    toast.success(message(title, options), settings(options)),
+  error: (title: string, options?: DashboardToastOptions) =>
+    toast.error(message(title, options), settings(options)),
   warning: (title: string, options?: DashboardToastOptions) =>
-    showToast('warning', title, options),
-  info: (title: string, options?: DashboardToastOptions) => showToast('info', title, options),
+    toast(message(title, options), { ...settings(options), icon: '⚠️' }),
+  info: (title: string, options?: DashboardToastOptions) =>
+    toast(message(title, options), { ...settings(options), icon: 'ℹ️' }),
   loading: (title: string, options?: DashboardToastOptions) =>
-    showToast('loading', title, options),
+    toast.loading(message(title, options), settings(options)),
   dismiss: (id?: string) => toast.dismiss(id),
 }
