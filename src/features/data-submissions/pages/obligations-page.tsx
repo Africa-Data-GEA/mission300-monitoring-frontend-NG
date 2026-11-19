@@ -28,9 +28,17 @@ export function ObligationsPage() {
       description="Start an assigned return using guided entry or the controlled upload template."
     >
       {isProvider && (
-        <Button asChild size="sm" variant="secondary" className="mb-3 w-fit">
-          <Link to="/data-submissions/workbook">Upload one workbook for all datasets</Link>
-        </Button>
+        <Card className="mb-3 flex flex-wrap items-center justify-between gap-3 p-4">
+          <div>
+            <p className="font-semibold text-text-default">Submit everything in one workbook</p>
+            <p className="text-sm text-text-muted">
+              One Excel file with a sheet per dataset, already listing your open periods. Fill in the numbers and upload it once.
+            </p>
+          </div>
+          <Button asChild>
+            <Link to="/data-submissions/workbook">Download and upload workbook</Link>
+          </Button>
+        </Card>
       )}
       {filters.data && (
         <WorkflowFilters
