@@ -1,6 +1,6 @@
 import { Plus } from 'lucide-react'
 import { useState } from 'react'
-import toast from 'react-hot-toast'
+import { dashboardToast } from '@/lib/dashboard-toast'
 import type { ReformAction } from '@/api/schemas/reform-actions'
 import { REFORM_STATUS_OPTIONS } from '@/api/schemas/reform-actions'
 import { Breadcrumb } from '@/components/ui/breadcrumb'
@@ -136,7 +136,7 @@ export function ReformActionsPage() {
         onClose={() => setTarget(null)}
         onSaved={(message) => {
           setTarget(null)
-          toast.success(message)
+          dashboardToast.success('Reform action saved', { description: message })
         }}
       />
 

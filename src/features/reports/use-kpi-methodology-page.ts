@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import toast from 'react-hot-toast'
+import { dashboardToast } from '@/lib/dashboard-toast'
 import type { ExportFormat } from '@/api/schemas/reports'
 import { fetchMethodologyReport } from './api'
 import { downloadBlob } from './lib/download'
@@ -19,7 +19,9 @@ export function useKpiMethodologyPage() {
           : await buildReportWorkbook(generated)
       downloadBlob(blob, `kpi-methodology.${format}`)
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'The methodology could not be downloaded.')
+      dashboardToast.error('Methodology not downloaded', {
+        description: error instanceof Error ? error.message : 'The methodology could not be downloaded.',
+      })
     } finally {
       setDownloadingMethodology(null)
     }

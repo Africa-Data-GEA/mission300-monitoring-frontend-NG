@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import toast from 'react-hot-toast'
+import { dashboardToast } from '@/lib/dashboard-toast'
 import type { CompactExportCard, ExportFormat } from '@/api/schemas/reports'
 import { environment } from '@/config/environment'
 import { useBrandIdentity } from '@/features/branding/use-brand-identity'
@@ -43,7 +43,9 @@ export function useCompactExportsPage() {
             : await buildReportWorkbook(generated)
       downloadBlob(blob, savedReport.fileReference)
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'The export could not be downloaded.')
+      dashboardToast.error('Export not downloaded', {
+        description: error instanceof Error ? error.message : 'The export could not be downloaded.',
+      })
     } finally {
       setCompactExportKey(null)
     }

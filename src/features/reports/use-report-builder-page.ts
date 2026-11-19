@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import toast from 'react-hot-toast'
+import { dashboardToast } from '@/lib/dashboard-toast'
 import type { ExportFormat, ReportConfig, ReportType } from '@/api/schemas/reports'
 import { downloadSavedReportPdf, useGenerateReport, useReportPreview, useReportsFilters } from './api'
 import { defaultReportConfig } from './lib/default-report-config'
@@ -54,7 +54,9 @@ export function useReportBuilderPage() {
           : await buildReportWorkbook(generated)
       downloadBlob(blob, savedReport.fileReference)
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'The report could not be downloaded.')
+      dashboardToast.error('Report not downloaded', {
+        description: error instanceof Error ? error.message : 'The report could not be downloaded.',
+      })
     } finally {
       setDownloadingFormat(null)
     }

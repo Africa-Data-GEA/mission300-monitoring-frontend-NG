@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import toast from 'react-hot-toast'
 import type { ReportSchedule, ReportScheduleInput, SendScheduleResult } from '@/api/schemas/report-schedules'
+import { dashboardToast } from '@/lib/dashboard-toast'
 import {
   useDeleteReportSchedule,
   useReportSchedules,
@@ -8,13 +8,24 @@ import {
   useSendReportSchedule,
 } from './schedules-api'
 
-function sendOutcome(result: SendScheduleResult, test: boolean): { ok: boolean; message: string } {
+function sendOutcome(
+  result: SendScheduleResult,
+  test: boolean,
+): { tone: 'success' | 'warning' | 'error'; title: string; message: string } {
   const target = test ? 'to you' : `to ${result.recipientCount} ${result.recipientCount === 1 ? 'recipient' : 'recipients'}`
-  if (result.status === 'sent') return { ok: true, message: `The brief was sent ${target}.` }
+  if (result.status === 'sent') return { tone: 'success', title: 'Brief sent', message: `The brief was sent ${target}.` }
   if (result.status === 'partial') {
-    return { ok: false, message: `The brief reached some recipients but ${result.failedCount} failed. ${result.error ?? ''}`.trim() }
+    return {
+      tone: 'warning',
+      title: 'Brief partly sent',
+      message: `${result.failedCount} of ${result.recipientCount} could not be reached. ${result.error ?? ''}`.trim(),
+    }
   }
-  return { ok: false, message: `The brief could not be sent. ${result.error ?? ''}`.trim() }
+  return { tone: 'error', title: 'Brief not sent', message: result.error ?? 'The brief could not be sent.' }
+}
+
+function reason(error: unknown, fallback: string): string {
+  return error instanceof Error ? error.message : fallback
 }
 
 export function useReportSchedulesPage() {
@@ -45,10 +56,10 @@ export function useReportSchedulesPage() {
   async function saveSchedule(input: ReportScheduleInput) {
     try {
       await save.mutateAsync({ id: editing?.id ?? null, input })
-      toast.success(editing ? 'Schedule updated.' : 'Schedule created.')
+      dashboardToast.success(editing ? 'Schedule updated' : 'Schedule created')
       setDialogOpen(false)
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'The schedule could not be saved.')
+      dashboardToast.error('Schedule not saved', { description: reason(error, 'The schedule could not be saved.') })
     }
   }
 
@@ -68,7 +79,7 @@ export function useReportSchedulesPage() {
         },
       })
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'The schedule could not be updated.')
+      dashboardToast.error('Schedule not updated', { description: reason(error, 'The schedule could not be updated.') })
     } finally {
       setBusyId(null)
     }
@@ -78,10 +89,9 @@ export function useReportSchedulesPage() {
     setBusyId(schedule.id)
     try {
       const outcome = sendOutcome(await send.mutateAsync({ id: schedule.id, test }), test)
-      if (outcome.ok) toast.success(outcome.message)
-      else toast.error(outcome.message)
+      dashboardToast[outcome.tone](outcome.title, { description: outcome.message })
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'The brief could not be sent.')
+      dashboardToast.error('Brief not sent', { description: reason(error, 'The brief could not be sent.') })
     } finally {
       setBusyId(null)
     }
@@ -95,7 +105,7 @@ export function useReportSchedulesPage() {
       await remove.mutateAsync(target.id)
       setPendingDelete(null)
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'The schedule could not be deleted.')
+      dashboardToast.error('Schedule not deleted', { description: reason(error, 'The schedule could not be deleted.') })
     } finally {
       setBusyId(null)
     }
