@@ -1,5 +1,7 @@
 import { Link } from 'react-router'
 import { Button } from '@/components/ui/button'
+import { readAuthSession } from '@/features/auth/auth-session'
+import { grantedRoles } from '@/features/auth/role-access'
 import { Card } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Pagination } from '@/components/ui/pagination'
@@ -17,15 +19,19 @@ export function ObligationsPage() {
   const filters = useSubmissionFilters()
   const list = useObligations(state.query)
   const error = filters.error ?? list.error
+  const session = readAuthSession()
+  const isProvider = !!session && grantedRoles(session.user).includes('institutional-data-provider')
 
   return (
     <WorkflowShell
       title="Reporting obligations"
       description="Start an assigned return using guided entry or the controlled upload template."
     >
-      <Button asChild size="sm" variant="secondary" className="mb-3 w-fit">
-        <Link to="/data-submissions/workbook">Upload one workbook for all datasets</Link>
-      </Button>
+      {isProvider && (
+        <Button asChild size="sm" variant="secondary" className="mb-3 w-fit">
+          <Link to="/data-submissions/workbook">Upload one workbook for all datasets</Link>
+        </Button>
+      )}
       {filters.data && (
         <WorkflowFilters
           options={filters.data}
