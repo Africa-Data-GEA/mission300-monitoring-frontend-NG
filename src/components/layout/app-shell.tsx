@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Outlet, useMatches, useNavigate } from 'react-router'
 import { useQueryClient } from '@tanstack/react-query'
 import { AUTH_SESSION_CHANGED, readAuthSession } from '@/features/auth/auth-session'
+import { canUserReachModule } from '@/features/auth/role-access'
 import { useTokenRefresh } from '@/features/auth/use-token-refresh'
 import { GlobalFiltersProvider } from '@/app/global-filters'
 import { prefetchRouteChunks } from '@/app/route-chunks'
@@ -32,7 +33,8 @@ export function AppShell() {
    * skeleton while its chunk downloads. See route-chunks.ts.
    */
   useEffect(() => {
-    prefetchRouteChunks()
+    const session = readAuthSession()
+    prefetchRouteChunks((moduleKey) => !!session && canUserReachModule(session.user, moduleKey))
   }, [])
 
   /*
@@ -42,6 +44,8 @@ export function AppShell() {
    * use-password-login.ts.
    */
   useEffect(() => {
+    const session = readAuthSession()
+    if (!session || !canUserReachModule(session.user, 'executive-overview')) return
     void prefetchExecutiveOverview(queryClient, DEFAULT_FILTER_VALUES)
   }, [queryClient])
 

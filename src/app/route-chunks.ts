@@ -77,6 +77,26 @@ const PREFETCH_ORDER: (keyof typeof routeChunks)[] = [
  */
 const VENDOR_PREFETCH = [() => import('react-apexcharts')]
 
+const CHUNK_MODULES: Partial<Record<keyof typeof routeChunks, string>> = {
+  institutionOverview: 'institution-overview',
+  kpiExplorer: 'kpi-directory',
+  programs: 'programs',
+  pillarDashboard: 'pillar-dashboards',
+  pillarIndex: 'pillar-dashboards',
+  bottlenecks: 'programs',
+  learningLog: 'learning-log',
+  reformActions: 'reform-actions',
+  stateDisco: 'state-disco',
+  dataSubmissions: 'data-submissions',
+  stakeholders: 'stakeholders',
+  administration: 'administration',
+  reports: 'reports',
+}
+
+const CHART_MODULES = ['executive-overview', 'pillar-dashboards', 'state-disco', 'programs']
+
+const SETTLE_DELAY_MS = 3000
+
 let started = false
 
 /**
@@ -86,7 +106,7 @@ let started = false
  * current page's own data requests for connections, and guarded so repeated
  * mounts (StrictMode's double-invoke included) only ever schedule one pass.
  */
-export function prefetchRouteChunks(): void {
+export function prefetchRouteChunks(canReach: (moduleKey: string) => boolean = () => true): void {
   if (started || typeof window === 'undefined') return
   started = true
 
@@ -97,8 +117,11 @@ export function prefetchRouteChunks(): void {
   }
 
   const queue: (() => Promise<unknown>)[] = [
-    ...VENDOR_PREFETCH,
-    ...PREFETCH_ORDER.map((key) => routeChunks[key]),
+    ...(CHART_MODULES.some(canReach) ? VENDOR_PREFETCH : []),
+    ...PREFETCH_ORDER.filter((key) => {
+      const moduleKey = CHUNK_MODULES[key]
+      return !moduleKey || canReach(moduleKey)
+    }).map((key) => routeChunks[key]),
   ]
 
   let index = 0
@@ -112,5 +135,5 @@ export function prefetchRouteChunks(): void {
       .then(() => schedule(next))
   }
 
-  schedule(next)
+  window.setTimeout(() => schedule(next), SETTLE_DELAY_MS)
 }

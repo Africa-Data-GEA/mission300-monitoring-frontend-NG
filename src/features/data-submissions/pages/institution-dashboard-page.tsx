@@ -1,4 +1,3 @@
-import { FileSpreadsheet, Keyboard } from 'lucide-react'
 import { Link } from 'react-router'
 import { useQuery } from '@tanstack/react-query'
 import { userAccountSchema } from '@/api/schemas/administration'
@@ -8,12 +7,13 @@ import { Card } from '@/components/ui/card'
 import { readAuthSession } from '@/features/auth/auth-session'
 import { grantedRoles } from '@/features/auth/role-access'
 import { api } from '@/lib/api-client'
+import type { SubmissionListItem } from '@/api/schemas/data-submissions'
 import { useDataGaps, useObligations, useSubmissions } from '../api'
-import { ObligationActions } from '../components/obligation-actions'
+import { DEFAULT_WORKFLOW_QUERY } from '../use-workflow-query'
 import { TruncationNotice } from '../components/truncation-notice'
 import { WorkflowStatusBadge } from '../components/workflow-status'
 
-const FETCH_ALL = { pageSize: 100 }
+const FETCH_ALL = { ...DEFAULT_WORKFLOW_QUERY, pageSize: 100 }
 
 /**
  * The landing view for an institutional data provider — what they see first
@@ -30,6 +30,43 @@ const FETCH_ALL = { pageSize: 100 }
  * endpoint yet, so this reads the same session/account lookup the sidebar
  * already uses for role-based nav gating.
  */
+interface RecentUpload {
+  key: string
+  title: string
+  subtitle: string
+  status: SubmissionListItem['status']
+  linkId: string
+}
+
+function groupRecentUploads(items: SubmissionListItem[]): RecentUpload[] {
+  const groups = new Map<string, SubmissionListItem[]>()
+  for (const item of items) groups.set(item.batchId ?? item.id, [...(groups.get(item.batchId ?? item.id) ?? []), item])
+  return [...groups]
+    .map(([key, members]) => {
+      const first = members[0]
+      if (!first) return null
+      const datasets = new Set(members.map((member) => member.dataset))
+      const counts = new Map<string, number>()
+      for (const member of members) counts.set(member.status.label, (counts.get(member.status.label) ?? 0) + 1)
+      return {
+        key,
+        sortKey: Math.max(...members.map((member) => new Date(member.submittedAt ?? 0).getTime())),
+        title:
+          members.length === 1
+            ? `${first.dataset} · ${first.reportingPeriod}`
+            : `${datasets.size === 1 ? first.dataset : `${datasets.size} datasets`} · ${members.length} submissions`,
+        subtitle:
+          members.length === 1
+            ? `v${first.version} · ${first.submittedAtLabel}`
+            : `${[...counts].map(([label, count]) => `${count} ${label.toLowerCase()}`).join(' · ')} · ${first.submittedAtLabel}`,
+        status: first.status,
+        linkId: first.id,
+      }
+    })
+    .filter((entry): entry is RecentUpload & { sortKey: number } => entry !== null)
+    .sort((a, b) => b.sortKey - a.sortKey)
+}
+
 export function InstitutionDashboardPage() {
   const session = readAuthSession()
   const { data: account } = useQuery({
@@ -54,22 +91,18 @@ export function InstitutionDashboardPage() {
     .filter((row) => !!institution && row.institution === institution)
     .sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime())
 
-  const mySubmissions = (submissions.data?.items ?? [])
-    .filter((row) => !!institution && row.institution === institution)
-    .sort((a, b) => new Date(b.submittedAt ?? 0).getTime() - new Date(a.submittedAt ?? 0).getTime())
-    .slice(0, 5)
+  const recentUploads = groupRecentUploads(submissions.data?.items ?? []).slice(0, 5)
 
   const myGaps = (gaps.data?.items ?? []).filter((row) => !!institution && row.institution === institution)
 
   const dueOrOverdue = myObligations.filter((row) => row.status.code === 'due' || row.status.code === 'overdue')
-  const nextObligation = dueOrOverdue[0] ?? myObligations[0] ?? null
 
   return (
     <div className="flex min-w-0 flex-col gap-4">
       <div>
         <Breadcrumb items={[{ label: 'Data operations' }, { label: 'Overview' }]} />
         <h1 className="mt-2 text-3xl font-semibold tracking-tight text-text-default">
-          {institution ? `${institution}'s submissions` : 'Your submissions'}
+          {institution ?? 'Your submissions'}
         </h1>
         <p className="mt-1 max-w-3xl text-sm text-text-muted">
           {account
@@ -83,35 +116,22 @@ export function InstitutionDashboardPage() {
         )}
       </div>
 
-      {nextObligation && (
-        <Card className="flex flex-wrap items-center justify-between gap-3 border-brand-200 bg-brand-50 p-4">
-          <div>
-            <p className="text-xs font-medium text-brand-700">Next up</p>
-            <p className="mt-0.5 text-sm font-semibold text-text-default">
-              {nextObligation.dataset} · {nextObligation.reportingPeriod}
-            </p>
-            <p className="mt-0.5 text-xs text-text-muted">{nextObligation.dueLabel}</p>
-          </div>
-          <div className="flex gap-2">
-            {nextObligation.availableActions.includes('enter-data') && (
-              <Button asChild size="sm" variant="secondary">
-                <Link to={`/data-submissions/obligations/${nextObligation.id}/entry`}>
-                  <Keyboard aria-hidden="true" />
-                  Enter data
-                </Link>
-              </Button>
-            )}
-            {nextObligation.availableActions.includes('upload-template') && (
-              <Button asChild size="sm">
-                <Link to={`/data-submissions/obligations/${nextObligation.id}/upload`}>
-                  <FileSpreadsheet aria-hidden="true" />
-                  Upload
-                </Link>
-              </Button>
-            )}
-          </div>
-        </Card>
-      )}
+      <Card className="flex flex-wrap items-center justify-between gap-3 border-brand-200 bg-brand-50 p-4">
+        <div>
+          <p className="text-xs font-medium text-brand-700">Submit your data</p>
+          <p className="mt-0.5 text-sm font-semibold text-text-default">
+            {dueOrOverdue.length > 0
+              ? `${dueOrOverdue.length} ${dueOrOverdue.length === 1 ? 'dataset is' : 'datasets are'} due or overdue`
+              : 'Everything is up to date'}
+          </p>
+          <p className="mt-0.5 text-xs text-text-muted">
+            One workbook with a sheet per dataset, already listing your open periods.
+          </p>
+        </div>
+        <Button asChild size="sm">
+          <Link to="/data-submissions/workbook">Download and upload workbook</Link>
+        </Button>
+      </Card>
 
       <Card variant="well" className="p-4">
         <div className="flex items-center justify-between gap-3">
@@ -148,7 +168,6 @@ export function InstitutionDashboardPage() {
                     {row.dueLabel}
                   </p>
                 </div>
-                <ObligationActions obligation={row} />
               </div>
             ))}
           </div>
@@ -167,43 +186,28 @@ export function InstitutionDashboardPage() {
 
         {submissions.isPending ? (
           <p className="mt-3 text-sm text-text-muted">Loading…</p>
-        ) : mySubmissions.length === 0 ? (
+        ) : recentUploads.length === 0 ? (
           <p className="mt-3 text-sm text-text-muted">No submissions yet.</p>
         ) : (
           <div className="mt-3 space-y-2">
-            {mySubmissions.map((row) => {
-              // The validation detail route is reviewer/validator-only
-              // (rolePage(REVIEWERS, ...) in routes.tsx) — a provider
-              // without that role sees this same row as a plain summary
-              // instead of a link that would just bounce to /access-denied.
+            {recentUploads.map((row) => {
               const content = (
                 <>
                   <div>
-                    <p className="text-sm font-medium text-text-default">
-                      {row.dataset} · {row.reportingPeriod}
-                    </p>
-                    <p className="mt-0.5 text-xs text-text-muted">
-                      v{row.version} · {row.submittedAtLabel}
-                    </p>
+                    <p className="text-sm font-medium text-text-default">{row.title}</p>
+                    <p className="mt-0.5 text-xs text-text-muted">{row.subtitle}</p>
                   </div>
                   <WorkflowStatusBadge status={row.status} />
                 </>
               )
-              return canReview ? (
+              return (
                 <Link
-                  key={row.id}
-                  to={`/data-submissions/validation/${row.id}`}
+                  key={row.key}
+                  to="/data-submissions/submissions"
                   className="flex flex-wrap items-center justify-between gap-3 rounded-card border border-border-default bg-surface p-3 transition-colors hover:bg-surface-sunken"
                 >
                   {content}
                 </Link>
-              ) : (
-                <div
-                  key={row.id}
-                  className="flex flex-wrap items-center justify-between gap-3 rounded-card border border-border-default bg-surface p-3"
-                >
-                  {content}
-                </div>
               )
             })}
           </div>

@@ -1,5 +1,6 @@
-import { Download, LoaderCircle, Upload } from 'lucide-react'
+import { CheckCircle2, Download, LoaderCircle, Upload } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
+import { Link } from 'react-router'
 import type { WorkbookUploadResult } from '@/api/schemas/data-submissions'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -23,6 +24,7 @@ export function WorkbookUploadPage() {
   const [sourceReference, setSourceReference] = useState('')
   const [notes, setNotes] = useState('')
   const [result, setResult] = useState<WorkbookUploadResult | null>(null)
+  const [received, setReceived] = useState<WorkbookUploadResult | null>(null)
   const [downloading, setDownloading] = useState(false)
 
   async function download() {
@@ -52,6 +54,14 @@ export function WorkbookUploadPage() {
     if (isAdmin) body.append('institutionId', institution)
     try {
       const outcome = await upload.mutateAsync(body)
+      if (outcome.accepted.length > 0) {
+        setReceived(outcome)
+        setResult(null)
+        setFile(null)
+        setSourceReference('')
+        setNotes('')
+        return
+      }
       setResult(outcome)
       if (outcome.status === 'complete') dashboardToast.success('Workbook submitted', { description: outcome.message })
       else if (outcome.status === 'unchanged') dashboardToast.info('Nothing new to submit', { description: outcome.message })
@@ -60,6 +70,34 @@ export function WorkbookUploadPage() {
     } catch (error) {
       dashboardToast.error('Upload failed', { description: error instanceof Error ? error.message : 'Please try again.' })
     }
+  }
+
+  if (received) {
+    const accepted = received.accepted.reduce((total, sheet) => total + sheet.submissions, 0)
+    return (
+      <WorkflowShell title="Submission received" description="Thank you. Your data is now with the reviewers.">
+        <Card className="mx-auto flex w-full max-w-2xl flex-col items-center gap-3 p-8 text-center">
+          <CheckCircle2 className="size-12 text-status-on-track" aria-hidden="true" />
+          <h2 className="text-xl font-semibold text-text-default">We received your submission</h2>
+          <p className="text-sm text-text-muted">
+            {accepted} submission{accepted === 1 ? '' : 's'} from {received.accepted.length} sheet{received.accepted.length === 1 ? '' : 's'} went to review. Nothing is published until a reviewer approves it.
+          </p>
+          <div className="mt-2 flex flex-wrap justify-center gap-2">
+            <Button asChild>
+              <Link to="/data-submissions/submissions">View submission history</Link>
+            </Button>
+            <Button variant="secondary" type="button" onClick={() => setReceived(null)}>
+              Upload another workbook
+            </Button>
+          </div>
+        </Card>
+        {received.rejected.length > 0 && (
+          <div className="mx-auto mt-4 w-full max-w-2xl">
+            <WorkbookResultsCard result={{ ...received, accepted: [], skipped: [] }} />
+          </div>
+        )}
+      </WorkflowShell>
+    )
   }
 
   return (

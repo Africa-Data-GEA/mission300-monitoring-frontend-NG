@@ -90,7 +90,7 @@ function buildColumns(
 export function SubmissionsPage() {
   const state = useWorkflowQuery()
   const filters = useSubmissionFilters()
-  const list = useSubmissions({ ...state.query, pageSize: 100 })
+  const list = useSubmissions({ ...state.query, pageSize: 20 })
   const error = filters.error ?? list.error
   const session = readAuthSession()
   // The detail route is reviewer/validator-only (rolePage(REVIEWERS, ...) in
