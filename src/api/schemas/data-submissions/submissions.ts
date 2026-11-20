@@ -6,6 +6,7 @@ import {
 export const submissionListItemSchema = z.object({
   id: z.string().min(1),
   obligationId: z.string().nullable().optional(),
+  batchId: z.string().min(1).optional(),
   institution: z.string().min(1),
   dataset: z.string().min(1),
   reportingPeriod: z.string().min(1),
@@ -46,7 +47,7 @@ export const validationQueueItemSchema = submissionListItemSchema.extend({
   automatedCheck: workflowStatusSchema,
   issueCount: z.number().int().min(0),
   batchId: z.string().min(1).optional(),
-  batchCount: z.number().int().min(2).optional(),
+  batchCount: z.number().int().min(1).optional(),
   submissionIds: z.array(z.string().min(1)).optional(),
 })
 
@@ -136,3 +137,32 @@ export type KpiExtraction = z.infer<typeof kpiExtractionSchema>
 export type SubmissionDetail = z.infer<typeof submissionDetailSchema>
 export type ValidationDecisionRequest = z.infer<typeof validationDecisionRequestSchema>
 export type BulkValidationDecisionRequest = z.infer<typeof bulkValidationDecisionRequestSchema>
+
+export const uploadBatchSchema = z.object({
+  batchId: z.string().min(1),
+  submittedBy: z.string(),
+  submittedAtLabel: z.string(),
+  sourceReference: z.string(),
+  fileName: z.string().nullable(),
+  notes: z.string(),
+  total: z.number().int(),
+  pending: z.number().int(),
+  datasets: z.array(
+    z.object({
+      name: z.string(),
+      columns: z.array(z.object({ id: z.string(), name: z.string(), unit: z.string() })),
+      rows: z.array(
+        z.object({
+          id: z.string(),
+          institution: z.string(),
+          period: z.string(),
+          status: workflowStatusSchema,
+          canDecide: z.boolean(),
+          values: z.record(z.string(), z.number()),
+        }),
+      ),
+    }),
+  ),
+})
+
+export type UploadBatch = z.infer<typeof uploadBatchSchema>

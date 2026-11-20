@@ -166,7 +166,7 @@ export type UploadDefinition = z.infer<typeof uploadDefinitionSchema>
 export type DraftSaved = z.infer<typeof draftSavedSchema>
 
 export const workbookUploadResultSchema = z.object({
-  status: z.enum(['complete', 'partial', 'failed']),
+  status: z.enum(['complete', 'partial', 'unchanged', 'failed']),
   batchId: z.string().nullable(),
   message: z.string().min(1),
   accepted: z.array(z.object({ sheet: z.string(), dataset: z.string(), submissions: z.number() })),

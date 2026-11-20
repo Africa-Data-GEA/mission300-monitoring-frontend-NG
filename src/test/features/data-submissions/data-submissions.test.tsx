@@ -1,4 +1,4 @@
-import { screen, within } from '@testing-library/react'
+import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { ObligationsPage } from '@/features/data-submissions/pages/obligations-page'
 import { ValidationQueuePage } from '@/features/data-submissions/pages/validation-queue-page'
@@ -28,12 +28,15 @@ describe('Data submission workflows', () => {
       route: '/data-submissions/obligations',
     })
 
+    await waitFor(() => expect(document.querySelectorAll('button[aria-expanded="false"]').length).toBeGreaterThan(0))
+    document.querySelectorAll('button[aria-expanded="false"]').forEach((group) => fireEvent.click(group))
+
     expect((await screen.findAllByText('Metering performance')).length).toBeGreaterThan(0)
     expect(screen.getAllByRole('link', { name: /enter data/i })[0]).toHaveAttribute(
       'href',
       '/data-submissions/obligations/obl-001/entry',
     )
-    expect(screen.getAllByRole('link', { name: /upload/i })[0]).toHaveAttribute(
+    expect(screen.getAllByRole('link', { name: /^upload$/i })[0]).toHaveAttribute(
       'href',
       '/data-submissions/obligations/obl-001/upload',
     )

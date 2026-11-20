@@ -1,6 +1,6 @@
-import { ArrowLeft, ClipboardCheck, Layers } from 'lucide-react'
+import { ClipboardCheck, Layers } from 'lucide-react'
 import { useState } from 'react'
-import { Link, useLocation, useParams } from 'react-router'
+import { Link, useLocation } from 'react-router'
 import type { ValidationDecisionRequest, ValidationQueueItem } from '@/api/schemas/data-submissions'
 import type { Column } from '@/components/ui/data-table'
 import { Button } from '@/components/ui/button'
@@ -43,7 +43,7 @@ function buildColumns(selected: ReadonlySet<string>, toggle: (ids: string[]) => 
     cell: (row) => (
       <>
         <p className="font-medium">{row.dataset}</p>
-        {row.batchCount && <p className="text-xs text-text-muted">One upload, {row.batchCount} submissions</p>}
+        {row.batchCount && row.batchCount > 1 && <p className="text-xs text-text-muted">One upload, {row.batchCount} submissions</p>}
       </>
     ),
     sortValue: (row) => row.dataset,
@@ -60,8 +60,7 @@ function buildColumns(selected: ReadonlySet<string>, toggle: (ids: string[]) => 
 export function ValidationQueuePage() {
   const state = useWorkflowQuery()
   const filters = useSubmissionFilters()
-  const { batchId } = useParams()
-  const list = useValidationQueue(state.query, batchId)
+  const list = useValidationQueue(state.query)
   const prefetchReview = usePrefetchSubmissionReview()
   const error = filters.error ?? list.error
   const location = useLocation()
@@ -108,14 +107,9 @@ export function ValidationQueuePage() {
 
   return (
     <WorkflowShell
-      title={batchId ? 'Upload review' : 'Validation queue'}
-      description={batchId ? 'Every submission created by one upload. Decide them together or one by one.' : 'Review server validation results and record a controlled publication decision.'}
+      title="Validation queue"
+      description="Review server validation results and record a controlled publication decision."
     >
-      {batchId && (
-        <Button asChild size="sm" variant="secondary" className="mb-3">
-          <Link to="/data-submissions/validation"><ArrowLeft />All uploads</Link>
-        </Button>
-      )}
       {publishedMessage && <PublishConfirmationBanner message={publishedMessage} />}
       {filters.data && <WorkflowFilters options={filters.data} query={state.query} onChange={state.update} onReset={state.reset} />}
       {selected.size > 0 && (

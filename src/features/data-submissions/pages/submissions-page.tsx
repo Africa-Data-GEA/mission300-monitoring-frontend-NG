@@ -11,11 +11,33 @@ import { readAuthSession } from '@/features/auth/auth-session'
 import { grantedRoles } from '@/features/auth/role-access'
 import { useBulkValidationDecision, useSubmissions, useSubmissionFilters } from '../api'
 import { BulkDecisionBar } from '../components/bulk-decision-bar'
+import { UploadGroup } from '../components/upload-group'
 import { ListState } from '../components/list-state'
 import { WorkflowFilters } from '../components/workflow-filters'
 import { WorkflowShell } from '../components/workflow-shell'
 import { WorkflowStatusBadge } from '../components/workflow-status'
 import { useWorkflowQuery } from '../use-workflow-query'
+
+function groupUploads(items: SubmissionListItem[]) {
+  const batches = new Map<string, SubmissionListItem[]>()
+  const singles: SubmissionListItem[] = []
+  for (const item of items) {
+    if (item.batchId) batches.set(item.batchId, [...(batches.get(item.batchId) ?? []), item])
+    else singles.push(item)
+  }
+  return { batches: [...batches].filter(([, members]) => members.length > 1), singles: [...singles, ...[...batches.values()].filter((members) => members.length === 1).flat()] }
+}
+
+function describeUpload(members: [SubmissionListItem, ...SubmissionListItem[]]) {
+  const datasets = new Set(members.map((member) => member.dataset))
+  const counts = new Map<string, number>()
+  for (const member of members) counts.set(member.status.label, (counts.get(member.status.label) ?? 0) + 1)
+  return {
+    title: datasets.size === 1 ? members[0].dataset : `${datasets.size} datasets`,
+    subtitle: `${members.length} submissions · ${members[0].submittedBy} · ${members[0].submittedAtLabel}`,
+    summary: [...counts].map(([label, count]) => `${count} ${label.toLowerCase()}`).join(' · '),
+  }
+}
 
 const REVIEW_ROLES = ['data-reviewer', 'validator', 'system-administrator']
 
@@ -68,7 +90,7 @@ function buildColumns(
 export function SubmissionsPage() {
   const state = useWorkflowQuery()
   const filters = useSubmissionFilters()
-  const list = useSubmissions(state.query)
+  const list = useSubmissions({ ...state.query, pageSize: 100 })
   const error = filters.error ?? list.error
   const session = readAuthSession()
   // The detail route is reviewer/validator-only (rolePage(REVIEWERS, ...) in
@@ -100,6 +122,38 @@ export function SubmissionsPage() {
   }
 
   const columns = buildColumns(canBulkDecide, selected, toggle)
+  const uploads = groupUploads(list.data?.items ?? [])
+
+  function renderTable(members: SubmissionListItem[], caption: string) {
+    return (
+              <div className="rounded-control border border-border-default bg-surface">
+                <DataTable
+                  caption={caption}
+                  columns={columns}
+                  rows={members}
+                  getRowId={(row) => row.id}
+                  rowActions={canOpenDetail || canCorrect ? (row) => (
+                    <div className="flex justify-end gap-1">
+                      {canCorrect && row.obligationId && row.availableActions.includes('correct') && (
+                        <Button asChild size="sm">
+                          <Link to={`/data-submissions/obligations/${row.obligationId}/${row.method === 'manual-entry' ? 'entry' : 'upload'}`}>
+                            {row.method === 'manual-entry' ? <PencilLine /> : <FileSpreadsheet />}
+                            Correct and resubmit
+                          </Link>
+                        </Button>
+                      )}
+                      {canOpenDetail && (
+                        <Button asChild size="icon" variant="ghost">
+                          <Link aria-label={`View ${row.id}`} to={`/data-submissions/validation/${row.id}`}><Eye /></Link>
+                        </Button>
+                      )}
+                    </div>
+                  ) : undefined}
+                />
+              </div>
+    )
+  }
+
 
   return (
     <WorkflowShell title="Submission history" description="Track every draft and submitted version without overwriting the audit trail.">
@@ -115,32 +169,20 @@ export function SubmissionsPage() {
       )}
       <ListState pending={filters.isPending || list.isPending} error={error} retry={() => void list.refetch()}>
         {list.data && (
-          <Card className="p-3">
-            <DataTable
-              caption="Submission history"
-              columns={columns}
-              rows={list.data.items}
-              getRowId={(row) => row.id}
-              rowActions={canOpenDetail || canCorrect ? (row) => (
-                <div className="flex justify-end gap-1">
-                  {canCorrect && row.obligationId && row.availableActions.includes('correct') && (
-                    <Button asChild size="sm">
-                      <Link to={`/data-submissions/obligations/${row.obligationId}/${row.method === 'manual-entry' ? 'entry' : 'upload'}`}>
-                        {row.method === 'manual-entry' ? <PencilLine /> : <FileSpreadsheet />}
-                        Correct and resubmit
-                      </Link>
-                    </Button>
-                  )}
-                  {canOpenDetail && (
-                    <Button asChild size="icon" variant="ghost">
-                      <Link aria-label={`View ${row.id}`} to={`/data-submissions/validation/${row.id}`}><Eye /></Link>
-                    </Button>
-                  )}
-                </div>
-              ) : undefined}
-            />
+          <div className="flex flex-col gap-3">
+            {uploads.batches.map(([batchId, members]) => {
+              const info = describeUpload(members as [SubmissionListItem, ...SubmissionListItem[]])
+              return (
+                <UploadGroup key={batchId} title={info.title} subtitle={info.subtitle} summary={info.summary}>
+                  {renderTable(members, info.title)}
+                </UploadGroup>
+              )
+            })}
+            {uploads.singles.length > 0 && (
+              <Card className="p-3">{renderTable(uploads.singles, 'Submission history')}</Card>
+            )}
             <Pagination {...list.data} onPageChange={state.setPage} />
-          </Card>
+          </div>
         )}
       </ListState>
     </WorkflowShell>

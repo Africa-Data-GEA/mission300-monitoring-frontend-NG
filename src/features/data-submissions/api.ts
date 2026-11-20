@@ -5,6 +5,7 @@ import {
   datasetListSchema,
   dataSubmissionFiltersSchema,
   draftSavedSchema,
+  uploadBatchSchema,
   workbookUploadResultSchema,
   entryDraftSavedSchema,
   entryDraftSchema,
@@ -116,13 +117,16 @@ export const useObligations = (query: DataSubmissionQuery) =>
 export const useSubmissions = (query: DataSubmissionQuery) =>
   useWorkflowList('submissions', '/data-submissions/submissions', query, submissionListSchema)
 
-export const useValidationQueue = (query: DataSubmissionQuery, batchId?: string) =>
-  useWorkflowList(
-    batchId ? `validation-batch-${batchId}` : 'validation',
-    batchId ? `/data-submissions/validation/batches/${batchId}` : '/data-submissions/validation',
-    query,
-    validationQueueSchema,
-  )
+export const useValidationQueue = (query: DataSubmissionQuery) =>
+  useWorkflowList('validation', '/data-submissions/validation', query, validationQueueSchema)
+
+export function useUploadBatch(batchId: string) {
+  return useQuery({
+    queryKey: ['data-submissions', 'upload-batch', batchId],
+    queryFn: () => api.get(`/data-submissions/validation/batches/${batchId}`, uploadBatchSchema),
+    enabled: Boolean(batchId),
+  })
+}
 
 export const useOverdueSubmissions = (query: DataSubmissionQuery) =>
   useWorkflowList('overdue', '/data-submissions/overdue', query, overdueListSchema)

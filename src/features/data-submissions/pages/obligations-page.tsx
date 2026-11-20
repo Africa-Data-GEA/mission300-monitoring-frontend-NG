@@ -1,26 +1,33 @@
 import { Link } from 'react-router'
+import type { Obligation } from '@/api/schemas/data-submissions'
 import { Button } from '@/components/ui/button'
 import { readAuthSession } from '@/features/auth/auth-session'
 import { grantedRoles } from '@/features/auth/role-access'
 import { Card } from '@/components/ui/card'
-import { DataTable } from '@/components/ui/data-table'
 import { Pagination } from '@/components/ui/pagination'
 import { useObligations, useSubmissionFilters } from '../api'
 import { ListState } from '../components/list-state'
-import { ObligationActions } from '../components/obligation-actions'
 import { ObligationStats } from '../components/obligation-stats'
-import { OBLIGATIONS_COLUMNS } from '../components/obligations-columns'
+import { ObligationGroup } from '../components/obligation-group'
 import { WorkflowFilters } from '../components/workflow-filters'
 import { WorkflowShell } from '../components/workflow-shell'
 import { useWorkflowQuery } from '../use-workflow-query'
 
+function groupByInstitution(items: Obligation[]) {
+  const groups = new Map<string, Obligation[]>()
+  for (const item of items) groups.set(item.institution, [...(groups.get(item.institution) ?? []), item])
+  return [...groups]
+}
+
 export function ObligationsPage() {
   const state = useWorkflowQuery()
   const filters = useSubmissionFilters()
-  const list = useObligations(state.query)
+  const list = useObligations({ ...state.query, pageSize: 100 })
   const error = filters.error ?? list.error
   const session = readAuthSession()
-  const isProvider = !!session && grantedRoles(session.user).includes('institutional-data-provider')
+  const isProvider =
+    !!session &&
+    grantedRoles(session.user).some((role) => role === 'institutional-data-provider' || role === 'system-administrator')
 
   return (
     <WorkflowShell
@@ -36,7 +43,13 @@ export function ObligationsPage() {
             </p>
           </div>
           <Button asChild>
-            <Link to="/data-submissions/workbook">Download and upload workbook</Link>
+            <Link
+              to="/data-submissions/workbook"
+              onPointerEnter={() => void import('./workbook-upload-page')}
+              onFocus={() => void import('./workbook-upload-page')}
+            >
+              Download and upload workbook
+            </Link>
           </Button>
         </Card>
       )}
@@ -55,16 +68,12 @@ export function ObligationsPage() {
       >
         {list.data && <ObligationStats stats={list.data.stats} />}
         {list.data && (
-          <Card className="p-3">
-            <DataTable
-              caption="Assigned reporting obligations"
-              columns={OBLIGATIONS_COLUMNS}
-              rows={list.data.items}
-              getRowId={(row) => row.id}
-              rowActions={(row) => <ObligationActions obligation={row} />}
-            />
+          <div className="flex flex-col gap-3">
+            {groupByInstitution(list.data.items).map(([institution, items]) => (
+              <ObligationGroup key={institution} institution={institution} items={items} />
+            ))}
             <Pagination {...list.data} onPageChange={state.setPage} />
-          </Card>
+          </div>
         )}
       </ListState>
     </WorkflowShell>

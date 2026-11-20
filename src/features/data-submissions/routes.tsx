@@ -13,6 +13,7 @@ const SubmissionsPage = lazy(() => import('./pages/submissions-page').then((modu
 const ManualEntryPage = lazy(() => import('./pages/manual-entry-page').then((module) => ({ default: module.ManualEntryPage })))
 const UploadPage = lazy(() => import('./pages/upload-page').then((module) => ({ default: module.UploadPage })))
 const ValidationQueuePage = lazy(() => import('./pages/validation-queue-page').then((module) => ({ default: module.ValidationQueuePage })))
+const UploadReviewPage = lazy(() => import('./pages/upload-review-page').then((module) => ({ default: module.UploadReviewPage })))
 const ValidationDetailPage = lazy(() => import('./pages/validation-detail-page').then((module) => ({ default: module.ValidationDetailPage })))
 const OverduePage = lazy(() => import('./pages/overdue-page').then((module) => ({ default: module.OverduePage })))
 const DataGapsPage = lazy(() => import('./pages/data-gaps-page').then((module) => ({ default: module.DataGapsPage })))
@@ -49,10 +50,10 @@ export const dataSubmissionRoutes: RouteObject[] = [
   { path: 'obligations', element: page(<ObligationsPage />) },
   { path: 'obligations/:obligationId/entry', element: rolePage(PROVIDER, <ManualEntryPage />) },
   { path: 'obligations/:obligationId/upload', element: rolePage(PROVIDER, <UploadPage />) },
-  { path: 'workbook', element: rolePage(PROVIDER, <WorkbookUploadPage />) },
+  { path: 'workbook', element: rolePage([...PROVIDER, 'system-administrator'], <WorkbookUploadPage />) },
   { path: 'submissions', element: page(<SubmissionsPage />) },
   { path: 'validation', element: rolePage(REVIEWERS, <ValidationQueuePage />) },
-  { path: 'validation/batches/:batchId', element: rolePage(REVIEWERS, <ValidationQueuePage />) },
+  { path: 'validation/batches/:batchId', element: rolePage(REVIEWERS, <UploadReviewPage />) },
   { path: 'validation/:submissionId', element: rolePage(REVIEWERS, <ValidationDetailPage />) },
   { path: 'overdue', element: page(<OverduePage />) },
   { path: 'gaps', element: page(<DataGapsPage />) },
