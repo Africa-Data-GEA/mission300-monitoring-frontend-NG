@@ -123,10 +123,18 @@ export function GlobalFilterBar({ onClose }: { onClose?: () => void }) {
   // A half-selected range (from with no "to" yet) intentionally does not
   // touch filters.period.
   const [customRange, setCustomRange] = useState<DateRange | undefined>()
+  const [customActive, setCustomActive] = useState(false)
 
   function handleCustomRangeChange(range: DateRange | undefined) {
     setCustomRange(range)
-    if (range?.from && range?.to) setFilter('period', toQuarterPeriod(range.to))
+    if (range?.from && range?.to && range.to.toDateString() !== range.from.toDateString()) {
+      setFilter('period', toQuarterPeriod(range.to))
+    }
+  }
+
+  function leaveCustomRange() {
+    setCustomActive(false)
+    setCustomRange(undefined)
   }
 
   if (isPending || !options) {
@@ -142,8 +150,10 @@ export function GlobalFilterBar({ onClose }: { onClose?: () => void }) {
     (key) => filters[key] !== DEFAULT_FILTER_VALUES[key],
   ).length
 
-  const isCustomPeriod = filters.period === CUSTOM_PERIOD
+  const isCustomPeriod = customActive || filters.period === CUSTOM_PERIOD
+  const rangeApplied = !!customRange?.from && !!customRange.to && customRange.to.toDateString() !== customRange.from.toDateString()
   const parsedPeriod = isCustomPeriod ? null : parsePeriod(filters.period)
+  const appliedPeriod = parsePeriod(filters.period)
   const selectedYear = parsedPeriod?.year ?? yearOptions[0]?.value ?? ''
   const quartersForYear = quartersByYear.get(selectedYear) ?? []
   const quarterOptions: FilterOption[] = [...quartersForYear, { value: CUSTOM_PERIOD, label: 'Custom range…' }]
@@ -160,9 +170,10 @@ export function GlobalFilterBar({ onClose }: { onClose?: () => void }) {
 
   function handleQuarterChange(quarter: string) {
     if (quarter === CUSTOM_PERIOD) {
-      setFilter('period', CUSTOM_PERIOD)
+      setCustomActive(true)
       return
     }
+    leaveCustomRange()
     setFilter('period', buildPeriod(selectedYear, quarter as QuarterToken))
   }
 
@@ -181,7 +192,15 @@ export function GlobalFilterBar({ onClose }: { onClose?: () => void }) {
         </div>
         <div className="flex shrink-0 items-center gap-2">
           {isDirty && (
-            <Button type="button" variant="ghost" size="sm" onClick={reset}>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                leaveCustomRange()
+                reset()
+              }}
+            >
               Reset filters
             </Button>
           )}
@@ -217,7 +236,7 @@ export function GlobalFilterBar({ onClose }: { onClose?: () => void }) {
         />
 
         {/* Only once "Custom range…" is chosen, so the bar stays compact by default. */}
-        {filters.period === CUSTOM_PERIOD && (
+        {isCustomPeriod && (
           <DateRangeField
             label="Custom range"
             value={customRange}
@@ -327,6 +346,14 @@ export function GlobalFilterBar({ onClose }: { onClose?: () => void }) {
           </PopoverContent>
         </Popover>
       </div>
+
+      {isCustomPeriod && (
+        <p className="mt-2 text-xs text-text-muted" aria-live="polite">
+          {rangeApplied && appliedPeriod
+            ? `Showing the latest figures reported up to ${QUARTER_LABELS[appliedPeriod.quarter]} ${appliedPeriod.year}, the period your end date falls in. Figures are reported quarterly or yearly, not daily.`
+            : 'Pick a start date and an end date. Figures are reported quarterly or yearly, so the end date decides which period is shown.'}
+        </p>
+      )}
     </section>
   )
 }

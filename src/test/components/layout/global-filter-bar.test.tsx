@@ -1,4 +1,4 @@
-import { screen, waitFor } from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it } from 'vitest'
 import { GlobalFilterBar } from '@/components/layout/global-filter-bar'
@@ -178,6 +178,21 @@ describe('GlobalFilterBar', () => {
         expect(screen.getByRole('button', { name: /Custom range/ })).toBeInTheDocument()
       })
       expect(screen.getByRole('combobox', { name: /^Year/ })).toBeDisabled()
+    })
+
+    it('keeps the date picker open after one day is picked so the end date can be chosen', async () => {
+      const user = userEvent.setup()
+      await renderBar('/?period=q2-2025')
+
+      await user.click(screen.getByRole('combobox', { name: /^Quarter/ }))
+      await user.click(await screen.findByRole('option', { name: 'Custom range…' }))
+      await user.click(await screen.findByRole('button', { name: /Custom range/ }))
+      await screen.findAllByRole('grid')
+      const cell = screen.getAllByRole('gridcell').find((candidate) => candidate.textContent?.trim() === '18')
+      await user.click(within(cell!).getByRole('button'))
+
+      expect(screen.getByRole('button', { name: /Custom range/ })).toBeInTheDocument()
+      expect(screen.getByRole('combobox', { name: /^Quarter/ })).toHaveTextContent('Custom range')
     })
   })
 
