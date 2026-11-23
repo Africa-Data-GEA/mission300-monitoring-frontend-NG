@@ -3,6 +3,7 @@ import { NAVIGATION } from '@/config/navigation'
 import { readAuthSession } from '@/features/auth/auth-session'
 import { canUserReachModule } from '@/features/auth/role-access'
 import { PLATFORM_NAME } from '@/config/platform'
+import { PartnerLogos } from './partner-logos'
 import { useBrandConfig } from '@/features/branding/api'
 import { useBrandIdentity } from '@/features/branding/use-brand-identity'
 import { cn } from '@/lib/utils'
@@ -109,23 +110,8 @@ export function Sidebar({
         </p>
       </nav>
 
-      {/* Partner marks — SEforALL and GEAPP are named to the Compact but have
-          no page of their own, so a small, quiet footer strip is the only
-          place they'd otherwise appear. The build credit sits alone on the
-          right, separate from the partner marks on the left. */}
-      <div className="flex shrink-0 flex-col gap-2 border-t border-border-default px-4 py-3">
-        <div className="flex items-center gap-2.5">
-          <img alt="World Bank Group" src="/reports/compact-progress/logo-worldbank.png" className="h-6 w-auto shrink-0 object-contain" />
-          <div className="h-4 w-px shrink-0 bg-white/15" aria-hidden="true" />
-          <img alt="African Development Bank" src="/reports/compact-progress/logo-afdb.png" className="h-6 w-auto shrink-0 object-contain" />
-          <div className="h-4 w-px shrink-0 bg-white/15" aria-hidden="true" />
-          <img alt="The Rockefeller Foundation" src="/Logos/rockefeller-foundation-white.png" className="h-6 w-auto shrink-0 object-contain" />
-        </div>
-        <div className="flex items-center gap-3">
-          <img alt="SEforALL" src="/seforall.svg" className="h-8 w-auto shrink-0 object-contain brightness-0 invert" />
-          <div className="h-6 w-px shrink-0 bg-white/15" aria-hidden="true" />
-          <img alt="GEAPP" src="/Logos/geapp-trimmed.png" className="h-6 w-auto min-w-0 shrink object-contain" />
-        </div>
+      <div className="flex shrink-0 flex-col gap-4 border-t border-border-default px-4 py-4">
+        <PartnerLogos />
         <img alt="Powered by EMRC" src="/Logos/powered-by-emrc-white.png" className="h-6 w-auto self-start object-contain" />
       </div>
 

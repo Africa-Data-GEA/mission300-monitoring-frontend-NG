@@ -1,3 +1,4 @@
+import { PartnerLogos } from '@/components/layout/partner-logos'
 import { PLATFORM_NAME } from '@/config/platform'
 import { useBrandIdentity } from '@/features/branding/use-brand-identity'
 import { ArrowUpRight, Download } from 'lucide-react'
@@ -58,25 +59,9 @@ export function PublicFooter({ lastUpdated }: { lastUpdated?: string }) {
           </div>
         </div>
 
-        {/* Delivery partners — SEforALL and GEAPP support the Compact's
-            tracking, grouped on the left. EMRC built this platform, credited
-            alone on the right — same pattern as the authenticated sidebar's
-            own footer. */}
-        <div className="mt-10 flex flex-wrap items-center gap-x-5 gap-y-4 border-t border-white/18 pt-6">
-          <img alt="World Bank Group" src="/reports/compact-progress/logo-worldbank.png" className="h-10 w-auto shrink-0 object-contain" />
-          <div className="h-8 w-px shrink-0 bg-white/18" aria-hidden="true" />
-          <img alt="African Development Bank" src="/reports/compact-progress/logo-afdb.png" className="h-10 w-auto shrink-0 object-contain" />
-          <div className="h-8 w-px shrink-0 bg-white/18" aria-hidden="true" />
-          <img alt="The Rockefeller Foundation" src="/Logos/rockefeller-foundation-white.png" className="h-10 w-auto shrink-0 object-contain" />
-        </div>
-
-        <div className="mt-6 flex flex-wrap items-center justify-between gap-5">
-          <div className="flex items-center gap-5">
-            <img alt="SEforALL" src="/seforall.svg" className="h-12 w-auto shrink-0 object-contain brightness-0 invert" />
-            <div className="h-8 w-px shrink-0 bg-white/18" aria-hidden="true" />
-            <img alt="GEAPP" src="/Logos/geapp-trimmed.png" className="h-10 w-auto shrink-0 object-contain" />
-          </div>
-          <img alt="Powered by EMRC" src="/Logos/powered-by-emrc-white.png" className="h-7 w-auto shrink-0 object-contain" />
+        <div className="mt-10 flex flex-wrap items-end justify-between gap-8 border-t border-white/18 pt-8">
+          <PartnerLogos wide />
+          <img alt="Powered by EMRC" src="/Logos/powered-by-emrc-white.png" className="h-8 w-auto shrink-0 object-contain" />
         </div>
 
         <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-white/18 pt-5 text-[0.6875rem] leading-4 text-white/50">
