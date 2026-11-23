@@ -62,7 +62,15 @@ export function PublicFooter({ lastUpdated }: { lastUpdated?: string }) {
             tracking, grouped on the left. EMRC built this platform, credited
             alone on the right — same pattern as the authenticated sidebar's
             own footer. */}
-        <div className="mt-10 flex flex-wrap items-center justify-between gap-5 border-t border-white/18 pt-6">
+        <div className="mt-10 flex flex-wrap items-center gap-x-5 gap-y-4 border-t border-white/18 pt-6">
+          <img alt="World Bank Group" src="/reports/compact-progress/logo-worldbank.png" className="h-10 w-auto shrink-0 object-contain" />
+          <div className="h-8 w-px shrink-0 bg-white/18" aria-hidden="true" />
+          <img alt="African Development Bank" src="/reports/compact-progress/logo-afdb.png" className="h-10 w-auto shrink-0 object-contain" />
+          <div className="h-8 w-px shrink-0 bg-white/18" aria-hidden="true" />
+          <img alt="The Rockefeller Foundation" src="/Logos/rockefeller-foundation-white.png" className="h-10 w-auto shrink-0 object-contain" />
+        </div>
+
+        <div className="mt-6 flex flex-wrap items-center justify-between gap-5">
           <div className="flex items-center gap-5">
             <img alt="SEforALL" src="/seforall.svg" className="h-12 w-auto shrink-0 object-contain brightness-0 invert" />
             <div className="h-8 w-px shrink-0 bg-white/18" aria-hidden="true" />

@@ -1,6 +1,7 @@
 import { Link } from 'react-router'
 import { PLATFORM_NAME } from '@/config/platform'
 import { useBrandConfig } from '@/features/branding/api'
+import { useBrandIdentity } from '@/features/branding/use-brand-identity'
 
 const NAV_ITEMS = [
   { label: 'Figures', to: '#latest-figures' },
@@ -12,6 +13,7 @@ const NAV_ITEMS = [
 /** A restrained public masthead with direct navigation and one primary action. */
 export function PublicHeader() {
   const { data: brand } = useBrandConfig()
+  const identity = useBrandIdentity()
 
   return (
     <header className="sticky top-0 z-50">
@@ -31,24 +33,11 @@ export function PublicHeader() {
             />
           </Link>
 
-          {/* Funding partners — the World Bank, AfDB and the Rockefeller
-              Foundation back the Compact itself, shown quietly beside the
-              masthead in their real brand colours. */}
-          <div className="hidden shrink-0 items-center gap-4 border-l border-[#dce3e8] pl-4 sm:flex">
+          <div className="hidden shrink-0 items-center border-l border-[#dce3e8] pl-4 sm:flex">
             <img
-              alt="World Bank Group"
-              src="/reports/compact-progress/worldbank-color.png"
-              className="h-8 w-auto shrink-0 object-contain"
-            />
-            <img
-              alt="African Development Bank"
-              src="/reports/compact-progress/afdb-color.png"
-              className="h-9 w-auto shrink-0 object-contain"
-            />
-            <img
-              alt="The Rockefeller Foundation"
-              src="/Logos/rockefeller-foundation.png"
-              className="h-9 w-auto shrink-0 object-contain"
+              alt={`${identity.officialName} coat of arms`}
+              src={identity.crestUrl}
+              className="h-12 w-auto shrink-0 object-contain"
             />
           </div>
 

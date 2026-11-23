@@ -4,6 +4,7 @@ import { readAuthSession } from '@/features/auth/auth-session'
 import { canUserReachModule } from '@/features/auth/role-access'
 import { PLATFORM_NAME } from '@/config/platform'
 import { useBrandConfig } from '@/features/branding/api'
+import { useBrandIdentity } from '@/features/branding/use-brand-identity'
 import { cn } from '@/lib/utils'
 import { NavDropdownItem } from './nav-dropdown-item'
 import { NavItem } from './nav-item'
@@ -31,6 +32,7 @@ export function Sidebar({
 }) {
   const session = readAuthSession()
   const { data: brand } = useBrandConfig()
+  const identity = useBrandIdentity()
 
   // No session (e.g. a dev workflow that never went through /account/login)
   // shows the full nav rather than nothing — restriction only applies once a
@@ -67,29 +69,13 @@ export function Sidebar({
             src="/Logos/m300-logo-on-dark.png"
             className="h-12 w-auto shrink-0 object-contain"
           />
+          <div className="h-8 w-px shrink-0 bg-white/15" aria-hidden="true" />
+          <img
+            alt={`${identity.officialName} coat of arms`}
+            src={identity.crestUrl}
+            className="h-11 w-auto shrink-0 object-contain"
+          />
         </Link>
-      </div>
-
-      {/* Funding partners — the World Bank, AfDB and the Rockefeller Foundation back the Compact itself,
-          shown quietly up top rather than competing with the platform mark. */}
-      <div className="flex shrink-0 items-center gap-2.5 border-t border-border-default px-4 py-2">
-        <img
-          alt="World Bank Group"
-          src="/reports/compact-progress/logo-worldbank.png"
-          className="h-6 w-auto shrink-0 object-contain"
-        />
-        <div className="h-4 w-px shrink-0 bg-white/15" aria-hidden="true" />
-        <img
-          alt="African Development Bank"
-          src="/reports/compact-progress/logo-afdb.png"
-          className="h-6 w-auto shrink-0 object-contain"
-        />
-        <div className="h-4 w-px shrink-0 bg-white/15" aria-hidden="true" />
-        <img
-          alt="The Rockefeller Foundation"
-          src="/Logos/rockefeller-foundation-white.png"
-          className="h-6 w-auto shrink-0 object-contain"
-        />
       </div>
 
       <nav
@@ -128,6 +114,13 @@ export function Sidebar({
           place they'd otherwise appear. The build credit sits alone on the
           right, separate from the partner marks on the left. */}
       <div className="flex shrink-0 flex-col gap-2 border-t border-border-default px-4 py-3">
+        <div className="flex items-center gap-2.5">
+          <img alt="World Bank Group" src="/reports/compact-progress/logo-worldbank.png" className="h-6 w-auto shrink-0 object-contain" />
+          <div className="h-4 w-px shrink-0 bg-white/15" aria-hidden="true" />
+          <img alt="African Development Bank" src="/reports/compact-progress/logo-afdb.png" className="h-6 w-auto shrink-0 object-contain" />
+          <div className="h-4 w-px shrink-0 bg-white/15" aria-hidden="true" />
+          <img alt="The Rockefeller Foundation" src="/Logos/rockefeller-foundation-white.png" className="h-6 w-auto shrink-0 object-contain" />
+        </div>
         <div className="flex items-center gap-3">
           <img alt="SEforALL" src="/seforall.svg" className="h-8 w-auto shrink-0 object-contain brightness-0 invert" />
           <div className="h-6 w-px shrink-0 bg-white/15" aria-hidden="true" />
