@@ -251,7 +251,7 @@ export function buildCompactProgressReportData(
           month: 'long',
           year: 'numeric',
         }),
-    cycleLabel: parameters ? cycleHeading(parameters.periodLabel) : 'Second cycle of data collection 2025',
+    cycleLabel: parameters ? cycleHeading(parameters.periodLabel) : 'Cycle 1 data collection 2026',
     reportDateLabel: parameters ? formatReportMonth(parameters.asOfDate) : '',
     keyTargets,
     pillarTargets,

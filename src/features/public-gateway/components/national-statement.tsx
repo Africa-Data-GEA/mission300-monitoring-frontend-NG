@@ -88,7 +88,7 @@ export function NationalStatement({ cards }: { cards: HeadlineCards }) {
               >
                 Sign in
               </Link>{' '}
-              — for reporting institutions
+              for reporting institutions
             </p>
           </div>
         </div>

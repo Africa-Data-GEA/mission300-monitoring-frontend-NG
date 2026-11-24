@@ -44,11 +44,11 @@ export function ChartDownloadBar({
 
   return (
     <div className="mt-4 flex flex-wrap items-center justify-end gap-x-6 gap-y-2 border-t border-border-default pt-3">
-      {source && (
+      {/* {source && (
         <p className="mr-auto min-w-0 text-[0.75rem] leading-4 text-text-subtle">
           <span className="font-semibold text-text-muted">Source:</span> {source}
         </p>
-      )}
+      )} */}
 
       <div className="flex shrink-0 items-center gap-2">
         {chartId && (
