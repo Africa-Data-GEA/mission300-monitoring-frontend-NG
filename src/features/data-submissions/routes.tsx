@@ -1,22 +1,23 @@
 import { lazy, Suspense } from 'react'
 import type { RouteObject } from 'react-router'
 import { Navigate } from 'react-router'
+import { routeChunks } from '@/app/route-chunks'
 import { RouteFallback } from '@/components/layout/route-fallback'
 import { RequireAnyRole } from '@/features/auth/require-auth'
 import { readAuthSession } from '@/features/auth/auth-session'
 import { grantedRoles } from '@/features/auth/role-access'
 
-const InstitutionDashboardPage = lazy(() => import('./pages/institution-dashboard-page').then((module) => ({ default: module.InstitutionDashboardPage })))
-const ObligationsPage = lazy(() => import('./pages/obligations-page').then((module) => ({ default: module.ObligationsPage })))
-const WorkbookUploadPage = lazy(() => import('./pages/workbook-upload-page').then((module) => ({ default: module.WorkbookUploadPage })))
-const SubmissionsPage = lazy(() => import('./pages/submissions-page').then((module) => ({ default: module.SubmissionsPage })))
+const InstitutionDashboardPage = lazy(() => routeChunks.dataSubmissions().then((module) => ({ default: module.InstitutionDashboardPage })))
+const ObligationsPage = lazy(() => routeChunks.dataSubmissionsObligations().then((module) => ({ default: module.ObligationsPage })))
+const WorkbookUploadPage = lazy(() => routeChunks.dataSubmissionsWorkbook().then((module) => ({ default: module.WorkbookUploadPage })))
+const SubmissionsPage = lazy(() => routeChunks.dataSubmissionsHistory().then((module) => ({ default: module.SubmissionsPage })))
 const ManualEntryPage = lazy(() => import('./pages/manual-entry-page').then((module) => ({ default: module.ManualEntryPage })))
 const UploadPage = lazy(() => import('./pages/upload-page').then((module) => ({ default: module.UploadPage })))
-const ValidationQueuePage = lazy(() => import('./pages/validation-queue-page').then((module) => ({ default: module.ValidationQueuePage })))
+const ValidationQueuePage = lazy(() => routeChunks.dataSubmissionsValidation().then((module) => ({ default: module.ValidationQueuePage })))
 const UploadReviewPage = lazy(() => import('./pages/upload-review-page').then((module) => ({ default: module.UploadReviewPage })))
 const ValidationDetailPage = lazy(() => import('./pages/validation-detail-page').then((module) => ({ default: module.ValidationDetailPage })))
-const OverduePage = lazy(() => import('./pages/overdue-page').then((module) => ({ default: module.OverduePage })))
-const DataGapsPage = lazy(() => import('./pages/data-gaps-page').then((module) => ({ default: module.DataGapsPage })))
+const OverduePage = lazy(() => routeChunks.dataSubmissionsOverdue().then((module) => ({ default: module.OverduePage })))
+const DataGapsPage = lazy(() => routeChunks.dataSubmissionsGaps().then((module) => ({ default: module.DataGapsPage })))
 
 function page(element: React.ReactNode) {
   return <Suspense fallback={<RouteFallback />}>{element}</Suspense>
