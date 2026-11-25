@@ -1,4 +1,3 @@
-
 # Mission 300 Compact Monitoring Platform
 
 Frontend for monitoring delivery of Nigeria's Mission 300 National Energy
