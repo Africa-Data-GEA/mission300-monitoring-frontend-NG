@@ -11,7 +11,7 @@ Local demonstrations can run with in-process mock handlers and data.
 ```bash
 pnpm install
 copy .env.example .env.local
-pnpm dev
+pnpm devd
 ```
 
 The default development mode is `mock`, so the frontend can run without a
