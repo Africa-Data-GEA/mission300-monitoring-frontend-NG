@@ -31,7 +31,6 @@ export interface ChartDataset {
  */
 export function ChartDownloadBar({
   title,
-  source,
   chartId,
   dataset,
 }: {
