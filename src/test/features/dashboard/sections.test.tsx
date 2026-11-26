@@ -266,39 +266,40 @@ describe('Section C — national performance', () => {
 
 describe('Section D — delivery status and exceptions', () => {
   const projectTotal = deliveryStatus.ongoingProjects.length
-  const projectPageSize = 5
+  const programmePageSize = 5
+  const programmeTotal = new Set(
+    deliveryStatus.ongoingProjects.map((project) => project.programmeId),
+  ).size
 
-  it('renders ongoing projects in a paginated table with drill-down links', () => {
+  it('lists priority programmes in a paginated table and opens one to its projects', async () => {
+    const user = userEvent.setup()
     renderWithRouter(<DeliveryStatusSection panel={deliveryStatus} onProjectsChanged={() => {}} />)
 
     expect(screen.getAllByRole('table')).toHaveLength(2)
     expect(
-      screen.getByText(new RegExp(`Showing 1.*${Math.min(projectPageSize, projectTotal)} of ${projectTotal} records`)),
+      screen.getByText(new RegExp(`Showing 1.*${Math.min(programmePageSize, programmeTotal)} of ${programmeTotal} records`)),
     ).toBeInTheDocument()
-    const firstPageProject = deliveryStatus.ongoingProjects[0]!
-    expect(screen.getByRole('link', { name: firstPageProject.name })).toHaveAttribute(
-      'href',
-      `/programs/projects/${firstPageProject.id}`,
-    )
-    expect(screen.getByRole('link', { name: 'Transmission Rehabilitation Programme' })).toHaveAttribute(
-      'href',
-      '/programs/PRG-2025-001',
-    )
-  })
-
-  it('paginates the project table', async () => {
-    const user = userEvent.setup()
-    renderWithRouter(<DeliveryStatusSection panel={deliveryStatus} onProjectsChanged={() => {}} />)
 
     const projectsPanel = within(screen.getByRole('tabpanel'))
-    await user.click(projectsPanel.getByRole('button', { name: 'Next page' }))
+    const toggle = projectsPanel.getAllByRole('button', { name: /^Show projects in / })[0]!
+    const programmeName = toggle.getAttribute('aria-label')!.replace('Show projects in ', '')
+    const own = deliveryStatus.ongoingProjects.filter(
+      (project) => project.programmeName === programmeName,
+    )
+    expect(screen.getByRole('link', { name: programmeName })).toHaveAttribute(
+      'href',
+      `/programs/${own[0]!.programmeId}`,
+    )
+    expect(screen.queryByRole('link', { name: own[0]!.name })).not.toBeInTheDocument()
 
-    const secondPageLast = Math.min(projectPageSize * 2, projectTotal)
-    expect(
-      screen.getByText(new RegExp(`Showing ${projectPageSize + 1}.*${secondPageLast} of ${projectTotal} records`)),
-    ).toBeInTheDocument()
-    const secondPageProject = deliveryStatus.ongoingProjects[projectPageSize]!
-    expect(screen.getByRole('link', { name: secondPageProject.name })).toBeInTheDocument()
+    await user.click(toggle)
+
+    for (const project of own) {
+      expect(screen.getByRole('link', { name: project.name })).toHaveAttribute(
+        'href',
+        `/programs/projects/${project.id}`,
+      )
+    }
   })
 
   it('searches projects and paginates the filtered results', async () => {
@@ -310,9 +311,6 @@ describe('Section D — delivery status and exceptions', () => {
     expect(screen.getByText('2 projects found')).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Ikeja Franchise Meter Rollout, Phase 2' })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Feeder Rehabilitation Lots, Lagos' })).toBeInTheDocument()
-    expect(
-      within(screen.getByRole('tabpanel')).getByRole('button', { name: 'Next page' }),
-    ).toBeDisabled()
   })
 
   it('switches to an overall project-status chart', async () => {
@@ -323,7 +321,7 @@ describe('Section D — delivery status and exceptions', () => {
 
     expect(
       screen.getByRole('img', {
-        name: `Delivery status distribution for ${projectTotal} ongoing projects`,
+        name: `Delivery status by programme for ${projectTotal} ongoing projects`,
       }),
     ).toBeInTheDocument()
   })

@@ -26,6 +26,8 @@ const GOLD = '#ffb800'
 const CREAM = '#fdf3d8'
 const TEXT_MUTED = '#5b6472'
 const ASSET_BASE = '/reports/compact-progress'
+/** The partners' official marks. Each box below keeps its file's aspect ratio. */
+const PARTNER_BASE = '/Logos/partners'
 
 const STATUS_COLORS: Record<string, string> = {
   'Not yet due': '#5b6472',
@@ -73,6 +75,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   coverPartnerLogos: { flexDirection: 'row', alignItems: 'center', gap: 14 },
+  closingPartnerLogos: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', columnGap: 18, rowGap: 10 },
   externalUseBadge: {
     position: 'absolute',
     right: 24,
@@ -184,8 +187,8 @@ function CoverPage({ data }: { data: CompactProgressReportData }) {
       <View style={styles.coverLeft}>
         <View>
           <View style={styles.coverLogosRow}>
-            <Image src={`${ASSET_BASE}/logo-worldbank.png`} style={{ width: 90, height: 31 }} />
-            <Image src={`${ASSET_BASE}/logo-afdb.png`} style={{ width: 52, height: 26 }} />
+            <Image src={`${PARTNER_BASE}/worldbank-white.png`} style={{ width: 117, height: 23 }} />
+            <Image src={`${PARTNER_BASE}/afdb-white.png`} style={{ width: 52, height: 27 }} />
           </View>
 
           <Text style={styles.coverTitle}>
@@ -212,8 +215,9 @@ function CoverPage({ data }: { data: CompactProgressReportData }) {
         <View>
           <Text style={styles.coverPartnersLabel}>In collaboration with</Text>
           <View style={styles.coverPartnerLogos}>
-            <Image src={`${ASSET_BASE}/logo-rockefeller.png`} style={{ width: 80, height: 27 }} />
-            <Image src={`${ASSET_BASE}/logo-geapp.png`} style={{ width: 80, height: 27 }} />
+            <Image src={`${PARTNER_BASE}/rockefeller-white.png`} style={{ width: 70, height: 26 }} />
+            <Image src={`${PARTNER_BASE}/geapp-white.png`} style={{ width: 101, height: 19 }} />
+            <Image src={`${PARTNER_BASE}/seforall-white.png`} style={{ width: 76, height: 34 }} />
           </View>
         </View>
       </View>
@@ -579,11 +583,13 @@ function ClosingPage({ data }: { data: CompactProgressReportData }) {
         </View>
         <View>
           <Text style={[styles.coverPartnersLabel, { color: TEXT_MUTED }]}>In collaboration with</Text>
-          <View style={styles.coverPartnerLogos}>
-            <Image src={`${ASSET_BASE}/logo-worldbank.png`} style={{ width: 80, height: 27 }} />
-            <Image src={`${ASSET_BASE}/logo-afdb.png`} style={{ width: 46, height: 23 }} />
-            <Image src={`${ASSET_BASE}/logo-rockefeller.png`} style={{ width: 70, height: 24 }} />
-            <Image src={`${ASSET_BASE}/logo-geapp.png`} style={{ width: 70, height: 24 }} />
+          {/* Full-colour marks: this page is white, so the cover's white ones vanish on it. */}
+          <View style={styles.closingPartnerLogos}>
+            <Image src={`${PARTNER_BASE}/worldbank-color.png`} style={{ width: 102, height: 20 }} />
+            <Image src={`${PARTNER_BASE}/afdb-color.png`} style={{ width: 104, height: 26 }} />
+            <Image src={`${PARTNER_BASE}/rockefeller-color.png`} style={{ width: 76, height: 28 }} />
+            <Image src={`${PARTNER_BASE}/geapp-color.png`} style={{ width: 107, height: 20 }} />
+            <Image src={`${PARTNER_BASE}/seforall-color.png`} style={{ width: 85, height: 38 }} />
           </View>
         </View>
       </View>

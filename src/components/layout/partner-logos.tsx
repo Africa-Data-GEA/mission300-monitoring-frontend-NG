@@ -1,19 +1,20 @@
 import { cn } from '@/lib/utils'
 
+// The partners' official white marks, for the navy sidebar and footer.
 const GROUPS = [
   {
     id: 'funders',
     logos: [
       { alt: 'World Bank Group', src: '/Logos/partners/worldbank-white.png', height: 'h-5', wideHeight: 'h-8' },
       { alt: 'African Development Bank', src: '/Logos/partners/afdb-white.png', height: 'h-9', wideHeight: 'h-14' },
-      { alt: 'The Rockefeller Foundation', src: '/Logos/rockefeller-foundation-white.png', height: 'h-8', wideHeight: 'h-12' },
+      { alt: 'The Rockefeller Foundation', src: '/Logos/partners/rockefeller-white.png', height: 'h-8', wideHeight: 'h-12' },
     ],
   },
   {
     id: 'delivery',
     logos: [
-      { alt: 'SEforALL', src: '/seforall.svg', height: 'h-9', wideHeight: 'h-14', className: 'brightness-0 invert' },
-      { alt: 'GEAPP', src: '/Logos/geapp-trimmed.png', height: 'h-7', wideHeight: 'h-10' },
+      { alt: 'SEforALL', src: '/Logos/partners/seforall-white.png', height: 'h-10', wideHeight: 'h-16' },
+      { alt: 'GEAPP', src: '/Logos/partners/geapp-white.png', height: 'h-6', wideHeight: 'h-10' },
     ],
   },
 ] as const
@@ -36,7 +37,7 @@ export function PartnerLogos({ wide = false, className }: { wide?: boolean; clas
               key={logo.alt}
               alt={logo.alt}
               src={logo.src}
-              className={cn('w-auto shrink-0 object-contain', wide ? logo.wideHeight : logo.height, 'className' in logo && logo.className)}
+              className={cn('w-auto shrink-0 object-contain', wide ? logo.wideHeight : logo.height)}
             />
           ))}
         </div>

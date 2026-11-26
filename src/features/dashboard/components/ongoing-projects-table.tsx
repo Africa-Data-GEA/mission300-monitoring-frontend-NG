@@ -1,46 +1,23 @@
-import { useId, useMemo, useState } from 'react'
-import { Pencil, Plus, Search, Trash2 } from 'lucide-react'
-import { Link, useNavigate } from 'react-router'
+import { Fragment, useId, useMemo, useState } from 'react'
+import { Plus, Search } from 'lucide-react'
+import { useNavigate } from 'react-router'
 import { Button } from '@/components/ui/button'
 import { Pagination } from '@/components/ui/pagination'
 import { SelectField } from '@/components/ui/select-field'
 import { SortableColumnHeader } from '@/components/ui/sortable-column-header'
-import { ExecutionStatusBadge } from '@/features/programs/components/execution-status-badge'
-import { PipelineReadinessBadge } from '@/features/programs/components/pipeline-readiness-badge'
 import { deleteProject } from '@/features/programs/lib/project-admin-api'
 import { readAuthSession } from '@/features/auth/auth-session'
 import { canUserReachModule } from '@/features/auth/role-access'
-import { formatDeadline } from '@/lib/format'
-import { cn } from '@/lib/utils'
+import { groupProjectsByProgramme, STATUS_SEVERITY } from '../lib/group-projects-by-programme'
 import type { OngoingProject } from '../types'
+import { OngoingProjectRow } from './ongoing-project-row'
+import { ProgrammeGroupRow } from './programme-group-row'
 
+/** Programmes per page. */
 const PAGE_SIZE = 5
-const dateFormatter = new Intl.DateTimeFormat('en-GB', {
-  day: '2-digit',
-  month: 'short',
-  year: 'numeric',
-})
-
-/**
- * Worst first. This table is the delivery-exceptions half of Section D, so
- * leadership must meet the blocked and delayed projects before the healthy
- * ones — and because the list is paginated at five, an unsorted order can push
- * a blocked project onto page two where nobody looks.
- *
- * Completed work carries no delivery risk, so it sorts below every live
- * status rather than competing with blocked and delayed projects for the
- * top of page one.
- */
-const STATUS_SEVERITY: Record<OngoingProject['currentStatus'], number> = {
-  blocked: 0,
-  delayed: 1,
-  'at-risk': 2,
-  'on-track': 3,
-  completed: 4,
-}
 
 /** Columns this table can be ordered by, beyond its worst-first default. */
-type SortKey = 'status' | 'endDate' | 'name' | 'owner' | 'pillarLabel' | 'location'
+type SortKey = 'status' | 'endDate' | 'name' | 'pillar'
 
 /**
  * Sort key for a projected completion date. A project with no recorded date
@@ -61,6 +38,11 @@ function toFilterOptions(
 }
 
 /**
+ * Priority projects grouped under their programme, worst first. Filters and
+ * search work on projects; sorting and pagination work on programmes.
+ * Programmes start closed and open on their own while something is narrowing
+ * the list, so a match is never hidden inside a closed row.
+ *
  * `onChanged` re-fetches the Overview payload after a project is removed —
  * stakeholder feedback asked to be able to add, modify and delete priority
  * items directly from this table. Add/edit navigate to their own page
@@ -75,7 +57,7 @@ export function OngoingProjectsTable({
 }: {
   projects: readonly OngoingProject[]
   onChanged: () => void
-  /** Set when arriving here via the status donut's click-through — see
+  /** Set when arriving here via the status chart's click-through — see
    * DeliveryStatusSection. */
   statusFilter?: OngoingProject['currentStatus'] | null
   onClearStatusFilter?: () => void
@@ -92,12 +74,14 @@ export function OngoingProjectsTable({
   // Review feedback: this table needs filtering by status/owner/pillar/
   // location and sorting by end date to be usable (docs/M300 Monitoring
   // Platform Feedback.pptx, slide 3). `statusFilter` above stays separate —
-  // it is the donut chart's click-through, not one of these controls.
+  // it is the chart's click-through, not one of these controls.
   const [ownerFilter, setOwnerFilter] = useState('all')
   const [pillarFilter, setPillarFilter] = useState('all')
   const [locationFilter, setLocationFilter] = useState('all')
   const [sortKey, setSortKey] = useState<SortKey>('status')
   const [descending, setDescending] = useState(false)
+  /** Programmes the reader has opened or closed, overriding the default. */
+  const [toggled, setToggled] = useState<ReadonlySet<string>>(new Set())
 
   const ownerOptions = useMemo(
     () => toFilterOptions(projects, (project) => project.owner, 'All owners'),
@@ -154,39 +138,40 @@ export function OngoingProjectsTable({
       ].some((value) => value.toLocaleLowerCase().includes(query))
     })
 
+    // Worst first within a programme; within a status, the nearest deadline is
+    // the more urgent one.
+    return matching.sort(
+      (a, b) =>
+        STATUS_SEVERITY[a.currentStatus] - STATUS_SEVERITY[b.currentStatus] ||
+        deadlineTime(a.endDate) - deadlineTime(b.endDate),
+    )
+  }, [projects, search, statusFilter, ownerFilter, pillarFilter, locationFilter])
+
+  const groups = useMemo(() => {
     const direction = descending ? -1 : 1
-    return [...matching].sort((a, b) => {
+    return groupProjectsByProgramme(filteredProjects).sort((a, b) => {
       switch (sortKey) {
         case 'endDate':
           return (deadlineTime(a.endDate) - deadlineTime(b.endDate)) * direction
         case 'name':
-          return a.name.localeCompare(b.name) * direction
-        case 'owner':
-          return a.owner.localeCompare(b.owner) * direction
-        case 'pillarLabel':
-          return a.pillarLabel.localeCompare(b.pillarLabel) * direction
-        case 'location':
-          return a.location.localeCompare(b.location) * direction
+          return a.programmeName.localeCompare(b.programmeName) * direction
+        case 'pillar':
+          return a.pillarLabels.join().localeCompare(b.pillarLabels.join()) * direction
         default:
-          // Worst first, so leadership meets the blocked and delayed projects
-          // before the healthy ones. Within a status, the nearest deadline is
-          // the more urgent one.
+          // Worst first, so leadership meets the programmes holding blocked
+          // and delayed projects before the healthy ones.
           return (
-            (STATUS_SEVERITY[a.currentStatus] - STATUS_SEVERITY[b.currentStatus] ||
-              deadlineTime(a.endDate) - deadlineTime(b.endDate)) * direction
+            (STATUS_SEVERITY[a.worstStatus] - STATUS_SEVERITY[b.worstStatus] ||
+              a.programmeName.localeCompare(b.programmeName)) * direction
           )
       }
     })
-  }, [
-    projects,
-    search,
-    statusFilter,
-    ownerFilter,
-    pillarFilter,
-    locationFilter,
-    sortKey,
-    descending,
-  ])
+  }, [filteredProjects, sortKey, descending])
+
+  const isFiltering = Boolean(
+    search.trim() || ownerFilter !== 'all' || pillarFilter !== 'all' || locationFilter !== 'all',
+  )
+  const openByDefault = isFiltering || statusFilter !== null
 
   function toggleSort(key: SortKey) {
     if (key === sortKey) {
@@ -196,10 +181,28 @@ export function OngoingProjectsTable({
     setSortKey(key)
     setDescending(false)
   }
-  const pageCount = Math.max(1, Math.ceil(filteredProjects.length / PAGE_SIZE))
+
+  function toggleProgramme(programmeId: string) {
+    setToggled((current) => {
+      const next = new Set(current)
+      if (!next.delete(programmeId)) next.add(programmeId)
+      return next
+    })
+  }
+
+  /** Applies a filter change and returns the list to its default state. */
+  function narrow(apply: (value: string) => void) {
+    return (value: string) => {
+      apply(value)
+      setPage(1)
+      setToggled(new Set())
+    }
+  }
+
+  const pageCount = Math.max(1, Math.ceil(groups.length / PAGE_SIZE))
   const currentPage = Math.min(page, pageCount)
   const firstIndex = (currentPage - 1) * PAGE_SIZE
-  const visibleProjects = filteredProjects.slice(firstIndex, firstIndex + PAGE_SIZE)
+  const visibleGroups = groups.slice(firstIndex, firstIndex + PAGE_SIZE)
 
   return (
     <div className="mt-3">
@@ -234,10 +237,7 @@ export function OngoingProjectsTable({
               id={searchId}
               type="search"
               value={search}
-              onChange={(event) => {
-                setSearch(event.target.value)
-                setPage(1)
-              }}
+              onChange={(event) => narrow(setSearch)(event.target.value)}
               placeholder="Project, programme, owner or location"
               className="h-9 w-full rounded-control border border-border-default bg-surface pr-3 pl-9 text-sm text-text-default placeholder:text-text-subtle"
             />
@@ -247,10 +247,7 @@ export function OngoingProjectsTable({
           label="Owner"
           value={ownerFilter}
           options={ownerOptions}
-          onChange={(value) => {
-            setOwnerFilter(value)
-            setPage(1)
-          }}
+          onChange={narrow(setOwnerFilter)}
           className="w-full sm:w-44"
         />
 
@@ -258,10 +255,7 @@ export function OngoingProjectsTable({
           label="Pillar"
           value={pillarFilter}
           options={pillarOptions}
-          onChange={(value) => {
-            setPillarFilter(value)
-            setPage(1)
-          }}
+          onChange={narrow(setPillarFilter)}
           className="w-full sm:w-40"
         />
 
@@ -269,10 +263,7 @@ export function OngoingProjectsTable({
           label="Location"
           value={locationFilter}
           options={locationOptions}
-          onChange={(value) => {
-            setLocationFilter(value)
-            setPage(1)
-          }}
+          onChange={narrow(setLocationFilter)}
           className="w-full sm:w-40"
         />
 
@@ -283,10 +274,7 @@ export function OngoingProjectsTable({
           The node stays mounted so the live region can announce into it.
         */}
         <p aria-live="polite" className="pb-2 text-xs text-text-muted">
-          {search.trim() ||
-          ownerFilter !== 'all' ||
-          pillarFilter !== 'all' ||
-          locationFilter !== 'all'
+          {isFiltering
             ? `${filteredProjects.length} project${filteredProjects.length === 1 ? '' : 's'} found`
             : ''}
         </p>
@@ -309,31 +297,20 @@ export function OngoingProjectsTable({
           <thead className="bg-surface-sunken text-xs font-medium text-text-muted">
             <tr>
               <SortableColumnHeader
-                label="Project"
+                label="Programme / project"
                 active={sortKey === 'name'}
                 descending={descending}
                 onClick={() => toggleSort('name')}
               />
-              <th className="px-3 py-2.5">Programme</th>
               <SortableColumnHeader
                 label="Pillar"
-                active={sortKey === 'pillarLabel'}
+                active={sortKey === 'pillar'}
                 descending={descending}
-                onClick={() => toggleSort('pillarLabel')}
+                onClick={() => toggleSort('pillar')}
               />
-              <SortableColumnHeader
-                label="Owner"
-                active={sortKey === 'owner'}
-                descending={descending}
-                onClick={() => toggleSort('owner')}
-              />
+              <th className="px-3 py-2.5">Owner</th>
               <th className="px-3 py-2.5">Lead</th>
-              <SortableColumnHeader
-                label="Location"
-                active={sortKey === 'location'}
-                descending={descending}
-                onClick={() => toggleSort('location')}
-              />
+              <th className="px-3 py-2.5">Location</th>
               <SortableColumnHeader
                 label="End date"
                 active={sortKey === 'endDate'}
@@ -353,97 +330,34 @@ export function OngoingProjectsTable({
             </tr>
           </thead>
           <tbody className="divide-y divide-border-default bg-surface-card">
-            {visibleProjects.map((project) => (
-              <tr key={project.id} className="align-top hover:bg-surface-subtle">
-                <td className="px-3 py-3">
-                  <Link
-                    to={`/programs/projects/${project.id}`}
-                    className="font-semibold text-link underline decoration-chart-blue-light underline-offset-4 transition-colors hover:text-chart-blue-darkest hover:decoration-chart-blue-darkest"
-                  >
-                    {project.name}
-                  </Link>
-                </td>
-                <td className="px-3 py-3 text-sm">
-                  <Link
-                    to={`/programs/${project.programmeId}`}
-                    className="font-medium text-link underline decoration-chart-blue-light underline-offset-4 transition-colors hover:text-chart-blue-darkest hover:decoration-chart-blue-darkest"
-                  >
-                    {project.programmeName}
-                  </Link>
-                </td>
-                <td className="px-3 py-3 text-sm text-text-muted">{project.pillarLabel}</td>
-                <td className="px-3 py-3 text-sm text-text-muted">{project.owner}</td>
-                <td className="px-3 py-3 text-sm text-text-muted">{project.leadName || '—'}</td>
-                <td className="px-3 py-3 text-sm text-text-muted">{project.location}</td>
-                <td className="px-3 py-3 text-sm whitespace-nowrap text-text-muted">
-                  {project.endDate ? (
-                    <>
-                      {dateFormatter.format(new Date(project.endDate))}
-                      {/*
-                        An absolute date alone makes the reader do the arithmetic.
-                        For a row already flagged delayed, the overdue span is the
-                        number that matters, so it is tinted to match the badge.
-                      */}
-                      <span
-                        className={cn(
-                          'mt-0.5 block text-xs',
-                          new Date(project.endDate).getTime() < now.getTime()
-                            ? 'font-medium text-status-at-risk'
-                            : 'text-text-subtle',
-                        )}
-                      >
-                        {formatDeadline(project.endDate, now)}
-                      </span>
-                    </>
-                  ) : (
-                    <span className="text-text-subtle">Not set</span>
-                  )}
-                </td>
-                <td className="px-3 py-3">
-                  <div className="flex flex-col items-start gap-1">
-                    <ExecutionStatusBadge status={project.currentStatus} />
-                    {project.pipelineReadiness && (
-                      <PipelineReadinessBadge readiness={project.pipelineReadiness} />
-                    )}
-                  </div>
-                </td>
-                <td className="px-3 py-3 text-sm text-text-muted">
-                  <span className="line-clamp-2 max-w-[220px]" title={project.comment || undefined}>
-                    {project.comment || '—'}
-                  </span>
-                </td>
-                <td className="px-3 py-3">
-                  {canManageProjects && (
-                    <div className="flex items-center gap-1">
-                      <Button
-                        type="button"
-                        size="icon"
-                        variant="ghost"
-                        onClick={() => navigate(`/programs/projects/${project.id}/edit`)}
-                        aria-label={`Edit ${project.name}`}
-                      >
-                        <Pencil aria-hidden="true" className="size-4" />
-                      </Button>
-                      <Button
-                        type="button"
-                        size="icon"
-                        variant="ghost"
-                        disabled={deletingId === project.id}
-                        onClick={() => void handleDelete(project)}
-                        aria-label={`Remove ${project.name}`}
-                      >
-                        <Trash2 aria-hidden="true" className="size-4" />
-                      </Button>
-                    </div>
-                  )}
-                </td>
-              </tr>
-            ))}
+            {visibleGroups.map((group) => {
+              const expanded = openByDefault !== toggled.has(group.programmeId)
+              return (
+                <Fragment key={group.programmeId}>
+                  <ProgrammeGroupRow
+                    group={group}
+                    expanded={expanded}
+                    onToggle={() => toggleProgramme(group.programmeId)}
+                  />
+                  {expanded &&
+                    group.projects.map((project) => (
+                      <OngoingProjectRow
+                        key={project.id}
+                        project={project}
+                        now={now}
+                        canManage={canManageProjects}
+                        deleting={deletingId === project.id}
+                        onDelete={() => void handleDelete(project)}
+                      />
+                    ))}
+                </Fragment>
+              )
+            })}
           </tbody>
         </table>
       </div>
 
-      {filteredProjects.length === 0 ? (
+      {groups.length === 0 ? (
         <p className="py-8 text-center text-sm text-text-muted">
           {search ? `No projects match “${search}”.` : 'No ongoing projects found.'}
         </p>
@@ -451,7 +365,7 @@ export function OngoingProjectsTable({
         <Pagination
           page={currentPage}
           pageSize={PAGE_SIZE}
-          total={filteredProjects.length}
+          total={groups.length}
           onPageChange={setPage}
         />
       )}

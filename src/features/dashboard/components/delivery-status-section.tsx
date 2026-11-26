@@ -52,7 +52,7 @@ export function DeliveryStatusSection({
           <div>
             <div>
               <h3 className="text-sm font-semibold text-text-default">
-                Priority project delivery status
+                Priority project delivery status by programme
               </h3>
               {/*
                 No subtitle. The count is already in the table's pagination
@@ -93,7 +93,7 @@ export function DeliveryStatusSection({
             </TabsContent>
             <TabsContent value="chart">
               <ProjectStatusChart
-                summary={panel.statusSummary}
+                projects={panel.ongoingProjects}
                 onStatusClick={(status) => {
                   setStatusFilter(status)
                   setDeliveryTab('table')

@@ -5,6 +5,7 @@ import { environment } from '@/config/environment'
 import { useBrandIdentity } from '@/features/branding/use-brand-identity'
 import { useGenerateReport, useReportsFilters, useReportsOverview } from './api'
 import { buildCompactProgressReportPdf } from './lib/build-compact-progress-report-pdf'
+import { buildCompactProgressWorksheet } from './lib/build-compact-progress-worksheet'
 import type { CompactReportParameters } from './lib/compact-report-parameters'
 import { defaultReportConfig } from './lib/default-report-config'
 import { downloadBlob } from './lib/download'
@@ -38,9 +39,11 @@ export function useCompactExportsPage() {
       const blob =
         card.id === 'compact-progress-report' && format === 'pdf'
           ? await buildCompactProgressReportPdf(await loadCompactReportData(country, parameters))
-          : format === 'pdf'
-            ? await buildReportPdf(generated, { orientation: 'portrait' })
-            : await buildReportWorkbook(generated)
+          : card.id === 'compact-progress-report' && !environment.usesBrowserMocks
+            ? await buildCompactProgressWorksheet(parameters)
+            : format === 'pdf'
+              ? await buildReportPdf(generated, { orientation: 'portrait' })
+              : await buildReportWorkbook(generated)
       downloadBlob(blob, savedReport.fileReference)
     } catch (error) {
       dashboardToast.error('Export not downloaded', {
