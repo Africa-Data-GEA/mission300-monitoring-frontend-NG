@@ -8,8 +8,7 @@ Local demonstrations can run with in-process mock handlers and data.
 - pnpm 10.33.0
 ## Local developmentel
 
-```bash
-pnpm install
+```bashw
 copy .env.example .env.local
 pnpm devd
 ```
