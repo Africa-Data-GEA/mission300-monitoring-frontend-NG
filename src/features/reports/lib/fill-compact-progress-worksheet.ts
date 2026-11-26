@@ -51,7 +51,7 @@ function writeAction(sheet: Worksheet, rowNumber: number, action: ReformAction) 
   const row = sheet.getRow(rowNumber)
   let changed = false
 
-  function set(column: number, value: string | Date) {
+  function set(column: number, value: string | Date | null) {
     row.getCell(column).value = value
     changed = true
   }
@@ -63,33 +63,47 @@ function writeAction(sheet: Worksheet, rowNumber: number, action: ReformAction) 
     [COLUMN.previousStatus, action.previousStatus],
     [COLUMN.currentStatus, action.status],
   ] as const) {
-    if (!status) continue
     const written = key(row.getCell(column).text)
+    if (!status) {
+      if (written) set(column, null)
+      continue
+    }
     const matches =
       written === key(statusLabel(status, action.isPriority)) || written === key(SHEET_STATUS[status])
     if (!matches) set(column, statusLabel(status, action.isPriority))
   }
 
-  const sheetDue = cellDay(
-    row.getCell(COLUMN.adjustedDate).value ?? row.getCell(COLUMN.referenceDate).value,
-  )
-  if (action.dueDate && day(action.dueDate) !== sheetDue) {
-    set(COLUMN.adjustedDate, toDate(action.dueDate))
+  const reference = action.referenceDueDate ? day(action.referenceDueDate) : ''
+  const due = action.dueDate ? day(action.dueDate) : ''
+  if (reference && reference !== cellDay(row.getCell(COLUMN.referenceDate).value)) {
+    set(COLUMN.referenceDate, toDate(reference))
   }
-  if (
-    action.completedAt &&
-    day(action.completedAt) !== cellDay(row.getCell(COLUMN.completedDate).value)
-  ) {
-    set(COLUMN.completedDate, toDate(action.completedAt))
+  const adjusted = cellDay(row.getCell(COLUMN.adjustedDate).value)
+  if (due && due !== reference) {
+    if (due !== adjusted) set(COLUMN.adjustedDate, toDate(due))
+  } else if (adjusted && adjusted !== due) {
+    set(COLUMN.adjustedDate, null)
   }
-  if (action.comment && key(action.comment) !== key(row.getCell(COLUMN.comment).text)) {
-    // A comment equal to the previous report's one is already on the sheet.
-    if (key(action.comment) !== key(row.getCell(COLUMN.comment - 1).text)) {
-      set(COLUMN.comment, action.comment)
-    }
+
+  const completed = action.completedAt ? day(action.completedAt) : ''
+  if (completed !== cellDay(row.getCell(COLUMN.completedDate).value)) {
+    set(COLUMN.completedDate, completed ? toDate(completed) : null)
+  }
+
+  if (key(action.comment) !== key(row.getCell(COLUMN.comment).text)) {
+    set(COLUMN.comment, action.comment || null)
   }
 
   if (changed) row.getCell(COLUMN.lastUpdate).value = toDate(action.updatedAt)
+}
+
+/** Empties and hides a listed action the platform no longer holds. */
+function removeAction(sheet: Worksheet, rowNumber: number) {
+  const row = sheet.getRow(rowNumber)
+  row.eachCell((cell) => {
+    cell.value = null
+  })
+  row.hidden = true
 }
 
 /** Adds an action the official worksheet does not list yet, styled like its last row. */
@@ -110,9 +124,10 @@ function appendAction(sheet: Worksheet, templateRow: number, action: ReformActio
 }
 
 /**
- * Brings the official Compact Progress Report worksheet up to date with the
- * platform's reform actions. Only cells that differ are written, so the
- * worksheet's own wording, formulas and styling stay as the CDMU prepared them.
+ * Brings the official Compact Progress Report worksheet in line with the
+ * platform's reform actions, which are the source of every status, date and
+ * current comment. The worksheet keeps its own wording, styling and the
+ * previous cycle's comments.
  */
 export function fillCompactProgressWorksheet(
   workbook: Workbook,
@@ -129,6 +144,7 @@ export function fillCompactProgressWorksheet(
 
   const sheet = workbook.getWorksheet('Nigeria Actions')
   if (!sheet) throw new Error('The worksheet template has no "Nigeria Actions" sheet.')
+  if (actions.length === 0) throw new Error('The platform returned no reform actions to report.')
 
   if (parameters) {
     const [year, month, date] = parameters.asOfDate.split('-')
@@ -145,9 +161,18 @@ export function fillCompactProgressWorksheet(
     lastActionRow = rowNumber
   }
 
+  const listed = new Set(actions.map((action) => key(action.action)))
+  const removed = [...rows]
+    .filter(([text, rowNumber]) => {
+      const priority = sheet.getRow(rowNumber).getCell(COLUMN.priority).text
+      return !listed.has(text) && (priority === 'Yes' || priority === 'No')
+    })
+    .map(([, rowNumber]) => rowNumber)
+
   for (const action of actions) {
     const rowNumber = rows.get(key(action.action))
     if (rowNumber) writeAction(sheet, rowNumber, action)
     else appendAction(sheet, lastActionRow, action)
   }
+  for (const rowNumber of removed) removeAction(sheet, rowNumber)
 }

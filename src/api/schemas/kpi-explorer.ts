@@ -372,6 +372,8 @@ export const kpiProfileSchema = z.object({
   direction: improvementDirectionSchema,
   trend: trendSchema.optional(),
   history: z.array(kpiHistoryPointSchema),
+  /** Every yearly value on record, unlike `history` which is only the most recent few. */
+  annualValues: z.array(z.object({ period: z.string(), value: z.number() })).optional(),
 
   // Traceability panel.
   sourceInstitution: z.string().min(1),
