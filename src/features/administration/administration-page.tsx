@@ -10,6 +10,7 @@ import { AdministrationSkeleton } from './components/administration-skeleton'
 import { AuditLog } from './components/audit-log'
 import { CustomizationPanel } from './components/customization-panel'
 import { InviteUserDialog } from './components/invite-user-dialog'
+import { RemindersPanel } from './components/reminders-panel'
 import { RolesAndPermissions } from './components/roles-matrix'
 import { ScopeTable } from './components/scope-table'
 import { TabCount } from './components/tab-count'
@@ -21,7 +22,7 @@ import { EditUserDialog } from './components/edit-user-dialog'
  * Specification: docs/specs/user-access-administration.md
  *
  * Structured as a lightweight console shell: a vertical sub-nav on the left
- * (Users / Roles / Access scope / Audit log / Customization) and the active
+ * (Users / Roles / Access scope / Audit log / Reminders / Customization) and the active
  * panel on the right — still one route, one page, just laid out like a
  * console rather than a horizontal-tab document. Reuses `Tabs` in its
  * vertical orientation rather than a new nav component, so the same
@@ -95,6 +96,11 @@ export function AdministrationPage() {
               <TabCount value={data.auditLog.total} />
             </TabsTrigger>
             {canCustomize && (
+              <TabsTrigger orientation="vertical" value="reminders">
+                <span className="flex-1">Reminders</span>
+              </TabsTrigger>
+            )}
+            {canCustomize && (
               <TabsTrigger orientation="vertical" value="branding">
                 <span className="flex-1">Customization</span>
               </TabsTrigger>
@@ -103,7 +109,7 @@ export function AdministrationPage() {
         </Card>
 
         <Card className="min-w-0 flex-1 overflow-hidden p-0">
-          {page.activeTab !== 'branding' && page.filters && (
+          {page.activeTab !== 'branding' && page.activeTab !== 'reminders' && page.filters && (
             <div className="px-2 pt-3 sm:px-4">
               <AdministrationFilters
                 options={page.filters}
@@ -161,6 +167,12 @@ export function AdministrationPage() {
                 onViewUser={page.viewAuditUser}
               />
             </TabsContent>
+
+            {canCustomize && (
+              <TabsContent value="reminders" className="pt-4">
+                <RemindersPanel />
+              </TabsContent>
+            )}
 
             {canCustomize && (
               <TabsContent value="branding" className="pt-4">

@@ -72,6 +72,7 @@ import type {
 import type { ExecutiveOverview, OngoingProject } from '@/features/dashboard/types'
 import { bottlenecksHandlers } from './handlers/bottlenecks'
 import { brandingHandlers } from './handlers/branding'
+import { notificationReminderHandlers } from './handlers/notification-reminders'
 import { dataSubmissionHandlers } from './handlers/data-submissions'
 import { learningLogHandlers } from './handlers/learning-log'
 import { pillarDashboardHandlers } from './handlers/pillar-dashboard'
@@ -444,6 +445,7 @@ function displayInstitutionType(raw: string): typeof stakeholderInstitutions[num
 export const handlers = [
   ...bottlenecksHandlers,
   ...brandingHandlers,
+  ...notificationReminderHandlers,
   ...dataSubmissionHandlers,
   ...learningLogHandlers,
   ...pillarDashboardHandlers,
