@@ -8,6 +8,7 @@ export interface ScheduleFormValues {
   dayOfMonth: string
   hourLagos: string
   recipients: string
+  institutionId: string
   isActive: boolean
 }
 
@@ -37,7 +38,7 @@ export const CADENCE_OPTIONS: FilterOption[] = [
 ]
 
 export function emptyScheduleForm(): ScheduleFormValues {
-  return { name: '', cadence: 'weekly', dayOfWeek: '1', dayOfMonth: '1', hourLagos: '8', recipients: '', isActive: true }
+  return { name: '', cadence: 'weekly', dayOfWeek: '1', dayOfMonth: '1', hourLagos: '8', recipients: '', institutionId: 'all', isActive: true }
 }
 
 export function formFromSchedule(schedule: ReportSchedule): ScheduleFormValues {
@@ -48,6 +49,7 @@ export function formFromSchedule(schedule: ReportSchedule): ScheduleFormValues {
     dayOfMonth: String(schedule.dayOfMonth ?? 1),
     hourLagos: String(schedule.hourLagos),
     recipients: schedule.recipients.join('\n'),
+    institutionId: schedule.institutionId ?? 'all',
     isActive: schedule.isActive,
   }
 }
@@ -75,6 +77,7 @@ export function inputFromForm(values: ScheduleFormValues): ReportScheduleInput {
     ...(values.cadence === 'weekly' ? { dayOfWeek: Number(values.dayOfWeek) } : { dayOfMonth: Number(values.dayOfMonth) }),
     hourLagos: Number(values.hourLagos),
     recipients: parseRecipients(values.recipients).valid,
+    ...(values.institutionId !== 'all' ? { institutionId: values.institutionId } : {}),
     isActive: values.isActive,
   }
 }

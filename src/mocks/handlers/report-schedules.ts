@@ -14,6 +14,16 @@ function nextRun(): string {
   return new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString()
 }
 
+const DEMO_AGENCIES = [
+  { id: 'inst-nerc', name: 'NERC' },
+  { id: 'inst-rea', name: 'Rural Electrification Agency' },
+]
+
+const audienceOf = (input: ReportScheduleInput) => ({
+  institutionId: input.institutionId ?? null,
+  institutionName: DEMO_AGENCIES.find((agency) => agency.id === input.institutionId)?.name ?? null,
+})
+
 let schedules: ReportSchedule[] = [
   {
     id: 'sched-demo-1',
@@ -25,6 +35,8 @@ let schedules: ReportSchedule[] = [
     description: 'Every Monday at 08:00 (Lagos time)',
     recipients: ['minister.office@example.gov.ng', 'special.adviser@example.gov.ng'],
     pillars: ['all'],
+    institutionId: null,
+    institutionName: null,
     isActive: true,
     nextRunAt: nextRun(),
     lastRunAt: null,
@@ -46,6 +58,8 @@ trailer<</Root 1 0 R>>
 %%EOF`
 
 export const reportScheduleHandlers = [
+  http.get('/api/reports/schedules/audiences', () => HttpResponse.json(DEMO_AGENCIES)),
+
   http.get('/api/reports/schedules', async () => {
     await delay(200)
     return HttpResponse.json({ items: schedules })
@@ -64,6 +78,7 @@ export const reportScheduleHandlers = [
       description: describe(input),
       recipients: input.recipients,
       pillars: input.pillars ?? ['all'],
+      ...audienceOf(input),
       isActive: input.isActive ?? true,
       nextRunAt: nextRun(),
       lastRunAt: null,
@@ -81,6 +96,7 @@ export const reportScheduleHandlers = [
     if (!existing) return HttpResponse.json({ message: 'Schedule not found.' }, { status: 404 })
     const updated: ReportSchedule = {
       ...existing,
+      ...audienceOf(input),
       name: input.name,
       cadence: input.cadence,
       dayOfWeek: input.dayOfWeek ?? null,

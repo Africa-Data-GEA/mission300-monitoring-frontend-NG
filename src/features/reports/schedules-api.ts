@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   reportScheduleSchema,
   reportSchedulesSchema,
+  scheduleAudiencesSchema,
   sendScheduleResultSchema,
   type ReportScheduleInput,
 } from '@/api/schemas/report-schedules'
@@ -15,6 +16,14 @@ export function useReportSchedules() {
   return useQuery({
     queryKey: scheduleKeys.all,
     queryFn: () => api.get('/reports/schedules', reportSchedulesSchema),
+  })
+}
+
+export function useScheduleAudiences() {
+  return useQuery({
+    queryKey: [...scheduleKeys.all, 'audiences'],
+    queryFn: () => api.get('/reports/schedules/audiences', scheduleAudiencesSchema),
+    staleTime: 5 * 60 * 1000,
   })
 }
 

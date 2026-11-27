@@ -47,6 +47,12 @@ describe('validateScheduleForm', () => {
 })
 
 describe('inputFromForm', () => {
+  it('names the agency only when the brief is for one', () => {
+    const base = { ...emptyScheduleForm(), name: 'Brief', recipients: 'a@b.org' }
+    expect(inputFromForm(base)).not.toHaveProperty('institutionId')
+    expect(inputFromForm({ ...base, institutionId: 'inst-rea' }).institutionId).toBe('inst-rea')
+  })
+
   it('sends the weekday for a weekly schedule and the day of month for a monthly one', () => {
     const weekly = inputFromForm({ ...emptyScheduleForm(), name: ' Brief ', recipients: 'a@b.org', dayOfWeek: '4', hourLagos: '17' })
     expect(weekly).toEqual({ name: 'Brief', cadence: 'weekly', dayOfWeek: 4, hourLagos: 17, recipients: ['a@b.org'], isActive: true })

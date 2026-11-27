@@ -37,6 +37,12 @@ export function ReportSchedulesTable({
       sortValue: (row) => row.name,
     },
     {
+      id: 'audience',
+      header: 'Report for',
+      cell: (row) => row.institutionName ?? 'Everyone',
+      sortValue: (row) => row.institutionName ?? '',
+    },
+    {
       id: 'recipients',
       header: 'Recipients',
       cell: (row) => (

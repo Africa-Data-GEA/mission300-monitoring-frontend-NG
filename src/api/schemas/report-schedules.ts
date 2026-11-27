@@ -22,6 +22,8 @@ export const reportScheduleSchema = z.object({
   description: z.string().min(1),
   recipients: z.array(z.string()),
   pillars: z.array(z.string()),
+  institutionId: z.string().nullable().default(null),
+  institutionName: z.string().nullable().default(null),
   isActive: z.boolean(),
   nextRunAt: z.string().min(1),
   lastRunAt: z.string().nullable(),
@@ -48,8 +50,11 @@ export const reportScheduleInputSchema = z.object({
   hourLagos: z.number().min(0).max(23),
   recipients: z.array(z.string()).min(1),
   pillars: z.array(z.string()).optional(),
+  institutionId: z.string().optional(),
   isActive: z.boolean().optional(),
 })
+
+export const scheduleAudiencesSchema = z.array(z.object({ id: z.string().min(1), name: z.string().min(1) }))
 
 export type ReportSchedule = z.infer<typeof reportScheduleSchema>
 export type ReportScheduleInput = z.infer<typeof reportScheduleInputSchema>

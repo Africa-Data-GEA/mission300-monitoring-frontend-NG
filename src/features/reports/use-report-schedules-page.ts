@@ -75,6 +75,7 @@ export function useReportSchedulesPage() {
           hourLagos: schedule.hourLagos,
           recipients: schedule.recipients,
           pillars: schedule.pillars,
+          ...(schedule.institutionId ? { institutionId: schedule.institutionId } : {}),
           isActive: !schedule.isActive,
         },
       })

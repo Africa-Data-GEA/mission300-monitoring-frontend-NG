@@ -14,6 +14,7 @@ import {
   validateScheduleForm,
   type ScheduleFormValues,
 } from '../lib/schedule-form'
+import { useScheduleAudiences } from '../schedules-api'
 
 const FIELD_CLASS = 'rounded-control border border-border-strong bg-surface px-3 text-sm text-text-default'
 
@@ -31,6 +32,11 @@ export function ReportScheduleForm({
   const [values, setValues] = useState<ScheduleFormValues>(() => (schedule ? formFromSchedule(schedule) : emptyScheduleForm()))
   const [error, setError] = useState<string | null>(null)
   const recipientCount = parseRecipients(values.recipients).valid.length
+  const audiences = useScheduleAudiences()
+  const audienceOptions = [
+    { value: 'all', label: 'Everyone (national brief)' },
+    ...(audiences.data ?? []).map((agency) => ({ value: agency.id, label: agency.name })),
+  ]
 
   function update<K extends keyof ScheduleFormValues>(key: K, value: ScheduleFormValues[K]) {
     setValues((current) => ({ ...current, [key]: value }))
@@ -60,6 +66,20 @@ export function ReportScheduleForm({
           value={values.name}
           onChange={(event) => update('name', event.target.value)}
         />
+      </div>
+
+      <div className="flex flex-col gap-1.5">
+        <SelectField
+          label="Report for"
+          value={values.institutionId}
+          options={audienceOptions}
+          onChange={(value) => update('institutionId', value)}
+        />
+        <p className="text-xs text-text-muted">
+          {values.institutionId === 'all'
+            ? 'The national brief covering every agency.'
+            : 'Only this agency’s indicators, projects, bottlenecks and the actions it leads.'}
+        </p>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-3">
